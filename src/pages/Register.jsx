@@ -42,27 +42,22 @@ export default function Register(){
   }
 
 return (
-    <div className=" w-full  flex flex-col justify-center items-center  overflow-hidden">
-
+    <div className="w-full flex flex-col justify-center items-center overflow-hidden px-4 sm:px-6">
 
   {/* Dotted Background */}
     <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
-
-    {/* <div className="absolute h-screen inset-0 bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-80"></div> */}
-
-<div className='relative justify-center items-center w-full max-w-2xl px-4'>
-      {/* LOGIN CARD */}
-      <div className="bg-white shadow-2xl rounded-3xl px-10 py-10">
+<div className='relative justify-center items-center w-full max-w-md sm:max-w-lg md:max-w-2xl px-4 sm:px-6'>
+      {/* REGISTER CARD */}
+      <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-6 sm:px-8 md:px-10 py-6 sm:py-8 md:py-10">
        <div className="flex justify-center items-center">
         <LogoLogin />
 </div>
-<h2 className="text-2xl text-center font-semibold text-[#0f172a]">Create Account</h2>
-<p className="text-center text-gray-500 mt-1 mb-6">Create your account to get started.</p>
-
+<h2 className="text-xl sm:text-2xl text-center font-semibold text-[#0f172a]">Create Account</h2>
+<p className="text-center text-sm sm:text-base text-gray-500 mt-1 mb-4 sm:mb-6">Create your account to get started.</p>
 
 <form onSubmit={handleSubmit}>
-  <div className='grid gap-4 md:grid-cols-2'>
+  <div className='grid gap-3 sm:gap-4 md:grid-cols-2'>
 <InputField
   label="First Name"
   name="first_name"
@@ -112,15 +107,14 @@ return (
 </div>
 <button
   type="submit"
-  className="w-full bg-primary text-black font-semibold py-3 rounded-lg shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+  className="w-full bg-primary text-black font-semibold py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
   disabled={loading}
 >
   {loading ? 'Creating account...' : 'Register'}
 </button>
 </form>
 
-
-<p className="text-center text-gray-600 mt-6">Already have an account? <Link to="/login" className="text-primary font-medium">Login</Link></p>
+<p className="text-center text-sm sm:text-base text-gray-600 mt-4 sm:mt-6">Already have an account? <Link to="/login" className="text-primary font-medium">Login</Link></p>
 </div>
 </div>
 </div>

@@ -115,19 +115,19 @@ const Waivers = () => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col justify-center items-center overflow-hidden relative">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-y-auto relative py-8 sm:py-0">
 
       {/* Dotted Background */}
       <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
       {/* CSF School Academy - Top Center */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10">
-        <h1 className="text-[62px] font-bold text-[#173151] font-kollektif drop-shadow-lg">CSF School Academy</h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[62px] font-bold text-[#173151] font-kollektif drop-shadow-lg">CSF School Academy</h1>
       </div>
 
-      <div className='relative justify-center items-center w-full max-w-4xl px-4 mt-32'>
+      <div className='relative justify-center items-center w-full max-w-md sm:max-w-2xl md:max-w-4xl px-4 sm:px-6 mt-20 sm:mt-24 md:mt-32'>
         {/* WAIVER CARD */}
-        <div className="bg-white shadow-2xl rounded-3xl px-8 py-6 w-full max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-8 py-4 sm:py-6 w-full max-h-[calc(100vh-120px)] sm:max-h-[calc(100vh-180px)] md:max-h-[calc(100vh-200px)] overflow-y-auto">
 
           {loading && (
             <div className="text-center py-10">
@@ -141,7 +141,7 @@ const Waivers = () => {
           {/* Logo and Title Section */}
           <div className="relative flex items-center mb-6">
             {/* Logo - Left Side */}
-            <div className="flex w-[128px] h-[124px] items-center max-sm:flex max-sm:justify-center max-sm:items-center">
+            <div className="flex w-16 h-16 sm:w-24 sm:h-24 md:w-[128px] md:h-[124px] items-center justify-center">
               <Logo />
             </div>
 
@@ -199,18 +199,18 @@ const Waivers = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="flex gap-4 justify-end mt-6">
+          <div className="flex gap-3 sm:gap-4 justify-end mt-6">
             <button
               type="button"
               onClick={() => window.history.back()}
-              className="bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-gray-300 transition"
+              className="bg-gray-200 text-gray-700 px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-gray-300 transition"
               disabled={submitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-[#173151] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-[#1f3d67] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#173151] text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-[#1f3d67] transition disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={submitting}
             >
               {submitting ? "Signing..." : "Submit Waiver"}

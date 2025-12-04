@@ -195,7 +195,7 @@ export default function ProgramOverview() {
 
             {/* CSF School Academy - Center */}
             <div className="flex-1 text-center">
-              <h1 className="text-[62px] max-sm:text-[32px] font-bold text-[#173151] font-kollektif drop-shadow-lg">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[62px] font-bold text-[#173151] font-kollektif drop-shadow-lg">
                 CSF School Academy
               </h1>
             </div>

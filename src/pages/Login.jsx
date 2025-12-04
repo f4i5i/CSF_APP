@@ -69,25 +69,21 @@ export default function Login() {
 
 
   return (
-    <div className=" w-full  flex flex-col justify-center items-center  overflow-hidden">
-
+    <div className="w-full flex flex-col justify-center items-center overflow-hidden px-4 sm:px-6">
 
   {/* Dotted Background */}
     <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
-
-    {/* <div className="absolute h-screen inset-0 bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-80"></div> */}
-
-<div className='relative justify-center items-center w-full max-w-md'>
+<div className='relative justify-center items-center w-full max-w-md sm:max-w-lg px-4'>
       {/* LOGIN CARD */}
-      <div className="bg-white shadow-2xl rounded-2xl p-10 ">
+      <div className="bg-white shadow-2xl rounded-2xl p-6 sm:p-8 md:p-10">
        <div className="flex justify-center items-center">
         <LogoLogin />
 </div>
-        <h2 className="text-2xl font-manrope text-center font-semibold text-[#173151]">
+        <h2 className="text-xl sm:text-2xl font-manrope text-center font-semibold text-[#173151]">
           Welcome Back
         </h2>
-        <p className="text-center font-manrope font-normal text-base text-[#666D80] mt-1 mb-6">
+        <p className="text-center font-manrope font-normal text-sm sm:text-base text-[#666D80] mt-1 mb-4 sm:mb-6">
           Glad to see you again. Log in to your account.
         </p>
 
@@ -135,7 +131,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-primary font-['inter'] py-3 rounded-lg font-semibold bg-[#F3BC48] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary font-['inter'] py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] transition disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
@@ -161,8 +157,8 @@ export default function Login() {
        </button> */}
         </form>
 
-        <p className="text-center  font-['inter'] text-base font-normal text-gray-500 mt-6">
-          Don’t have an account?
+        <p className="text-center font-['inter'] text-sm sm:text-base font-normal text-gray-500 mt-4 sm:mt-6">
+          Don't have an account?
           <Link to="/register" className="text-[#F3BC48] font-medium ml-1">
             Register
           </Link>
