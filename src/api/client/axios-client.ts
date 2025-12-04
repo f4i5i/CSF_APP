@@ -15,6 +15,7 @@ export const apiClient = axios.create({
   withCredentials: true, // CRITICAL for httpOnly cookies
   headers: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': '69420',
   },
 });
 
@@ -104,7 +105,12 @@ apiClient.interceptors.response.use(
         const response = await axios.post<LoginResponse>(
           `${API_CONFIG.BASE_URL}${API_CONFIG.API_PREFIX}/auth/refresh`,
           { refresh_token: refreshToken },
-          { withCredentials: true }
+          {
+            withCredentials: true,
+            headers: {
+              'ngrok-skip-browser-warning': '69420',
+            }
+          }
         );
 
         const { access_token, refresh_token } = response.data;
