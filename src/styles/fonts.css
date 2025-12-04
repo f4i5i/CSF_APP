@@ -1,0 +1,81 @@
+/* Regular */
+@font-face {
+  font-family: "Kollektif";
+  src: url("../assets/fonts/Kollektif/Kollektif.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Bold */
+@font-face {
+  font-family: "Kollektif";
+  src: url("../assets/fonts/Kollektif/Kollektif-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Italic */
+@font-face {
+  font-family: "Kollektif";
+  src: url("../assets/fonts/Kollektif/Kollektif-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Bold Italic */
+@font-face {
+  font-family: "Kollektif";
+  src: url("../assets/fonts/Kollektif/Kollektif-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+
+/* Manrope Light */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope/Manrope-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* Manrope Regular */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope/Manrope-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Manrope Medium */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope/Manrope-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* Manrope SemiBold */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope/Manrope-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* Manrope Bold */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope/Manrope-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Manrope ExtraBold */
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/Manrope/Manrope-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+}
+

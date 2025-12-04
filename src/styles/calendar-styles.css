@@ -1,0 +1,68 @@
+/* Remove default borders */
+.rbc-month-view {
+  border: none !important;
+  background: #f7f9fc;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+/* Weekday header */
+.rbc-month-header {
+  background: transparent;
+}
+
+.rbc-header {
+  font-weight: 600;
+  color: #1d3557;
+  padding: 12px 0;
+  font-size: 15px;
+}
+
+/* Grid cells */
+.rbc-day-bg {
+  border: none !important;
+}
+
+.rbc-date-cell {
+  padding: 10px;
+  font-size: 14px;
+  color: #5c6b7a;
+}
+
+/* Past days faded */
+.rbc-off-range {
+  color: #d0d6dd !important;
+}
+
+/* Event styling */
+.rbc-event {
+  background: #1d3557 !important;
+  border-radius: 10px !important;
+  padding: 4px 8px !important;
+  font-size: 12px;
+  color: white !important;
+}
+
+/* Yellow event variation (optional) */
+.rbc-event.yellow {
+  background: #f3bc48 !important;
+  color: black !important;
+}
+
+/* Remove default shadow */
+.rbc-calendar {
+  box-shadow: none !important;
+}
+.rbc-event.blue {
+  background: #1E3A8A !important; /* navy */
+  color: white;
+  border-radius: 8px;
+  padding: 4px 6px;
+}
+
+.rbc-event.yellow {
+  background: #FBBF24 !important; /* yellow */
+  color: #1D1D1D;
+  border-radius: 8px;
+  padding: 4px 6px;
+}
