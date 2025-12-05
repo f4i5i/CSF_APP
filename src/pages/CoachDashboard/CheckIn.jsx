@@ -17,6 +17,7 @@ const CheckIn = () => {
     { id: 3, name: "James L.", grade: 3, checked: true, img: "/s3.png" },
     { id: 4, name: "Emma R.", grade: 5, checked: false, img: "/s4.png" },
     { id: 5, name: "Michael K.", grade: 4, checked: true, img: "/s5.png" },
+    { id: 6, name: "Michael K.", grade: 4, checked: true, img: "/s5.png" },
   ];
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState("Davidson Elementary");
@@ -32,9 +33,10 @@ const CheckIn = () => {
     <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
-      <main className="mx-10 py-6 max-sm:py-2 max-sm:mx-3">
-        <div className="flex max-sm:justify-between mb-6 max-sm:items-center">
-      <h1 className="text-3xl font-semibold ">Check-In</h1>
+      <main className="mx-10 py-6 max-xxl:py-3 max-sm:py-2 max-sm:mx-3">
+        <div className="flex max-sm:justify-between mb-6 max-xxl:mb-3 max-xl:mb-3 max-sm:items-center">
+       <h1 className="text-[32px] xxl1:text-[46px] max-xxl:text-[32px] max-xl:text-[28px] font-manrope font-bold text-[#1D3557]">
+     Check-In</h1>
  <button className="flex sm:hidden items-center whitespace-nowrap gap-2 bg-[#7d97b5] text-white px-5 py-3 rounded-full text-sm shadow-md">
   <MessageSquare size={16} />
   <span>Text Class</span>
@@ -42,11 +44,11 @@ const CheckIn = () => {
 </div>
       {/* TOP FILTER BAR */}
           
-      <div className="flex max-sm:flex-col gap-4 mb-6 px-6 py-4 bg-[#FFFFFF80] rounded-[30px] ">
+      <div className="flex max-sm:flex-col gap-4 mb-6 max-xxl:mb-3 max-xl:py-2 px-4 py-4 bg-[#FFFFFF80] rounded-[30px] ">
 
          
       {/* 🔍 SEARCH BAR */}
-      <div className="flex items-center bg-[#f9fafb] rounded-full px-4 py-3 w-full border">
+      <div className="flex items-center bg-[#f9fafb] rounded-full max-xl:py-2 px-4 py-3 w-full border">
         <Search size={18} className="text-gray-500 mr-2" />
         <input
           type="text"
@@ -66,7 +68,7 @@ const CheckIn = () => {
         className="w-[316px] max-sm:w-full flex justify-between items-center 
                    bg-[#FFFFFF66] px-4 py-3 rounded-full 
                    shadow-sm border border-gray-200 
-                   text-[16px] font-medium"
+                   text-[16px] max-xl:text-sm font-medium"
       >
         {selected}
 
@@ -93,7 +95,7 @@ const CheckIn = () => {
                 setSelected(item);
                 setOpen(false);
               }}
-              className="w-full text-left px-4 py-3 text-[15px] hover:bg-gray-100"
+              className="w-full text-left px-4 py-3 text-[15px] max-xl:text-sm hover:bg-gray-100"
             >
               {item}
             </button>
@@ -104,7 +106,7 @@ const CheckIn = () => {
 
         {/* 💬 TEXT CLASS BUTTON */}
         <div>
-       <button className="flex max-sm:hidden items-center whitespace-nowrap gap-2 bg-[#7d97b5] text-white px-5 py-3 rounded-full text-sm shadow-md">
+       <button className="flex max-sm:hidden items-center whitespace-nowrap gap-2 bg-[#7d97b5] text-white px-5 py-3 rounded-full text-sm max-xl:text-xs shadow-md">
   <MessageSquare size={16} />
   <span>Text Class</span>
 </button>

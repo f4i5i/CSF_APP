@@ -94,7 +94,7 @@ export default function AnnouncementCard({ announcements = [], loading = false }
 
       <div className="flex flex-col gap-[14px]">
         {transformedAnnouncements.map((item) => (
-          <div key={item.id} className="bg-white p-6 rounded-[20px] border border-transparent relative">
+          <div key={item.id} className="bg-white p-6 max-xl:p-4 rounded-[20px] border border-transparent relative">
             {/* Unread indicator */}
             {/* {!item.is_read && (
               <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></div>

@@ -110,5 +110,5 @@ export default function GoogleSignInButton({
     );
   }
 
-  return <div ref={buttonRef} className={combineClasses('w-full', className)} />;
+  return <div ref={buttonRef} className={combineClasses("w-full max-w-sm mx-auto sm:max-w-md md:max-w-lg", className)} />;
 }

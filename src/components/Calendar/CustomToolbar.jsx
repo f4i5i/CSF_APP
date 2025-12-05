@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function CustomToolbar({ label, onNavigate }) {
   return (
-    <div className="flex items-center justify-between px-4 pb-3 mb-4">
+    <div className="flex items-center justify-between px-4 pb-3 max-xxl:mb-0 mb-4">
       
       {/* Month - Year */}
       <h2 className="text-xl font-semibold text-[#1D3557]">

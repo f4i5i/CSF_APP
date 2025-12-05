@@ -1,30 +1,100 @@
+import { useState } from "react";
 import StudentCard from "./StudentCard";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 const StudentList = ({ students, search, sort, setSort, onOpen }) => {
+  const [page, setPage] = useState(1);
+  const perPage = 5;
+
+  // SEARCH FILTER
   const filtered = students.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // PAGINATION CALCULATION
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const start = (page - 1) * perPage;
+  const currentStudents = filtered.slice(start, start + perPage);
+
   return (
     <div className="bg-white/60 p-4 rounded-3xl shadow-md backdrop-blur-md border">
+      
       {/* HEADER */}
-      <div className="flex justify-between  items-center mb-3">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-lg font-manrope text-[#1B1B1B]">
           Students ({filtered.filter((s) => s.checked).length}/{filtered.length})
         </h2>
 
-        <button className="flex items-center  gap-2 bg-[#FFFFFF80] px-4 py-2 rounded-full shadow text-sm">
+        <button className="flex items-center gap-2 bg-[#FFFFFF80] px-4 py-2 rounded-full shadow text-sm">
           {sort} <ChevronDown size={16} />
         </button>
       </div>
 
-      {/* LIST */}
+      {/* STUDENT CARDS */}
       <div className="flex flex-col gap-3">
-        {filtered.map((student) => (
-          <StudentCard key={student.id} student={student}  onOpenModal={onOpen}/>
-        ))}
+        {currentStudents.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-4">
+            No students found
+          </p>
+        ) : (
+          currentStudents.map((student) => (
+            <StudentCard
+              key={student.id}
+              student={student}
+              onOpenModal={onOpen}
+            />
+          ))
+        )}
       </div>
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3 mt-4">
+
+           {/* PREV (Chevron Left) */}
+          <button
+            onClick={() => page > 1 && setPage(page - 1)}
+            disabled={page === 1}
+            className={`p-2 rounded-lg ${
+              page === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-[#1B1B1B] hover:bg-gray-100"
+            }`}
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {/* PAGE NUMBERS */}
+          <div className="flex gap-2">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-3 py-1 rounded-lg text-sm ${
+                  page === i + 1
+                    ? "bg-[#1D3557] text-white"
+                    : "text-[#1B1B1B] hover:bg-gray-100"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+
+          {/* NEXT (Chevron Right) */}
+          <button
+            onClick={() => page < totalPages && setPage(page + 1)}
+            disabled={page === totalPages}
+            className={`p-2 rounded-lg ${
+              page === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-[#1B1B1B] hover:bg-gray-100"
+            }`}
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

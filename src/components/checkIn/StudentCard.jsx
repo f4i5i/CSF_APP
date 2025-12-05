@@ -10,7 +10,7 @@ const StudentCard = ({ student,onOpenModal }) => {
       <div className="flex items-center gap-4">
         {/* Check Status */}
         <div
-          className={`w-12 h-12 rounded-full flex items-center justify-center 
+          className={`w-12 h-12 max-xxl:w-9 max-xxl:h-9 max-xl:h-8 max-xl:w-8 rounded-full flex items-center justify-center 
             ${student.checked ? "bg-green-500 text-white" : "border border-[#C9CBD3]"}`}
         >
           {student.checked && <Check size={14} />}
@@ -20,13 +20,13 @@ const StudentCard = ({ student,onOpenModal }) => {
         <img
           src={student.img}
           alt={student.name}
-          className="w-12 h-12 rounded-full object-cover"
+          className="w-12 h-12 max-xxl:w-9 max-xxl:h-9 max-xl:h-8 max-xl:w-8 rounded-full object-cover"
         />
 
         {/* Name + Grade */}
         <div>
-          <p className="font-semibold text-xl max-sm:text-base text-[#0F1D2E] font-manrope">{student.name}</p>
-          <p className="text-sm max-sm:text-xs font-manrope font-medium text-[#000]">Grade {student.grade}</p>
+          <p className="font-semibold text-xl max-xxl:text-lg max-xl:text-base max-sm:text-base text-[#0F1D2E] font-manrope">{student.name}</p>
+          <p className="text-sm max-sm:text-xs max-xxl:text-xs  font-manrope font-medium text-[#000]">Grade {student.grade}</p>
         </div>
       </div>
 

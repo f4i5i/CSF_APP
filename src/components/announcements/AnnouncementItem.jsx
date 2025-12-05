@@ -29,7 +29,7 @@ export default function AnnouncementItem({ item }) {
           {/* Hidden fallback div for failed image loads */}
           {typeof item.avatar === 'string' && (
             <div
-              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[54px] lg:h-[54px] rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-sm"
+              className="w-10 h-10 xl:w-9 xl:h-9 xxl:w-9 xxl:h-9 sm:w-12 sm:h-12 lg:w-[54px] lg:h-[54px] rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-sm"
               style={{ display: 'none' }}
             >
               {item.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
@@ -46,10 +46,10 @@ export default function AnnouncementItem({ item }) {
       </div>
 </div>
       {/* Title */}
-      <h3 className="text-xl sm:text-2xl font-manrope font-semibold text-[#0F1D2E] mt-4">{item.title}</h3>
+      <h3 className="text-xl sm:text-2xl max-xxl:text-xl max-xl:text-lg font-manrope font-semibold text-[#0F1D2E] mt-4">{item.title}</h3>
 
       {/* Description */}
-      <p className="text-sm sm:text-base text-[#1B1B1B] font-manrope font-semibold mt-2 opacity-80">{item.description}</p>
+      <p className="text-sm sm:text-base max-xxl:text-sm max-xl:text-sm text-[#1B1B1B] font-manrope font-semibold mt-2 opacity-80">{item.description}</p>
 
       {/* Attachments */}
       {item.attachments?.length > 0 && (

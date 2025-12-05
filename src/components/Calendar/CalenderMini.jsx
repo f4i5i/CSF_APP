@@ -1,38 +1,112 @@
-import React, { useState } from 'react'
-import { DayPicker } from 'react-day-picker';
-import "react-day-picker/dist/style.css";
-import CustomCaption from './CustomCaption';
-import CustomNav from './CustomNav';
-const CalenderMini = () => {
-     const [selectedDay, setSelectedDay] = useState(new Date());
+import React, { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
- const selectedDays = [new Date(2025, 9, 8), new Date(2025, 9, 10), new Date(2025, 9, 20), new Date(2025, 9, 21)];
+const CalenderMini = () => {
+  const [currentMonth, setCurrentMonth] = useState(9); // October
+  const [currentYear, setCurrentYear] = useState(2025);
+
+  // ⭐ ADD THIS — selected date state
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  const highlightedDates = [];
+
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const totalDays = getDaysInMonth(currentMonth, currentYear);
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const startingIndex = firstDay === 0 ? 6 : firstDay - 1;
+
+  const prevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear((y) => y - 1);
+    } else setCurrentMonth((m) => m - 1);
+  };
+
+  const nextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear((y) => y + 1);
+    } else setCurrentMonth((m) => m + 1);
+  };
 
   return (
-    <div className=" rounded-3xl  max-sm:p-1 w-full " >
-      <h2 className="text-[20px] xxl1:text-3xl font-kollektif font-medium pb-8">Calendar</h2>
-<div className="bg-[#FFFFFF50] rounded-3xl p-6 shadow-sm  w-fit ">
- 
-      <DayPicker
-        mode="single"
-        defaultMonth={new Date(2025, 9)}
-         selected={selectedDay}
-        onSelect={setSelectedDay}
-        modifiers={{
-          highlighted: selectedDays,
-        }}
-        modifiersStyles={{
-          highlighted: {
-            backgroundColor: "#F4B728",
-            color: "#fff",
-            borderRadius: "50%",
-          },
-        }}
-       
-        className="!text-black !font-manrope calendar "
-      />
+    <div className="rounded-3xl max-sm:py-1 w-full">
+      <h2 className="text-[20px] font-kollektif font-medium pb-8 max-xxl:pb-4">Calendar</h2>
+
+      <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-fit">
+
+        {/* Month Header */}
+        <div className="flex justify-between items-center mb-3">
+          <span className="font-medium text-[#0F1D2E]">
+            {new Date(currentYear, currentMonth).toLocaleString("default", {
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+
+          <div className="flex gap-3">
+            <button onClick={prevMonth}>
+              <ChevronLeft className="w-5 h-5 text-[#0F1D2E]" />
+            </button>
+            <button onClick={nextMonth}>
+              <ChevronRight className="w-5 h-5 text-[#0F1D2E]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Days Header */}
+        <div className="grid grid-cols-7 text-center text-xs text-[#6F6F6F] mb-2">
+          {days.map((d) => (
+            <div key={d}>{d}</div>
+          ))}
+        </div>
+
+        {/* Dates Grid */}
+        <div className="grid grid-cols-7 text-center">
+          {[...Array(startingIndex)].map((_, i) => (
+            <div key={i} className="text-[#6F6F6F]">.</div>
+          ))}
+
+          {[...Array(totalDays)].map((_, i) => {
+            const day = i + 1;
+            const isEvent = highlightedDates.includes(day);
+            const isSelected =
+              selectedDay &&
+              selectedDay.getDate() === day &&
+              selectedDay.getMonth() === currentMonth &&
+              selectedDay.getFullYear() === currentYear;
+
+            return (
+              <div
+                key={day}
+                onClick={() =>
+                  setSelectedDay(new Date(currentYear, currentMonth, day))
+                }
+                className={`mx-auto w-9 h-9 flex items-center justify-center 
+                rounded-full cursor-pointer text-xs
+                ${
+                  isSelected
+                    ? "bg-[#1D3557] text-white"
+                    : isEvent
+                    ? "bg-yellow-400 text-white"
+                    : "text-[#6F6F6F]"
+                }`}
+              >
+                {day}
+              </div>
+            );
+          })}
+        </div>
       </div>
-        <p className="mt-6 text-[20px] xl:text-base xl1:text-xl xxl1:text-3xl font-normal font-kollektif text-[#0f1d2e]">
+
+      {/* Selected Date Text */}
+      <p className="mt-6 text-[20px] font-kollektif text-[#0f1d2e]">
         {selectedDay
           ? selectedDay.toLocaleDateString("en-US", {
               day: "numeric",
@@ -42,7 +116,7 @@ const CalenderMini = () => {
           : "No date selected"}
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default CalenderMini
+export default CalenderMini;

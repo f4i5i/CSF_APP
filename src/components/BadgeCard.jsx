@@ -7,7 +7,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   // Loading state
   if (loading) {
     return (
-      <div className="w-full h-[419px] bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 animate-pulse">
+      <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-32 mb-6"></div>
         <div className="flex justify-center items-center w-full h-[150px]">
           <div className="w-[150px] h-[150px] bg-gray-200 rounded-full"></div>
@@ -28,7 +28,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   // Empty state - no badges
   if (!badges || badges.length === 0) {
     return (
-      <div className="w-full h-[419px] bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col items-center justify-center text-gray-500 px-4 py-6">
+      <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col items-center justify-center text-gray-500 px-4 py-6">
         <Award className="w-16 h-16 mb-3 text-gray-300" />
         <h3 className="text-lg xxl1:text-xl font-semibold text-gray-700 mb-1">No Badges Yet</h3>
         <p className="text-sm xxl1:text-base text-center text-gray-500">
@@ -79,7 +79,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   };
 
   return (
-    <div className="w-full h-[419px] bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6">
+    <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px]  bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6">
       <div className="h-full justify-between flex flex-col gap-6">
         {/* Title */}
         <h2 className="text-[20px] items-start justify-start text-start font-semibold font-manrope text-[#1b1b1b]">

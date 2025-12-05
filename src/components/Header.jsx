@@ -87,7 +87,7 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
         {/* MIDDLE NAVBAR */}
     {role === "parent" &&
       <nav>
-  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
+  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg max-xl:text-base  text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
     
     <li>
       <NavLink
@@ -155,7 +155,7 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
 
 {role === "admin" &&
 <nav>
-  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
+  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg max-xl:text-base text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
     
     <li>
       <NavLink
@@ -242,7 +242,7 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
 
 {role === "coach" &&
 <nav>
-  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
+  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg max-xl:text-sm text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
     
     <li>
       <NavLink

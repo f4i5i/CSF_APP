@@ -27,6 +27,7 @@ import {
   waiversService,
 } from '../../api/services';
 import CreatePostModal from '../../components/CreatePostModal';
+import Calender1 from '../../components/Calender1';
 
 export default function DashboardCoach() {
   // 1. User from auth context
@@ -170,16 +171,16 @@ export default function DashboardCoach() {
     <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
-      <main className="mx-6 py-8 max-sm:py-2 max-sm:mx-3">
+      <main className="mx-6 py-8 max-xxl:py-4 max-sm:py-2 max-sm:mx-3">
         {/* Subheader Section */}
-        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 gap-4">
+        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-3 gap-4">
           {/* Welcome Message & Child Selector */}
           <div className="flex flex-col gap-2">
             <div className="text-[46px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
               Welcome back, {user?.first_name || 'Coach'}! 👋
             </div>
             {/* locations and active students */}
-         <p className="text-black font-manrope font-medium text-base">
+         <p className="text-black font-manrope font-medium text-base max-xxl:text-sm">
                 Managing 3 locations • 45 active students
               </p>
             
@@ -188,7 +189,7 @@ export default function DashboardCoach() {
           {/* Stats */}
           <div className="flex items-center gap-16 max-sm:hidden">
             <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px] font-kollektif font-normal text-[#0F1D2E]">
+              <p className="text-[60px]  font-kollektif font-normal text-[#0F1D2E]">
                 {attendanceStreak}
               </p>
               <p className="text-black font-kollektif normal text-base">
@@ -207,10 +208,10 @@ export default function DashboardCoach() {
         </div>
 
         {/* Waivers Alert */}
-        <WaiversAlert
+        {/* <WaiversAlert
           pendingWaivers={pendingWaivers}
           loading={loadingWaivers}
-        />
+        /> */}
 
         <div className="flex flex-col lg:flex-row gap-3">
           {/* Left Column */}
@@ -219,7 +220,7 @@ export default function DashboardCoach() {
             <div>
               <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
        <div className='w-full flex justify-between items-center'>
-        <h2 className="text-xl xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>     
+        <h2 className="text-xl xxl1:text-2xl max-xxl:text-lg  font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>     
 <button onClick={() => setOpenModal(true)}
  className="flex items-center gap-2 bg-[#DDE0E3] text-[#000000] px-4 py-2 rounded-full text-base font-semibold font-manrope">
   <Plus size={16} />
@@ -234,31 +235,21 @@ export default function DashboardCoach() {
             </div>
             </div>
 
-  {/* Active Enrollments */}
-            <EnrollmentCard
-              enrollments={activeEnrollments}
-              loading={loadingEnrollments}
-            />
-
-            {/* Payment Status */}
-            <PaymentStatusCard
-              summary={paymentSummary}
-              loading={loadingPayments}
-            />
+  
           </div>
 
           {/* Right Column */}
-          <div className="space-y-3 grid grid-cols-1 xxl1:w-[50%]">
+          <div className="space-y-3 grid grid-cols-1  xxl:w-[50%]">
               {/* Calendar & Next Event */}
-            <div className="bg-[#FFFFFF80] max-md:flex-col px-6 rounded-[30px] lg:w-full flex gap-1">
-              <div className="w-[40%] xxl1:w-[50%] max-sm:hidden">
-                <Calendar events={calendarEvents} />
+             <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2">
+              <div className="w-[40%] max-sm:hidden">
+                <Calender1 events={calendarEvents} />
               </div>
 
              <div className="lg:w-[60%]  max-sm:w-full max-sm:flex">
 
-                <div className="pt-6 w-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl pl-3  font-kollektif font-normal mb-4">
+               <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
+                  <h2 className="text-[20px] xxl1:text-2xl max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
                     Next Event
                   </h2>
                   <NextEvent event={nextEvent} loading={loadingEvents} />

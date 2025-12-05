@@ -143,7 +143,7 @@ return (
 
 <Route path="/paymentbilling" element={
   <ProtectedRoute>
-    <Settings initialSection="payment" />
+    <PaymentBilling initialSection="payment" />
   </ProtectedRoute>
 } />
 

@@ -52,7 +52,7 @@ const Badges = () => {
       </h1>
 <div
       
-      className="flex max-xl:grid max-xl:grid-cols-5 max-sm:grid-cols-2 max-sm:grid  gap-6 max-sm:px-2 py-2 mb-8"
+      className="flex max-xl:grid max-xl:grid-cols-7 max-lg:grid max-lg:grid-cols-4 max-sm:grid-cols-2 max-sm:grid  gap-6 max-sm:px-2 py-2 mb-8"
 
       >
         {badges.map((badge, i) => (

@@ -10,8 +10,8 @@ const Calender = () => {
    <div className=" min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
 
       <Header />
- <main className=" mx-6 py-8  max-sm:py-2 max-sm:mx-3">
-    <div className="flex gap-4 bg-[#FFFFFF80] p-8 max-sm:p-0 rounded-[30px] w-full max-sm:flex-col">
+ <main className=" mx-6 py-8  max-xxl1:py-4  max-sm:py-2 max-sm:mx-3">
+    <div className="flex gap-4 bg-[#FFFFFF80] p-8 max-xxl1:py-4  max-sm:p-0 rounded-[30px] w-full max-sm:flex-col">
 
   {/* LEFT SIDE */}
   <div className="flex flex-col max-sm:p-3 gap-3 max-sm:w-full">

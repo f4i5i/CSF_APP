@@ -5,14 +5,14 @@ const PhotoCard = ({ photos = [], loading = false }) => {
   // Loading state
   if (loading) {
     return (
-      <div className="w-full h-[419px] rounded-[30px] bg-gray-200 animate-pulse"></div>
+      <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] rounded-[30px] bg-gray-200 animate-pulse"></div>
     );
   }
 
   // Empty state - no photos
   if (!photos || photos.length === 0) {
     return (
-      <div className="w-full h-[419px] rounded-[30px] bg-[#FFFFFF50] flex flex-col items-center justify-center text-gray-500">
+      <div className="w-full h-[419px] max-xxl1:h-[250px] rounded-[30px] bg-[#FFFFFF50] flex flex-col items-center justify-center text-gray-500">
         <ImageIcon className="w-16 h-16 mb-3 text-gray-300" />
         <p className="font-medium xxl1:text-xl">No photos yet</p>
         <p className="text-sm mt-1 xxl1:text-base">Check back later for photos</p>
@@ -26,7 +26,7 @@ const PhotoCard = ({ photos = [], loading = false }) => {
     return (
       <Link
         to="/photos"
-        className="block w-full h-[419px] rounded-[30px] bg-cover bg-center relative overflow-hidden group"
+        className="block w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] rounded-[30px] bg-cover bg-center relative overflow-hidden group"
         style={{
           backgroundImage: `url(${photo.url || photo.image_url})`,
         }}
@@ -60,7 +60,7 @@ const PhotoCard = ({ photos = [], loading = false }) => {
   const remaining = photos.length > 6 ? photos.length - 6 : 0;
 
   return (
-    <div className="w-full h-[419px] rounded-[30px] bg-[#FFFFFF50] p-4 overflow-hidden">
+    <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] rounded-[30px] bg-[#FFFFFF50] p-4 overflow-hidden">
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-bold font-manrope text-xl">Program Photos</h3>
         <Link

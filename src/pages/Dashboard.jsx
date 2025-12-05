@@ -25,6 +25,7 @@ import {
   installmentsService,
   waiversService,
 } from '../api/services';
+import Calender1 from '../components/Calender1';
 
 export default function Dashboard() {
   // 1. User from auth context
@@ -240,24 +241,24 @@ export default function Dashboard() {
     <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
-      <main className="mx-6 py-8 max-sm:py-2 max-sm:mx-3">
+      <main className="mx-6 py-8 max-xxl:py-4 max-sm:py-2 max-sm:mx-3">
         {/* Subheader Section */}
-        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 gap-4">
+        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-4 gap-4">
           {/* Welcome Message & Child Selector */}
-          <div className="flex flex-col gap-4">
-            <div className="text-[46px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
+          <div className="flex flex-col gap-4 max-xxl:gap-2 max-xl:gap-2">
+            <div className="text-[46px] max-xxl:text-[32px] max-xl:text-[32px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
               Welcome back, {user?.first_name || 'Parent'}! 👋
             </div>
 
             {/* Child Selector */}
             {loadingChildren ? (
-              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs text-base font-medium font-manrope sm:w-full rounded-full shadow animate-pulse">
-                <div className="h-8 bg-gray-200 rounded-full w-64"></div>
+              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm text-base font-medium font-manrope sm:w-full rounded-full shadow animate-pulse">
+                <div className="h-8 bg-gray-200 rounded-full max-sm:w-full w-64"></div>
               </div>
             ) : (
-              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs text-base font-medium font-manrope sm:w-full rounded-full shadow text-gray-400 border border-gray-50">
+              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm  text-base font-medium font-manrope sm:w-full rounded-full shadow text-[#1B1B1B] border border-gray-50">
                 <select
-                  className="px-4 bg-gray-50 text-base max-sm:text-xs font-medium max-sm:font-normal font-manrope sm:w-full border-none text-gray-400"
+                  className="px-4 bg-gray-50 text-base max-sm:text-xs max-xxl:text-sm font-medium max-sm:font-normal font-manrope sm:w-full border-none text-[#1B1B1B]"
                   value={selectedChild?.id || ''}
                   onChange={handleChildChange}
                   disabled={children.length === 0}
@@ -284,7 +285,7 @@ export default function Dashboard() {
           {/* Stats */}
           <div className="flex items-center gap-16 max-sm:hidden">
             <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px] font-kollektif font-normal text-[#0F1D2E]">
+              <p className="text-[60px] max-xl:text-3xl font-kollektif font-normal text-[#0F1D2E]">
                 {attendanceStreak}
               </p>
               <p className="text-black font-kollektif normal text-base">
@@ -292,7 +293,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px] font-kollektif normal text-[#0F1D2E]">
+              <p className="text-[60px] max-xl:text-3xl font-kollektif font-normal text-[#0F1D2E]">
                 {badgeCount}
               </p>
               <p className="text-black font-kollektif normal text-base">
@@ -314,7 +315,7 @@ export default function Dashboard() {
             {/* Announcements */}
             <div>
                          <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
-                   <h2 className="text-xl xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>
+                   <h2 className="text-xl xl:text-xl lg:text-lg xxl:text-xl max-xxl:text-lg xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>
                        <AnnouncementCard
                          announcements={announcements}
                          loading={loadingAnnouncements}
@@ -326,15 +327,15 @@ export default function Dashboard() {
           {/* Right Column */}
           <div className="space-y-3 grid grid-cols-1 xxl1:w-[50%]">
             {/* Calendar & Next Event */}
-            <div className="bg-[#FFFFFF80] max-md:flex-col px-6 rounded-[30px] lg:w-full flex gap-1">
+            <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2">
               <div className="w-[40%] max-sm:hidden">
-                <Calendar events={calendarEvents} />
+                <Calender1 events={calendarEvents} />
               </div>
 
              <div className="lg:w-[60%] max-sm:w-full max-sm:flex">
 
-                <div className="pt-6 w-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl pl-3  font-kollektif font-normal mb-4">
+                <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
+                  <h2 className="text-[20px] xxl1:text-2xl max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
                     Next Event
                   </h2>
                   <NextEvent event={nextEvent} loading={loadingEvents} />
