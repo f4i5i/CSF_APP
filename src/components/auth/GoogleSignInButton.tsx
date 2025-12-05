@@ -28,7 +28,6 @@ const BUTTON_OPTIONS = {
   type: 'standard',
   theme: 'outline',
   size: 'large',
-  width: 280,
   text: 'signin_with',
   shape: 'pill',
 };
@@ -71,7 +70,14 @@ export default function GoogleSignInButton({
         },
       });
 
-      window.google.accounts.id.renderButton(buttonRef.current, BUTTON_OPTIONS);
+      // Calculate button width based on container width
+      const containerWidth = buttonRef.current.offsetWidth;
+      const buttonWidth = Math.min(containerWidth, 400); // Max 400px
+
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        ...BUTTON_OPTIONS,
+        width: buttonWidth,
+      });
     };
 
     if (window.google) {

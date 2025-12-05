@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import AuthLayout from './pages/Authlayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
 import Dashboard from './pages/Dashboard'
 import Calender from './pages/Calender'
 import Gallery from './pages/Gallery'
@@ -65,6 +66,7 @@ return (
 <Route element={<AuthLayout />}>
   <Route path="/login" element={<Login />} />
   <Route path="/register" element={<Register />} />
+  <Route path="/forgot-password" element={<ForgotPassword />} />
 </Route>
 
 {/* Protected routes - require authentication */}
