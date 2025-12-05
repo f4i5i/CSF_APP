@@ -76,7 +76,7 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
     ? navItemsadmin
     : navItems; 
   return (
-    <header className="w-full py-1 flex justify-between max-sm:items-center">
+    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:pr-3">
       <div className="w-full mr-6 ml-1 mt-5 max-sm:mx-auto  flex items-center justify-between max-sm:justify-center">
 
         {/* LEFT: Logo */}
@@ -376,7 +376,7 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
           </div>
         )}
 </div>
-      <div className="hidden max-sm:flex items-center gap-3 cursor-pointer  max-sm:justify-end max-sm:items-end">
+      <div className="hidden max-sm:flex items-center gap-3 cursor-pointer   max-sm:justify-end max-sm:items-end">
           <img
            onClick={() => setOpen(!open)}
         ref={dropdownRef}

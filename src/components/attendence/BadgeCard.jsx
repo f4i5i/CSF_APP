@@ -5,7 +5,7 @@ export default function BadgeCard({ title,compact, subtitle, icon, active }) {
   <div
       className={`
         ${compact ? "max-sm:w-[200px]" : "max-sm:w-full"}
-        w-[200px] shrink-0 min-h-[160px]
+        w-[200px] shrink-0 min-h-[160px] max-sm:w-[160px] max-sm:h-[140px]
         rounded-2xl bg-white shadow-md
         flex flex-col items-center justify-center text-center
         px-4 max-xl:px-2 py-6 transition-all
