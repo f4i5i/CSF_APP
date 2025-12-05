@@ -70,31 +70,59 @@ export default function GoogleSignInButton({
         },
       });
 
-      // Calculate button width based on container width
-      const containerWidth = buttonRef.current.offsetWidth;
-      const buttonWidth = Math.min(containerWidth, 400); // Max 400px
+      // Wait for DOM to settle before calculating width
+      setTimeout(() => {
+        if (!buttonRef.current || !window.google) return;
 
-      window.google.accounts.id.renderButton(buttonRef.current, {
-        ...BUTTON_OPTIONS,
-        width: buttonWidth,
-      });
+        // Calculate button width based on container width
+        const containerWidth = buttonRef.current.offsetWidth;
+        // Use full container width, max 400px, min 200px for mobile
+        const buttonWidth = Math.max(200, Math.min(containerWidth, 400));
+
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          ...BUTTON_OPTIONS,
+          width: buttonWidth,
+        });
+      }, 100);
+    };
+
+    const handleResize = () => {
+      if (!window.google || !buttonRef.current) return;
+
+      // Clear previous button
+      if (buttonRef.current) {
+        buttonRef.current.innerHTML = '';
+      }
+
+      // Re-render with new width
+      setTimeout(() => {
+        if (!buttonRef.current || !window.google) return;
+        const containerWidth = buttonRef.current.offsetWidth;
+        const buttonWidth = Math.max(200, Math.min(containerWidth, 400));
+
+        window.google.accounts.id.renderButton(buttonRef.current, {
+          ...BUTTON_OPTIONS,
+          width: buttonWidth,
+        });
+      }, 100);
     };
 
     if (window.google) {
       initialize();
-      return;
+    } else {
+      const script = document.createElement('script');
+      script.src = SCRIPT_SRC;
+      script.async = true;
+      script.defer = true;
+      script.onload = initialize;
+      script.onerror = () => onError?.('Unable to load Google script');
+      document.body.appendChild(script);
     }
 
-    const script = document.createElement('script');
-    script.src = SCRIPT_SRC;
-    script.async = true;
-    script.defer = true;
-    script.onload = initialize;
-    script.onerror = () => onError?.('Unable to load Google script');
-    document.body.appendChild(script);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      document.body.removeChild(script);
+      window.removeEventListener('resize', handleResize);
     };
   }, [clientId, onError, onSuccess]);
 
@@ -110,5 +138,9 @@ export default function GoogleSignInButton({
     );
   }
 
-  return <div ref={buttonRef} className={combineClasses('w-full', className)} />;
+  return (
+    <div className="w-full overflow-hidden flex items-center justify-center">
+      <div ref={buttonRef} className={combineClasses('w-full max-w-full', className)} />
+    </div>
+  );
 }
