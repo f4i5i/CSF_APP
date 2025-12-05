@@ -79,9 +79,7 @@ export default function Login() {
       {/* LOGIN CARD */}
       <div className="bg-white shadow-2xl rounded-2xl p-4 sm:p-6 md:p-10">
        <div className="flex justify-center items-center mb-2 sm:mb-4">
-        <div className="scale-75 sm:scale-100">
-          <LogoLogin />
-        </div>
+        <LogoLogin />
 </div>
         <h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
           Welcome Back

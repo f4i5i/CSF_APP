@@ -111,9 +111,7 @@ return (
       {/* REGISTER CARD */}
       <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-10 py-4 sm:py-6 md:py-10">
        <div className="flex justify-center items-center mb-2 sm:mb-3">
-        <div className="scale-75 sm:scale-90 md:scale-100">
-          <LogoLogin />
-        </div>
+        <LogoLogin />
 </div>
 <h2 className="text-lg sm:text-xl md:text-2xl text-center font-semibold text-[#0f172a]">Create Account</h2>
 <p className="text-center text-xs sm:text-sm md:text-base text-gray-500 mt-1 mb-3 sm:mb-4 md:mb-6">Create your account to get started.</p>
