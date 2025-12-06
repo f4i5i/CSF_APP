@@ -16,13 +16,13 @@ export default function ClassCard({ cls, onClick, onRegister }) {
 
             {/* Register button */}
             <div
-              className="border-2 border-blue-400 rounded-lg px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-blue-50 cursor-pointer hover:bg-blue-100 transition"
+              className="border-1 border-[#F3BC48] flex justify-center items-center rounded-lg px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-[#F3BC48] cursor-pointer transition"
               onClick={(e) => {
                 e.stopPropagation();
                 onRegister?.();
               }}
             >
-              <span className="text-blue-600 text-sm sm:text-base font-semibold">Register</span>
+              <span className="text-[#0D0D12] text-sm sm:text-base font-semibold">Register</span>
             </div>
           </div>
 

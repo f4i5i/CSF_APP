@@ -208,7 +208,7 @@ export default function ProgramOverview() {
 
        {/* ---------- HERO SECTION ---------- */}
 <div className="w-full bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 py-14 md:py-20">
-  <div className="max-w-7xl xxl1:max-w-9xl mx-auto px-6 flex flex-col-reverse md:flex-row items-center gap-10">
+  <div className="max-w-7xl xxl1:max-w-9xl mx-auto px-6 flex flex-col md:flex-row items-center gap-10">
 
     {/* LEFT CONTENT */}
     <div className="flex-1 text-[#173151] space-y-6">
@@ -285,7 +285,7 @@ export default function ProgramOverview() {
 
               <div className=" flex flex-col items-center justify-center p-4 text-gray-900">
                 <p className="text-xl xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] drop-shadow">{p.title}</p>
-                <p className="text-sm opacity-90  drop-shadow">
+                <p className="text-sm opacity-90 text-center drop-shadow">
                   {p.desc}
                 </p>
               </div>

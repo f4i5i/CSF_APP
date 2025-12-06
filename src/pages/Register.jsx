@@ -102,12 +102,12 @@ export default function Register(){
   }
 
 return (
-    <div className="h-screen w-full flex flex-col justify-center items-center overflow-y-auto px-3 sm:px-6">
+    <div className=" w-full flex flex-col justify-center items-center overflow-y-auto  px-3 sm:px-6">
 
   {/* Dotted Background */}
     <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
-<div className='relative justify-center items-center w-full max-w-md sm:max-w-lg md:max-w-2xl px-2 sm:px-4 md:px-6 my-auto'>
+<div className='relative justify-center  items-center w-full max-w-md sm:max-w-lg md:max-w-2xl px-2 sm:px-4 md:px-6 my-auto'>
       {/* REGISTER CARD */}
       <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-10 py-4 sm:py-6 md:py-10">
        <div className="flex justify-center items-center mb-2 sm:mb-3">
@@ -221,7 +221,7 @@ return (
       <button
         type="button"
         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-        className="absolute right-3 top-9 text-gray-500 hover:text-gray-700 transition"
+        className="absolute  right-3 top-9 text-gray-500 hover:text-gray-700 transition"
       >
         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
       </button>
@@ -230,7 +230,7 @@ return (
   </div>
 <button
   type="submit"
-  className="w-full bg-primary text-black font-semibold py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+  className="w-full mt-4 bg-primary text-black font-semibold py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed "
   disabled={loading}
 >
   {loading ? 'Creating account...' : 'Register'}

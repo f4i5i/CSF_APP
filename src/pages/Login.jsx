@@ -70,15 +70,15 @@ export default function Login() {
 
 
   return (
-    <div className=" w-full flex flex-col justify-center items-center overflow-y-auto px-3 sm:px-6">
+    <div className=" w-full flex flex-col justify-center items-center overflow-y-auto  px-3 sm:px-6">
 
   {/* Dotted Background */}
     <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
 <div className='relative justify-center items-center w-full max-w-md sm:max-w-lg px-2 sm:px-4 my-auto'>
       {/* LOGIN CARD */}
-      <div className="bg-white shadow-2xl rounded-2xl p-4 sm:p-6 md:p-10">
-       <div className="flex justify-center items-center mb-2 sm:mb-4">
+      <div className="bg-white shadow-2xl rounded-2xl max-sm:pb-8 p-4 sm:p-6 md:p-10">
+       <div className="flex justify-center items-center mb-0 sm:mb-4">
         <LogoLogin />
 </div>
         <h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
@@ -90,8 +90,8 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
 
-          <div className="mb-3 sm:mb-4">
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+          <div className="mb-3 max-sm:mt-8 sm:mb-4">
+            <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               Email Address <span className="text-red-500">*</span>
             </label>
             <input
@@ -100,13 +100,13 @@ export default function Login() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-primary"
+              className="w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border border-gray-300 outline-none focus:ring-2 focus:ring-primary"
               required
             />
           </div>
 
           <div className="mb-3 sm:mb-4">
-  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+  <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
     Password <span className="text-red-500">*</span>
   </label>
 
@@ -115,7 +115,7 @@ export default function Login() {
     <input
       type={showPassword ? "text" : "password"}
       name="password"
-      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg pr-10 focus:ring-2 focus:ring-primary outline-none"
+      className="w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg pr-10 focus:ring-2 focus:ring-primary outline-none"
       placeholder="Enter your password"
       value={password}
       onChange={(e) => setPassword(e.target.value)}
@@ -141,7 +141,7 @@ export default function Login() {
 </div>
 
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm font-normal font-manrope text-gray-600 mb-3 sm:mb-4">
+          <div className="flex justify-between sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm font-normal font-manrope text-gray-600 mb-3 sm:mb-4">
             <label className="flex items-center gap-2">
               <input type="checkbox" className="w-3 h-3 sm:w-4 sm:h-4 text-[#0d0d12]" /> Keep me login
             </label>
@@ -176,7 +176,7 @@ export default function Login() {
        </button> */}
         </form>
 
-        <p className="text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal  text-gray-500 mt-3 sm:mt-4 md:mt-6">
+        <p className="text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal  text-[#666d80] mt-3 sm:mt-4 md:mt-6">
           Don't have an account?
           <Link to="/register" className="text-[#F3BC48] font-medium ml-1">
             Register
