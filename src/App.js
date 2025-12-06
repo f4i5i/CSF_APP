@@ -181,12 +181,7 @@ return (
 } 
 /> 
 
-<Route path="/checkout" element={
-  <ProtectedRoute>
-    <Checkout />
- </ProtectedRoute> 
-} 
-/> 
+<Route path="/checkout" element={<Checkout />} /> 
 
 <Route path="/financials" element={
   <ProtectedRoute>
