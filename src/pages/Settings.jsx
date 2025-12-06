@@ -29,10 +29,10 @@ export default function Settings() {
       </div>
  {/* BUTTONS */}
           <div className="flex justify-end max-sm:justify-between max-sm:px-3 max-sm:w-full max-sm:flex max-sm:mt-4 gap-4 mt-10">
-            <button className="px-6 py-3 max-sm:w-[168px] rounded-full bg-white border">
+            <button className="px-6 py-3 text-[#0D0D12] max-sm:w-[168px] rounded-full bg-white border">
               Cancel
             </button>
-            <button className="px-6 py-3 max-sm:w-[168px]  rounded-full bg-[#f4b728] text-white">
+            <button className="px-6 py-3 max-sm:w-[168px] text-[#0D0D12] rounded-full bg-[#f4b728] ">
               Save Changes
             </button>
           </div>
@@ -46,46 +46,46 @@ export default function Settings() {
         {/* RIGHT FORM SECTION */}
         <div className="flex max-sm:flex-col gap-4 p-10 max-sm:p-6">
             <div className="w-[35%] max-sm:w-full">
-          <h2 className="text-[18px] font-semibold text-[#0f1d2e]">
+          <h2 className="text-[18px] font-semibold text-[#000]">
             Account Setting
           </h2>
 
-          <p className="text-sm max-sm:w-full text-gray-500 mt-1 mb-8 max-sm:mb-2">
+          <p className="text-sm max-sm:w-full text-[#666D80] mt-1 mb-8 max-sm:mb-2">
             View and update your account details, profile, and more.
           </p>
 </div>
           <form className="space-y-6">
 
             <div>
-              <label className="text-sm font-medium text-[#1d3557]">
+              <label className="text-sm font-medium text-[#666D80]">
                 Full Name *
               </label>
               <input
                 type="text"
                 defaultValue="Robert Johnson"
-                className="mt-2 w-full border rounded-lg px-4 py-3 bg-white outline-none"
+                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-[#1d3557]">
+              <label className="text-sm font-medium text-[#666D80]">
                 Email Address *
               </label>
               <input
                 type="email"
                 defaultValue="robertjohnson@gmail.com"
-                className="mt-2 w-full border rounded-lg px-4 py-3 bg-white outline-none"
+                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-[#1d3557]">
+              <label className="text-sm font-medium text-[#666D80]">
                 Phone Number (optional)
               </label>
               <input
                 type="text"
                 defaultValue="+1 (212) 555 4567"
-                className="mt-2 w-full border rounded-lg px-4 py-3 bg-white outline-none"
+                className="mt-2 w-full text-[#0D0D12] border rounded-lg px-4 py-3 bg-white outline-none"
               />
             </div>
           </form>

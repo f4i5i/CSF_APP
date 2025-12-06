@@ -13,9 +13,9 @@ export default function AuthLayout() {
 
       {/* FOOTER */}
       <footer className="w-full py-2 bg-transparent">
-        <div className="w-full flex flex-row max-sm:flex max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-gray-600 text-xs sm:text-sm">
+        <div className="w-full flex flex-row max-sm:flex max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-[#000] text-xs sm:text-sm">
 
-          <p className="text-center sm:text-left font-['inter'] font-normal text-sm mb-2 sm:mb-0">
+          <p className="text-center text-[#000] sm:text-left font-['inter'] font-normal text-sm mb-2 sm:mb-0">
             © 2025 Carolina Soccer Factory. All rights reserved.
           </p>
 

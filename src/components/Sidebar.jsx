@@ -85,7 +85,7 @@ const Sidebar = () => {
       ? "text-red-500" // 🔴 always red
       : location.pathname.includes(item.path)
       ? "bg-[#F6F8FA] font-medium border-[1px] border-[#DFE1E7]"
-      : "text-gray-600"
+      : "text-[#666D80]"
   }`}
           >
             {item.label}

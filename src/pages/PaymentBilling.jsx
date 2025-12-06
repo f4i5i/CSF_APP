@@ -40,8 +40,8 @@ const PaymentPage = () => {
         <div className="flex max-sm:flex-col gap-6 p-6 max-sm:p-1">
             <div className="flex flex-col gap-6 w-[40%] max-sm:px-5 max-sm:pt-5 max-sm:w-full">
           <div className="">
-            <h2 className="font-semibold text-lg">Payment</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="font-semibold text-[#000000] text-lg">Payment</h2>
+            <p className="text-sm text-[#666D80] mt-1">
               Manage your payment methods securely. Add, update or remove cards.
             </p>
           </div>
@@ -49,8 +49,8 @@ const PaymentPage = () => {
          
 
           <div className="max-sm:hidden">
-            <h2 className="font-semibold text-lg">Billing</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="font-semibold text-[#000000] text-lg">Billing</h2>
+            <p className="text-sm text-[#666D80] mt-1">
               Review and update your billing information.
             </p>
           </div>
@@ -60,8 +60,8 @@ const PaymentPage = () => {
   <PaymentCard />
 </div>
  <div className="sm:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
-            <h2 className="font-semibold text-lg">Billing</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="font-semibold text-[#000] text-lg">Billing</h2>
+            <p className="text-sm text-[#666D80] mt-1">
               Review and update your billing information.
             </p>
           </div>

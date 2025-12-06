@@ -335,7 +335,7 @@ export default function Dashboard() {
              <div className="lg:w-[60%] max-sm:w-full max-sm:flex">
 
                 <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
+                  <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
                     Next Event
                   </h2>
                   <NextEvent event={nextEvent} loading={loadingEvents} />

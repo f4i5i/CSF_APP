@@ -14,12 +14,12 @@ export default function BadgeCard({ title,compact, subtitle, icon, active }) {
     >
       <img src={icon} alt={title} className="w-12 h-12 xxl1:w-20 xxl1:h-20 mb-3" />
 
-      <h3 className="font-manrope font-medium text-[16px] max-xl:text-sm xxl1:text-lg text-[#1D3557]">
+      <h3 className="font-manrope font-semibold text-[16px] max-xl:text-sm xxl1:text-lg text-[#1b1b1b]">
         {title}
       </h3>
 
       {subtitle && (
-        <p className="text-xs xxl1:text-sm text-gray-500 mt-1">{subtitle}</p>
+        <p className="text-xs xxl1:text-sm text-[#0F1D2E] mt-1">{subtitle}</p>
       )}
     </div>
   );

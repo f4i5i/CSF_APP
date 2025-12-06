@@ -38,11 +38,11 @@ export default function AnnouncementItem({ item }) {
 
           <div>
             <p className="text-sm sm:text-base font-bold font-kollektif text-black opacity-80">{item.name}</p>
-            <p className="text-xs sm:text-sm font-kollektif font-semibold text-[#1B1B1B] opacity-50">{item.date}</p>
+            <p className="text-xs sm:text-sm font-manrope font-semibold text-[#1B1B1B] opacity-50">{item.date}</p>
           </div>
         </div>
 <div className="bg-white/50 flex items-center justify-center rounded-full w-10 h-10 sm:w-12 sm:h-12 lg:w-[54px] lg:h-[54px]">
-        <EllipsisVertical size={20} className="text-gray-600 " />
+        <EllipsisVertical size={20} className="text-[#000000] " />
       </div>
 </div>
       {/* Title */}

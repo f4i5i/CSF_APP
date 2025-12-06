@@ -105,36 +105,47 @@ export default function Login() {
             />
           </div>
 
-          <div className="mb-3 sm:mb-4 relative">
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-              Password <span className="text-red-500">*</span>
-            </label>
+          <div className="mb-3 sm:mb-4">
+  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+    Password <span className="text-red-500">*</span>
+  </label>
 
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg pr-10 focus:ring-2 focus:ring-primary outline-none"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+  {/* Wrapping only the input + eye icon */}
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg pr-10 focus:ring-2 focus:ring-primary outline-none"
+      placeholder="Enter your password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
 
-            {/* SHOW/HIDE BUTTON */}
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-8 sm:top-9 text-gray-500 hover:text-gray-700 transition"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="
+        absolute
+        right-3
+        top-1/2 
+        -translate-y-1/2
+        text-gray-500 
+        hover:text-gray-700 
+        transition
+      "
+    >
+      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
+
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm font-normal font-manrope text-gray-600 mb-3 sm:mb-4">
             <label className="flex items-center gap-2">
               <input type="checkbox" className="w-3 h-3 sm:w-4 sm:h-4 text-[#0d0d12]" /> Keep me login
             </label>
-            <Link to="/forgot-password" className="text-[#F3BC48] hover:underline">Forgot Password?</Link>
+            <Link to="/forgot-password" className="text-[#F3BC48] font-medium hover:underline">Forgot Password?</Link>
           </div>
 
           <button
@@ -165,7 +176,7 @@ export default function Login() {
        </button> */}
         </form>
 
-        <p className="text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal text-gray-500 mt-3 sm:mt-4 md:mt-6">
+        <p className="text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal  text-gray-500 mt-3 sm:mt-4 md:mt-6">
           Don't have an account?
           <Link to="/register" className="text-[#F3BC48] font-medium ml-1">
             Register

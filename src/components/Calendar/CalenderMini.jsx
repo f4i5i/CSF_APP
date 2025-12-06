@@ -37,7 +37,7 @@ const CalenderMini = () => {
 
   return (
     <div className="rounded-3xl max-sm:py-1 w-full">
-      <h2 className="text-[20px] font-kollektif font-medium pb-8 max-xxl:pb-4">Calendar</h2>
+      <h2 className="text-[20px] font-kollektif text-[#0F1D2E] font-medium pb-8 max-xxl:pb-4">Calendar</h2>
 
       <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-fit">
 
