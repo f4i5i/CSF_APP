@@ -9,7 +9,7 @@ const Calendar = () => {
 
   return (
     <div className=" rounded-3xl py-6  w-full " >
-      <h2 className="text-[20px] xxl1:text-2xl font-kollektif font-normal text-[#0f1d2e] mb-4">Calendar</h2>
+      <h2 className="text-[20px] xxl1:text-2xl font-kollektif font-normal text-[#1B1B1B] mb-4">Calendar</h2>
 
       <DayPicker
         mode="single"

@@ -2,9 +2,19 @@ import React, { useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import "../../styles/calendar-styles.css"; 
+import "../../styles/calendar-styles.css";
 import CustomToolbar from "./CustomToolbar";
 const localizer = momentLocalizer(moment);
+
+// Custom event component to show time
+const CustomEvent = ({ event }) => {
+  const startTime = moment(event.start).format('h:mm a');
+  return (
+    <div>
+      <strong>{startTime}</strong> - {event.title}
+    </div>
+  );
+};
 
 export default function EventCalendar() {
  const [events] = useState([
@@ -43,6 +53,7 @@ export default function EventCalendar() {
         events={events}
         components={{
           toolbar: CustomToolbar, // ✅ THIS MAKES CHEVRONS PART OF CALENDAR
+          event: CustomEvent, // ✅ SHOWS TIME WITH EVENT TITLE
         }}
         style={{ width: "100%", height: "80vh" }}
       />

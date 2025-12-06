@@ -1,12 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import baseLogo from "../assets/logo.png"; // white logo outline
 import crown from "../assets/Carolina.png"; // golden crown
 
 const LogoLogin = () => {
   return (
-    <div className="">
-    <div className="flex justify-center items-center mb-4  w-[108px] 
-          h-[108px]  relative">
+    <Link to="/" className="inline-block">
+    <div className="flex justify-center items-center mb-4  w-[108px]
+          h-[108px]  relative cursor-pointer">
 
       {/* Logo Outline (turns black using blend mode) */}
       <img
@@ -33,7 +34,7 @@ const LogoLogin = () => {
         "
       />
     </div>
-    </div>
+    </Link>
   );
 };
 

@@ -37,13 +37,13 @@ const CalenderMini = () => {
 
   return (
     <div className="rounded-3xl max-sm:py-1 w-full">
-      <h2 className="text-[20px] font-kollektif text-[#0F1D2E] font-medium pb-8 max-xxl:pb-4">Calendar</h2>
+      <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4">Calendar</h2>
 
       <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-fit">
 
         {/* Month Header */}
         <div className="flex justify-between items-center mb-3">
-          <span className="font-medium text-[#0F1D2E]">
+          <span className="font-medium text-[#1B1B1B]">
             {new Date(currentYear, currentMonth).toLocaleString("default", {
               month: "short",
               year: "numeric",
@@ -52,10 +52,10 @@ const CalenderMini = () => {
 
           <div className="flex gap-3">
             <button onClick={prevMonth}>
-              <ChevronLeft className="w-5 h-5 text-[#0F1D2E]" />
+              <ChevronLeft className="w-5 h-5 text-[#1B1B1B]" />
             </button>
             <button onClick={nextMonth}>
-              <ChevronRight className="w-5 h-5 text-[#0F1D2E]" />
+              <ChevronRight className="w-5 h-5 text-[#1B1B1B]" />
             </button>
           </div>
         </div>
@@ -76,6 +76,10 @@ const CalenderMini = () => {
           {[...Array(totalDays)].map((_, i) => {
             const day = i + 1;
             const isEvent = highlightedDates.includes(day);
+            const dateObj = new Date(currentYear, currentMonth, day);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isPast = dateObj < today;
             const isSelected =
               selectedDay &&
               selectedDay.getDate() === day &&
@@ -88,13 +92,15 @@ const CalenderMini = () => {
                 onClick={() =>
                   setSelectedDay(new Date(currentYear, currentMonth, day))
                 }
-                className={`mx-auto w-9 h-9 flex items-center justify-center 
+                className={`mx-auto w-9 h-9 flex items-center justify-center
                 rounded-full cursor-pointer text-xs
                 ${
                   isSelected
                     ? "bg-[#1D3557] text-white"
                     : isEvent
                     ? "bg-yellow-400 text-white"
+                    : isPast
+                    ? "text-gray-400"
                     : "text-[#6F6F6F]"
                 }`}
               >
@@ -106,7 +112,7 @@ const CalenderMini = () => {
       </div>
 
       {/* Selected Date Text */}
-      <p className="mt-6 text-[20px] font-kollektif text-[#0f1d2e]">
+      <p className="mt-6 text-[20px] font-kollektif text-[#1B1B1B]">
         {selectedDay
           ? selectedDay.toLocaleDateString("en-US", {
               day: "numeric",

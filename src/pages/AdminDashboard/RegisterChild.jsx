@@ -437,7 +437,7 @@ export default function RegisterChild() {
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-[#173151] text-white px-4 sm:px-5 py-2 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-[#1f3d67] disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="bg-[#F3BC48] text-[#173151] px-4 sm:px-5 py-2 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Save Child"}

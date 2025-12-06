@@ -79,7 +79,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   };
 
   return (
-    <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px]  bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6">
+    <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px]  bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 relative">
       <div className="h-full justify-between flex flex-col gap-6">
         {/* Title */}
         <h2 className="text-[20px] items-start justify-start text-start font-semibold font-manrope text-[#1b1b1b]">
@@ -136,30 +136,31 @@ const BadgeCard = ({ badges = [], loading = false }) => {
         </div>
       </div>
 
-      {/* Bottom Pagination */}
-      <div className="flex items-center justify-between w-full mt-auto pt-10">
-        <button
-          onClick={handlePrevious}
-          className="p-4 bg-[#FFFFFF80] rounded-full hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={badges.length <= 1}
-          aria-label="Previous badge"
-        >
-          <ArrowLeft size={20} />
-        </button>
-
+      {/* Bottom Pagination - Counter Only */}
+      <div className="flex items-center justify-center w-full mt-auto pt-10">
         <span className="text-[14px] font-medium text-gray-700">
           {currentIndex + 1}/{badges.length}
         </span>
-
-        <button
-          onClick={handleNext}
-          className="p-4 bg-[#FFFFFF80] rounded-full hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={badges.length <= 1}
-          aria-label="Next badge"
-        >
-          <ArrowRight size={20} />
-        </button>
       </div>
+
+      {/* Navigation Arrows - Positioned on Sides */}
+      <button
+        onClick={handlePrevious}
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-4 bg-[#FFFFFF80] rounded-full hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={badges.length <= 1}
+        aria-label="Previous badge"
+      >
+        <ArrowLeft size={20} />
+      </button>
+
+      <button
+        onClick={handleNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-4 bg-[#FFFFFF80] rounded-full hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={badges.length <= 1}
+        aria-label="Next badge"
+      >
+        <ArrowRight size={20} />
+      </button>
     </div>
   );
 };

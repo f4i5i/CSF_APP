@@ -1,4 +1,5 @@
 import React from "react";
+import { Check, X } from "lucide-react";
 
 export default function AttendanceRow({ date, status }) {
   const isPresent = status === "Present";
@@ -6,10 +7,10 @@ export default function AttendanceRow({ date, status }) {
   return (
     <div className="flex items-center gap-4 bg-white rounded-2xl px-4 py-3 shadow-sm">
       <div
-        className={`w-[73px] h-[67px] max-xxl:w-[50px] max-xxl:h-[44px] rounded-[20px] flex items-center justify-center 
+        className={`w-[73px] h-[67px] max-xxl:w-[50px] max-xxl:h-[44px] rounded-[20px] flex items-center justify-center
         ${isPresent ? "bg-[#DEF9CD] text-[#32AE60]" : "bg-[#FFE2E2] text-[#E7000B]"}`}
       >
-        {isPresent ? "✔" : "✘"}
+        {isPresent ? <Check size={32} className="max-xxl:w-6 max-xxl:h-6" /> : <X size={32} className="max-xxl:w-6 max-xxl:h-6" />}
       </div>
 
       <div className="flex flex-col">

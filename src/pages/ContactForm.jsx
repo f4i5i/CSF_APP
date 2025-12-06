@@ -8,9 +8,9 @@ export default function ContactForm() {
   
   <Header/>
       {/* PAGE HEADER */}
-      <main className="w-full ">
-      <h2 className="text-3xl font-bold text-[#1D3557] text-center">Get in touch</h2>
-      <p className="text-gray-600 text-center mt-2">
+      <main className="w-full mt-12 max-sm:mt-8">
+      <h2 className="font-kollektif text-[46px] font-normal text-[#173151] text-center max-sm:text-3xl">Get in touch</h2>
+      <p className="text-[#0A0A0A] font-manrope text-center mt-2">
         Have a question? We'd love to hear from you.
       </p>
 
@@ -56,19 +56,19 @@ export default function ContactForm() {
         {/* Phone */}
         <div className="bg-white/70 rounded-2xl p-6 text-center shadow-md">
           <h4 className="font-semibold text-[#1D3557]">Phone</h4>
-          <p className="text-gray-600 mt-1">00 445 000 2234</p>
+          <p className="text-[#3B3B3B] mt-1">00 445 000 2234</p>
         </div>
 
         {/* Email */}
         <div className="bg-white/70 rounded-2xl p-6 text-center shadow-md">
           <h4 className="font-semibold text-[#1D3557]">Email</h4>
-          <p className="text-gray-600 mt-1">company@gmail.com</p>
+          <p className="text-[#3B3B3B] mt-1">company@gmail.com</p>
         </div>
 
         {/* Location */}
         <div className="bg-white/70 rounded-2xl p-6 text-center shadow-md">
           <h4 className="font-semibold text-[#1D3557]">Location</h4>
-          <p className="text-gray-600 mt-1">6391 Elgin St. Celina, USA</p>
+          <p className="text-[#3B3B3B] mt-1">6391 Elgin St. Celina, USA</p>
         </div>
 
       </div>

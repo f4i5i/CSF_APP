@@ -162,10 +162,40 @@ export default function Dashboard() {
 
   // Get this month's events (for calendar)
   const calendarEvents = useMemo(() => {
-    if (!classEvents) return [];
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    if (!classEvents || classEvents.length === 0) {
+      // Dummy events for demonstration when no real data
+      return [
+        {
+          id: 'dummy-1',
+          title: 'Soccer Practice',
+          type: 'practice',
+          start_datetime: new Date(now.getFullYear(), now.getMonth(), 8, 15, 0).toISOString(),
+          location: 'Main Field',
+          description: 'Weekly soccer training session'
+        },
+        {
+          id: 'dummy-2',
+          title: 'Team Match',
+          type: 'game',
+          start_datetime: new Date(now.getFullYear(), now.getMonth(), 15, 10, 0).toISOString(),
+          location: 'Stadium',
+          description: 'Competitive match against rivals'
+        },
+        {
+          id: 'dummy-3',
+          title: 'Skills Workshop',
+          type: 'social',
+          start_datetime: new Date(now.getFullYear(), now.getMonth(), 22, 14, 0).toISOString(),
+          location: 'Training Center',
+          description: 'Special skills development workshop'
+        }
+      ];
+    }
+
     return classEvents.filter(event => {
       const eventDate = new Date(event.start_datetime);
       return eventDate >= startOfMonth && eventDate <= endOfMonth;
@@ -238,7 +268,7 @@ export default function Dashboard() {
   }, [badges]);
 
   return (
-    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
       <main className="mx-6 py-8 max-xxl:py-4 max-sm:py-2 max-sm:mx-3">
@@ -311,7 +341,7 @@ export default function Dashboard() {
 
         <div className="flex flex-col md:flex-row lg:flex-row gap-3">
           {/* Left Column */}
-          <div className="col-span-2 max-sm:hidden space-y-3 w-[60%] ">
+          <div className="col-span-2 max-sm:hidden space-y-3 w-[50%] ">
             {/* Announcements */}
             <div>
                          <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
@@ -332,7 +362,7 @@ export default function Dashboard() {
                 <Calender1 events={calendarEvents} />
               </div>
 
-             <div className="lg:w-[60%] max-sm:w-full max-sm:flex">
+             <div className="lg:w-[50%] max-sm:w-full max-sm:flex">
 
                 <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
                   <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">

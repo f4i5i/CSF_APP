@@ -36,10 +36,10 @@ export default function Calender1() {
   return (
    
      <div className=" rounded-3xl py-6 max-xxl:py-4 w-full " >
-      <h2 className="text-[20px] xxl1:text-2xl font-kollektif max-xxl:text-lg font-normal text-[#0f1d2e] mb-4 max-xxl:mb-3">Calendar</h2>
+      <h2 className="text-[20px] xxl1:text-2xl font-kollektif max-xxl:text-lg font-normal text-[#1B1B1B] mb-4 max-xxl:mb-3">Calendar</h2>
 
         <div className="flex justify-between items-center mb-3 max-xxl:mb-2">
-          <span className="font-medium max-xxl:text-sm text-[#0F1D2E]">
+          <span className="font-medium max-xxl:text-sm text-[#1B1B1B]">
             {new Date(currentYear, currentMonth).toLocaleString("default", {
               month: "short",
               year: "numeric",
@@ -48,10 +48,10 @@ export default function Calender1() {
 
           <div className="flex gap-3">
             <button onClick={prevMonth}>
-              <ChevronLeft className="w-5 h-5 text-[#0F1D2E]" />
+              <ChevronLeft className="w-5 h-5 text-[#1B1B1B]" />
             </button>
             <button onClick={nextMonth}>
-              <ChevronRight className="w-5 h-5 text-[#0F1D2E]" />
+              <ChevronRight className="w-5 h-5 text-[#1B1B1B]" />
             </button>
           </div>
         </div>
@@ -72,13 +72,17 @@ export default function Calender1() {
           {[...Array(totalDays)].map((_, i) => {
             const day = i + 1;
             const isEvent = highlightedDates.includes(day);
+            const dateObj = new Date(currentYear, currentMonth, day);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isPast = dateObj < today;
 
             return (
               <div
                 key={i}
-                className={`mx-auto w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 flex items-center justify-center 
-                rounded-full text-xs xxl:text-sm cursor-pointer 
-                ${isEvent ? "bg-yellow-400 text-white font-semibold" : "text-[#6F6F6F]"}`}
+                className={`mx-auto w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 flex items-center justify-center
+                rounded-full text-xs xxl:text-sm cursor-pointer
+                ${isEvent ? "bg-yellow-400 text-white font-semibold" : isPast ? "text-gray-400" : "text-[#6F6F6F]"}`}
               >
                 {day}
               </div>
