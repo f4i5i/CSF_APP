@@ -1,11 +1,21 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useClass } from "../api/hooks/classes/useClass";
 import { formatDateRange, formatSchedule } from "../utils/formatters";
+import {
+  getCapacityMeta,
+  getCancellationSummary,
+  getDirectRegistrationLink,
+  getOfferingLabel,
+  getOfferingType,
+  getPriceModelLabel,
+} from "../utils/classHelpers";
 
 export default function ClassDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
   const {
     data: classDetail,
     isLoading,
@@ -15,6 +25,28 @@ export default function ClassDetail() {
   const image = classDetail?.cover_photo_url || classDetail?.image_url;
   const scheduleLabel = formatSchedule(classDetail?.schedule);
   const dateLabel = formatDateRange(classDetail?.start_date, classDetail?.end_date);
+  const offeringType = classDetail ? getOfferingType(classDetail) : 'unknown';
+  const offeringLabel = getOfferingLabel(offeringType);
+  const priceModel = getPriceModelLabel(classDetail, offeringType);
+  const capacityMeta = getCapacityMeta(classDetail);
+  const registrationLink = classDetail ? getDirectRegistrationLink(classDetail.id ?? id, classDetail) : '';
+  const cancellationSummary = getCancellationSummary(classDetail);
+  const priceLabel =
+    classDetail?.price_display ||
+    classDetail?.price_text ||
+    (classDetail?.base_price ? `$${classDetail.base_price}` : 'Contact for pricing');
+  const scheduleItems = classDetail?.schedule ?? [];
+
+  const handleCopyLink = async () => {
+    if (!registrationLink) return;
+    try {
+      await navigator.clipboard?.writeText(registrationLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      setCopied(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] pb-12">
@@ -26,7 +58,7 @@ export default function ClassDetail() {
         )}
 
         {classDetail && (
-          <div className="rounded-3xl bg-white/80 p-6 shadow-lg">
+          <div className="rounded-3xl bg-white/80 p-6 shadow-lg space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="overflow-hidden rounded-2xl bg-gray-100">
                 {image ? (
@@ -68,22 +100,100 @@ export default function ClassDetail() {
                       </p>
                     </div>
                   )}
+                  {offeringLabel && (
+                    <div>
+                      <p className="font-semibold text-gray-500">Program Type</p>
+                      <p className="text-gray-800">{offeringLabel}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-4 rounded-2xl bg-gray-50 p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm uppercase tracking-wide text-gray-500">Investment</p>
-                <p className="text-3xl font-bold text-[#173151]">
-                  {classDetail.base_price ? `$${classDetail.base_price}` : 'Contact for pricing'}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-gray-50 p-6 space-y-2">
+                <p className="text-sm uppercase tracking-wide text-gray-500">Schedule Recap</p>
+                {scheduleItems.length > 0 ? (
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    {scheduleItems.map((slot, index) => (
+                      <li key={`${slot.day_of_week}-${slot.start_time}-${index}`}>
+                        {formatSchedule([slot])}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">Full schedule coming soon.</p>
+                )}
+              </div>
+
+              <div className="rounded-2xl bg-gray-50 p-6 space-y-2">
+                <p className="text-sm uppercase tracking-wide text-gray-500">Capacity</p>
+                <p className={`text-2xl font-semibold ${capacityMeta.hasCapacity ? 'text-emerald-700' : 'text-rose-600'}`}>
+                  {capacityMeta.hasCapacity
+                    ? `${capacityMeta.availableSpots} spots open`
+                    : 'Currently waitlisted'}
                 </p>
+                <p className="text-sm text-gray-600">
+                  {capacityMeta.total ? `${capacityMeta.current}/${capacityMeta.total} enrolled` : `${capacityMeta.current} enrolled`}
+                </p>
+                {!capacityMeta.hasCapacity && (
+                  <p className="text-xs text-gray-500">
+                    {capacityMeta.waitlistCount > 0
+                      ? `${capacityMeta.waitlistCount} families waiting`
+                      : 'Join the waitlist to be notified next.'}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-white/70 p-6 space-y-2">
+                <p className="text-sm uppercase tracking-wide text-gray-500">Price & Membership</p>
+                <p className="text-3xl font-bold text-[#173151]">{priceLabel}</p>
+                <p className="text-sm text-gray-600">Price model: {priceModel}</p>
+                {offeringLabel && (
+                  <p className="text-sm text-gray-600">Billing type: {offeringLabel}</p>
+                )}
+              </div>
+
+              <div className="rounded-2xl bg-white/70 p-6 space-y-3">
+                <p className="text-sm uppercase tracking-wide text-gray-500">Direct registration link</p>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <input
+                    type="text"
+                    value={registrationLink}
+                    readOnly
+                    className="flex-1 rounded-xl border border-gray-200 bg-white/80 px-3 py-2 text-sm text-gray-700"
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className="rounded-xl border border-[#173151] px-4 py-2 text-sm font-semibold text-[#173151]"
+                  >
+                    {copied ? 'Copied!' : 'Copy link'}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">Share this URL for direct registration.</p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white/70 p-6">
+              <p className="text-sm uppercase tracking-wide text-gray-500">Cancellation policy</p>
+              <p className="mt-2 text-gray-700">{cancellationSummary}</p>
+            </div>
+
+            <div className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-wide text-gray-500">Investment ({priceModel})</p>
+                <p className="text-3xl font-bold text-[#173151]">{priceLabel}</p>
+                {!capacityMeta.hasCapacity && (
+                  <p className="text-sm text-rose-600">This class is full – secure your waitlist spot.</p>
+                )}
               </div>
               <button
                 onClick={() => navigate(`/checkout?classId=${classDetail.id}`)}
                 className="w-full rounded-full bg-[#F3BC48] px-8 py-3 font-semibold text-[#173151] shadow sm:w-auto"
               >
-                Reserve Spot
+                {capacityMeta.hasCapacity ? 'Reserve Spot' : 'Join Waitlist'}
               </button>
             </div>
           </div>

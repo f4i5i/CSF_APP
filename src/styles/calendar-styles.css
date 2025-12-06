@@ -1,9 +1,10 @@
 /* Remove default borders */
 .rbc-month-view {
-  border: none !important;
-  background: #f7f9fc;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 20px;
-  padding: 20px;
+  padding: 16px 20px 24px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
 }
 
 /* Weekday header */
@@ -12,41 +13,53 @@
 }
 
 .rbc-header {
-  font-weight: 600;
-  color: #1d3557;
+  font-family: 'Kollektif', sans-serif;
+  font-weight: 400;
+  color: rgba(37, 40, 43, 0.88);
   padding: 12px 0;
-  font-size: 15px;
+  font-size: 18px;
+  letter-spacing: 0.1px;
 }
 
 /* Grid cells */
 .rbc-day-bg {
-  border: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
 }
 
 .rbc-date-cell {
-  padding: 10px;
-  font-size: 14px;
-  color: #5c6b7a;
+  padding: 8px 12px;
+  font-size: 18px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  color: rgba(37, 40, 43, 0.56);
+  text-align: right;
 }
 
 /* Past days faded */
 .rbc-off-range {
-  color: #d0d6dd !important;
+  color: rgba(37, 40, 43, 0.22) !important;
+}
+
+.rbc-off-range-bg {
+  background-color: transparent !important;
+}
+
+/* Today indicator */
+.rbc-today {
+  background: transparent !important;
 }
 
 /* Event styling */
 .rbc-event {
-  background: #1d3557 !important;
-  border-radius: 10px !important;
-  padding: 4px 8px !important;
-  font-size: 12px;
-  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 /* Yellow event variation (optional) */
 .rbc-event.yellow {
-  background: #f3bc48 !important;
-  color: black !important;
+  background: transparent !important;
 }
 
 /* Remove default shadow */

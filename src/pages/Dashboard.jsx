@@ -271,12 +271,12 @@ export default function Dashboard() {
     <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
-      <main className="mx-6 py-8 max-xxl:py-4 max-sm:py-2 max-sm:mx-3">
+      <main className="mx-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:mx-3">
         {/* Subheader Section */}
-        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-4 gap-4">
+        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
           {/* Welcome Message & Child Selector */}
           <div className="flex flex-col gap-4 max-xxl:gap-2 max-xl:gap-2">
-            <div className="text-[46px] max-xxl:text-[32px] max-xl:text-[32px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
+            <div className="text-[46px] max-xxl:text-[32px] max-xl:text-[32px] max-sm:text-[24px] md:text-4xl text-[#173151] font-kollektif font-normal leading-[100%] tracking-[-0.02em] flex items-center gap-2">
               Welcome back, {user?.first_name || 'Parent'}! 👋
             </div>
 
@@ -318,7 +318,7 @@ export default function Dashboard() {
               <p className="text-[60px] max-xl:text-3xl font-kollektif font-normal text-[#0F1D2E]">
                 {attendanceStreak}
               </p>
-              <p className="text-black font-kollektif normal text-base">
+              <p className="text-black font-kollektif text-[16px] leading-[160%] tracking-[0] font-normal">
                 Attendance Streak
               </p>
             </div>
@@ -326,7 +326,7 @@ export default function Dashboard() {
               <p className="text-[60px] max-xl:text-3xl font-kollektif font-normal text-[#0F1D2E]">
                 {badgeCount}
               </p>
-              <p className="text-black font-kollektif normal text-base">
+              <p className="text-black font-kollektif text-[16px] leading-[160%] tracking-[0] font-normal">
                 Badges Earned
               </p>
             </div>
@@ -339,7 +339,7 @@ export default function Dashboard() {
           loading={loadingWaivers}
         /> */}
 
-        <div className="flex flex-col md:flex-row lg:flex-row gap-3">
+        <div className="flex flex-col md:flex-row lg:flex-row gap-3 max-sm:gap-6">
           {/* Left Column */}
           <div className="col-span-2 max-sm:hidden space-y-3 w-[50%] ">
             {/* Announcements */}
@@ -355,7 +355,7 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-3 grid grid-cols-1 xxl1:w-[50%]">
+          <div className="space-y-3 grid grid-cols-1 xxl1:w-[50%] max-sm:space-y-6">
             {/* Calendar & Next Event */}
             <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2">
               <div className="w-[40%] max-sm:hidden">

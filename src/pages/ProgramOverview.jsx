@@ -7,6 +7,12 @@ import { useAreas } from '../api/hooks/classes/useAreas';
 import { useClasses } from '../api/hooks/classes/useClasses';
 import ClassCard from "../components/ClassCard";
 import { formatDateRange, formatSchedule } from "../utils/formatters";
+import {
+  getCapacityMeta,
+  getOfferingLabel,
+  getOfferingType,
+  getPriceModelLabel,
+} from "../utils/classHelpers";
 import Logo from "../components/Logo";
 
 /**
@@ -38,6 +44,7 @@ export default function ProgramOverview() {
     timeOfDay: 'all',
     ageRange: 'all',
     capacity: 'all',
+    offeringType: 'all',
   };
 
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -45,6 +52,7 @@ export default function ProgramOverview() {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const areaRef = useRef(null);
+  const areaContentRefs = useRef({});
 
   // Fetch classes with filters (only when program + area selected)
   const classesQuery = useClasses({
@@ -78,6 +86,11 @@ export default function ProgramOverview() {
   const timeOfDayOptions = ['all', 'morning', 'afternoon', 'evening'];
   const ageRangeOptions = ['all', 'under8', '8to12', '13plus'];
   const capacityOptions = ['all', 'available', 'full'];
+  const programTypeOptions = [
+    { value: 'all', label: 'Membership + Short-term' },
+    { value: 'membership', label: 'Membership only' },
+    { value: 'short-term', label: 'Short-term only' },
+  ];
 
   const schoolOptions = useMemo(() => {
     const unique = new Map();
@@ -145,6 +158,10 @@ export default function ProgramOverview() {
           filters.capacity === 'all' ||
           (filters.capacity === 'available' ? current < totalCapacity : current >= totalCapacity);
 
+        const offeringType = getOfferingType(cls);
+        const matchesOffering =
+          filters.offeringType === 'all' || offeringType === filters.offeringType;
+
         return (
           matchesArea &&
           matchesSearch &&
@@ -152,33 +169,47 @@ export default function ProgramOverview() {
           matchesWeekday &&
           matchesTime &&
           matchesAge &&
-          matchesCapacity
+          matchesCapacity &&
+          matchesOffering
         );
       })
       .sort((a, b) =>
         a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
       )
-      .map((cls) => ({
-        id: cls.id,
-        area: cls.area_id,
-        program: cls.program_id,
-        title: cls.name,
-        description: cls.description,
-        school: cls.school?.name || cls.location || 'Location TBA',
-        programName: cls.program?.name || '',
-        dates: formatDateRange(cls.start_date, cls.end_date),
-        time: formatSchedule(cls.schedule),
-        ages: cls.min_age && cls.max_age
-          ? `Ages ${cls.min_age}–${cls.max_age}`
-          : 'All Ages',
-        capacity: {
-          filled: cls.current_enrollment ?? 0,
-          total: cls.capacity ?? 0
-        },
-        image: cls.cover_photo_url || cls.image_url || getClassImage(),
-        schedule: cls.schedule,
-        price: cls.base_price,
-      }));
+      .map((cls) => {
+        const capacityMeta = getCapacityMeta(cls);
+        const offeringType = getOfferingType(cls);
+        const badgeLabel = getOfferingLabel(offeringType);
+
+        return {
+          id: cls.id,
+          area: cls.area_id,
+          program: cls.program_id,
+          title: cls.name,
+          description: cls.description,
+          school: cls.school?.name || cls.location || 'Location TBA',
+          programName: cls.program?.name || '',
+          dates: formatDateRange(cls.start_date, cls.end_date),
+          time: formatSchedule(cls.schedule),
+          ages: cls.min_age && cls.max_age
+            ? `Ages ${cls.min_age}–${cls.max_age}`
+            : 'All Ages',
+          capacity: {
+            filled: capacityMeta.current,
+            total: capacityMeta.total
+          },
+          hasCapacity: capacityMeta.hasCapacity,
+          spotsRemaining: capacityMeta.availableSpots,
+          waitlistCount: capacityMeta.waitlistCount,
+          badgeLabel,
+          offeringType,
+          priceModel: getPriceModelLabel(cls, offeringType),
+          priceLabel: cls.price_display || cls.price_text || (cls.base_price ? `$${cls.base_price}` : 'Contact for pricing'),
+          image: cls.cover_photo_url || cls.image_url || getClassImage(),
+          schedule: cls.schedule,
+          price: cls.base_price,
+        };
+      });
   };
 
   return (
@@ -263,7 +294,7 @@ export default function ProgramOverview() {
 {/* Only show programs if loaded and no error */}
 {!programsLoading && !programsError && PROGRAMS.length > 0 && (
      <div className="max-w-7xl xxl1:max-w-8xl mx-auto px-4 py-10">
-        <h2 className="text-2xl text-center font-semibold mb-6 text-[#173151] font-kollektif drop-shadow-lg">Programs</h2>
+        <h2 className="text-[60px] max-xl:text-5xl max-lg:text-4xl max-sm:text-3xl text-center font-semibold mb-6 text-[#173151] font-kollektif drop-shadow-lg">Programs</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {PROGRAMS.map((p) => (
@@ -302,7 +333,7 @@ export default function ProgramOverview() {
       const selectedProgramData = PROGRAMS.find(p => p.id === selectedProgram);
       return (
         <div className="flex flex-col justify-center items-center">
-       <h2 className="text-[#173151] text-3xl font-semibold mb-2">{selectedProgramData?.title}</h2>
+       <h2 className="text-[#173151] text-[60px] max-xl:text-5xl max-lg:text-4xl max-sm:text-3xl font-semibold mb-2 font-kollektif">{selectedProgramData?.title}</h2>
         <h2 className="text-xl font-semibold mb-6">Select your Area </h2>
 </div>
              );
@@ -316,6 +347,11 @@ export default function ProgramOverview() {
                   const nextArea = openArea === area.id ? null : area.id;
                   setOpenArea(nextArea);
                   resetFilters();
+                  if (nextArea) {
+                    setTimeout(() => {
+                      areaContentRefs.current[nextArea]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
+                  }
                 }}
                 className={`px-6 py-4 w-full rounded-md bg-[#FFFFFF50] border text-base font-medium transition
                   ${
@@ -335,6 +371,11 @@ export default function ProgramOverview() {
             return (
               <div
                 key={area.id}
+                ref={(el) => {
+                  if (el) {
+                    areaContentRefs.current[area.id] = el;
+                  }
+                }}
                 className={`transition-all duration-500 overflow-hidden ${
                   isOpen ? "max-h-[3000px] mt-6" : "max-h-0"
                 }`}
@@ -410,6 +451,18 @@ export default function ProgramOverview() {
                             : option === 'available'
                             ? 'Open Seats'
                             : 'Waitlisted'}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
+                      value={filters.offeringType}
+                      onChange={(e) => setFilters((prev) => ({ ...prev, offeringType: e.target.value }))}
+                    >
+                      {programTypeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
                         </option>
                       ))}
                     </select>

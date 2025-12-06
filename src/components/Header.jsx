@@ -76,12 +76,12 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
     ? navItemsadmin
     : navItems; 
   return (
-    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:pr-3">
-      <div className="w-full mr-6 ml-1 mt-5 max-sm:mx-auto  flex items-center justify-between max-sm:justify-center">
+    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:px-3">
+      <div className="w-full mr-6 ml-1 mt-5 max-sm:mx-auto flex items-center justify-between max-sm:justify-between">
 
         {/* LEFT: Logo */}
-        <div className="flex w-[64px] h-[62px] items-center max-sm:flex max-sm:justify-center max-sm:items-center">
-         <Logo/>
+        <div className="flex w-[64px] h-[62px] items-center max-sm:mx-auto max-sm:justify-start">
+          <Logo/>
         </div>
 
         {/* MIDDLE NAVBAR */}
@@ -319,8 +319,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
             className="w-10 h-10 max-sm:w-12 max-sm:h-12 rounded-full object-cover"
           />
 
-          <div className="leading-tight max-sm:hidden ">
-            <p className="text-[#0F2D50] font-semibold text-sm capitalize">
+          <div className="leading-tight max-sm:hidden">
+            <p className="text-[#0F2D50] font-manrope font-medium text-[18px] leading-[140%] tracking-[-0.02em] capitalize">
               {user?.first_name} {user?.last_name?.charAt(0)}.
             </p>
             <p className="text-gray-500 text-xs capitalize">{user?.role || 'User'}</p>
@@ -376,13 +376,13 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
           </div>
         )}
 </div>
-      <div className="hidden max-sm:flex items-center gap-3 cursor-pointer   max-sm:justify-end max-sm:items-end">
+      <div className="hidden max-sm:flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end pr-2">
           <img
            onClick={() => setOpen(!open)}
         ref={dropdownRef}
             src={logo}
             alt="profile"
-            className="w-10 h-10 max-sm:w-12 max-sm:h-12 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover"
           />
 
         

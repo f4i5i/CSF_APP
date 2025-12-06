@@ -166,31 +166,26 @@ export default function RegisterChild() {
      ${errors[field] ? "border-red-500" : "border-gray-300"}`;
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-y-auto relative py-8 sm:py-0">
+    <div className="min-h-screen w-full flex flex-col items-center relative">
 
       {/* Dotted Background */}
       <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
       {/* CSF School Academy - Top Center */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10">
+      <div className="w-full text-center mt-6 sm:mt-8 px-4 z-10">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[62px] font-bold text-[#173151] font-kollektif drop-shadow-lg">CSF School Academy</h1>
       </div>
 
-      <div className='relative justify-center items-center w-full max-w-md sm:max-w-2xl md:max-w-4xl px-4 sm:px-6 mt-20 sm:mt-24 md:mt-32'>
+      <div className='z-10 flex-1 w-full flex justify-center items-center px-4 sm:px-6 py-8'>
         {/* FORM CARD */}
-        <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-8 py-4 sm:py-6 w-full">
-          {/* Logo and Title Section */}
-          <div className="relative flex items-center mb-4">
-            {/* Logo - Left Side */}
-            <div className="flex w-16 h-16 sm:w-24 sm:h-24 md:w-[128px] md:h-[124px] items-center justify-center">
+        <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-8 py-4 sm:py-5 w-full max-w-md sm:max-w-2xl md:max-w-4xl">
+          {/* Title Section */}
+          <div className="text-center mb-6 flex flex-col items-center gap-2">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
               <Logo />
             </div>
-
-            {/* Title - Centered */}
-            <div className="absolute left-1/2 -translate-x-1/2 text-center">
-              <h2 className="text-2xl font-semibold text-[#0f172a]">Register a Child</h2>
-              <p className="text-gray-500 mt-1">Add a child to your account</p>
-            </div>
+            <h2 className="text-2xl font-semibold text-[#0f172a]">Register a Child</h2>
+            <p className="text-gray-500 mt-1">Add a child to your account</p>
           </div>
 
         {/* Error Message */}
@@ -427,14 +422,7 @@ export default function RegisterChild() {
         </div>
 
         {/* SUBMIT BUTTON */}
-        <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-4 justify-end">
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-gray-200 text-gray-700 px-4 sm:px-5 py-2 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-gray-300 w-full sm:w-auto"
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center sm:justify-end">
           <button
             onClick={handleSubmit}
             className="bg-[#F3BC48] text-[#173151] px-4 sm:px-5 py-2 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
@@ -442,9 +430,40 @@ export default function RegisterChild() {
           >
             {isSubmitting ? "Saving..." : "Save Child"}
           </button>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-gray-200 text-gray-700 px-4 sm:px-5 py-2 text-sm sm:text-base rounded-xl font-semibold shadow-md hover:bg-gray-300 w-full sm:w-auto"
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
         </div>
         </div>
       </div>
+      <footer className="z-10 w-full py-2 bg-transparent">
+        <div className="w-full flex flex-row max-sm:flex max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-[#000] text-xs sm:text-sm">
+          <p className="text-center text-[#000] sm:text-left font-['inter'] font-normal text-sm mb-2 sm:mb-0">
+            © 2025 Carolina Soccer Factory. All rights reserved.
+          </p>
+          <div className="flex gap-5">
+            <a href="#" className="flex font-['inter'] font-normal text-sm text-black items-center gap-1 hover:underline">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              Privacy
+            </a>
+            <a href="#" className="flex font-['inter'] font-normal text-sm text-black items-center gap-1 hover:underline">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M9.1 9a3 3 0 1 1 4.8 2.2c-.7.5-1.2 1.1-1.2 1.8v1"></path>
+                <line x1="12" y1="17" x2="12" y2="17"></line>
+              </svg>
+              Get help
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

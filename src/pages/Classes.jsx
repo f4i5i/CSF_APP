@@ -4,6 +4,12 @@ import Header from "../components/Header";
 import ClassCard from "../components/ClassCard";
 import { useClasses } from "../api/hooks/classes/useClasses";
 import { formatDateRange, formatSchedule } from "../utils/formatters";
+import {
+  getCapacityMeta,
+  getOfferingLabel,
+  getOfferingType,
+  getPriceModelLabel,
+} from "../utils/classHelpers";
 
 export default function Classes() {
   const navigate = useNavigate();
@@ -19,15 +25,31 @@ export default function Classes() {
         cls.name.toLowerCase().includes(value) ||
         cls.description?.toLowerCase().includes(value)
       )
-      .map((cls) => ({
-        ...cls,
-        title: cls.name,
-        school: cls.school?.name || cls.location || "Location TBA",
-        dates: formatDateRange(cls.start_date, cls.end_date),
-        time: formatSchedule(cls.schedule),
-        ages: cls.min_age && cls.max_age ? `Ages ${cls.min_age}–${cls.max_age}` : "All Ages",
-        image: cls.cover_photo_url || cls.image_url,
-      }));
+      .map((cls) => {
+        const capacityMeta = getCapacityMeta(cls);
+        const offeringType = getOfferingType(cls);
+
+        return {
+          ...cls,
+          title: cls.name,
+          school: cls.school?.name || cls.location || "Location TBA",
+          dates: formatDateRange(cls.start_date, cls.end_date),
+          time: formatSchedule(cls.schedule),
+          ages: cls.min_age && cls.max_age ? `Ages ${cls.min_age}–${cls.max_age}` : "All Ages",
+          image: cls.cover_photo_url || cls.image_url,
+          capacity: {
+            filled: capacityMeta.current,
+            total: capacityMeta.total,
+          },
+          hasCapacity: capacityMeta.hasCapacity,
+          spotsRemaining: capacityMeta.availableSpots,
+          waitlistCount: capacityMeta.waitlistCount,
+          offeringType,
+          badgeLabel: getOfferingLabel(offeringType),
+          priceModel: getPriceModelLabel(cls, offeringType),
+          priceLabel: cls.price_display || cls.price_text || (cls.base_price ? `$${cls.base_price}` : "Contact for pricing"),
+        };
+      });
   }, [classes, search]);
 
   return (

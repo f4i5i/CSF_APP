@@ -3,9 +3,9 @@ import Attachment from "./Attachment";
 
 export default function AnnouncementItem({ item }) {
   return (
-    <div className="border-b last:border-b-0 pb-6">
+    <div className="flex flex-col gap-4">
       {/* Header Section */}
-      <div className="flex items-center justify-between border-b border-[#0000001A] pb-3">
+      <div className="flex items-center justify-between border-b border-black/10 pb-4">
         <div className="flex items-center gap-3">
           {/* Avatar - either image URL or initials placeholder */}
           {typeof item.avatar === 'string' ? (
@@ -36,24 +36,34 @@ export default function AnnouncementItem({ item }) {
             </div>
           )}
 
-          <div>
-            <p className="text-sm sm:text-base font-bold font-kollektif text-black opacity-80">{item.name}</p>
-            <p className="text-xs sm:text-sm font-manrope font-semibold text-[#1B1B1B] opacity-50">{item.date}</p>
+          <div className="flex flex-col">
+            <p className="text-base font-kollektif font-bold text-black/80 leading-[150%] tracking-[-0.01em]">
+              {item.name}
+            </p>
+            <p className="text-sm font-manrope font-semibold text-[#1B1B1B]/50 leading-[150%] tracking-[-0.01em]">
+              {item.date}
+            </p>
           </div>
         </div>
-<div className="bg-white/50 flex items-center justify-center rounded-full w-10 h-10 sm:w-12 sm:h-12 lg:w-[54px] lg:h-[54px]">
-        <EllipsisVertical size={20} className="text-[#000000] " />
+        <div className="bg-white/50 flex items-center justify-center rounded-full w-10 h-10 sm:w-12 sm:h-12 lg:w-[54px] lg:h-[54px]">
+          <EllipsisVertical size={20} className="text-black" />
+        </div>
       </div>
-</div>
       {/* Title */}
-      <h3 className="text-xl sm:text-2xl max-xxl:text-xl max-xl:text-lg font-manrope font-semibold text-[#0F1D2E] mt-4">{item.title}</h3>
+      <div className="flex flex-col gap-2">
+        <h3 className="text-[22px] font-manrope font-semibold text-[#0F1D2E] leading-[150%] tracking-[-0.01em]">
+          {item.title}
+        </h3>
 
-      {/* Description */}
-      <p className="text-sm sm:text-base max-xxl:text-sm max-xl:text-sm text-[#1B1B1B] font-manrope font-semibold mt-2 opacity-80">{item.description}</p>
+        {/* Description */}
+        <p className="text-base font-manrope font-semibold text-[#1B1B1B]/80 leading-[150%] tracking-[-0.01em]">
+          {item.description}
+        </p>
+      </div>
 
       {/* Attachments */}
       {item.attachments?.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-3">
+        <div className="mt-2 flex flex-wrap gap-3">
           {item.attachments.map((file, index) => (
             <Attachment key={index} file={file} />
           ))}

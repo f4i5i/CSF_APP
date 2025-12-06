@@ -102,25 +102,25 @@ export default function Register(){
   }
 
 return (
-    <div className=" w-full flex flex-col justify-center items-center overflow-y-auto  px-3 sm:px-6">
+    <div className=" w-full flex flex-col justify-start items-center overflow-y-auto  px-3 sm:px-6 py-8 sm:py-12">
 
   {/* Dotted Background */}
     <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
 
-<div className='relative justify-center  items-center w-full max-w-md sm:max-w-lg md:max-w-2xl px-2 sm:px-4 md:px-6 my-auto'>
+<div className='relative flex justify-center  items-center w-full px-2 sm:px-4 md:px-6 my-auto py-8 sm:py-12'>
       {/* REGISTER CARD */}
-      <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-10 py-4 sm:py-6 md:py-10">
-       <div className="flex justify-center items-center mb-2 sm:mb-3">
+      <div className="bg-white shadow-2xl rounded-[20px] px-6 sm:px-8 md:px-12 py-6 sm:py-8 md:py-10 w-full max-w-3xl space-y-2">
+       <div className="flex justify-center items-center -mb-1">
         <LogoLogin />
 </div>
-<h2 className="text-lg sm:text-xl md:text-2xl text-center font-semibold text-[#0f172a]">Create Account</h2>
-<p className="text-center text-xs sm:text-sm md:text-base text-gray-500 mt-1 mb-3 sm:mb-4 md:mb-6">Create your account to get started.</p>
+<h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">Create Account</h2>
+<p className="text-center font-manrope font-normal text-xs sm:text-sm md:text-base text-[#666D80] mt-1 mb-3 sm:mb-4 md:mb-6">Create your account to get started.</p>
 
-<form onSubmit={handleSubmit}>
-  <div className='grid gap-3 sm:gap-4 md:grid-cols-2'>
+<form onSubmit={handleSubmit} className="flex flex-col gap-8">
+  <div className='grid gap-4 md:grid-cols-2'>
     {/* First Name */}
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
         First Name <span className="text-red-500">*</span>
       </label>
       <input
@@ -129,14 +129,14 @@ return (
         placeholder="Enter your first name"
         value={formData.first_name}
         onChange={handleChange}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-md border ${errors.first_name ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
+        className={`w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border ${errors.first_name ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
       />
       {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
     </div>
 
     {/* Last Name */}
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
         Last Name <span className="text-red-500">*</span>
       </label>
       <input
@@ -145,14 +145,14 @@ return (
         placeholder="Enter your last name"
         value={formData.last_name}
         onChange={handleChange}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-md border ${errors.last_name ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
+        className={`w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border ${errors.last_name ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
       />
       {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
     </div>
 
     {/* Email */}
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
         Email Address <span className="text-red-500">*</span>
       </label>
       <input
@@ -161,14 +161,14 @@ return (
         placeholder="Enter your email"
         value={formData.email}
         onChange={handleChange}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
+        className={`w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
       />
       {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
     </div>
 
     {/* Phone */}
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
         Phone (optional)
       </label>
       <input
@@ -177,14 +177,14 @@ return (
         placeholder="Enter your phone number"
         value={formData.phone}
         onChange={handleChange}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-md border ${errors.phone ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
+        className={`w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border ${errors.phone ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary`}
       />
       {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
     </div>
 
     {/* Password */}
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
         Password <span className="text-red-500">*</span>
       </label>
       <input
@@ -193,7 +193,7 @@ return (
         placeholder="Create a password (min 8 characters)"
         value={formData.password}
         onChange={handleChange}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary pr-10`}
+        className={`w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary pr-10`}
       />
       <button
         type="button"
@@ -207,7 +207,7 @@ return (
 
     {/* Confirm Password */}
     <div className="relative">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
         Confirm Password <span className="text-red-500">*</span>
       </label>
       <input
@@ -216,7 +216,7 @@ return (
         placeholder="Confirm your password"
         value={formData.confirm_password}
         onChange={handleChange}
-        className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-md border ${errors.confirm_password ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary pr-10`}
+        className={`w-full font-manrope px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md border ${errors.confirm_password ? 'border-red-500' : 'border-gray-300'} outline-none focus:ring-2 focus:ring-primary pr-10`}
       />
       <button
         type="button"
@@ -228,13 +228,14 @@ return (
       {errors.confirm_password && <p className="text-red-500 text-xs mt-1">{errors.confirm_password}</p>}
     </div>
   </div>
-<button
-  type="submit"
-  className="w-full mt-4 bg-primary text-black font-semibold py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed "
-  disabled={loading}
->
-  {loading ? 'Creating account...' : 'Register'}
-</button>
+
+  <button
+    type="submit"
+    className="w-full bg-primary font-['inter'] py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] transition disabled:opacity-50 disabled:cursor-not-allowed"
+    disabled={loading}
+  >
+    {loading ? 'Creating account...' : 'Register'}
+  </button>
 </form>
 
 <p className="text-center text-sm sm:text-base text-gray-600 mt-4 sm:mt-6">Already have an account? <Link to="/login" className="text-primary font-medium">Login</Link></p>

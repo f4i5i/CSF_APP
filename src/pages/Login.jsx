@@ -141,11 +141,20 @@ export default function Login() {
 </div>
 
 
-          <div className="flex justify-between sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm font-normal font-manrope text-gray-600 mb-3 sm:mb-4">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" className="w-3 h-3 sm:w-4 sm:h-4 text-[#0d0d12]" /> Keep me login
+          <div className="flex w-full max-w-[436px] items-start justify-between gap-4 text-xs sm:text-sm font-manrope mb-3 sm:mb-4">
+            <label className="flex items-center gap-2 text-[#0D0D12]">
+              <input
+                type="checkbox"
+                className="w-4 h-4 border border-[#DFE1E7] rounded-[4.8px] bg-white"
+              />
+              <span className="text-[14px] leading-[150%] tracking-[0.02em]">Keep me login</span>
             </label>
-            <Link to="/forgot-password" className="text-[#F3BC48] font-medium hover:underline">Forgot Password?</Link>
+            <Link
+              to="/forgot-password"
+              className="text-[#F3BC48] font-manrope font-medium text-[14px] leading-[150%] tracking-[0.02em] text-right hover:underline"
+            >
+              Forgot Password?
+            </Link>
           </div>
 
           <button

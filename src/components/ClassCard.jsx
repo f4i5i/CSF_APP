@@ -1,51 +1,94 @@
+import { getOfferingLabel } from "../utils/classHelpers";
+
+const InfoRow = ({ label, value }) => (
+  <div className="rounded-lg border border-white/40 bg-white/60 p-3">
+    <p className="text-xs uppercase tracking-wide text-gray-500">{label}</p>
+    <p className="text-sm font-semibold text-[#0D0D12]">{value}</p>
+  </div>
+);
+
 export default function ClassCard({ cls, onClick, onRegister }) {
+  const badgeLabel = cls.badgeLabel || getOfferingLabel(cls.offeringType);
+  const totalCapacity = cls.capacity?.total ?? (typeof cls.capacity === 'number' ? cls.capacity : 0);
+  const filledCapacity = cls.capacity?.filled ?? cls.current_enrollment ?? 0;
+  const spotsRemaining = typeof cls.spotsRemaining === 'number'
+    ? cls.spotsRemaining
+    : Math.max(totalCapacity - filledCapacity, 0);
+  const waitlistCount = cls.waitlistCount ?? cls.waitlist_count ?? 0;
+  const hasCapacity =
+    typeof cls.hasCapacity === 'boolean' ? cls.hasCapacity : !(totalCapacity > 0 && spotsRemaining <= 0);
+  const isFull = !hasCapacity;
+  const priceLabel = cls.priceLabel || (cls.price ? `$${cls.price}` : 'Contact for pricing');
+  const capacityLabel = totalCapacity
+    ? `${filledCapacity}/${totalCapacity} enrolled`
+    : `${filledCapacity} enrolled`;
+
   return (
-
-<div
-  className="bg-[#FFFFFF50] shadow rounded-lg sm:rounded-xl overflow-hidden hover:shadow-lg transition p-3 sm:p-4 cursor-pointer"
-  onClick={onClick}
->
-          {/* Top row - Logo and Register button */}
-          <div className="flex justify-between items-start mb-4 sm:mb-6">
-            {/* Logo/Image placeholder */}
-            <div className="border-2 border-gray-400 rounded-lg w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center bg-gray-50">
-              <img
-        src={cls.image}
-        className="w-full h-full object-cover rounded-md"
-      />  </div>
-
-            {/* Register button */}
-            <div
-              className="border-1 border-[#F3BC48] flex justify-center items-center rounded-lg px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-[#F3BC48] cursor-pointer transition"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRegister?.();
-              }}
-            >
-              <span className="text-[#0D0D12] text-sm sm:text-base font-semibold">Register</span>
-            </div>
+    <div
+      className="bg-[#FFFFFF90] shadow rounded-2xl overflow-hidden hover:shadow-xl transition cursor-pointer border border-white/70"
+      onClick={onClick}
+    >
+      <div className="p-4 space-y-4">
+        <div className="flex gap-4">
+          <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+            {cls.image ? (
+              <img src={cls.image} className="w-full h-full object-cover" alt={cls.title} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">Image TBA</div>
+            )}
+            {badgeLabel && (
+              <span className="absolute top-2 left-2 rounded-full bg-[#F3BC48] px-2 py-0.5 text-xs font-semibold text-[#0D0D12]">
+                {badgeLabel}
+              </span>
+            )}
           </div>
 
-          {/* Center - Name of class (big) */}
-          <div className="rounded-lg p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 flex items-center justify-center">
-            <span className="text-[#173151] text-lg sm:text-xl md:text-2xl font-semibold text-center">{cls.title}</span>
-          </div>
-
-          {/* Bottom row - Day/Time and Start/End Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
-            {/* Day and time */}
-            <div className="rounded-lg p-3 sm:p-4 md:p-6 flex items-center justify-center">
-              <span className="text-sm sm:text-base text-gray-800 text-center">{cls.time}</span>
-            </div>
-
-            {/* Start + end date */}
-            <div className="rounded-lg p-3 sm:p-4 md:p-6 flex items-center justify-center">
-              <span className="text-sm sm:text-base text-gray-800 text-center">{cls.dates}</span>
-            </div>
+          <div className="flex-1 space-y-1">
+            <p className="text-xs uppercase tracking-wide text-gray-500">{cls.school}</p>
+            <h3 className="text-xl font-semibold text-[#173151] leading-tight">{cls.title}</h3>
+            {cls.programName && (
+              <p className="text-sm font-medium text-gray-600">{cls.programName}</p>
+            )}
+            {cls.description && (
+              <p className="text-sm text-gray-500 line-clamp-2">{cls.description}</p>
+            )}
           </div>
         </div>
-      
-         
-  
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <InfoRow label="Dates" value={cls.dates} />
+          <InfoRow label="Schedule" value={cls.time} />
+          <InfoRow label="Ages" value={cls.ages} />
+          <InfoRow label="Capacity" value={capacityLabel} />
+          <InfoRow label="Price" value={priceLabel} />
+          {cls.priceModel && <InfoRow label="Price model" value={cls.priceModel} />}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className={`text-sm font-semibold ${isFull ? 'text-rose-600' : 'text-emerald-600'}`}>
+              {isFull ? 'Waitlist only' : spotsRemaining > 0 ? `${spotsRemaining} spots available` : 'Limited spots'}
+            </p>
+            <p className="text-xs text-gray-500">
+              {isFull
+                ? waitlistCount > 0
+                  ? `${waitlistCount} player${waitlistCount === 1 ? '' : 's'} on waitlist`
+                  : 'Waitlist available'
+                : 'Capacity updates in real-time'}
+            </p>
+          </div>
+
+          <button
+            className="border border-[#F3BC48] rounded-full px-6 py-2 bg-[#F3BC48] text-[#0D0D12] font-semibold text-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRegister?.();
+            }}
+          >
+            Register
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
