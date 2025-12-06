@@ -351,7 +351,7 @@ export default function ProgramOverview() {
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <select
-                      className="rounded-lg border px-3 py-2 bg-white/80"
+                      className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.school}
                       onChange={(e) => setFilters((prev) => ({ ...prev, school: e.target.value }))}
                     >
@@ -364,7 +364,7 @@ export default function ProgramOverview() {
                     </select>
 
                     <select
-                      className="rounded-lg border px-3 py-2 bg-white/80"
+                      className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.weekday}
                       onChange={(e) => setFilters((prev) => ({ ...prev, weekday: e.target.value }))}
                     >
@@ -376,7 +376,7 @@ export default function ProgramOverview() {
                     </select>
 
                     <select
-                      className="rounded-lg border px-3 py-2 bg-white/80"
+                      className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.timeOfDay}
                       onChange={(e) => setFilters((prev) => ({ ...prev, timeOfDay: e.target.value }))}
                     >
@@ -388,7 +388,7 @@ export default function ProgramOverview() {
                     </select>
 
                     <select
-                      className="rounded-lg border px-3 py-2 bg-white/80"
+                      className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.ageRange}
                       onChange={(e) => setFilters((prev) => ({ ...prev, ageRange: e.target.value }))}
                     >
@@ -399,7 +399,7 @@ export default function ProgramOverview() {
                     </select>
 
                     <select
-                      className="rounded-lg border px-3 py-2 bg-white/80"
+                      className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.capacity}
                       onChange={(e) => setFilters((prev) => ({ ...prev, capacity: e.target.value }))}
                     >
