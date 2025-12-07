@@ -47,19 +47,13 @@ export const useApi = (apiFunction, options = {}) => {
 
         // Only update state if component is still mounted
         if (isMountedRef.current) {
-          console.log('useApi - Setting data:', result);
           setData(result);
           setLoading(false);
 
           // Call success callback if provided
           if (onSuccess) {
-            console.log('useApi - Calling onSuccess callback with:', result);
             onSuccess(result);
-          } else {
-            console.log('useApi - No onSuccess callback provided');
           }
-        } else {
-          console.log('useApi - Component unmounted, skipping state update');
         }
 
         return result;

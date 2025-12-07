@@ -53,40 +53,40 @@ export default function Calender1() {
   };
 
   return (
-    <div className="rounded-3xl py-6 max-xxl:py-4 w-full">
-      <h2 className="text-[20px] xxl1:text-2xl font-kollektif max-xxl:text-lg font-normal text-[#1B1B1B] mb-4 max-xxl:mb-3">
+    <div className="rounded-3xl py-6 max-xxl:py-4 mb-2 -ml-2 w-full max-w-[280px]">
+      <h2 className="text-[20px] xxl1:text-2xl font-kollektif max-xxl:text-lg font-normal text-[#1B1B1B] mt-2 mb-4 max-xxl:mb-5">
         Calendar
       </h2>
 
-      <div className="flex justify-between items-center mb-3 max-xxl:mb-2">
-        <span className="font-medium max-xxl:text-sm text-[#1B1B1B]">
+      <div className="flex justify-between items-left mb-3 max-xxl:mb-7 gap-2">
+        <span className="font-medium max-xxl:text-sm text-[#1B1B1B] mt-3">
           {new Date(currentYear, currentMonth).toLocaleString("default", {
             month: "short",
             year: "numeric",
           })}
         </span>
 
-        <div className="flex gap-3">
-          <button onClick={prevMonth}>
-            <ChevronLeft className="w-5 h-5 text-[#1B1B1B]" />
+        <div className="flex gap-4 ml-1">
+          <button onClick={prevMonth} className="-ml-2 mt-3">
+            <ChevronLeft className="w-4 h-5 text-[#1B1B1B]" />
           </button>
-          <button onClick={nextMonth}>
-            <ChevronRight className="w-5 h-5 text-[#1B1B1B]" />
+          <button onClick={nextMonth} className="-ml-2 mt-3">
+            <ChevronRight className="w-4 h-5 text-[#1B1B1B]" />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 text-center xxl:text-sm text-xs text-[#6F6F6F] mb-2">
+      <div className="grid grid-cols-7 gap-xs-1 text-center xxl:text-sm text-xs text-[#6F6F6F] -mt-2 mb-1 -ml-2">
         {days.map((d) => (
           <div key={d}>{d}</div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 text-center">
+      <div className="grid grid-cols-7 gap-x-2 gap-y-2 text-center -ml-.5">
         {leadingDates.map((day, i) => (
           <div
             key={`lead-${i}`}
-            className="mx-auto w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 flex items-center justify-center rounded-full text-xs xxl:text-sm text-gray-300"
+            className="flex items-center justify-center gap-3 w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 rounded-full text-xs xxl:text-sm text-gray-300"
           >
             {day}
           </div>
@@ -102,7 +102,7 @@ export default function Calender1() {
           return (
             <div
               key={day}
-              className={`mx-auto w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 flex items-center justify-center rounded-full text-xs xxl:text-sm cursor-pointer transition
+              className={`flex items-center justify-center w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 rounded-full text-xs xxl:text-sm cursor-pointer transition
                 ${isEvent ? "bg-yellow-400 text-white font-semibold" : isToday ? "border border-[#F3BC48] text-[#0F1D2E]" : isPast ? "text-gray-400" : "text-[#1B1B1B]"}`}
             >
               {day}
@@ -113,7 +113,7 @@ export default function Calender1() {
         {trailingDates.map((day, i) => (
           <div
             key={`trail-${i}`}
-            className="mx-auto w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 flex items-center justify-center rounded-full text-xs xxl:text-sm text-gray-300"
+            className="flex items-center justify-center w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 rounded-full text-xs xxl:text-sm text-gray-300"
           >
             {day}
           </div>

@@ -3,7 +3,7 @@ import Attachment from "./Attachment";
 
 export default function AnnouncementItem({ item }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 -ml-5">
       {/* Header Section */}
       <div className="flex items-center justify-between border-b border-black/10 pb-4">
         <div className="flex items-center gap-3">
@@ -37,7 +37,7 @@ export default function AnnouncementItem({ item }) {
           )}
 
           <div className="flex flex-col">
-            <p className="text-base font-kollektif font-bold text-black/80 leading-[150%] tracking-[-0.01em]">
+            <p className="text-base font-kollektif font-bold text-black leading-[150%] tracking-[-0.01em]">
               {item.name}
             </p>
             <p className="text-sm font-manrope font-semibold text-[#1B1B1B]/50 leading-[150%] tracking-[-0.01em]">

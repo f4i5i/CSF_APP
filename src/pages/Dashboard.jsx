@@ -49,17 +49,7 @@ export default function Dashboard() {
     selectedChild
   });
 
-  // 3. Announcements - Fetch for selected child's class
-  const classId = selectedChild?.enrollments?.[0]?.class_id;
-  const { data: announcements = [], loading: loadingAnnouncements } = useApi(
-    () => announcementsService.getAll({ class_id: classId }),
-    {
-      initialData: [],
-      dependencies: [classId],
-      autoFetch: !!classId,
-    }
-  );
-
+  // We'll fetch announcements once we derive an accurate class_id below
   // 4 & 5. Events - Will be loaded after we have enrollment with class_id
   // (Moved below after enrollment is fetched)
 
@@ -111,13 +101,39 @@ export default function Dashboard() {
     return activeEnrollments?.[0] || null;
   }, [activeEnrollments]);
 
-  // 7. Recent photos (only if enrollment has class)
-  const { data: recentPhotos, loading: loadingPhotos } = useApi(
-    () => photosService.getByClass(firstEnrollment?.class?.id, { limit: 6 }),
+  // Resolve class ID from enrollment or fallback to child's first enrollment
+  const derivedClassId = useMemo(() => {
+    if (firstEnrollment?.class?.id) return firstEnrollment.class.id;
+    if (firstEnrollment?.class_id) return firstEnrollment.class_id;
+
+    const childEnrollment = selectedChild?.enrollments?.find(
+      (enrollment) => enrollment.status === 'active'
+    ) || selectedChild?.enrollments?.[0];
+
+    return (
+      childEnrollment?.class?.id ||
+      childEnrollment?.class_id ||
+      null
+    );
+  }, [firstEnrollment, selectedChild]);
+
+  // 3. Announcements - Fetch for derived class
+  const { data: announcements = [], loading: loadingAnnouncements } = useApi(
+    () => announcementsService.getAll({ class_id: derivedClassId }),
     {
       initialData: [],
-      dependencies: [firstEnrollment?.class?.id],
-      autoFetch: !!firstEnrollment?.class?.id,
+      dependencies: [derivedClassId],
+      autoFetch: !!derivedClassId,
+    }
+  );
+
+  // 7. Recent photos (only if enrollment has class)
+  const { data: recentPhotos, loading: loadingPhotos } = useApi(
+    () => photosService.getByClass(derivedClassId, { limit: 6 }),
+    {
+      initialData: [],
+      dependencies: [derivedClassId],
+      autoFetch: !!derivedClassId,
     }
   );
 
@@ -142,23 +158,70 @@ export default function Dashboard() {
 
   // 10. Events for class (only if enrollment has class)
   const { data: classEvents, loading: loadingEvents } = useApi(
-    () => eventsService.getByClass(firstEnrollment?.class?.id),
+    () => eventsService.getByClass(derivedClassId),
     {
       initialData: [],
-      dependencies: [firstEnrollment?.class?.id],
-      autoFetch: !!firstEnrollment?.class?.id,
+      dependencies: [derivedClassId],
+      autoFetch: !!derivedClassId,
     }
   );
 
+  const { data: fallbackEvents = [], loading: loadingFallbackEvents } = useApi(
+    () => eventsService.getUpcoming(5),
+    {
+      initialData: [],
+      autoFetch: !derivedClassId,
+      onError: (err) => console.warn('Failed to load upcoming events', err),
+    }
+  );
+
+  const normalizeEvents = (events) => {
+    const raw = Array.isArray(events) ? events : events?.items || [];
+    return raw.map((event) => {
+      if (event.start_datetime) return event;
+
+      const { event_date, start_time, end_time } = event;
+      const normalizeTime = (time) => {
+        if (!time) return '00:00';
+        const [h = '00', m = '00'] = time.split(':');
+        const hour = Math.min(Math.max(parseInt(h, 10) || 0, 0), 23)
+          .toString()
+          .padStart(2, '0');
+        const minute = Math.min(Math.max(parseInt(m, 10) || 0, 0), 59)
+          .toString()
+          .padStart(2, '0');
+        return `${hour}:${minute}`;
+      };
+
+      const startIso = event_date
+        ? `${event_date}T${normalizeTime(start_time)}:00`
+        : new Date().toISOString();
+      const endIso = event_date
+        ? `${event_date}T${normalizeTime(end_time)}:00`
+        : new Date().toISOString();
+
+      return {
+        ...event,
+        start_datetime: startIso,
+        end_datetime: endIso,
+        type: event.event_type || event.type,
+      };
+    });
+  };
+
+  const sourceEvents = normalizeEvents(classEvents).length > 0
+    ? normalizeEvents(classEvents)
+    : normalizeEvents(fallbackEvents);
+
   // Get upcoming events from class events (filter and sort on frontend)
   const upcomingEvents = useMemo(() => {
-    if (!classEvents) return [];
+    if (!sourceEvents) return [];
     const now = new Date();
-    return classEvents
+    return sourceEvents
       .filter(event => new Date(event.start_datetime) >= now)
       .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
       .slice(0, 3);
-  }, [classEvents]);
+  }, [sourceEvents]);
 
   // Get this month's events (for calendar)
   const calendarEvents = useMemo(() => {
@@ -166,41 +229,15 @@ export default function Dashboard() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    if (!classEvents || classEvents.length === 0) {
-      // Dummy events for demonstration when no real data
-      return [
-        {
-          id: 'dummy-1',
-          title: 'Soccer Practice',
-          type: 'practice',
-          start_datetime: new Date(now.getFullYear(), now.getMonth(), 8, 15, 0).toISOString(),
-          location: 'Main Field',
-          description: 'Weekly soccer training session'
-        },
-        {
-          id: 'dummy-2',
-          title: 'Team Match',
-          type: 'game',
-          start_datetime: new Date(now.getFullYear(), now.getMonth(), 15, 10, 0).toISOString(),
-          location: 'Stadium',
-          description: 'Competitive match against rivals'
-        },
-        {
-          id: 'dummy-3',
-          title: 'Skills Workshop',
-          type: 'social',
-          start_datetime: new Date(now.getFullYear(), now.getMonth(), 22, 14, 0).toISOString(),
-          location: 'Training Center',
-          description: 'Special skills development workshop'
-        }
-      ];
+    if (!sourceEvents || sourceEvents.length === 0) {
+      return [];
     }
 
-    return classEvents.filter(event => {
+    return sourceEvents.filter(event => {
       const eventDate = new Date(event.start_datetime);
       return eventDate >= startOfMonth && eventDate <= endOfMonth;
     });
-  }, [classEvents]);
+  }, [sourceEvents]);
 
   // 11. Payment summary
   const { data: paymentSummary, loading: loadingPayments } = useApi(
@@ -256,6 +293,7 @@ export default function Dashboard() {
   const attendanceStreak = attendanceStats?.current_streak || 0;
   const badgeCount = badges?.length || 0;
   const nextEvent = upcomingEvents?.[0] || null;
+  const nextEventLoading = derivedClassId ? loadingEvents : loadingFallbackEvents;
   const schoolName = getSchoolName(selectedChild);
   const classDays = getClassDays(selectedChild);
 
@@ -271,22 +309,22 @@ export default function Dashboard() {
     <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
-      <main className="mx-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:mx-3">
+      <main className="mx-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:mx-3 mt-8">
         {/* Subheader Section */}
         <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
           {/* Welcome Message & Child Selector */}
           <div className="flex flex-col gap-4 max-xxl:gap-2 max-xl:gap-2">
-            <div className="text-[46px] max-xxl:text-[32px] max-xl:text-[32px] max-sm:text-[24px] md:text-4xl text-[#173151] font-kollektif font-normal leading-[100%] tracking-[-0.02em] flex items-center gap-2">
+            <div className="text-[46px] max-xxl:text-[32px] max-xl:text-[32px] max-sm:text-[24px] md:text-4xl text-[#173151] font-kollektif font-normal leading-[100%] tracking-[-0.02em] flex items-center gap-2 max-sm:self-start max-sm:ml-3">
               Welcome back, {user?.first_name || 'Parent'}! 👋
             </div>
 
             {/* Child Selector */}
             {loadingChildren ? (
-              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm text-base font-medium font-manrope sm:w-full rounded-full shadow animate-pulse">
+              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm text-base font-medium font-manrope sm:w-full rounded-full shadow animate-pulse max-sm:self-end max-sm:mr-2">
                 <div className="h-8 bg-gray-200 rounded-full max-sm:w-full w-64"></div>
               </div>
             ) : (
-              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm  text-base font-medium font-manrope sm:w-full rounded-full shadow text-[#1B1B1B] border border-gray-50">
+              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm  text-base font-medium font-manrope sm:w-full rounded-full shadow text-[#1B1B1B] border border-gray-50 max-sm:self-end max-sm:mr-2">
                 <select
                   className="px-4 bg-gray-50 text-base max-sm:text-xs max-xxl:text-sm font-medium max-sm:font-normal font-manrope sm:w-full border-none text-[#1B1B1B]"
                   value={selectedChild?.id || ''}
@@ -357,32 +395,31 @@ export default function Dashboard() {
           {/* Right Column */}
           <div className="space-y-3 grid grid-cols-1 xl:w-[50%] xxl1:w-[50%] max-sm:space-y-6">
             {/* Calendar & Next Event */}
-            <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2">
-              <div className="w-[40%] max-sm:hidden">
+            <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-4 items-stretch">
+              <div className="flex-1 min-w-0 max-sm:hidden">
                 <Calender1 events={calendarEvents} />
               </div>
 
-             <div className="lg:w-[60%] max-sm:w-full max-sm:flex">
+             <div className="flex-1 min-w-0 max-sm:w-full">
 
-                <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-2">
-                    Next Event
+                <div className="pt-6 max-xxl:pt-4 w-full h-full max-md:pb-4">
+                  <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-2 font-kollektif font-normal mb-4 max-xxl:mb-2 mt-2 -ml-5">
+                     Next Event
                   </h2>
-                  <NextEvent event={nextEvent} loading={loadingEvents} />
+                  <NextEvent event={nextEvent} loading={nextEventLoading} />
                 </div>
               </div>
             </div>
 
             {/* Mobile: Announcements */}
            <div className="col-span-2 hidden max-sm:flex max-sm:w-full space-y-6 w-full">
-    
-                         <div className="w-full max-sm:w-[100%] bg-gray-50 rounded-[30px] shadow-sm p-6">
+              <div className="w-full max-sm:w-[100%] bg-[#FFFFFF80] rounded-[30px] shadow-sm p-6">
                    <h2 className="text-xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>
                        <AnnouncementCard
                          announcements={announcements}
                          loading={loadingAnnouncements}
                        />
-                       </div>
+              </div>
                       
             </div>
 

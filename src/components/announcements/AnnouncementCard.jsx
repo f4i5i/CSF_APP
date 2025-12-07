@@ -8,7 +8,7 @@ export default function AnnouncementCard({ announcements = [], loading = false }
       <div className="w-full">
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div key={i} className="bg-[#FFFFFF80] py-4 px-4 rounded-[20px] animate-pulse">
+            <div key={i} className="bg-white/20 py-4 px-4 rounded-[20px] animate-pulse">
               <div className="h-20 bg-gray-200 rounded"></div>
             </div>
           ))}
@@ -51,7 +51,7 @@ export default function AnnouncementCard({ announcements = [], loading = false }
     // Generate a color based on the name for consistency
     const colors = [
       'bg-blue-500', 'bg-green-500', 'bg-purple-500',
-      'bg-pink-500', 'bg-indigo-500', 'bg-red-500'
+      'bg-pink-500', 'bg-indigo-500', 'bg-red-500', 'bg-white-500'
     ];
     const colorIndex = name.charCodeAt(0) % colors.length;
 
@@ -85,7 +85,7 @@ export default function AnnouncementCard({ announcements = [], loading = false }
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-white/50 rounded-[30px] p-6 shadow-sm border border-white/10">
       {/* <div className="flex justify-end items-center mb-4">
         <Link to="/announcements" className="text-sm text-primary hover:underline font-medium">
           View All
@@ -96,7 +96,7 @@ export default function AnnouncementCard({ announcements = [], loading = false }
         {transformedAnnouncements.map((item) => (
           <div
             key={item.id}
-            className="relative flex flex-col bg-white p-5 sm:p-6 rounded-[20px] border border-[#DFE1E7]"
+            className="relative flex flex-col bg-white/50 p-5 sm:p-6 rounded-[20px] border border-white/10"
           >
             {/* Unread indicator */}
             {/* {!item.is_read && (

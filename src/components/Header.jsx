@@ -310,23 +310,23 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
 </nav>
 }
         {/* RIGHT: PROFILE */}
-         <div className=" max-sm:hidden flex max-sm:items-end max-sm:justify-end max-sm:right-0 items-center justify-between gap-3 cursor-pointer">
-       
-        <div className=" flex items-center gap-3 cursor-pointer max-sm:flex max-sm:justify-end max-sm:items-end">
-          <img
-            src={logo}
-            alt="profile"
-            className="w-10 h-10 max-sm:w-12 max-sm:h-12 rounded-full object-cover"
-          />
+         <div className="max-sm:hidden flex items-center justify-between gap-3 cursor-pointer">
+      
+          <div className="flex items-center gap-3 cursor-pointer">
+            <img
+              src={logo}
+              alt="profile"
+              className="w-12 h-12 rounded-full object-cover"
+            />
 
-          <div className="leading-tight max-sm:hidden">
-            <p className="text-[#0F2D50] font-manrope font-medium text-[18px] leading-[140%] tracking-[-0.02em] capitalize">
-              {user?.first_name} {user?.last_name?.charAt(0)}.
-            </p>
-            <p className="text-gray-500 text-xs capitalize">{user?.role || 'User'}</p>
+              <div className="leading-tight max-sm:hidden">
+                <p className="text-[#0F2D50] font-manrope font-medium text-[18px] leading-[140%] tracking-[-0.02em] capitalize">
+                  {user?.first_name} {user?.last_name?.charAt(0)}.
+                </p>
+                <p className="text-gray-500 text-xs capitalize">{user?.role || 'User'}</p>
+              </div>
           </div>
-           </div>
-           <div className="relative">
+          <div className="relative">
   <ChevronDown
     onClick={() => setOpen(!open)}
     size={18}
@@ -378,11 +378,11 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
 </div>
       <div className="hidden max-sm:flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end pr-2">
           <img
-           onClick={() => setOpen(!open)}
-        ref={dropdownRef}
+            onClick={() => setOpen(!open)}
+            ref={dropdownRef}
             src={logo}
             alt="profile"
-            className="w-10 h-10 rounded-full object-cover"
+            className="w-[80px] h-[65px] rounded-full object-cover"
           />
 
         

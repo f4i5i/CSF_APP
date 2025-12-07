@@ -184,13 +184,13 @@ export const API_ENDPOINTS = {
   // EVENTS
   // ===================
   EVENTS: {
-    LIST: '/events/calendar', // List events via calendar (use year/month params)
+    LIST: '/events', // List events (supports filters like upcoming, type, etc.)
     BY_ID: (id) => `/events/${id}`, // Get event details
     CREATE: '/events', // Create event (COACH)
     UPDATE: (id) => `/events/${id}`, // Update event
     DELETE: (id) => `/events/${id}`, // Delete event
     BY_CLASS: (classId) => `/events/class/${classId}`, // List class events
-    CALENDAR: '/events/calendar', // Get calendar view (year/month)
+    CALENDAR: '/events/calendar', // Calendar view requires class_id/year/month
   },
 
   // ===================

@@ -1,18 +1,72 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Image as ImageIcon } from 'lucide-react';
 
+const buildPhotoSrc = (photo) => {
+  if (!photo) return '';
+
+  const normalizeDataUrl = (data, mimeType) => {
+    if (!data) return '';
+    const trimmedData = data.trim();
+    if (trimmedData.startsWith('data:')) return trimmedData;
+    const type = mimeType || 'image/jpeg';
+    return `data:${type};base64,${trimmedData}`;
+  };
+
+  const inlineBase64 =
+    photo.image_base64 ||
+    photo.imageBase64 ||
+    photo.base64 ||
+    photo.base64_data ||
+    photo.image_data ||
+    photo?.image?.base64 ||
+    photo?.image?.base64_data ||
+    photo?.image?.data;
+
+  if (inlineBase64) {
+    const mimeType =
+      photo.mime_type ||
+      photo.content_type ||
+      photo?.image?.mime_type ||
+      photo?.image?.content_type;
+    return normalizeDataUrl(inlineBase64, mimeType);
+  }
+
+  return (
+    photo.url ||
+    photo.image_url ||
+    photo.thumbnail_url ||
+    photo?.image?.url ||
+    ''
+  );
+};
+
+const CARD_WIDTH = 'w-[330px] max-sm:w-full';
+const CARD_HEIGHT = 'h-[454px]';
+
 const PhotoCard = ({ photos = [], loading = false }) => {
+  const photoList = Array.isArray(photos)
+    ? photos
+    : Array.isArray(photos?.items)
+    ? photos.items
+    : Array.isArray(photos?.data)
+    ? photos.data
+    : Array.isArray(photos?.photos)
+    ? photos.photos
+    : Array.isArray(photos?.results)
+    ? photos.results
+    : [];
+
   // Loading state
   if (loading) {
     return (
-      <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] rounded-[30px] bg-gray-200 animate-pulse"></div>
+      <div className={`${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-gray-200 animate-pulse`}></div>
     );
   }
 
   // Empty state - no photos
-  if (!photos || photos.length === 0) {
+  if (!photoList || photoList.length === 0) {
     return (
-      <div className="w-full h-[419px] max-xxl1:h-[250px] rounded-[30px] bg-[#FFFFFF50] flex flex-col items-center justify-center text-gray-500">
+      <div className={`${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-[#FFFFFF50] flex flex-col items-center justify-center text-gray-500`}>
         <ImageIcon className="w-16 h-16 mb-3 text-gray-300" />
         <p className="font-medium xxl1:text-xl">No photos yet</p>
         <p className="text-sm mt-1 xxl1:text-base">Check back later for photos</p>
@@ -21,16 +75,24 @@ const PhotoCard = ({ photos = [], loading = false }) => {
   }
 
   // Show single large photo if only one
-  if (photos.length === 1) {
-    const photo = photos[0];
+  if (photoList.length === 1) {
+    const photo = photoList[0];
+    const photoSrc = buildPhotoSrc(photo);
     return (
       <Link
         to="/photos"
-        className="block w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] rounded-[30px] bg-cover bg-center relative overflow-hidden group"
-        style={{
-          backgroundImage: `url(${photo.url || photo.image_url})`,
-        }}
+        className={`block ${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-cover bg-center relative overflow-hidden group`}
       >
+        {photoSrc ? (
+          <img
+            src={photoSrc}
+            alt={photo.caption || 'Program photo'}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gray-200" />
+        )}
+
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all"></div>
 
         <div className="absolute top-4 right-4">
@@ -56,11 +118,11 @@ const PhotoCard = ({ photos = [], loading = false }) => {
   }
 
   // Grid view for multiple photos
-  const displayPhotos = photos.slice(0, 6);
-  const remaining = photos.length > 6 ? photos.length - 6 : 0;
+  const displayPhotos = photoList.slice(0, 6);
+  const remaining = photoList.length > 6 ? photoList.length - 6 : 0;
 
   return (
-    <div className="w-full h-[419px] max-xxl1:h-[250px] max-sm:h-[300px] rounded-[30px] bg-[#FFFFFF50] p-4 overflow-hidden">
+    <div className={`${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-[#FFFFFF50] p-4 overflow-hidden`}>
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-bold font-manrope text-xl">Program Photos</h3>
         <Link
@@ -79,7 +141,7 @@ const PhotoCard = ({ photos = [], loading = false }) => {
             onClick={() => window.location.href = '/photos'}
           >
             <img
-              src={photo.url || photo.image_url}
+              src={buildPhotoSrc(photo) || '/placeholder-photo.png'}
               alt={photo.caption || 'Program photo'}
               className="w-full h-full object-cover"
               onError={(e) => {
