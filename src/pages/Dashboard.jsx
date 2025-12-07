@@ -345,7 +345,7 @@ export default function Dashboard() {
             {/* Announcements */}
             <div>
                          <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
-                   <h2 className="text-xl xl:text-xl lg:text-lg xxl:text-xl max-xxl:text-lg xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>
+                   <h2 className="text-xl xl:text-xl lg:text-lg xxl:text-xl max-xxl:text-lg xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4 max-xxl:mb-2">Announcements</h2>
                        <AnnouncementCard
                          announcements={announcements}
                          loading={loadingAnnouncements}
@@ -355,17 +355,17 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-3 grid grid-cols-1 xxl1:w-[50%] max-sm:space-y-6">
+          <div className="space-y-3 grid grid-cols-1 xl:w-[50%] xxl1:w-[50%] max-sm:space-y-6">
             {/* Calendar & Next Event */}
             <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2">
               <div className="w-[40%] max-sm:hidden">
                 <Calender1 events={calendarEvents} />
               </div>
 
-             <div className="lg:w-[50%] max-sm:w-full max-sm:flex">
+             <div className="lg:w-[60%] max-sm:w-full max-sm:flex">
 
                 <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
+                  <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-2">
                     Next Event
                   </h2>
                   <NextEvent event={nextEvent} loading={loadingEvents} />
