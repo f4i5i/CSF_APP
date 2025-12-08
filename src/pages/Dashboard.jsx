@@ -383,20 +383,20 @@ export default function Dashboard() {
           <div className="col-span-2 max-sm:hidden space-y-3 w-[50%] ">
             {/* Announcements */}
             <div>
-                         <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
+                {/* <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
                    <h2 className="text-xl xl:text-xl lg:text-lg xxl:text-xl max-xxl:text-lg xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4 max-xxl:mb-2">Announcements</h2>
                        <AnnouncementCard
                          announcements={announcements}
                          loading={loadingAnnouncements}
                        />
-                       </div>
-                       </div>
+                </div> */}
+            </div>
           </div>
 
           {/* Right Column */}
           <div className="space-y-3 grid grid-cols-1 xl:w-[50%] xxl1:w-[50%] max-sm:space-y-6">
             {/* Calendar & Next Event */}
-            <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2 sm:gap-3 items-stretch">
+            {/* <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2 sm:gap-3 items-stretch">
               <div className="flex-1 min-w-0 max-sm:hidden">
                 <Calender1 events={calendarEvents} />
               </div>
@@ -409,25 +409,24 @@ export default function Dashboard() {
                   <NextEvent event={nextEvent} loading={nextEventLoading} />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Mobile: Announcements */}
-           <div className="col-span-2 hidden max-sm:flex max-sm:w-full space-y-6 w-full">
+           {/* <div className="col-span-2 hidden max-sm:flex max-sm:w-full space-y-6 w-full">
               <div className="w-full max-sm:w-[100%] bg-[#FFFFFF80] rounded-[30px] shadow-sm p-6">
                    <h2 className="text-xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>
                        <AnnouncementCard
                          announcements={announcements}
                          loading={loadingAnnouncements}
                        />
-              </div>
-                      
-            </div>
+              </div>     
+            </div> */}
 
             {/* Photos & Badges */}
-            <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
+            {/* <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
               <PhotoCard photos={recentPhotos} loading={loadingPhotos} />
               <BadgeCard badges={recentBadges} loading={loadingBadges} />
-            </div>
+            </div> */}
           </div>
         </div>
         </div>
