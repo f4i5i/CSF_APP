@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Award } from 'lucide-react';
 
-const CARD_WIDTH = 'w-[330px] max-sm:w-full';
-const CARD_HEIGHT = 'h-[454px]';
+const CARD_BASE = 'w-full h-full max-sm:w-full';
+const CARD_MIN_HEIGHT = 'min-h-[454px]';
 
 const BadgeCard = ({ badges = [], loading = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,7 +10,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   // Loading state
   if (loading) {
     return (
-      <div className={`${CARD_WIDTH} ${CARD_HEIGHT} bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 animate-pulse`}>
+      <div className={`${CARD_BASE} ${CARD_MIN_HEIGHT} bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 animate-pulse`}>
         <div className="h-6 bg-gray-200 rounded w-32 mb-6"></div>
         <div className="flex justify-center items-center w-full h-[150px]">
           <div className="w-[150px] h-[150px] bg-gray-200 rounded-full"></div>
@@ -31,7 +31,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   // Empty state - no badges
   if (!badges || badges.length === 0) {
     return (
-      <div className={`${CARD_WIDTH} ${CARD_HEIGHT} bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col items-center justify-center text-gray-500 px-4 py-6`}>
+      <div className={`${CARD_BASE} ${CARD_MIN_HEIGHT} bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col items-center justify-center text-gray-500 px-4 py-6`}>
         <Award className="w-16 h-16 mb-3 text-gray-300" />
         <h3 className="text-lg xxl1:text-xl font-semibold text-gray-700 mb-1">No Badges Yet</h3>
         <p className="text-sm xxl1:text-base text-center text-gray-500">
@@ -82,7 +82,7 @@ const BadgeCard = ({ badges = [], loading = false }) => {
   };
 
   return (
-    <div className={`${CARD_WIDTH} ${CARD_HEIGHT} bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 relative`}>
+    <div className={`${CARD_BASE} ${CARD_MIN_HEIGHT} bg-[#FFFFFF50] rounded-[30px] shadow-sm flex flex-col justify-between px-4 py-6 relative`}>
       <div className="h-full justify-between flex flex-col gap-6">
         {/* Title */}
         <h2 className="text-[20px] items-start justify-start text-start font-semibold font-manrope text-[#1b1b1b]">

@@ -309,7 +309,8 @@ export default function Dashboard() {
     <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
 
-      <main className="mx-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:mx-3 mt-8">
+      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 mt-8">
+        <div className="w-full max-w-[1600px] mr-auto">
         {/* Subheader Section */}
         <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
           {/* Welcome Message & Child Selector */}
@@ -395,13 +396,12 @@ export default function Dashboard() {
           {/* Right Column */}
           <div className="space-y-3 grid grid-cols-1 xl:w-[50%] xxl1:w-[50%] max-sm:space-y-6">
             {/* Calendar & Next Event */}
-            <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-4 items-stretch">
+            <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2 sm:gap-3 items-stretch">
               <div className="flex-1 min-w-0 max-sm:hidden">
                 <Calender1 events={calendarEvents} />
               </div>
 
-             <div className="flex-1 min-w-0 max-sm:w-full">
-
+              <div className="flex-1 min-w-0 max-sm:w-full">
                 <div className="pt-6 max-xxl:pt-4 w-full h-full max-md:pb-4">
                   <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-2 font-kollektif font-normal mb-4 max-xxl:mb-2 mt-2 -ml-5">
                      Next Event
@@ -429,6 +429,7 @@ export default function Dashboard() {
               <BadgeCard badges={recentBadges} loading={loadingBadges} />
             </div>
           </div>
+        </div>
         </div>
       </main>
     </div>

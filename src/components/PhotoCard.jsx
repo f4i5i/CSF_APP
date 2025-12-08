@@ -40,8 +40,8 @@ const buildPhotoSrc = (photo) => {
   );
 };
 
-const CARD_WIDTH = 'w-[330px] max-sm:w-full';
-const CARD_HEIGHT = 'h-[454px]';
+const CARD_BASE = 'w-full h-full max-sm:w-full';
+const CARD_MIN_HEIGHT = 'min-h-[454px]';
 
 const PhotoCard = ({ photos = [], loading = false }) => {
   const photoList = Array.isArray(photos)
@@ -59,14 +59,14 @@ const PhotoCard = ({ photos = [], loading = false }) => {
   // Loading state
   if (loading) {
     return (
-      <div className={`${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-gray-200 animate-pulse`}></div>
+      <div className={`${CARD_BASE} ${CARD_MIN_HEIGHT} rounded-[30px] bg-gray-200 animate-pulse`}></div>
     );
   }
 
   // Empty state - no photos
   if (!photoList || photoList.length === 0) {
     return (
-      <div className={`${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-[#FFFFFF50] flex flex-col items-center justify-center text-gray-500`}>
+      <div className={`${CARD_BASE} ${CARD_MIN_HEIGHT} rounded-[30px] bg-[#FFFFFF50] flex flex-col items-center justify-center text-gray-500`}>
         <ImageIcon className="w-16 h-16 mb-3 text-gray-300" />
         <p className="font-medium xxl1:text-xl">No photos yet</p>
         <p className="text-sm mt-1 xxl1:text-base">Check back later for photos</p>
@@ -81,7 +81,7 @@ const PhotoCard = ({ photos = [], loading = false }) => {
     return (
       <Link
         to="/photos"
-        className={`block ${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-cover bg-center relative overflow-hidden group`}
+        className={`block ${CARD_BASE} ${CARD_MIN_HEIGHT} rounded-[30px] bg-cover bg-center relative overflow-hidden group`}
       >
         {photoSrc ? (
           <img
@@ -122,7 +122,7 @@ const PhotoCard = ({ photos = [], loading = false }) => {
   const remaining = photoList.length > 6 ? photoList.length - 6 : 0;
 
   return (
-    <div className={`${CARD_WIDTH} ${CARD_HEIGHT} rounded-[30px] bg-[#FFFFFF50] p-4 overflow-hidden`}>
+    <div className={`${CARD_BASE} ${CARD_MIN_HEIGHT} rounded-[30px] bg-[#FFFFFF50] p-4 overflow-hidden`}>
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-bold font-manrope text-xl">Program Photos</h3>
         <Link

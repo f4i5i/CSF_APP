@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function Calender1() {
+export default function Calendar1() {
   const today = useMemo(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -20,15 +20,17 @@ export default function Calender1() {
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const startingIndex = firstDay === 0 ? 6 : firstDay - 1;
 
-  const prevMonthMeta = currentMonth === 0
-    ? { month: 11, year: currentYear - 1 }
-    : { month: currentMonth - 1, year: currentYear };
-  const nextMonthMeta = currentMonth === 11
-    ? { month: 0, year: currentYear + 1 }
-    : { month: currentMonth + 1, year: currentYear };
+  const prevMonthMeta =
+    currentMonth === 0
+      ? { month: 11, year: currentYear - 1 }
+      : { month: currentMonth - 1, year: currentYear };
 
   const prevMonthTotalDays = getDaysInMonth(prevMonthMeta.month, prevMonthMeta.year);
-  const leadingDates = Array.from({ length: startingIndex }, (_, idx) => prevMonthTotalDays - startingIndex + idx + 1);
+
+  const leadingDates = Array.from(
+    { length: startingIndex },
+    (_, idx) => prevMonthTotalDays - startingIndex + idx + 1
+  );
 
   const totalCells = startingIndex + totalDays;
   const trailingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
@@ -53,45 +55,63 @@ export default function Calender1() {
   };
 
   return (
-    <div className="rounded-3xl py-6 max-xxl:py-4 mb-2 -ml-2 w-full max-w-[280px]">
-      <h2 className="text-[20px] xxl1:text-2xl font-kollektif max-xxl:text-lg font-normal text-[#1B1B1B] mt-2 mb-4 max-xxl:mb-5">
+    <div className="w-full max-w-sm mx-auto p-4 sm:p-6">
+      {/* Header */}
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-kollektif font-normal text-[#1B1B1B] mb-4 sm:mb-6">
         Calendar
       </h2>
 
-      <div className="flex justify-between items-left mb-3 max-xxl:mb-7 gap-2">
-        <span className="font-medium max-xxl:text-sm text-[#1B1B1B] mt-3">
+      {/* Month Navigation */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <span className="text-sm sm:text-base font-medium text-[#1B1B1B]">
           {new Date(currentYear, currentMonth).toLocaleString("default", {
             month: "short",
             year: "numeric",
           })}
         </span>
-
-        <div className="flex gap-4 ml-1">
-          <button onClick={prevMonth} className="-ml-2 mt-3">
-            <ChevronLeft className="w-4 h-5 text-[#1B1B1B]" />
+        <div className="flex items-center gap-3 sm:gap-4">
+          <button
+            onClick={prevMonth}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[#1B1B1B]" />
           </button>
-          <button onClick={nextMonth} className="-ml-2 mt-3">
-            <ChevronRight className="w-4 h-5 text-[#1B1B1B]" />
+          <button
+            onClick={nextMonth}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#1B1B1B]" />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-xs-1 text-center xxl:text-sm text-xs text-[#6F6F6F] -mt-2 mb-1 -ml-2">
-        {days.map((d) => (
-          <div key={d}>{d}</div>
+      {/* Day Headers */}
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center">
+        {days.map((day) => (
+          <div
+            key={day}
+            className="text-xs sm:text-sm font-medium text-[#6F6F6F] py-1"
+          >
+            {day}
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-x-2 gap-y-2 text-center -ml-.5">
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center">
+        {/* Previous Month Dates */}
         {leadingDates.map((day, i) => (
           <div
             key={`lead-${i}`}
-            className="flex items-center justify-center gap-3 w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 rounded-full text-xs xxl:text-sm text-gray-300"
+            className="aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm text-gray-300"
           >
             {day}
           </div>
         ))}
 
+        {/* Current Month Dates */}
         {[...Array(totalDays)].map((_, i) => {
           const day = i + 1;
           const isEvent = highlightedDates.includes(day);
@@ -100,20 +120,30 @@ export default function Calender1() {
           const isPast = dateObj < today;
 
           return (
-            <div
+            <button
               key={day}
-              className={`flex items-center justify-center w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 rounded-full text-xs xxl:text-sm cursor-pointer transition
-                ${isEvent ? "bg-yellow-400 text-white font-semibold" : isToday ? "border border-[#F3BC48] text-[#0F1D2E]" : isPast ? "text-gray-400" : "text-[#1B1B1B]"}`}
+              className={`aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm transition-all duration-200 hover:scale-110
+                ${
+                  isEvent
+                    ? "bg-yellow-400 text-white font-semibold shadow-sm hover:bg-yellow-500"
+                    : isToday
+                    ? "border-2 border-[#F3BC48] text-[#0F1D2E] font-medium"
+                    : isPast
+                    ? "text-gray-400"
+                    : "text-[#1B1B1B] hover:bg-gray-50"
+                }`}
+              aria-label={`${day} ${new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })}`}
             >
               {day}
-            </div>
+            </button>
           );
         })}
 
+        {/* Next Month Dates */}
         {trailingDates.map((day, i) => (
           <div
             key={`trail-${i}`}
-            className="flex items-center justify-center w-9 h-9 max-xxl1:w-7 max-xxl1:h-7 rounded-full text-xs xxl:text-sm text-gray-300"
+            className="aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm text-gray-300"
           >
             {day}
           </div>

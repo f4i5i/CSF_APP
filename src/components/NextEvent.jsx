@@ -21,12 +21,11 @@ const AttachmentChip = ({ label }) => (
   </div>
 );
 
-const CARD_WIDTH = 'w-[340px] max-sm:w-full';
-const CARD_HEIGHT = 'h-[254px]';
+const CARD_MIN_HEIGHT = 'min-h-[254px]';
 
 const EmptyState = () => (
-  <div className="w-full h-full py-3 flex justify-start">
-    <div className={`bg-white rounded-[30px] p-6 shadow-sm ${CARD_WIDTH} ${CARD_HEIGHT} flex flex-col items-center justify-center text-center text-gray-500 overflow-hidden`}>
+  <div className="w-full py-3 flex justify-start">
+    <div className={`bg-white rounded-[30px] p-6 shadow-sm w-full ${CARD_MIN_HEIGHT} flex flex-col items-center justify-center text-center text-gray-500 overflow-hidden`}>
       <p className="font-kollektif text-xl text-[#0F1D2E]">Next Event</p>
       <p className="text-sm mt-2">No upcoming events scheduled</p>
     </div>
@@ -34,8 +33,8 @@ const EmptyState = () => (
 );
 
 const LoadingState = () => (
-  <div className="py-3 w-full h-full flex justify-start">
-    <div className={`bg-white rounded-[30px] p-6 shadow-sm ${CARD_WIDTH} ${CARD_HEIGHT} animate-pulse flex flex-col gap-4 overflow-hidden`}>
+  <div className="py-3 w-full flex justify-start">
+    <div className={`bg-white rounded-[30px] p-6 shadow-sm w-full ${CARD_MIN_HEIGHT} animate-pulse flex flex-col gap-4 overflow-hidden`}>
       <div className="h-16 bg-gray-200/70 rounded-2xl" />
       <div className="h-10 bg-gray-200/70 rounded-2xl" />
       <div className="h-4 bg-gray-200/70 rounded-full w-1/2" />
@@ -53,9 +52,9 @@ export default function NextEvent({ event = null, loading = false }) {
   const attachments = event.attachments || [];
 
   return (
-    <div className={`${CARD_WIDTH} -ml-8 mt-4 max-sm:ml-0`}>
-      <div className={`bg-white/20 rounded-[30px] shadow-sm w-full ${CARD_HEIGHT} flex items-stretch p-4 overflow-hidden`}>
-        <div className=" rounded-[14px] border border-white/15 flex flex-col gap-4 w-full h-full p-3 overflow-hidden">
+    <div className="w-full mt-4">
+      <div className={`bg-white/20 rounded-[30px] shadow-sm w-full ${CARD_MIN_HEIGHT} flex items-stretch p-4 overflow-hidden`}>
+        <div className=" rounded-[14px] border border-white/15 flex flex-col gap-4 w-full p-3 overflow-hidden">
           <div className="flex flex-wrap items-start gap-4">
             <div className="flex items-center gap-4">
               <p className="font-manrope font-medium text-[18px] leading-[160%] tracking-[0.0041em] text-center flex items-center text-[#0F1D2E]">
