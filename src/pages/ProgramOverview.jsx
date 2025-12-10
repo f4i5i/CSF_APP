@@ -294,7 +294,7 @@ export default function ProgramOverview() {
 {/* Only show programs if loaded and no error */}
 {!programsLoading && !programsError && PROGRAMS.length > 0 && (
      <div className="max-w-7xl xxl1:max-w-8xl mx-auto px-4 py-10">
-        <h2 className="text-[60px] max-xl:text-5xl max-lg:text-4xl max-sm:text-3xl text-center font-semibold mb-6 text-[#173151] font-kollektif drop-shadow-lg">Programs</h2>
+        <h2 className="text-fluid-3xl text-center font-semibold mb-6 text-[#173151] font-kollektif drop-shadow-lg">Programs</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {PROGRAMS.map((p) => (
@@ -333,7 +333,7 @@ export default function ProgramOverview() {
       const selectedProgramData = PROGRAMS.find(p => p.id === selectedProgram);
       return (
         <div className="flex flex-col justify-center items-center">
-       <h2 className="text-[#173151] text-[60px] max-xl:text-5xl max-lg:text-4xl max-sm:text-3xl font-semibold mb-2 font-kollektif">{selectedProgramData?.title}</h2>
+       <h2 className="text-[#173151] text-fluid-3xl font-semibold mb-2 font-kollektif">{selectedProgramData?.title}</h2>
         <h2 className="text-xl font-semibold mb-6">Select your Area </h2>
 </div>
              );

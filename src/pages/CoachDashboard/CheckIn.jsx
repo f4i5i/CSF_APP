@@ -35,7 +35,7 @@ const CheckIn = () => {
 
       <main className="mx-10 py-6 max-xxl:py-3 max-sm:py-2 max-sm:mx-3">
         <div className="flex max-sm:justify-between mb-6 max-xxl:mb-3 max-xl:mb-3 max-sm:items-center">
-       <h1 className="text-[32px] xxl1:text-[46px] max-xxl:text-[32px] max-xl:text-[28px] font-manrope font-bold text-[#1D3557]">
+       <h1 className="text-fluid-2xl font-manrope font-bold text-[#1D3557]">
      Check-In</h1>
  <button className="flex sm:hidden items-center whitespace-nowrap gap-2 bg-[#7d97b5] text-white px-5 py-3 rounded-full text-sm shadow-md">
   <MessageSquare size={16} />
@@ -68,7 +68,7 @@ const CheckIn = () => {
         className="w-[316px] max-sm:w-full flex justify-between items-center 
                    bg-[#FFFFFF66] px-4 py-3 rounded-full 
                    shadow-sm border border-gray-200 
-                   text-[16px] max-xl:text-sm font-medium"
+                   text-fluid-base font-medium"
       >
         {selected}
 

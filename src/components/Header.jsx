@@ -80,21 +80,21 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <div className="w-full mr-6 ml-1 mt-5 max-sm:mx-auto flex items-center justify-between max-sm:justify-between">
 
         {/* LEFT: Logo */}
-        <div className="flex w-[64px] h-[62px] items-center max-sm:mx-auto max-sm:justify-start">
+        <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start">
           <Logo/>
         </div>
 
         {/* MIDDLE NAVBAR */}
     {role === "parent" &&
       <nav>
-  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg max-xl:text-base  text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
-    
+  <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
+
     <li>
       <NavLink
         to="/dashboard"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Dashboard
@@ -105,8 +105,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/calendar"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Calendar
@@ -117,8 +117,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/attendance"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Attendance
@@ -129,8 +129,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/photos"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Photos
@@ -141,8 +141,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/badges"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Badges
@@ -155,14 +155,14 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
 
 {role === "admin" &&
 <nav>
-  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg max-xl:text-base text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
-    
+  <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
+
     <li>
       <NavLink
         to="/admin"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Dashboard
@@ -172,8 +172,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/company-setting"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Account
@@ -183,8 +183,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/clients"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Clients
@@ -194,8 +194,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/class"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Classes
@@ -205,8 +205,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/calendar"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Calendar
@@ -216,8 +216,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/financials"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Finance
@@ -228,8 +228,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/communication"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Communication
@@ -242,14 +242,14 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
 
 {role === "coach" &&
 <nav>
-  <ul className="flex items-center max-sm:hidden font-manrope xxl1:text-lg max-xl:text-sm text-base font-medium bg-[#FFFFFF66] rounded-full shadow px-2 py-1 gap-1">
-    
+  <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
+
     <li>
       <NavLink
         to="/coachdashboard"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Dashboard
@@ -260,8 +260,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/calendar"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Calendar
@@ -272,8 +272,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/checkIn"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Check-In
@@ -284,8 +284,8 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/attendance"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Attendance
@@ -296,41 +296,39 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
       <NavLink
         to="/Gallery"
         className={({ isActive }) =>
-          `flex items-center gap-2 px-5 py-2 rounded-full font-medium 
-          ${isActive ? "bg-[#F3BC48] text-black" : "hover:bg-gray-100"}`
+          `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${isActive ? "bg-[#F3BC48] text-black" : "text-black hover:bg-white/20"}`
         }
       >
         Photos
       </NavLink>
     </li>
 
-    
-
   </ul>
 </nav>
 }
         {/* RIGHT: PROFILE */}
-         <div className="max-sm:hidden flex items-center justify-between gap-3 cursor-pointer">
-      
+         <div className="max-sm:hidden flex items-center gap-1 cursor-pointer p-1 rounded-full pr-20">
+
           <div className="flex items-center gap-3 cursor-pointer">
             <img
               src={logo}
               alt="profile"
-              className="w-12 h-12 rounded-full object-cover"
+              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover"
             />
 
-              <div className="leading-tight max-sm:hidden">
-                <p className="text-[#0F2D50] font-manrope font-medium text-[18px] leading-[140%] tracking-[-0.02em] capitalize">
+              <div className="leading-tight max-sm:hidden text-end">
+                <p className="text-[#173151] font-manrope font-medium text-fluid-md leading-[140%] tracking-[-0.02em] capitalize">
                   {user?.first_name} {user?.last_name?.charAt(0)}.
                 </p>
-                <p className="text-gray-500 text-xs capitalize">{user?.role || 'User'}</p>
+                <p className="text-[#6f6f6f] text-sm font-manrope font-medium leading-[155%] capitalize">{user?.role || 'User'}</p>
               </div>
           </div>
           <div className="relative">
   <ChevronDown
     onClick={() => setOpen(!open)}
-    size={18}
-    className={`${open ? "rotate-180" : ""} transition cursor-pointer`}
+    size={24}
+    className={`${open ? "rotate-180" : ""} transition cursor-pointer text-black ml-2`}
   />
 
             {/* <svg  onClick={() => setOpen(!open)}
@@ -382,7 +380,7 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
             ref={dropdownRef}
             src={logo}
             alt="profile"
-            className="w-[80px] h-[65px] rounded-full object-cover"
+            className="w-fluid-avatar-lg h-fluid-avatar-lg rounded-full object-cover"
           />
 
         

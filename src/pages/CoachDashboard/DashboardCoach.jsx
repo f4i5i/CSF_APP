@@ -176,7 +176,7 @@ export default function DashboardCoach() {
         <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-3 gap-4">
           {/* Welcome Message & Child Selector */}
           <div className="flex flex-col gap-2">
-            <div className="text-[46px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
+            <div className="text-fluid-2xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
               Welcome back, {user?.first_name || 'Coach'}! 👋
             </div>
             {/* locations and active students */}
@@ -189,7 +189,7 @@ export default function DashboardCoach() {
           {/* Stats */}
           <div className="flex items-center gap-16 max-sm:hidden">
             <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px]  font-kollektif font-normal text-[#0F1D2E]">
+              <p className="text-fluid-3xl font-kollektif font-normal text-[#0F1D2E]">
                 {attendanceStreak}
               </p>
               <p className="text-black font-kollektif normal text-base">
@@ -197,7 +197,7 @@ export default function DashboardCoach() {
               </p>
             </div>
             <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px] font-kollektif normal text-[#0F1D2E]">
+              <p className="text-fluid-3xl font-kollektif normal text-[#0F1D2E]">
                 {badgeCount}
               </p>
               <p className="text-black font-kollektif normal text-base">
@@ -249,7 +249,7 @@ export default function DashboardCoach() {
              <div className="lg:w-[60%]  max-sm:w-full max-sm:flex">
 
                <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl max-xxl:text-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
+                  <h2 className="text-fluid-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
                     Next Event
                   </h2>
                   <NextEvent event={nextEvent} loading={loadingEvents} />

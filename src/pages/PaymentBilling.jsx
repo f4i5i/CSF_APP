@@ -11,12 +11,12 @@ const PaymentPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] flex flex-col justify-between max-sm:pb-20">
       {/* HEADER */}
-     <div className="flex  mr-6 ml-1 mt-5 max-sm:mx-auto w-[64px] h-[62px] items-center max-sm:flex max-sm:justify-center max-sm:items-center">
+     <div className="flex  mr-6 ml-1 mt-5 max-sm:mx-auto w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:flex max-sm:justify-center max-sm:items-center">
          <Logo/>
         </div>
        <main className="w-full max-sm:px-4">
            <div className="w-[60%] max-xl:w-[70%]  flex max-sm:flex-col max-sm:w-full justify-between items-center max-sm:justify-start max-sm:items-start mx-auto">
-      <div className="px-10 pt-10 max-sm:px-3 max-sm:pt-1 text-[20px] font-manrope font-semibold text-[#0f1d2e]">
+      <div className="px-10 pt-10 max-sm:px-3 max-sm:pt-1 text-fluid-lg font-manrope font-semibold text-[#0f1d2e]">
         Settings
       </div>
  {/* BUTTONS */}

@@ -55,7 +55,7 @@ const Financials = () => {
        
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-[46px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">Financials</h1>
+            <h1 className="text-fluid-2xl text-[#173151] font-normal font-kollektif flex items-center gap-2">Financials</h1>
             <p className="text-black font-manrope font-medium text-base">Overview of revenue, per-program breakdown, and averages.</p>
           </div>
 

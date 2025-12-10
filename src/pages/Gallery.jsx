@@ -17,7 +17,7 @@ const Gallery = () => {
 
       <Header />
  <main className="mx-6 py-8 max-sm:py-2 max-sm:mx-3">
- <h1 className="text-[32px] xxl1:text-[46px] font-manrope font-bold text-[#173151] mb-6">
+ <h1 className="text-fluid-2xl font-manrope font-bold text-[#173151] mb-6">
                     Photo Gallery
                   </h1>
   <div className="grid grid-cols-3 max-sm:grid-cols-1 gap-4">

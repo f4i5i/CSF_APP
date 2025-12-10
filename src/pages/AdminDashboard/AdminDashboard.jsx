@@ -65,7 +65,7 @@ const AdminDashboard = () => {
        
         <div className="flex items-center justify-between mb-6 gap-4">
           <div className="flex flex-col gap-2">
-            <div className="text-[46px] max-sm:text-[24px] md:text-4xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
+            <div className="text-fluid-2xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
               Welcome back, Admin! 👋
             </div>
             {/* locations and active students */}

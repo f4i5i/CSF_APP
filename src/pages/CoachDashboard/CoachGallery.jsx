@@ -14,7 +14,7 @@ const CoachGallery = () => {
       <Header />
  <main className="mx-10 py-6 max-sm:py-2 max-sm:mx-3">
   <div className='w-full flex justify-between items-center max-sm:mb-6'>
- <h1 className="text-[32px] font-manrope font-bold text-[#173151] mb-6 max-sm:mb-0">
+ <h1 className="text-fluid-2xl font-manrope font-bold text-[#173151] mb-6 max-sm:mb-0">
                     Photo Gallery
                   </h1>
                    <button className="

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import Header from '../components/Header';
 import Calendar from '../components/Calender';
 import NextEvent from '../components/NextEvent';
@@ -9,6 +10,8 @@ import AnnouncementCard from '../components/announcements/AnnouncementCard';
 import EnrollmentCard from '../components/EnrollmentCard';
 import PaymentStatusCard from '../components/PaymentStatusCard';
 import WaiversAlert from '../components/WaiversAlert';
+import StatCard from '../components/dashboard/StatCard';
+import ProgramPhotoCard from '../components/dashboard/ProgramPhotoCard';
 
 // Hooks
 import { useAuth } from '../context/auth';
@@ -310,24 +313,24 @@ export default function Dashboard() {
       <Header />
 
       <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 mt-8">
-        <div className="w-full max-w-[1600px] mr-auto">
+        <div className="w-full">
         {/* Subheader Section */}
-        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
+        <div className="flex flex-row lg:flex-row items-start lg:items-start justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
           {/* Welcome Message & Child Selector */}
-          <div className="flex flex-col gap-4 max-xxl:gap-2 max-xl:gap-2">
-            <div className="text-[46px] max-xxl:text-[32px] max-xl:text-[32px] max-sm:text-[24px] md:text-4xl text-[#173151] font-kollektif font-normal leading-[100%] tracking-[-0.02em] flex items-center gap-2 max-sm:self-start max-sm:ml-3">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-fluid-2xl text-[#173151] font-kollektif font-normal leading-[1.002] tracking-[-0.02em] max-sm:ml-3">
               Welcome back, {user?.first_name || 'Parent'}! 👋
-            </div>
+            </h1>
 
             {/* Child Selector */}
             {loadingChildren ? (
-              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm text-base font-medium font-manrope sm:w-full rounded-full shadow animate-pulse max-sm:self-end max-sm:mr-2">
-                <div className="h-8 bg-gray-200 rounded-full max-sm:w-full w-64"></div>
+              <div className="py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-fluid-2xl animate-pulse max-sm:self-end max-sm:mr-2">
+                <div className="h-6 bg-gray-200 rounded-full w-64"></div>
               </div>
             ) : (
-              <div className="py-2 pr-4 pl-1 bg-gray-50 w-fit max-sm:text-xs max-xxl:text-sm  text-base font-medium font-manrope sm:w-full rounded-full shadow text-[#1B1B1B] border border-gray-50 max-sm:self-end max-sm:mr-2">
+              <div className="relative py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#1B1B1B] max-sm:self-end max-sm:mr-2 flex items-center gap-2">
                 <select
-                  className="px-4 bg-gray-50 text-base max-sm:text-xs max-xxl:text-sm font-medium max-sm:font-normal font-manrope sm:w-full border-none text-[#1B1B1B]"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   value={selectedChild?.id || ''}
                   onChange={handleChildChange}
                   disabled={children.length === 0}
@@ -337,38 +340,40 @@ export default function Dashboard() {
                   ) : (
                     children.map((child) => {
                       const school = getSchoolName(child);
+                      const childName = `${child.first_name || ''} ${child.last_name || ''}`.trim();
+                      const childClassDays = getClassDays(child);
                       return (
                         <option key={child.id} value={child.id}>
-                          {child.first_name} {child.last_name}
+                          {childName || 'Student'}
                           {school ? ` • ${school}` : ''}
                           {child.grade ? ` • Grade ${child.grade}` : ''}
+                          {childClassDays ? ` • ${childClassDays}` : ''}
                         </option>
                       );
                     })
                   )}
                 </select>
+                <span className="font-manrope font-medium text-base text-[#1B1B1B] pointer-events-none">
+                  {children.length > 0 && selectedChild ? (
+                    <>
+                      {`${selectedChild.first_name || ''} ${selectedChild.last_name || ''}`.trim() || 'Student'}
+                      {getSchoolName(selectedChild) ? ` • ${getSchoolName(selectedChild)}` : ''}
+                      {selectedChild.grade ? ` • Grade ${selectedChild.grade}` : ''}
+                      {getClassDays(selectedChild) ? ` • ${getClassDays(selectedChild)}` : ''}
+                    </>
+                  ) : (
+                    'No children available'
+                  )}
+                </span>
+                <ChevronDown size={20} className="text-[#1B1B1B] pointer-events-none" />
               </div>
             )}
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-16 max-sm:hidden">
-            <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px] max-xl:text-3xl font-kollektif font-normal text-[#0F1D2E]">
-                {attendanceStreak}
-              </p>
-              <p className="text-black font-kollektif text-[16px] leading-[160%] tracking-[0] font-normal">
-                Attendance Streak
-              </p>
-            </div>
-            <div className="text-start flex flex-col justify-between">
-              <p className="text-[60px] max-xl:text-3xl font-kollektif font-normal text-[#0F1D2E]">
-                {badgeCount}
-              </p>
-              <p className="text-black font-kollektif text-[16px] leading-[160%] tracking-[0] font-normal">
-                Badges Earned
-              </p>
-            </div>
+          <div className="flex items-center gap-[42px] max-sm:hidden pr-20">
+            <StatCard value={attendanceStreak} label="Attendance Streak" />
+            <StatCard value={badgeCount} label="Badges Earned" />
           </div>
         </div>
 
@@ -378,55 +383,54 @@ export default function Dashboard() {
           loading={loadingWaivers}
         /> */}
 
-        <div className="flex flex-col md:flex-row lg:flex-row gap-3 max-sm:gap-6">
-          {/* Left Column */}
-          <div className="col-span-2 max-sm:hidden space-y-3 w-[50%] ">
-            {/* Announcements */}
-            <div>
-                {/* <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
-                   <h2 className="text-xl xl:text-xl lg:text-lg xxl:text-xl max-xxl:text-lg xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] mb-4 max-xxl:mb-2">Announcements</h2>
-                       <AnnouncementCard
-                         announcements={announcements}
-                         loading={loadingAnnouncements}
-                       />
-                </div> */}
+        <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
+          {/* Left Column - Announcements */}
+          <div className="w-full lg:w-[48%] max-sm:hidden">
+
+            <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm">
+            <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px] mb-4">Announcements</h2>
+              <AnnouncementCard
+                announcements={announcements}
+                loading={loadingAnnouncements}
+              />
             </div>
           </div>
 
           {/* Right Column */}
-          <div className="space-y-3 grid grid-cols-1 xl:w-[50%] xxl1:w-[50%] max-sm:space-y-6">
-            {/* Calendar & Next Event */}
-            {/* <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2 sm:gap-3 items-stretch">
-              <div className="flex-1 min-w-0 max-sm:hidden">
-                <Calender1 events={calendarEvents} />
-              </div>
+          <div className="w-full lg:w-[48%] space-y-4 max-sm:space-y-6">
+            {/* Calendar & Next Event Card */}
+            <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm">
+              <div className="flex gap-6 max-md:flex-col">
+                {/* Calendar Section */}
+                <div className="flex-1">
+                  <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Calendar</h2>
+                  <Calender1 events={calendarEvents} />
+                </div>
 
-              <div className="flex-1 min-w-0 max-sm:w-full">
-                <div className="pt-6 max-xxl:pt-4 w-full h-full max-md:pb-4">
-                  <h2 className="text-[20px] xxl1:text-2xl text-[#0F1D2E] max-xxl:text-lg pl-2 font-kollektif font-normal mb-4 max-xxl:mb-2 mt-2 -ml-5">
-                     Next Event
-                  </h2>
+                {/* Next Event Section */}
+                <div className="flex-1">
+                  <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Next Event</h2>
                   <NextEvent event={nextEvent} loading={nextEventLoading} />
                 </div>
               </div>
-            </div> */}
+            </div>
 
-            {/* Mobile: Announcements */}
-           {/* <div className="col-span-2 hidden max-sm:flex max-sm:w-full space-y-6 w-full">
-              <div className="w-full max-sm:w-[100%] bg-[#FFFFFF80] rounded-[30px] shadow-sm p-6">
-                   <h2 className="text-xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>
-                       <AnnouncementCard
-                         announcements={announcements}
-                         loading={loadingAnnouncements}
-                       />
-              </div>     
-            </div> */}
-
-            {/* Photos & Badges */}
-            {/* <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
-              <PhotoCard photos={recentPhotos} loading={loadingPhotos} />
+            {/* Program Photos & Badges - Stacked Vertically */}
+            <div className="flex flex-col gap-4">
+              <ProgramPhotoCard photo={recentPhotos?.[0]} loading={loadingPhotos} />
               <BadgeCard badges={recentBadges} loading={loadingBadges} />
-            </div> */}
+            </div>
+          </div>
+
+          {/* Mobile: Announcements */}
+          <div className="hidden max-sm:block w-full">
+            <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px] mb-4">Announcements</h2>
+            <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm">
+              <AnnouncementCard
+                announcements={announcements}
+                loading={loadingAnnouncements}
+              />
+            </div>
           </div>
         </div>
         </div>

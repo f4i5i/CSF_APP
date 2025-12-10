@@ -55,44 +55,39 @@ export default function Calendar1() {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto p-4 sm:p-6">
-      {/* Header */}
-      <h2 className="text-lg sm:text-xl lg:text-2xl font-kollektif font-normal text-[#1B1B1B] mb-4 sm:mb-6">
-        Calendar
-      </h2>
-
+    <div className="w-full">
       {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <span className="text-sm sm:text-base font-medium text-[#1B1B1B]">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm font-manrope font-medium text-[#0F1D2E] opacity-70 uppercase tracking-tight">
           {new Date(currentYear, currentMonth).toLocaleString("default", {
             month: "short",
             year: "numeric",
           })}
         </span>
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 opacity-70">
           <button
             onClick={prevMonth}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-0.5 hover:opacity-100 transition-opacity"
             aria-label="Previous month"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[#1B1B1B]" />
+            <ChevronLeft className="w-5 h-5 text-[#0F1D2E]" />
           </button>
           <button
             onClick={nextMonth}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-0.5 hover:opacity-100 transition-opacity"
             aria-label="Next month"
           >
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#1B1B1B]" />
+            <ChevronRight className="w-5 h-5 text-[#0F1D2E]" />
           </button>
         </div>
       </div>
 
       {/* Day Headers */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center">
+      <div className="grid grid-cols-7 gap-0 mb-3 text-center">
         {days.map((day) => (
           <div
             key={day}
-            className="text-xs sm:text-sm font-medium text-[#6F6F6F] py-1"
+            className="text-fluid-xs font-manrope font-light text-[#6F6F6F] leading-[155%] py-1"
           >
             {day}
           </div>
@@ -100,14 +95,14 @@ export default function Calendar1() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center">
+      <div className="grid grid-cols-7 gap-y-2.5 gap-x-0 text-center">
         {/* Previous Month Dates */}
         {leadingDates.map((day, i) => (
           <div
             key={`lead-${i}`}
-            className="aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm text-gray-300"
+            className="h-fluid-cell flex items-center justify-center text-fluid-sm font-manrope font-medium text-gray-300"
           >
-            {day}
+            .
           </div>
         ))}
 
@@ -117,20 +112,15 @@ export default function Calendar1() {
           const isEvent = highlightedDates.includes(day);
           const dateObj = new Date(currentYear, currentMonth, day);
           const isToday = dateObj.getTime() === today.getTime();
-          const isPast = dateObj < today;
 
           return (
             <button
               key={day}
-              className={`aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm transition-all duration-200 hover:scale-110
+              className={`h-fluid-cell flex items-center justify-center text-fluid-sm font-manrope font-medium leading-[1.55] transition-colors
                 ${
                   isEvent
-                    ? "bg-yellow-400 text-white font-semibold shadow-sm hover:bg-yellow-500"
-                    : isToday
-                    ? "border-2 border-[#F3BC48] text-[#0F1D2E] font-medium"
-                    : isPast
-                    ? "text-gray-400"
-                    : "text-[#1B1B1B] hover:bg-gray-50"
+                    ? "bg-[#F3BC48] text-[#0F1D2E] rounded-full px-fluid-2"
+                    : "text-[#6F6F6F] hover:bg-gray-50 rounded-full px-2"
                 }`}
               aria-label={`${day} ${new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })}`}
             >
@@ -143,7 +133,7 @@ export default function Calendar1() {
         {trailingDates.map((day, i) => (
           <div
             key={`trail-${i}`}
-            className="aspect-square flex items-center justify-center rounded-full text-xs sm:text-sm text-gray-300"
+            className="h-fluid-cell flex items-center justify-center text-fluid-sm font-manrope font-medium text-gray-300"
           >
             {day}
           </div>

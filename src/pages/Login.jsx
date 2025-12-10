@@ -147,11 +147,11 @@ export default function Login() {
                 type="checkbox"
                 className="w-4 h-4 border border-[#DFE1E7] rounded-[4.8px] bg-white"
               />
-              <span className="text-[14px] leading-[150%] tracking-[0.02em]">Keep me login</span>
+              <span className="text-fluid-sm leading-[150%] tracking-[0.02em]">Keep me login</span>
             </label>
             <Link
               to="/forgot-password"
-              className="text-[#F3BC48] font-manrope font-medium text-[14px] leading-[150%] tracking-[0.02em] text-right hover:underline"
+              className="text-[#F3BC48] font-manrope font-medium text-fluid-sm leading-[150%] tracking-[0.02em] text-right hover:underline"
             >
               Forgot Password?
             </Link>

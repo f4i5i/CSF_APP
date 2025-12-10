@@ -9,7 +9,7 @@ export default function ContactForm() {
   <Header/>
       {/* PAGE HEADER */}
       <main className="w-full mt-12 max-sm:mt-8">
-      <h2 className="font-kollektif text-[46px] font-normal text-[#173151] text-center max-sm:text-3xl">Get in touch</h2>
+      <h2 className="font-kollektif text-fluid-2xl font-normal text-[#173151] text-center">Get in touch</h2>
       <p className="text-[#0A0A0A] font-manrope text-center mt-2">
         Have a question? We'd love to hear from you.
       </p>

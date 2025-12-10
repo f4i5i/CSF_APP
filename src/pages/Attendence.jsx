@@ -51,14 +51,14 @@ const Attendence = () => {
       <Header />
 
       <main className="mx-6 py-8 max-xxl1:py-4 max-sm:py-2 max-sm:mx-3">
-        <h1 className="text-[32px] xxl1:text-[46px] font-manrope font-bold text-[#173151] mb-4 max-xxl1:mb-0">
+        <h1 className="text-fluid-2xl font-manrope font-bold text-[#173151] mb-4 max-xxl1:mb-0">
           Attendance
         </h1>
 
         <BadgeCarousel badges={badges} compact={true} />
 
         <div className="mt-8 max-xxl1:mt-3 bg-white rounded-3xl p-6 max-xxl1:pt-3 shadow-lg">
-          <h2 className="font-manrope font-semibold text-[18px] text-[#0f1d2e] mb-4 max-xxl1:mb-2">
+          <h2 className="font-manrope font-semibold text-fluid-md text-[#0f1d2e] mb-4 max-xxl1:mb-2">
             Attendance History
           </h2>
 

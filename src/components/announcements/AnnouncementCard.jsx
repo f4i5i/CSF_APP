@@ -8,7 +8,7 @@ export default function AnnouncementCard({ announcements = [], loading = false }
       <div className="w-full">
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div key={i} className="bg-white/20 py-4 px-4 rounded-[20px] animate-pulse">
+            <div key={i} className="bg-white/20 py-fluid-4 px-fluid-4 rounded-fluid-lg animate-pulse">
               <div className="h-20 bg-gray-200 rounded"></div>
             </div>
           ))}
@@ -85,24 +85,13 @@ export default function AnnouncementCard({ announcements = [], loading = false }
   });
 
   return (
-    <div className="w-full bg-white/50 rounded-[30px] p-6 shadow-sm border border-white/10">
-      {/* <div className="flex justify-end items-center mb-4">
-        <Link to="/announcements" className="text-sm text-primary hover:underline font-medium">
-          View All
-        </Link>
-      </div> */}
-
-      <div className="flex flex-col gap-[14px]">
+    <div className="w-full">
+      <div className="flex flex-col gap-[10px]">
         {transformedAnnouncements.map((item) => (
           <div
             key={item.id}
-            className="relative flex flex-col bg-white/50 p-5 sm:p-6 rounded-[20px] border border-white/10"
+            className="relative flex flex-col bg-white/50 p-fluid-5 rounded-fluid-lg"
           >
-            {/* Unread indicator */}
-            {/* {!item.is_read && (
-              <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></div>
-            )} */}
-
             {/* Priority badge */}
             {item.priority === 'high' && (
               <div className="absolute top-2 left-2">

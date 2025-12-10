@@ -47,7 +47,7 @@ const Badges = () => {
 
       <Header />
  <main className=" mx-6 py-8 max-sm:py-2 max-sm:mx-3">
-      <h1 className="text-[32px] xl:text-[32px] xxl1:text-[46px]  font-manrope font-medium text-[#173151] mb-4">
+      <h1 className="text-fluid-2xl font-manrope font-medium text-[#173151] mb-4">
         Achievements
       </h1>
 <div
@@ -61,10 +61,10 @@ const Badges = () => {
       </div>
 
        {/* ✅ Locked Badges */}
-      <h2 className="text-2xl xxl1:text-[46px] font-medium font-manrope  text-[#0F2D50] mb-1">
+      <h2 className="text-fluid-2xl font-medium font-manrope  text-[#0F2D50] mb-1">
         Locked Badges
       </h2>
-      <p className="text-gray-600 font-kollektif xxl1:text-[18px] mt-2 mb-6">
+      <p className="text-gray-600 font-kollektif text-fluid-md mt-2 mb-6">
         Keep working to unlock these achievements
       </p>
       <div className="flex max-lg:grid max-lg:grid-cols-5 max-md:grid-cols-4 gap-6 max-sm:grid-cols-2 max-sm:grid  pb-12">
