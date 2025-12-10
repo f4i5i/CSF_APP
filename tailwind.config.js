@@ -14,13 +14,13 @@ module.exports = {
       xxl: "1579px",
       xxl1: "2000px",
 
-      // ✅ Your shrinking (max-width) breakpoints
-      "max-xxl1": { max: "2070px"},
-      "max-xxl": { max: "1770px"},
-      "max-xl": { max: "1579px" },
-      "max-lg": { max: "1123px" },
-      "max-md": { max: "967px" },
-      "max-sm": { max: "639px" },
+      // // ✅ Your shrinking (max-width) breakpoints
+      // "max-xxl1": { max: "2070px"},
+      // "max-xxl": { max: "1770px"},
+      // "max-xl": { max: "1579px" },
+      // "max-lg": { max: "1123px" },
+      // "max-md": { max: "967px" },
+      // "max-sm": { max: "639px" },
     },
     extend: {
        fontFamily: {

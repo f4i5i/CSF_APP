@@ -37,10 +37,11 @@ const CalenderMini = () => {
 
   return (
     <div className="rounded-3xl max-sm:py-1 w-full">
-      <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4">Calendar</h2>
+      <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4">
+        Calendar
+      </h2>
 
-      <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-fit">
-
+      <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-full max-lg:w-full lg:w-fit">
         {/* Month Header */}
         <div className="flex justify-between items-center mb-3">
           <span className="font-medium text-[#1B1B1B]">
@@ -70,7 +71,9 @@ const CalenderMini = () => {
         {/* Dates Grid */}
         <div className="grid grid-cols-7 text-center">
           {[...Array(startingIndex)].map((_, i) => (
-            <div key={i} className="text-[#6F6F6F]">.</div>
+            <div key={i} className="text-[#6F6F6F]">
+              .
+            </div>
           ))}
 
           {[...Array(totalDays)].map((_, i) => {
