@@ -2,6 +2,8 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { Elements } from '@stripe/react-stripe-js'
+import stripePromise from './config/stripe.config'
 import AuthLayout from './pages/Authlayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -28,6 +30,11 @@ import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
 import RegisterChild from './pages/AdminDashboard/RegisterChild'
+import AdminClasses from './pages/AdminDashboard/Classes'
+import Installments from './pages/AdminDashboard/Installments'
+import Enrollments from './pages/AdminDashboard/Enrollments'
+import Waitlist from './pages/AdminDashboard/Waitlist'
+import Invoices from './pages/AdminDashboard/Invoices'
 
 export default function App(){
 return (
@@ -181,7 +188,11 @@ return (
 } 
 /> 
 
-<Route path="/checkout" element={<Checkout />} /> 
+<Route path="/checkout" element={
+  <Elements stripe={stripePromise}>
+    <Checkout />
+  </Elements>
+} /> 
 
 <Route path="/financials" element={
   <ProtectedRoute>
@@ -200,9 +211,40 @@ return (
 <Route path="/registerchild" element={
   <ProtectedRoute>
     <RegisterChild />
- </ProtectedRoute> 
-} 
-/> 
+ </ProtectedRoute>
+}
+/>
+
+{/* Admin CRUD Routes */}
+<Route path="/admin/classes" element={
+  <ProtectedRoute>
+    <AdminClasses />
+  </ProtectedRoute>
+} />
+
+<Route path="/admin/installments" element={
+  <ProtectedRoute>
+    <Installments />
+  </ProtectedRoute>
+} />
+
+<Route path="/admin/enrollments" element={
+  <ProtectedRoute>
+    <Enrollments />
+  </ProtectedRoute>
+} />
+
+<Route path="/admin/waitlist" element={
+  <ProtectedRoute>
+    <Waitlist />
+  </ProtectedRoute>
+} />
+
+<Route path="/admin/invoices" element={
+  <ProtectedRoute>
+    <Invoices />
+  </ProtectedRoute>
+} />
 
 </Routes>
 </>

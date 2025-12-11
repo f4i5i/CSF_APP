@@ -1,87 +1,276 @@
-import React from "react";
-import Logo from "../components/Logo";
+/**
+ * CheckOut Page - Complete Checkout Flow
+ * Integrates all checkout components for class enrollment with Stripe payment
+ */
 
-export default function Checkout() {
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useCheckoutFlow } from '../hooks/useCheckoutFlow';
+
+// Import all checkout components
+import CheckoutLoading from '../components/checkout/CheckoutLoading';
+import CheckoutError from '../components/checkout/CheckoutError';
+import WaitlistFlow from '../components/checkout/WaitlistFlow';
+import OrderConfirmation from '../components/checkout/OrderConfirmation';
+import ClassDetailsSummary from '../components/checkout/ClassDetailsSummary';
+import ChildSelector from '../components/checkout/ChildSelector';
+import PaymentMethodSelector from '../components/checkout/PaymentMethodSelector';
+import InstallmentPlanSelector from '../components/checkout/InstallmentPlanSelector';
+import DiscountCodeInput from '../components/checkout/DiscountCodeInput';
+import OrderSummary from '../components/checkout/OrderSummary';
+import StripePaymentForm from '../components/checkout/StripePaymentForm';
+
+export default function CheckOut() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const classId = searchParams.get('classId');
+
+  // Get checkout state and methods from hook
+  const {
+    // State
+    classData,
+    children,
+    selectedChildId,
+    paymentMethod,
+    selectedInstallmentPlan,
+    appliedDiscount,
+    orderTotal,
+    clientSecret,
+    hasCapacity,
+    loading,
+    error,
+    orderData,
+    enrollmentData,
+    paymentSucceeded,
+
+    // Methods
+    initializeCheckout,
+    selectChild,
+    selectPaymentMethod,
+    selectInstallmentPlan,
+    applyDiscount,
+    removeDiscount,
+    handlePaymentSuccess,
+    handlePaymentError,
+    joinWaitlist,
+    downloadReceipt,
+    retry,
+  } = useCheckoutFlow();
+
+  // State for discount loading
+  const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+
+  // Initialize checkout on mount
+  useEffect(() => {
+    if (!classId) {
+      navigate('/classes');
+      return;
+    }
+
+    initializeCheckout(classId);
+  }, [classId]);
+
+  // Handle discount application
+  const handleApplyDiscount = async (code) => {
+    setIsApplyingDiscount(true);
+    try {
+      await applyDiscount(code);
+    } finally {
+      setIsApplyingDiscount(false);
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return <CheckoutLoading />;
+  }
+
+  // Show error state
+  if (error && !classData) {
+    return (
+      <CheckoutError
+        error={error}
+        onRetry={retry}
+        onGoHome={() => navigate('/classes')}
+      />
+    );
+  }
+
+  // Show order confirmation after successful payment
+  if (paymentSucceeded && orderData && enrollmentData) {
+    return (
+      <OrderConfirmation
+        orderData={orderData}
+        enrollmentData={enrollmentData}
+        onDownloadReceipt={downloadReceipt}
+      />
+    );
+  }
+
+  // Show waitlist flow if class is full
+  if (!hasCapacity) {
+    return (
+      <WaitlistFlow
+        classData={classData}
+        childId={selectedChildId}
+        onJoinWaitlist={joinWaitlist}
+      />
+    );
+  }
+
+  // Calculate totals for OrderSummary
+  const classPrice = classData?.price || 0;
+  const registrationFee = 25; // Default registration fee
+  const processingFeePercent = 2.9; // Default processing fee
+
+  // Main checkout flow
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center overflow-y-auto relative py-8 sm:py-0">
-
-      {/* Dotted Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
-
-      {/* CSF School Academy - Top Center */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[62px] font-bold text-[#173151] font-kollektif drop-shadow-lg">CSF School Academy</h1>
-      </div>
-
-      <div className='relative justify-center items-center w-full max-w-md sm:max-w-2xl md:max-w-4xl px-4 sm:px-6 mt-20 sm:mt-24 md:mt-32'>
-        {/* CHECKOUT CARD */}
-        <div className="bg-white shadow-2xl rounded-2xl sm:rounded-3xl px-4 sm:px-6 md:px-8 py-4 sm:py-6 w-full">
-          {/* Logo and Title Section */}
-          <div className="relative flex items-center mb-6">
-            {/* Logo - Left Side */}
-            <div className="flex w-16 h-16 sm:w-24 sm:h-24 md:w-[128px] md:h-[124px] items-center justify-center">
-              <Logo />
-            </div>
-
-            {/* Title - Centered */}
-            <div className="absolute left-1/2 -translate-x-1/2 text-center">
-              <h2 className="text-2xl font-semibold text-[#0f172a]">Checkout</h2>
-              <p className="text-gray-500 mt-1">Complete your registration</p>
-            </div>
-          </div>
-
-        {/* Checkout Summary Box */}
-        <div className="border border-gray-300 rounded-xl p-5 mb-6">
-          <h3 className="text-lg font-semibold mb-4 text-[#173151]">Class Details</h3>
-
-          <div className="space-y-2">
-            <p className="text-gray-700"><span className="font-semibold">Class name:</span> Example Class</p>
-            <p className="text-gray-700"><span className="font-semibold">Day & Time:</span> Monday - 5:00 PM</p>
-            <p className="text-gray-700"><span className="font-semibold">Price:</span> $120</p>
-          </div>
-
+    <div className="min-h-screen w-full bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#173151] font-kollektif mb-2">
+            Complete Your Enrollment
+          </h1>
+          <p className="text-fluid-base font-manrope text-[#666D80]">
+            Just a few more steps to secure your child's spot
+          </p>
         </div>
 
-        {/* Order Overview */}
-        <h3 className="text-lg font-semibold mb-4 text-[#173151]">Order Overview</h3>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Checkout Flow */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Class Details */}
+            <ClassDetailsSummary classData={classData} />
 
-        <div className="space-y-6">
-          {/* Item row */}
-          <div className="flex justify-between">
-            <div>
-              <p className="font-medium">Class Name</p>
-              <p className="text-gray-500 text-sm">Child registered</p>
+            {/* Child Selection */}
+            <ChildSelector
+              children={children}
+              selectedChildId={selectedChildId}
+              onSelectChild={selectChild}
+              classData={classData}
+            />
+
+            {/* Payment Method Selection */}
+            {selectedChildId && (
+              <PaymentMethodSelector
+                selected={paymentMethod}
+                onSelect={selectPaymentMethod}
+                classPrice={classPrice}
+              />
+            )}
+
+            {/* Installment Plan Selection (only if installments selected) */}
+            {selectedChildId && paymentMethod === 'installments' && (
+              <InstallmentPlanSelector
+                orderTotal={orderTotal}
+                selectedPlan={selectedInstallmentPlan}
+                onSelect={selectInstallmentPlan}
+              />
+            )}
+
+            {/* Discount Code Input */}
+            {selectedChildId && paymentMethod && (
+              <DiscountCodeInput
+                onApply={handleApplyDiscount}
+                onRemove={removeDiscount}
+                appliedDiscount={appliedDiscount}
+                isLoading={isApplyingDiscount}
+              />
+            )}
+
+            {/* Stripe Payment Form (only when ready) */}
+            {selectedChildId &&
+              paymentMethod &&
+              (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
+              clientSecret && (
+                <StripePaymentForm
+                  clientSecret={clientSecret}
+                  amount={orderTotal}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                />
+              )}
+
+            {/* Error Message (if any during checkout) */}
+            {error && classData && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="font-manrope text-sm text-red-800">
+                  <strong>Error:</strong> {error.message || error}
+                </p>
+                <button
+                  onClick={retry}
+                  className="mt-2 text-sm font-manrope font-semibold text-red-600 hover:text-red-700 underline"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Order Summary (Sticky) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4">
+              <OrderSummary
+                classPrice={classPrice}
+                registrationFee={registrationFee}
+                processingFeePercent={processingFeePercent}
+                discount={appliedDiscount}
+                paymentMethod={paymentMethod}
+                installmentPlan={selectedInstallmentPlan}
+              />
+
+              {/* Help Text */}
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <p className="text-xs font-manrope text-blue-800">
+                  <strong>Need Help?</strong>
+                </p>
+                <p className="text-xs font-manrope text-blue-700 mt-1">
+                  Contact us at{' '}
+                  <a
+                    href="mailto:support@csfacademy.com"
+                    className="underline font-semibold"
+                  >
+                    support@csfacademy.com
+                  </a>
+                </p>
+              </div>
             </div>
-            <p className="font-medium">$120</p>
           </div>
-
-          {/* Registration fee */}
-          <div className="flex justify-between">
-            <p className="font-medium">Registration Fee</p>
-            <p className="font-medium">$25</p>
-          </div>
-
-          {/* Credit card fee */}
-          <div className="flex justify-between">
-            <p className="font-medium">Credit Card Fee</p>
-            <p className="font-medium">$3</p>
-          </div>
-
-          {/* Discounts */}
-          <div className="flex justify-between">
-            <p className="font-medium">Discounts</p>
-            <p className="font-medium">-$10</p>
-          </div>
-
-          <div className="border-t pt-4 flex justify-between text-lg font-semibold">
-            <p>Total</p>
-            <p>$138</p>
-          </div>
-
-          <button className="w-full bg-[#173151] text-white py-2 sm:py-3 rounded-xl text-base sm:text-lg font-semibold shadow-md hover:bg-[#1f3d67] transition">
-            Complete Checkout
-          </button>
         </div>
+
+        {/* Progress Indicator (Optional) */}
+        <div className="mt-8 max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-2">
+            <div
+              className={`h-2 flex-1 rounded-full ${
+                selectedChildId ? 'bg-[#F3BC48]' : 'bg-gray-300'
+              }`}
+            ></div>
+            <div
+              className={`h-2 flex-1 rounded-full ${
+                paymentMethod ? 'bg-[#F3BC48]' : 'bg-gray-300'
+              }`}
+            ></div>
+            <div
+              className={`h-2 flex-1 rounded-full ${
+                clientSecret ? 'bg-[#F3BC48]' : 'bg-gray-300'
+              }`}
+            ></div>
+          </div>
+          <div className="flex justify-between mt-2 text-xs font-manrope text-[#666D80]">
+            <span>Select Child</span>
+            <span>Payment Method</span>
+            <span>Complete Payment</span>
+          </div>
+        </div>
+
+        {/* Security Badge */}
+        <div className="mt-8 text-center">
+          <p className="text-xs font-manrope text-[#666D80]">
+            🔒 Secured by Stripe | Your payment information is encrypted and secure
+          </p>
         </div>
       </div>
     </div>
