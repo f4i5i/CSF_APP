@@ -38,9 +38,12 @@ export default function DataTable({
 
   // Sort data if sorting is enabled
   const sortedData = React.useMemo(() => {
-    if (!sortColumn) return data;
+    // Ensure data is always an array
+    const safeData = Array.isArray(data) ? data : [];
 
-    return [...data].sort((a, b) => {
+    if (!sortColumn) return safeData;
+
+    return [...safeData].sort((a, b) => {
       const aVal = a[sortColumn];
       const bVal = b[sortColumn];
 
