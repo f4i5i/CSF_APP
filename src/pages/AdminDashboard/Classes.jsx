@@ -50,11 +50,32 @@ export default function Classes() {
         is_active: statusFilter,
         search: searchQuery,
       });
-      setClasses(response.data || response);
-      setTotalItems(response.total || response.length);
+
+      // Handle different response structures
+      let classesData = [];
+      let total = 0;
+
+      if (Array.isArray(response)) {
+        // Response is directly an array
+        classesData = response;
+        total = response.length;
+      } else if (response && Array.isArray(response.data)) {
+        // Response has a data property that is an array
+        classesData = response.data;
+        total = response.total || response.data.length;
+      } else if (response && response.data) {
+        // Response.data exists but might be an object with items
+        classesData = Array.isArray(response.data.items) ? response.data.items : [];
+        total = response.data.total || response.total || classesData.length;
+      }
+
+      setClasses(classesData);
+      setTotalItems(total);
     } catch (error) {
       console.error('Failed to fetch classes:', error);
       toast.error('Failed to load classes');
+      setClasses([]); // Ensure classes is always an array
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
