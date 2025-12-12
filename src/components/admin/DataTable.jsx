@@ -109,7 +109,7 @@ export default function DataTable({
   };
 
   // Loading skeleton
-  if (false) {
+  if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
