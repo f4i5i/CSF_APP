@@ -144,6 +144,23 @@ background: linear-gradient(to bottom, #f3f6fb, #dee5f2, #c7d3e7);
   min-height: 100vh;
   background-attachment: fixed;
 }
+/* Thin custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;          /* thin */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #DFE1E7; /* gray thumb */
+  border-radius: 9999px;     /* fully rounded */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1a1;
+}
 
 
 /* extra utility to ensure no scroll and perfect centering */
