@@ -59,66 +59,71 @@ const AdminDashboard = () => {
   ];
 
   return (
-     <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
-     <div className="max-w-9xl mx-6 py-8 max-sm:py-2 max-sm:mx-3">
-       
+      <div
+        className="max-w-9xl sm:px-6 px-3 py-8 max-sm:py-2 rounded-lg border border-border-light  "
+        style={{ boxShadow: "0 5px 20px 0 rgb(0 0 0 / 0.05)" }}
+      >
         <div className="flex items-center justify-between mb-6 gap-4">
           <div className="flex flex-col gap-2">
-            <div className="text-fluid-2xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
+            <div className="text-fluid-2xl text-text-primary font-normal font-kollektif flex items-center gap-2">
               Welcome back, Admin! 👋
             </div>
             {/* locations and active students */}
-         <p className="text-black font-manrope font-medium text-base">
-                Managing 3 locations • 45 active students
-              </p>
-            
+            <p className="text-heading-dark font-manrope font-medium text-base">
+              Managing 3 locations • 45 active students
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-semibold text-[#0F1D2E]">50</p>
-            <p className="text-sm font-kollektif text-gray-600">Checked In Today</p>
+            <p className="text-3xl font-kollektif font-semibold text-heading-dark">50</p>
+            <p className="text-sm font-manrope text-neutral-main">
+              Checked In Today
+            </p>
           </div>
         </div>
 
-       <div className="grid grid-cols-12 gap-6">
-  {/* Left Sidebar */}
-  <aside className="col-span-12 lg:col-span-3">
-    <StatsSidebar stats={stats} />
-  </aside>
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left Sidebar */}
+          <aside className="col-span-12 lg:col-span-3">
+            <StatsSidebar stats={stats} />
+          </aside>
 
-  {/* Middle column */}
-  <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
-    {/* Registrations + Cancellations */}
-    <StatsCards
-      registrations={stats.registrations}
-      cancellations={stats.cancellations}
-    />
+          {/* Middle column */}
+          <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
+            {/* Registrations + Cancellations */}
+            <StatsCards
+              registrations={stats.registrations}
+              cancellations={stats.cancellations}
+            />
 
-    {/* Subscription + Short Term */}
-    <MiddleSummary
-      subscriptionStudents={stats.subscriptionStudents}
-      shortTermStudents={stats.shortTermStudents}
-    />
-  </div>
+            {/* Subscription + Short Term */}
+            <MiddleSummary
+              subscriptionStudents={stats.subscriptionStudents}
+              shortTermStudents={stats.shortTermStudents}
+            />
+          </div>
 
-  {/* Right — Monthly Chart */}
-  <div className="col-span-12 lg:col-span-3">
-    <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow h-full">
-      <h3 className="text-lg font-manrope font-semibold mb-2">Members (monthly)</h3>
-      <MembersBarChart data={stats.monthlyMembers} />
-    </div>
-  </div>
-</div>
-
-
-            {/* Today's classes */}
-            <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow mt-6">
-              <TodayClasses dateLabel={new Date().toLocaleDateString()} classes={todayClasses} />
+          {/* Right — Monthly Chart */}
+          <div className="col-span-12 lg:col-span-3">
+            <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow h-full">
+              <h3 className="text-lg font-manrope font-semibold mb-2">
+                Members (monthly)
+              </h3>
+              <MembersBarChart data={stats.monthlyMembers} />
             </div>
-         
+          </div>
+        </div>
+
+        {/* Today's classes */}
+        <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow mt-6">
+          <TodayClasses
+            dateLabel={new Date().toLocaleDateString()}
+            classes={todayClasses}
+          />
         </div>
       </div>
-   
+    </div>
   );
 };
 

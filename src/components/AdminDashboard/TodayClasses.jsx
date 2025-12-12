@@ -4,7 +4,7 @@ const ClassRow = ({ cls }) => (
   <div className="flex items-center justify-between py-3 border-b last:border-b-0">
     <div>
       <p className="font-medium text-[#0F2D50]">{cls.title}</p>
-      <p className="text-sm text-gray-500">{cls.school}</p>
+      <p className="text-sm text-neutral-main">{cls.school}</p>
     </div>
     <div className="text-right">
       <p className="text-sm font-semibold">{cls.time}</p>
@@ -18,9 +18,9 @@ const TodayClasses = ({ dateLabel, classes }) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-xl font-manrope font-semibold">Class Overview for today</h3>
-          <p className="text-sm font-manrope text-gray-500">{dateLabel}</p>
+          <p className="text-sm font-manrope text-neutral-main">{dateLabel}</p>
         </div>
-        <button className="px-4 py-2 font-kollektif bg-[#F3BC48] rounded-lg text-black font-semibold">
+        <button className="px-4 py-2 font-manrope bg-btn-gold rounded-lg text-text-primary font-semibold">
           Export
         </button>
       </div>

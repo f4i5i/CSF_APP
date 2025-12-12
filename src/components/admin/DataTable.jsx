@@ -41,12 +41,9 @@ export default function DataTable({
   };
 
   const sortedData = React.useMemo(() => {
-    // Ensure data is always an array
-    const safeData = Array.isArray(data) ? data : [];
+    if (!sortColumn) return data;
 
-    if (!sortColumn) return safeData;
-
-    return [...safeData].sort((a, b) => {
+    return [...data].sort((a, b) => {
       const aVal = a[sortColumn];
       const bVal = b[sortColumn];
 
@@ -213,7 +210,7 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border-light bg-white ">
-            {sortedData.map((row, rowIndex) => (
+            {sortedData?.map((row, rowIndex) => (
               <tr
                 key={row.id || rowIndex}
                 onClick={() => onRowClick && onRowClick(row)}
