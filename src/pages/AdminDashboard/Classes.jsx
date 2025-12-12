@@ -38,156 +38,7 @@ export default function Classes() {
   useEffect(() => {
     fetchClasses();
   }, [currentPage, programFilter, areaFilter, statusFilter, searchQuery]);
-  const dummyClasses = [
-    {
-      id: 1,
-      name: "Beginner Basketball",
-      program: { name: "Sports Program" },
-      schedule: [
-        { day_of_week: "Monday", start_time: "4:00 PM", end_time: "5:30 PM" },
-        {
-          day_of_week: "Wednesday",
-          start_time: "4:00 PM",
-          end_time: "5:30 PM",
-        },
-      ],
-      capacity: 20,
-      current_enrollment: 12,
-      min_age: 8,
-      max_age: 12,
-      is_active: true,
-    },
-    {
-      id: 2,
-      name: "Art & Creativity Workshop",
-      program: { name: "Arts Program" },
-      schedule: [
-        { day_of_week: "Friday", start_time: "3:00 PM", end_time: "4:00 PM" },
-      ],
-      capacity: 15,
-      current_enrollment: 10,
-      min_age: 6,
-      max_age: 10,
-      is_active: false,
-    },
-    {
-      id: 3,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 4,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 5,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 6,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 7,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 8,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 9,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 10,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-    {
-      id: 11,
-      name: "Advanced Coding Class",
-      program: { name: "STEM Program" },
-      schedule: [
-        { day_of_week: "Tuesday", start_time: "5:00 PM", end_time: "6:30 PM" },
-      ],
-      capacity: 18,
-      current_enrollment: 18,
-      min_age: 10,
-      max_age: 16,
-      is_active: true,
-    },
-  ];
+  
 
   const fetchClasses = async () => {
     setLoading(true);
@@ -201,24 +52,31 @@ export default function Classes() {
         search: searchQuery,
       });
 
-      const apiData = response.data || response;
+      // Handle different response structures
+      let classesData = [];
+      let total = 0;
 
-      // If API returns empty → use dummy data for UI
-      if (!apiData || apiData.length === 0) {
-        setClasses(dummyClasses);
-        setTotalItems(dummyClasses.length);
-      } else {
-        setClasses(apiData);
-        setTotalItems(response.total || apiData.length);
+      if (Array.isArray(response)) {
+        // Response is directly an array
+        classesData = response;
+        total = response.length;
+      } else if (response && Array.isArray(response.data)) {
+        // Response has a data property that is an array
+        classesData = response.data;
+        total = response.total || response.data.length;
+      } else if (response && response.data) {
+        // Response.data exists but might be an object with items
+        classesData = Array.isArray(response.data.items) ? response.data.items : [];
+        total = response.data.total || response.total || classesData.length;
       }
+
+      setClasses(classesData);
+      setTotalItems(total);
     } catch (error) {
-      console.error("Failed to fetch classes:", error);
-
-      // If API fails → also show dummy data
-      setClasses(dummyClasses);
-      setTotalItems(dummyClasses.length);
-
-      toast.error("Using dummy data because API failed");
+      console.error('Failed to fetch classes:', error);
+      toast.error('Failed to load classes');
+      setClasses([]); // Ensure classes is always an array
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }

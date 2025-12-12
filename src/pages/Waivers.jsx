@@ -23,12 +23,23 @@ const Waivers = () => {
   const fetchPendingWaivers = async () => {
     try {
       setLoading(true);
-      const waivers = await waiversService.getPending();
-      setPendingWaivers(waivers);
+      const response = await waiversService.getPending();
+
+      // Handle different response structures
+      let waiversData = [];
+      if (Array.isArray(response)) {
+        waiversData = response;
+      } else if (response && Array.isArray(response.data)) {
+        waiversData = response.data;
+      } else if (response && response.data && Array.isArray(response.data.items)) {
+        waiversData = response.data.items;
+      }
+
+      setPendingWaivers(waiversData);
 
       // Initialize acceptedWaivers state for each waiver
       const initialAcceptedState = {};
-      waivers.forEach(waiver => {
+      waiversData.forEach(waiver => {
         initialAcceptedState[waiver.id] = false;
       });
       setFormData(prev => ({
@@ -38,6 +49,7 @@ const Waivers = () => {
     } catch (error) {
       console.error("Failed to fetch pending waivers:", error);
       toast.error("Failed to load waivers");
+      setPendingWaivers([]); // Ensure it's always an array
     } finally {
       setLoading(false);
     }
