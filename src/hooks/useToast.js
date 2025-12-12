@@ -23,12 +23,12 @@ export const useToast = () => {
       duration: 3000,
       position: 'top-right',
       style: {
-        background: '#10B981',
-        color: '#fff',
+        background: '#32AE60', // status-success (tailwind)
+        color: '#ffffff',
       },
       iconTheme: {
-        primary: '#fff',
-        secondary: '#10B981',
+        primary: '#ffffff',
+        secondary: '#32AE60',
       },
       ...options,
     });
@@ -40,12 +40,12 @@ export const useToast = () => {
       duration: 4000,
       position: 'top-right',
       style: {
-        background: '#EF4444',
-        color: '#fff',
+        background: '#D02F2F', // error-main (tailwind)
+        color: '#ffffff',
       },
       iconTheme: {
-        primary: '#fff',
-        secondary: '#EF4444',
+        primary: '#ffffff',
+        secondary: '#D02F2F',
       },
       ...options,
     });
@@ -58,8 +58,12 @@ export const useToast = () => {
       position: 'top-right',
       icon: 'ℹ️',
       style: {
-        background: '#3B82F6',
-        color: '#fff',
+        background: '#7E97B5', // btn-secondary (tailwind)
+        color: '#ffffff',
+      },
+      iconTheme: {
+        primary: '#ffffff',
+        secondary: '#7E97B5',
       },
       ...options,
     });
@@ -72,8 +76,12 @@ export const useToast = () => {
       position: 'top-right',
       icon: '⚠️',
       style: {
-        background: '#F59E0B',
-        color: '#fff',
+        background: '#EBD13E', // warning-main (tailwind)
+        color: '#173151', // text-primary for contrast on yellow
+      },
+      iconTheme: {
+        primary: '#173151',
+        secondary: '#EBD13E',
       },
       ...options,
     });
@@ -83,6 +91,14 @@ export const useToast = () => {
   const loading = useCallback((message, options = {}) => {
     return toast.loading(message, {
       position: 'top-right',
+      style: {
+        background: '#F3BC48', // btn-gold (tailwind)
+        color: '#173151',
+      },
+      iconTheme: {
+        primary: '#173151',
+        secondary: '#F3BC48',
+      },
       ...options,
     });
   }, []);

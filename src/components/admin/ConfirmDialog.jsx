@@ -21,19 +21,19 @@ export default function ConfirmDialog({
 
   const variantStyles = {
     danger: {
-      icon: 'text-red-600',
-      iconBg: 'bg-red-100',
-      button: 'bg-red-600 hover:bg-red-700',
+      icon: 'text-error-main',
+      iconBg: 'bg-error-light/10',
+      button: 'bg-error-main hover:bg-error-dark transition-colors',
     },
     warning: {
-      icon: 'text-yellow-600',
-      iconBg: 'bg-yellow-100',
-      button: 'bg-yellow-600 hover:bg-yellow-700',
+      icon: 'text-warning-main',
+      iconBg: 'bg-warning-main/10',
+      button: 'bg-warning-main hover:bg-warning-dark transition-colors text-heading-dark',
     },
     info: {
-      icon: 'text-blue-600',
-      iconBg: 'bg-blue-100',
-      button: 'bg-blue-600 hover:bg-blue-700',
+      icon: 'text-btn-secondary',
+      iconBg: 'bg-btn-secondary/10',
+      button: 'bg-btn-secondary hover:bg-btn-gold transition-colors text-white',
     },
   };
 
@@ -42,17 +42,17 @@ export default function ConfirmDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div
-        className="bg-white rounded-lg shadow-2xl max-w-md w-full"
+        className="bg-white rounded-[12px] shadow-2xl max-w-md w-full border border-border-light"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-6 pb-4">
-          <div className="flex items-start gap-4">
+        <div className="flex items-start justify-between p-6 pb-4 border-b border-border-light">
+          <div className="flex items-center gap-4">
             <div className={`w-12 h-12 ${styles.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}>
               <AlertTriangle className={`w-6 h-6 ${styles.icon}`} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold font-manrope text-[#173151]">
+              <h3 className="text-lg font-bold font-manrope text-heading-dark ">
                 {title}
               </h3>
             </div>
@@ -62,21 +62,21 @@ export default function ConfirmDialog({
             className="p-1 hover:bg-gray-100 rounded transition"
             disabled={isLoading}
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-text-muted" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 pb-6">
-          <p className="text-base font-manrope text-[#666D80]">{message}</p>
+        <div className="px-6 py-5">
+          <p className="text-sm font-manrope text-text-muted leading-relaxed">{message}</p>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 rounded-b-lg">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-neutral-lightest rounded-b-[12px] border-t border-border-light">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-manrope font-semibold text-gray-700 hover:bg-gray-200 rounded-lg transition disabled:opacity-50"
+            className="px-4 py-2 text-sm font-manrope font-semibold text-text-primary border border-border-light hover:bg-neutral-lightest rounded-[8px] transition disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -84,7 +84,7 @@ export default function ConfirmDialog({
             onClick={onConfirm}
             disabled={isLoading}
             className={`
-              px-4 py-2 text-sm font-manrope font-semibold text-white rounded-lg transition
+              px-4 py-2 text-sm font-manrope font-semibold text-white rounded-[8px] transition
               disabled:opacity-50 disabled:cursor-not-allowed
               flex items-center gap-2
               ${styles.button}

@@ -84,9 +84,9 @@ return (
 } />
 
 <Route path="/dashboard" element={
-  <ProtectedRoute>
+  // <ProtectedRoute>
     <Dashboard />
-   </ProtectedRoute>
+  //  </ProtectedRoute>
 } />
 
 <Route path="/coachdashboard" element={
@@ -217,9 +217,9 @@ return (
 
 {/* Admin CRUD Routes */}
 <Route path="/admin/classes" element={
-  <ProtectedRoute>
+  // <ProtectedRoute>
     <AdminClasses />
-  </ProtectedRoute>
+  // </ProtectedRoute>
 } />
 
 <Route path="/admin/installments" element={
