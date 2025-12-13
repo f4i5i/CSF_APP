@@ -94,14 +94,12 @@ const Header = () => {
       : navItems;
   return (
     <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:px-3 mb-[15px]">
-      <div className="w-full ml-1 max-sm:mx-auto flex items-center justify-between max-sm:justify-between">
+      <div className="w-full ml-1 max-sm:mx-auto flex items-center justify-end max-sm:justify-between">
         {/* LEFT: Logo */}
         {/* <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start  invisible">
           <Logo />
         </div> */}
-        <h1 className="text-5xl text-text-primary font-kollektif font-semibold md:block hidden">
-          Admin
-        </h1>
+
         {/* SMALL SCREEN: toggle, centered logo, profile - spaced evenly */}
         <div className="md:hidden flex items-center justify-between w-full">
           <button
@@ -126,9 +124,9 @@ const Header = () => {
           </button>
 
           <img
-            src={baseLogo}
+            src="/images/logo.png"
             alt="Outline"
-            className="w-[54px] h-[50px] object-contain mix-blend-exclusion mx-2"
+            className="size-[80px] object-contain mix-blend-exclusion mx-2"
           />
           <div className="md:hidden flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end ">
             <img

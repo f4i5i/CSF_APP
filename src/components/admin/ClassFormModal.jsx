@@ -54,12 +54,12 @@ function CustomDropdown({ value, onChange, options, placeholder, error }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-3 py-2 border rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold flex items-center justify-between bg-white transition-colors ${
+        className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold flex items-center justify-between bg-white transition-colors ${
           error ? "border-btn-gold" : "border-border-light"
         }`}
         style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
       >
-        <span className={selectedOption ? "text-gray-900" : "text-gray-400"}>
+        <span className={selectedOption ? "text-gray-900 font-manrope" : "text-gray-400 font-manrope"}>
           {displayText}
         </span>
         <motion.div
@@ -581,7 +581,7 @@ export default function ClassFormModal({
                             }
                             className="w-4 h-4 text-[#F3BC48] border-border-light rounded focus:ring-btn-gold"
                           />
-                          <span className="text-sm font-medium text-heading-dark">
+                          <span className="text-sm font-medium font-manrope text-heading-dark">
                             {label}
                           </span>
                         </label>

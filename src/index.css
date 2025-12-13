@@ -5,12 +5,22 @@
 @tailwind utilities;
 @import "./styles/fonts.css";
 
-html, body, #root {
-height: 100%;
-margin: 0;
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
 }
-span,p,h3,h4,h5,h6,a,li,button {
-  font-family: 'font-manrope';
+span,
+p,
+h3,
+h4,
+h5,
+h6,
+a,
+li,
+button {
+  font-family: "font-manrope ";
 }
 /* Change chevron arrow color to black */
 .rdp-nav svg {
@@ -18,12 +28,12 @@ span,p,h3,h4,h5,h6,a,li,button {
   display: none;
 }
 .calender {
-    width: 359px !important;
+  width: 359px !important;
   height: 233px !important;
   overflow: hidden;
 }
 .calendermini {
-    width: 459px !important;
+  width: 459px !important;
   height: 233px !important;
   overflow: hidden;
 }
@@ -33,18 +43,13 @@ span,p,h3,h4,h5,h6,a,li,button {
   justify-content: space-between !important;
   align-items: center !important;
   gap: 6px !important; /* <-- controls spacing */
-  
 }
 /* Optional: reduce month title font size */
 .rdp-caption_label {
   font-size: 16px !important;
-  
-  
 }
 .calendar-mini .rdp-caption_label {
   margin-right: 10px !important;
-  
-  
 }
 .calendar-mini {
   width: 320px !important;
@@ -59,14 +64,14 @@ span,p,h3,h4,h5,h6,a,li,button {
   }
 
   /* shrink the calendar visually */
-.calendar-mini .rdp-months {
-  transform-origin: top left;
-}
-.calendar-mini .rdp {
-  font-size: 12px;
-  transform: scale(0.85);
-  transform-origin: top left;
-}
+  .calendar-mini .rdp-months {
+    transform-origin: top left;
+  }
+  .calendar-mini .rdp {
+    font-size: 12px;
+    transform: scale(0.85);
+    transform-origin: top left;
+  }
 }
 
 .calendar-mini .rdp-nav_button svg {
@@ -118,8 +123,6 @@ span,p,h3,h4,h5,h6,a,li,button {
   margin-top: 4px;
 }
 
-
-
 .fc .fc-daygrid-event {
   background: #f4b728;
   border: none;
@@ -139,17 +142,15 @@ span,p,h3,h4,h5,h6,a,li,button {
   border: none !important;
 }
 
-
 /* optional: a subtle centered container background */
 body {
-font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-background: linear-gradient(to bottom, #f3f6fb, #dee5f2, #c7d3e7);
+  background: linear-gradient(to bottom, #f3f6fb, #dee5f2, #c7d3e7);
   min-height: 100vh;
   background-attachment: fixed;
 }
 /* Thin custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;          /* thin */
+  width: 6px; /* thin */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -157,13 +158,12 @@ background: linear-gradient(to bottom, #f3f6fb, #dee5f2, #c7d3e7);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #DFE1E7; /* gray thumb */
-  border-radius: 9999px;     /* fully rounded */
+  background-color: #dfe1e7; /* gray thumb */
+  border-radius: 9999px; /* fully rounded */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #a1a1a1;
 }
-
 
 /* extra utility to ensure no scroll and perfect centering */

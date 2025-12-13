@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Home, BookOpen, Users, Calendar, DollarSign, ChevronRight, PanelRightOpen, PanelLeftOpen } from "lucide-react";
 import baseLogo from "../../assets/logo.png";
 import crown from "../../assets/Carolina.png";
@@ -25,7 +25,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
       <div className="md:flex items-center justify-between px-4 py-3  hidden">
         <div className="flex items-center justify-center gap-2">
           <div className={`${collapsed ? "w-0 h-0" : "w-10 h-10"}`}>
-            <div
+            <Link herf="/admin"
               className="flex justify-center items-center relative cursor-pointer"
             >
               {/* Logo Outline (turns black using blend mode) */}
@@ -36,7 +36,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
           mix-blend-exclusion"
               />
             
-            </div>{" "}
+            </Link>{" "}
           </div>
         </div>
         <button

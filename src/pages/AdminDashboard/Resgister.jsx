@@ -1,18 +1,30 @@
-import Logo from "../../components/Logo";
+import Logo from "@/components/Logo";
 import React from "react";
 import { Link } from "react-router-dom";
 
 export default function Resgister() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] p-6">
-      <div className="w-full max-w-5xl bg-white/90 rounded-3xl p-10 md:p-16 shadow-lg" style={{boxShadow: '0 10px 40px rgba(16,24,40,0.08)'}}>
-        <div className="flex flex-col items-center gap-4">
-            <Logo />
-          <h1 className="text-[24px] md:text-[28px] font-kollektif font-semibold text-text-primary">Carolina Soccer Factory</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+      <div
+        className="w-full max-w-[790px] bg-[#FFFFFF80] rounded-3xl  pt-[30px] pb-[13px] shadow-lg"
+        style={{ boxShadow: "0 10px 40px rgba(16,24,40,0.08)" }}
+      >
+        <div className="flex flex-col items-center gap-2">
+          {/* <Logo /> */}
+          <img
+            src="/images/logo.png"
+            alt="location"
+            className="size-[140px]  object-contain 
+          mix-blend-exclusion"
+          />
+
+          <h1 className="text-[24px] md:text-[28px] font-kollektif font-normal text-text-primary">
+            Carolina Soccer Factory
+          </h1>
           <p className="text-base text-text-muted font-manrope">Choose Area:</p>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 font-manrope">
+        <div className="mt-8 flex flex-wrap gap-4 items-center justify-center">
           {[
             { id: "charlotte", label: "Charlotte" },
             { id: "triangle", label: "Triangle" },
@@ -20,18 +32,29 @@ export default function Resgister() {
           ].map((area) => (
             <button
               key={area.id}
-              className="flex flex-col items-center justify-center gap-3 bg-white rounded-2xl py-10 shadow-md hover:shadow-lg transition text-center"
+              className="flex flex-col items-center justify-center w-full md:max-w-[225px]  gap-3 bg-[#FFFFFF80] rounded-[20px] py-[52px] shadow-sm text-center"
             >
-              <img src="/images/location.png" alt="location" className="w-10 h-10 opacity-90" />
-              <span className="text-lg font-manrope font-medium text-text-primary">{area.label}</span>
+              <img
+                src="/images/location.png"
+                alt="location"
+                className="size-[20px] "
+              />
+              <span className="text-lg font-kollektif font-bold text-text-primary">
+                {area.label}
+              </span>
             </button>
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <p className="text-sm text-text-muted font-manrope">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-btn-gold font-manrope">Login</Link>
+        <div className="mt-[70px] text-center">
+          <p className="text-base text-text-muted font-manrope">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-medium text-btn-gold font-manrope"
+            >
+              Login
+            </Link>
           </p>
         </div>
       </div>
