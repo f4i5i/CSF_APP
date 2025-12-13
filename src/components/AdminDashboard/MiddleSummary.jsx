@@ -3,11 +3,11 @@ import React from "react";
 const SummaryBox = ({ title, value, subtitle }) => (
   <div className="bg-[#FFFFFF80] rounded-2xl p-6 shadow h-full flex flex-col justify-between">
     <div>
-      <h3 className="text-base font-manrope font-semibold">{title}</h3>
-      <p className="text-sm font-manrope text-gray-500 mt-1">{subtitle}</p>
+      <h3 className="text-base font-manrope text-heading-dark font-semibold">{title}</h3>
+      <p className="text-sm font-manrope text-neutral-main mt-1">{subtitle}</p>
     </div>
     <div className="mt-4">
-      <p className="text-3xl font-manrope font-bold text-[#0F2D50]">{value}</p>
+      <p className="text-3xl font-kollektif font-medium text-heading-dark">{value}</p>
     </div>
   </div>
 );

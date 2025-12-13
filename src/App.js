@@ -29,6 +29,7 @@ import Checkout from './pages/CheckOut'
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
+import AdminLayout from './layouts/AdminLayout'
 import RegisterChild from './pages/AdminDashboard/RegisterChild'
 import AdminClasses from './pages/AdminDashboard/Classes'
 import Installments from './pages/AdminDashboard/Installments'
@@ -95,17 +96,13 @@ return (
    </ProtectedRoute>
 } />
 
-<Route path="/admin" element={
-  <ProtectedRoute>
-    <AdminDashboard />
-   </ProtectedRoute>
-} />
-
-<Route path="/calendar" element={
-  <ProtectedRoute>
-    <Calender />
-  </ProtectedRoute>
-} />
+      <Route element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/classes" element={<AdminClasses />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/calendar" element={<Calender />} />
+        <Route path="/financials" element={<Financials />} />
+      </Route>
 
 <Route path="/photos" element={
   <ProtectedRoute>
@@ -194,19 +191,6 @@ return (
   </Elements>
 } /> 
 
-<Route path="/financials" element={
-  <ProtectedRoute>
-    <Financials />
- </ProtectedRoute> 
-} 
-/> 
-
-<Route path="/clients" element={
-  <ProtectedRoute>
-    <Clients />
- </ProtectedRoute> 
-} 
-/> 
 
 <Route path="/registerchild" element={
   <ProtectedRoute>
@@ -216,11 +200,7 @@ return (
 />
 
 {/* Admin CRUD Routes */}
-<Route path="/admin/classes" element={
-  <ProtectedRoute>
-    <AdminClasses />
-  </ProtectedRoute>
-} />
+ 
 
 <Route path="/admin/installments" element={
   <ProtectedRoute>
