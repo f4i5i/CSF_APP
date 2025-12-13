@@ -29,12 +29,15 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Person } from "@mui/icons-material";
+import AdminSidebar from "./AdminSidebar/AdminSidebar";
+import { X } from "lucide-react";
 const Header = () => {
   const role = localStorage.getItem("role");
 
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // ✅ Close dropdown when clicking outside
@@ -96,13 +99,48 @@ const Header = () => {
         {/* <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start  invisible">
           <Logo />
         </div> */}
-        <h1 className="text-5xl text-text-primary font-kollektif font-semibold sm:block hidden">Admin</h1>
-        <img
-          src={baseLogo}
-          alt="Outline"
-          className="w-[54px] h-[50px] sm:hidden block  object-contain 
-          mix-blend-exclusion"
-        />
+        <h1 className="text-5xl text-text-primary font-kollektif font-semibold md:block hidden">
+          Admin
+        </h1>
+        {/* SMALL SCREEN: toggle, centered logo, profile - spaced evenly */}
+        <div className="md:hidden flex items-center justify-between w-full">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 bg-white rounded-md shadow"
+            aria-label="Open admin menu"
+          >
+            <svg
+              className="w-5 h-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+
+          <img
+            src={baseLogo}
+            alt="Outline"
+            className="w-[54px] h-[50px] object-contain mix-blend-exclusion mx-2"
+          />
+          <div className="md:hidden flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end ">
+            <img
+              onClick={() => setOpen(!open)}
+              ref={dropdownRef}
+              src={logo}
+              alt="profile"
+              className="w-fluid-avatar-lg h-fluid-avatar-lg rounded-full object-cover"
+            />
+          </div>
+        </div>
+
         {/* MIDDLE NAVBAR */}
         {/* {role === "parent" && (
           <nav>
@@ -389,7 +427,7 @@ const Header = () => {
           </nav>
         )}
         {/* RIGHT: PROFILE */}
-        <div className="max-sm:hidden flex items-center gap-1 cursor-pointer p-1 rounded-full pr-2">
+        <div className="hidden md:flex items-center gap-1 cursor-pointer p-1 rounded-full pr-2">
           <div className="flex items-center gap-3 cursor-pointer">
             <img
               src={logo}
@@ -469,22 +507,13 @@ const Header = () => {
           </div>
         )}
       </div>
-      <div className="hidden max-sm:flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end ">
-        <img
-          onClick={() => setOpen(!open)}
-          ref={dropdownRef}
-          src={logo}
-          alt="profile"
-          className="w-fluid-avatar-lg h-fluid-avatar-lg rounded-full object-cover"
-        />
-      </div>
 
       {/* mobile navbar */}
 
-      <div className="fixed bottom-0 w-full bg-[#0D1B2A] py-3 px-6 flex justify-between items-center sm:hidden z-10">
+      <div className="fixed bottom-0  w-full left-0 right-0 bg-[#0D1B2A] py-3 px-6 flex justify-between items-center sm:hidden z-10">
         {itemsToShow.map((item) => {
           const Icon = item.icon;
-          const hideLabel = role === "admin"; 
+          const hideLabel = role === "admin";
 
           return (
             <NavLink
@@ -524,6 +553,33 @@ const Header = () => {
 
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 rounded-full bg-gray-400 opacity-60" />
       </div>
+      {/* Mobile overlay sidebar (full width) */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/40"
+          onClick={() => setMobileOpen(false)}
+        >
+          <div
+            className="w-full h-full bg-white p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-start mb-4">
+              <button
+                aria-label="Close sidebar"
+                onClick={() => setMobileOpen(false)}
+                className="p-2 rounded-md bg-white shadow"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <AdminSidebar
+              collapsed={false}
+              setCollapsed={() => {}}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 };

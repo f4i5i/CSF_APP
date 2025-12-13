@@ -36,6 +36,7 @@ import Installments from './pages/AdminDashboard/Installments'
 import Enrollments from './pages/AdminDashboard/Enrollments'
 import Waitlist from './pages/AdminDashboard/Waitlist'
 import Invoices from './pages/AdminDashboard/Invoices'
+import Resgister from './pages/AdminDashboard/Resgister'
 
 export default function App(){
 return (
@@ -108,6 +109,11 @@ return (
   <ProtectedRoute>
     <Gallery />
   </ProtectedRoute>
+} />
+<Route path="/resgister" element={
+  // <ProtectedRoute>
+    <Resgister />
+  // </ProtectedRoute>
 } />
 
 <Route path="/Gallery" element={

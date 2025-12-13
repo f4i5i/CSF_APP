@@ -9,6 +9,9 @@ html, body, #root {
 height: 100%;
 margin: 0;
 }
+span,p,h3,h4,h5,h6,a,li,button {
+  font-family: 'font-manrope';
+}
 /* Change chevron arrow color to black */
 .rdp-nav svg {
   stroke: #000 !important;
