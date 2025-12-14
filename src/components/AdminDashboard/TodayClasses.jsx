@@ -3,11 +3,11 @@ import React from "react";
 const ClassRow = ({ cls }) => (
   <div className="flex items-center justify-between py-3 border-b last:border-b-0">
     <div>
-      <p className="font-medium text-[#0F2D50]">{cls.title}</p>
-      <p className="text-sm text-neutral-main">{cls.school}</p>
+      <p className="font-medium text-[#0F2D50] font-manrope">{cls.title}</p>
+      <p className="text-sm text-neutral-main font-manrope">{cls.school}</p>
     </div>
     <div className="text-right">
-      <p className="text-sm font-semibold">{cls.time}</p>
+      <p className="text-sm font-semibold font-manrope">{cls.time}</p>
     </div>
   </div>
 );
