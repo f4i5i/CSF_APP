@@ -432,7 +432,7 @@ const dummyClasses = [
       <div className="max-w-9xl mx-auto sm:px-4 px-0">
         <div className="mb-8 flex lg:flex-row flex-col  lg:items-center items-start lg:gap-0 gap-4  justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary font-kollektif">
+            <h1 className="lg:text-[46px] text-[20px] md:text-[30px] font-bold text-text-primary font-kollektif">
               Classes Management
             </h1>
             <p className="text-neutral-main font-manrope mt-1">
