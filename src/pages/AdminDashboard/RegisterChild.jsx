@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useClasses } from "../../api/hooks/classes/useClasses";
 import childrenService from "../../api/services/children.service";
+import waiversService from "../../api/services/waivers.service";
 import Logo from "../../components/Logo";
+import WaiverCheckModal from "../../components/WaiverCheckModal";
 
 export default function RegisterChild() {
   const navigate = useNavigate();
@@ -27,6 +29,11 @@ export default function RegisterChild() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [calculatedAge, setCalculatedAge] = useState(null);
+
+  // Waiver modal state
+  const [showWaiverModal, setShowWaiverModal] = useState(false);
+  const [unsignedWaivers, setUnsignedWaivers] = useState([]);
+  const [createdChildId, setCreatedChildId] = useState(null);
 
   // Fetch classes for classroom dropdown
   const { data: classes = [], isLoading: loadingClasses } = useClasses({
@@ -112,10 +119,40 @@ export default function RegisterChild() {
 
       // Create child via API
       const response = await childrenService.create(childData);
+      const childId = response.id;
 
       toast.success("Child registered successfully!");
 
-      // Navigate to dashboard
+      // Check for required waivers
+      try {
+        const waiverTemplates = await waiversService.getTemplates();
+        const requiredWaivers = waiverTemplates.items?.filter(w => w.is_required && w.is_active) || [];
+
+        if (requiredWaivers.length > 0) {
+          // Check which waivers are unsigned
+          const acceptances = await waiversService.getMyAcceptances();
+          const signedTemplateIds = new Set(
+            acceptances.items?.map(a => a.waiver_template_id) || []
+          );
+
+          const unsigned = requiredWaivers.filter(
+            w => !signedTemplateIds.has(w.id)
+          );
+
+          if (unsigned.length > 0) {
+            // Show waiver modal instead of navigating
+            setCreatedChildId(childId);
+            setUnsignedWaivers(unsigned);
+            setShowWaiverModal(true);
+            return; // Don't navigate yet
+          }
+        }
+      } catch (waiverError) {
+        console.error('Failed to check waivers:', waiverError);
+        // Don't block registration if waiver check fails
+      }
+
+      // Navigate to dashboard if no waivers needed
       navigate("/dashboard");
     } catch (error) {
       console.error("Failed to register child:", error);
@@ -440,6 +477,24 @@ export default function RegisterChild() {
         </div>
         </div>
       </div>
+
+      {/* Waiver Modal */}
+      {showWaiverModal && (
+        <WaiverCheckModal
+          waivers={unsignedWaivers}
+          onComplete={() => {
+            setShowWaiverModal(false);
+            toast.success("All waivers signed successfully!");
+            navigate("/dashboard");
+          }}
+          onSkip={() => {
+            setShowWaiverModal(false);
+            toast.info("You can sign waivers later from your dashboard");
+            navigate("/dashboard");
+          }}
+        />
+      )}
+
       <footer className="z-10 w-full py-2 bg-transparent">
         <div className="w-full flex flex-row max-sm:flex max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-[#000] text-xs sm:text-sm">
           <p className="text-center text-[#000] sm:text-left font-['inter'] font-normal text-sm mb-2 sm:mb-0">

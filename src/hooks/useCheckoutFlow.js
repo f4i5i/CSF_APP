@@ -3,7 +3,7 @@
  * Manages the complete checkout flow state and business logic for class enrollment
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import classesService from '../api/services/classes.service';
 import childrenService from '../api/services/children.service';
@@ -14,6 +14,14 @@ import installmentsService from '../api/services/installments.service';
 
 export const useCheckoutFlow = () => {
   const navigate = useNavigate();
+
+  // Refs to track if we're already processing to prevent duplicate calls
+  const isCreatingOrder = useRef(false);
+  const isCreatingPayment = useRef(false);
+
+  // Refs to track if we've had errors to prevent retry bombardment
+  const orderCreationFailed = useRef(false);
+  const paymentCreationFailed = useRef(false);
 
   // State
   const [state, setState] = useState({
@@ -34,6 +42,8 @@ export const useCheckoutFlow = () => {
     orderTotal: 0,
     appliedDiscount: null,
     discountCode: '',
+    orderData: null,
+    enrollmentData: null,
 
     // Stripe
     clientSecret: null,
@@ -41,15 +51,18 @@ export const useCheckoutFlow = () => {
 
     // Status
     isLoading: false,
+    loading: false,
     error: null,
     hasCapacity: true,
+    paymentSucceeded: false,
   });
 
   /**
    * Initialize checkout - fetch class details, children, and check capacity
    */
   const initializeCheckout = useCallback(async (classId) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    console.log('🔍 Initializing checkout for class:', classId);
+    setState((prev) => ({ ...prev, isLoading: true, loading: true, error: null }));
 
     try {
       // Fetch all required data in parallel
@@ -59,19 +72,33 @@ export const useCheckoutFlow = () => {
         classesService.checkCapacity(classId),
       ]);
 
+      console.log('📦 Class data received:', {
+        id: classData.id,
+        name: classData.name,
+        capacity: classData.capacity,
+        current_enrollment: classData.current_enrollment,
+        has_capacity: classData.has_capacity,
+        available_spots: classData.available_spots,
+      });
+
+      console.log('✅ Capacity check result:', capacity);
+      console.log('🎯 Setting hasCapacity to:', capacity?.available !== false);
+
       setState((prev) => ({
         ...prev,
         classData,
         children,
         hasCapacity: capacity?.available !== false,
         isLoading: false,
+        loading: false,
       }));
     } catch (error) {
-      console.error('Failed to initialize checkout:', error);
+      console.error('❌ Failed to initialize checkout:', error);
       setState((prev) => ({
         ...prev,
         error: error.message || 'Failed to load checkout data',
         isLoading: false,
+        loading: false,
       }));
     }
   }, []);
@@ -206,6 +233,7 @@ export const useCheckoutFlow = () => {
       return order;
     } catch (error) {
       console.error('Failed to create order:', error);
+      orderCreationFailed.current = true; // Mark as failed to prevent retry bombardment
       setState((prev) => ({
         ...prev,
         error: error.message || 'Failed to create order',
@@ -242,6 +270,17 @@ export const useCheckoutFlow = () => {
         payment_method: 'card',
       });
 
+      // Check if backend returned a Stripe Checkout Session URL
+      // Backend now uses client_secret field to send the checkout URL
+      if (paymentIntent.client_secret && paymentIntent.client_secret.startsWith('http')) {
+        console.log('🔗 Redirecting to Stripe Checkout Session:', paymentIntent.client_secret);
+        // Redirect to Stripe's hosted checkout page
+        // All payment processing happens on Stripe's secure page
+        window.location.href = paymentIntent.client_secret;
+        return paymentIntent;
+      }
+
+      // Legacy: Payment Intent flow (keeping for backwards compatibility)
       setState((prev) => ({
         ...prev,
         clientSecret: paymentIntent.client_secret,
@@ -252,6 +291,7 @@ export const useCheckoutFlow = () => {
       return paymentIntent;
     } catch (error) {
       console.error('Failed to initiate payment:', error);
+      paymentCreationFailed.current = true; // Mark as failed to prevent retry bombardment
       setState((prev) => ({
         ...prev,
         error: error.message || 'Failed to initiate payment',
@@ -335,6 +375,12 @@ export const useCheckoutFlow = () => {
    * Reset checkout state
    */
   const reset = useCallback(() => {
+    // Reset error flags
+    orderCreationFailed.current = false;
+    paymentCreationFailed.current = false;
+    isCreatingOrder.current = false;
+    isCreatingPayment.current = false;
+
     setState({
       currentStep: 'selection',
       classData: null,
@@ -346,13 +392,102 @@ export const useCheckoutFlow = () => {
       orderTotal: 0,
       appliedDiscount: null,
       discountCode: '',
+      orderData: null,
+      enrollmentData: null,
       clientSecret: null,
       paymentIntentId: null,
       isLoading: false,
+      loading: false,
       error: null,
       hasCapacity: true,
+      paymentSucceeded: false,
     });
   }, []);
+
+  /**
+   * Handle successful payment
+   */
+  const handlePaymentSuccess = useCallback(async (paymentIntent) => {
+    await confirmPayment(paymentIntent);
+  }, [confirmPayment]);
+
+  /**
+   * Join waitlist
+   */
+  const joinWaitlist = useCallback(async () => {
+    // TODO: Implement waitlist functionality
+    console.log('Join waitlist not yet implemented');
+  }, []);
+
+  /**
+   * Download receipt
+   */
+  const downloadReceipt = useCallback(() => {
+    // TODO: Implement receipt download
+    console.log('Download receipt not yet implemented');
+  }, []);
+
+  /**
+   * Retry after error
+   */
+  const retry = useCallback(() => {
+    // Reset error flags to allow retry
+    orderCreationFailed.current = false;
+    paymentCreationFailed.current = false;
+    setState((prev) => ({ ...prev, error: null }));
+  }, []);
+
+  // Auto-create order when all required selections are made
+  useEffect(() => {
+    const shouldCreateOrder =
+      state.classData &&
+      state.selectedChildId &&
+      state.paymentMethod &&
+      (state.paymentMethod !== 'installments' || state.installmentPlan) &&
+      !state.orderId &&
+      !state.isLoading &&
+      !isCreatingOrder.current &&
+      !orderCreationFailed.current; // Don't retry if order creation failed
+
+    if (shouldCreateOrder) {
+      console.log('🔄 Auto-creating order...');
+      isCreatingOrder.current = true;
+      createOrder().finally(() => {
+        isCreatingOrder.current = false;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    state.classData,
+    state.selectedChildId,
+    state.paymentMethod,
+    state.installmentPlan,
+    state.orderId,
+    state.isLoading,
+  ]);
+
+  // Auto-create payment intent when order is created
+  useEffect(() => {
+    const shouldCreatePaymentIntent =
+      state.orderId &&
+      !state.clientSecret &&
+      !state.isLoading &&
+      !isCreatingPayment.current &&
+      !paymentCreationFailed.current; // Don't retry if payment creation failed
+
+    if (shouldCreatePaymentIntent) {
+      console.log('🔄 Auto-creating payment intent...');
+      isCreatingPayment.current = true;
+      initiatePayment().finally(() => {
+        isCreatingPayment.current = false;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    state.orderId,
+    state.clientSecret,
+    state.isLoading,
+  ]);
 
   return {
     // State
@@ -369,6 +504,10 @@ export const useCheckoutFlow = () => {
     initiatePayment,
     confirmPayment,
     handlePaymentError,
+    handlePaymentSuccess,
+    joinWaitlist,
+    downloadReceipt,
+    retry,
     reset,
   };
 };

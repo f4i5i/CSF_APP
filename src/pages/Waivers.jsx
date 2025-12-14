@@ -25,15 +25,17 @@ const Waivers = () => {
       setLoading(true);
       const response = await waiversService.getPending();
 
-      // Handle different response structures
-      let waiversData = [];
-      if (Array.isArray(response)) {
-        waiversData = response;
-      } else if (response && Array.isArray(response.data)) {
-        waiversData = response.data;
-      } else if (response && response.data && Array.isArray(response.data.items)) {
-        waiversData = response.data.items;
-      }
+      // Backend returns: { items: [{waiver_template, is_accepted, acceptance, needs_reconsent}], pending_count, total }
+      // Extract waiver_template from each item
+      const waiversData = (response?.items || []).map(item => ({
+        id: item.waiver_template.id,
+        name: item.waiver_template.name,
+        content: item.waiver_template.content,
+        type: item.waiver_template.waiver_type,
+        version: item.waiver_template.version,
+        needs_reconsent: item.needs_reconsent,
+        is_accepted: item.is_accepted,
+      }));
 
       setPendingWaivers(waiversData);
 
@@ -94,7 +96,7 @@ const Waivers = () => {
     try {
       setSubmitting(true);
 
-      // Bulk sign all accepted waivers
+      // Sign all accepted waivers (loops through and calls individual accept endpoint)
       if (pendingWaivers.length > 0) {
         const waiversToSign = pendingWaivers.map((waiver) => ({
           template_id: waiver.id,
@@ -102,10 +104,17 @@ const Waivers = () => {
           agreed: true,
         }));
 
-        await waiversService.bulkSign({
+        const result = await waiversService.signMultiple({
           waivers: waiversToSign,
           signer_name: formData.signature,
         });
+
+        // Check if all waivers were signed successfully
+        if (!result.success && result.failed_count > 0) {
+          toast.error(`Failed to sign ${result.failed_count} waiver(s). Please try again.`);
+          console.error("Failed waivers:", result.errors);
+          return;
+        }
       }
 
       toast.success("Waivers signed successfully!");

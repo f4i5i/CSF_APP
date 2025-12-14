@@ -10,6 +10,8 @@ import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import ClassFormModal from "../../components/admin/ClassFormModal";
 import classesService from "../../api/services/classes.service";
+import programsService from "../../api/services/programs.service";
+import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
 import Header from "@/components/Header";
 import GenericButton from "@/components/GenericButton";
@@ -21,6 +23,11 @@ export default function Classes() {
   const [programFilter, setProgramFilter] = useState("");
   const [areaFilter, setAreaFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  // Filter options from API
+  const [programs, setPrograms] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -37,198 +44,83 @@ export default function Classes() {
     action: null,
   });
 
+  // Fetch filter options on mount
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
+
+  // Fetch classes when filters change
   useEffect(() => {
     fetchClasses();
   }, [currentPage, programFilter, areaFilter, statusFilter, searchQuery]);
-const dummyClasses = [
-  {
-    id: 1,
-    name: "Math 101",
-    program: { name: "Mathematics" },
-    schedule: [
-      { day_of_week: "Monday", start_time: "10:00", end_time: "12:00" },
-      { day_of_week: "Wednesday", start_time: "10:00", end_time: "12:00" },
-    ],
-    capacity: 20,
-    current_enrollment: 10,
-    min_age: 8,
-    max_age: 10,
-    is_active: true,
-  },
-  {
-    id: 2,
-    name: "Science Club",
-    program: { name: "Science" },
-    schedule: [{ day_of_week: "Friday", start_time: "14:00", end_time: "16:00" }],
-    capacity: 15,
-    current_enrollment: 8,
-    min_age: 9,
-    max_age: 12,
-    is_active: false,
-  },
-  {
-    id: 3,
-    name: "English Literature",
-    program: { name: "Language Arts" },
-    schedule: [{ day_of_week: "Tuesday", start_time: "09:00", end_time: "11:00" }],
-    capacity: 25,
-    current_enrollment: 20,
-    min_age: 10,
-    max_age: 13,
-    is_active: true,
-  },
-  {
-    id: 4,
-    name: "History 101",
-    program: { name: "Social Studies" },
-    schedule: [
-      { day_of_week: "Monday", start_time: "13:00", end_time: "15:00" },
-      { day_of_week: "Thursday", start_time: "13:00", end_time: "15:00" },
-    ],
-    capacity: 30,
-    current_enrollment: 25,
-    min_age: 11,
-    max_age: 14,
-    is_active: true,
-  },
-  {
-    id: 5,
-    name: "Art Workshop",
-    program: { name: "Arts" },
-    schedule: [{ day_of_week: "Wednesday", start_time: "10:00", end_time: "12:00" }],
-    capacity: 12,
-    current_enrollment: 10,
-    min_age: 8,
-    max_age: 12,
-    is_active: true,
-  },
-  {
-    id: 6,
-    name: "Music Class",
-    program: { name: "Arts" },
-    schedule: [{ day_of_week: "Friday", start_time: "09:00", end_time: "11:00" }],
-    capacity: 15,
-    current_enrollment: 12,
-    min_age: 7,
-    max_age: 10,
-    is_active: true,
-  },
-  {
-    id: 7,
-    name: "Physics Lab",
-    program: { name: "Science" },
-    schedule: [{ day_of_week: "Tuesday", start_time: "14:00", end_time: "16:00" }],
-    capacity: 20,
-    current_enrollment: 18,
-    min_age: 12,
-    max_age: 15,
-    is_active: true,
-  },
-  {
-    id: 8,
-    name: "Chemistry Basics",
-    program: { name: "Science" },
-    schedule: [
-      { day_of_week: "Monday", start_time: "10:00", end_time: "12:00" },
-      { day_of_week: "Wednesday", start_time: "10:00", end_time: "12:00" },
-    ],
-    capacity: 20,
-    current_enrollment: 15,
-    min_age: 12,
-    max_age: 15,
-    is_active: false,
-  },
-  {
-    id: 9,
-    name: "Computer Basics",
-    program: { name: "Technology" },
-    schedule: [{ day_of_week: "Thursday", start_time: "09:00", end_time: "11:00" }],
-    capacity: 18,
-    current_enrollment: 16,
-    min_age: 9,
-    max_age: 13,
-    is_active: true,
-  },
-  {
-    id: 10,
-    name: "Robotics Club",
-    program: { name: "Technology" },
-    schedule: [{ day_of_week: "Friday", start_time: "13:00", end_time: "15:00" }],
-    capacity: 10,
-    current_enrollment: 8,
-    min_age: 11,
-    max_age: 15,
-    is_active: false,
-  },
-  {
-    id: 11,
-    name: "Physical Education",
-    program: { name: "Sports" },
-    schedule: [
-      { day_of_week: "Monday", start_time: "08:00", end_time: "09:30" },
-      { day_of_week: "Wednesday", start_time: "08:00", end_time: "09:30" },
-    ],
-    capacity: 25,
-    current_enrollment: 20,
-    min_age: 7,
-    max_age: 12,
-    is_active: true,
-  },
-  {
-    id: 12,
-    name: "Drama Club",
-    program: { name: "Arts" },
-    schedule: [{ day_of_week: "Tuesday", start_time: "15:00", end_time: "17:00" }],
-    capacity: 15,
-    current_enrollment: 12,
-    min_age: 9,
-    max_age: 14,
-    is_active: true,
-  },
-  {
-    id: 13,
-    name: "French Language",
-    program: { name: "Language Arts" },
-    schedule: [{ day_of_week: "Thursday", start_time: "11:00", end_time: "13:00" }],
-    capacity: 20,
-    current_enrollment: 18,
-    min_age: 10,
-    max_age: 14,
-    is_active: false,
-  },
-];
+
+  const fetchFilterOptions = async () => {
+    setFiltersLoading(true);
+    try {
+      const [programsData, areasData] = await Promise.all([
+        programsService.getAll(),
+        areasService.getAll(),
+      ]);
+
+      // Handle different response structures
+      const programsList = Array.isArray(programsData)
+        ? programsData
+        : (programsData.items || programsData.data || []);
+
+      const areasList = Array.isArray(areasData)
+        ? areasData
+        : (areasData.items || areasData.data || []);
+
+      setPrograms(programsList);
+      setAreas(areasList);
+    } catch (error) {
+      console.error('Failed to fetch filter options:', error);
+      toast.error('Failed to load filter options');
+      setPrograms([]);
+      setAreas([]);
+    } finally {
+      setFiltersLoading(false);
+    }
+  };
 
 
   const fetchClasses = async () => {
-  setLoading(true);
-  try {
-    const response = await classesService.getAll({
-      page: currentPage,
-      limit: itemsPerPage,
-      program_id: programFilter,
-      area_id: areaFilter,
-      is_active: statusFilter,
-      search: searchQuery,
-    });
+    setLoading(true);
+    try {
+      // Calculate skip for pagination (backend uses skip/limit, not page)
+      const skip = (currentPage - 1) * itemsPerPage;
 
-    let classesData = [];
-    let total = 0;
+      // Build filter params (only include non-empty values)
+      const params = {
+        skip,
+        limit: itemsPerPage,
+      };
 
-    if (Array.isArray(response)) {
-      classesData = response;
-      total = response.length;
-    } else if (response && Array.isArray(response.data)) {
-      classesData = response.data;
-      total = response.total || response.data.length;
-    } else if (response && response.data) {
-      classesData = Array.isArray(response.data.items) ? response.data.items : [];
-      total = response.data.total || response.total || classesData.length;
-    }
+      if (programFilter) params.program_id = programFilter;
+      if (areaFilter) params.area_id = areaFilter;
+      if (searchQuery) params.search = searchQuery;
 
-    // If no data returned from API, use dummy data
-    if (!classesData || classesData.length === 0) {
-      classesData = dummyClasses;
-      total = dummyClasses.length;
+      const response = await classesService.getAll(params);
+
+      // Backend returns: { items: [], total: number, skip: number, limit: number }
+      let classesData = response.items || [];
+      let total = response.total || 0;
+
+      // Filter by active status on frontend if needed
+      if (statusFilter !== "") {
+        const isActive = statusFilter === "true";
+        classesData = classesData.filter((c) => c.is_active === isActive);
+      }
+
+      setClasses(classesData);
+      setTotalItems(total);
+    } catch (error) {
+      console.error('Failed to fetch classes:', error);
+      toast.error('Failed to load classes');
+      setClasses([]);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
     }
 
     setClasses(classesData);
@@ -389,8 +281,12 @@ const dummyClasses = [
       onChange: setProgramFilter,
       options: [
         { value: "", label: "All Programs" },
-        // TODO: Fetch actual programs from API
+        ...programs.map((program) => ({
+          value: program.id,
+          label: program.name,
+        })),
       ],
+      disabled: filtersLoading,
     },
     {
       type: "select",
@@ -399,8 +295,12 @@ const dummyClasses = [
       onChange: setAreaFilter,
       options: [
         { value: "", label: "All Areas" },
-        // TODO: Fetch actual areas from API
+        ...areas.map((area) => ({
+          value: area.id,
+          label: area.name,
+        })),
       ],
+      disabled: filtersLoading,
     },
     {
       type: "select",

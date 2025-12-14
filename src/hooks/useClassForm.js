@@ -14,6 +14,7 @@ const initialFormData = {
   program_id: '',
   area_id: '',
   school_id: '',
+  school_code: '',            // NEW - Ledges code
   capacity: '',
   min_age: '',
   max_age: '',
@@ -21,6 +22,15 @@ const initialFormData = {
   end_date: '',
   coach_id: null,
   is_active: true,
+
+  // NEW FIELDS
+  registration_start_date: '', // Registration period start
+  registration_end_date: '',   // Registration period end
+  recurrence_pattern: 'weekly', // weekly, monthly, one-time
+  repeat_every_weeks: '1',     // Number of weeks between repetitions
+  class_type: '',              // one-time or membership
+  class_image: null,           // Image file or URL
+  website_link: '',            // Class website/info link
 
   // Schedule (array)
   schedule: [
@@ -230,8 +240,69 @@ export default function useClassForm(initialData = null, mode = 'create') {
       }
     });
 
+    // NEW FIELDS VALIDATION
+
+    // School code validation
+    if (!formData.school_id) {
+      newErrors.school_id = 'School is required';
+    }
+
+    // Registration period validation
+    if (!formData.registration_start_date) {
+      newErrors.registration_start_date = 'Registration start date is required';
+    }
+
+    if (!formData.registration_end_date) {
+      newErrors.registration_end_date = 'Registration end date is required';
+    }
+
+    if (formData.registration_start_date && formData.registration_end_date) {
+      if (new Date(formData.registration_end_date) <= new Date(formData.registration_start_date)) {
+        newErrors.registration_end_date = 'Registration end date must be after start date';
+      }
+    }
+
+    // Registration period should be before class start date
+    if (formData.registration_end_date && formData.start_date) {
+      if (new Date(formData.registration_end_date) > new Date(formData.start_date)) {
+        newErrors.registration_end_date = 'Registration must end before class starts';
+      }
+    }
+
+    // Class type validation
+    if (!formData.class_type) {
+      newErrors.class_type = 'Class type is required';
+    }
+
+    // Recurrence pattern validation
+    if (!formData.recurrence_pattern) {
+      newErrors.recurrence_pattern = 'Recurrence pattern is required';
+    }
+
+    // Repeat every weeks validation
+    if (!formData.repeat_every_weeks || parseInt(formData.repeat_every_weeks) < 1) {
+      newErrors.repeat_every_weeks = 'Repeat frequency is required';
+    }
+
+    // Website link validation (optional but validate format if provided)
+    if (formData.website_link && formData.website_link.trim()) {
+      if (!isValidUrl(formData.website_link)) {
+        newErrors.website_link = 'Please enter a valid URL';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // URL validation helper
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   // Submit form
@@ -250,6 +321,17 @@ export default function useClassForm(initialData = null, mode = 'create') {
         capacity: parseInt(formData.capacity),
         min_age: parseInt(formData.min_age),
         max_age: parseInt(formData.max_age),
+
+        // NEW: Include new fields
+        school_id: formData.school_id,
+        school_code: formData.school_code,
+        registration_start_date: formData.registration_start_date,
+        registration_end_date: formData.registration_end_date,
+        recurrence_pattern: formData.recurrence_pattern,
+        repeat_every_weeks: parseInt(formData.repeat_every_weeks),
+        class_type: formData.class_type,
+        website_link: formData.website_link,
+
         // Only send enabled payment options with prices
         payment_options: formData.payment_options
           .filter(opt => opt.enabled)
@@ -259,6 +341,17 @@ export default function useClassForm(initialData = null, mode = 'create') {
             price: parseFloat(opt.price),
           })),
       };
+
+      // Handle image upload if image exists
+      if (formData.class_image instanceof File) {
+        // TODO: Upload image to storage and get URL
+        // apiData.class_image_url = await uploadImage(formData.class_image);
+        // For now, just log that an image would be uploaded
+        console.log('Image file detected, would upload:', formData.class_image.name);
+      } else if (typeof formData.class_image === 'string') {
+        // If it's already a URL (edit mode)
+        apiData.class_image_url = formData.class_image;
+      }
 
       if (mode === 'create') {
         await classesService.create(apiData);

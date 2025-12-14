@@ -2,23 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { X, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import useClassForm from "../../hooks/useClassForm";
-
-// Dummy data for dropdowns
-const PROGRAMS = [
-  { id: "1", name: "Soccer" },
-  { id: "2", name: "Basketball" },
-  { id: "3", name: "Tennis" },
-  { id: "4", name: "Swimming" },
-  { id: "5", name: "Gymnastics" },
-];
-
-const AREAS = [
-  { id: "1", name: "Downtown" },
-  { id: "2", name: "Midtown" },
-  { id: "3", name: "Uptown" },
-  { id: "4", name: "East Side" },
-  { id: "5", name: "West Side" },
-];
+import programsService from "../../api/services/programs.service";
+import areasService from "../../api/services/areas.service";
+import schoolsService from "../../api/services/schools.service";
+import toast from "react-hot-toast";
 
 const DAYS = [
   { id: "monday", name: "Monday" },
@@ -30,8 +17,29 @@ const DAYS = [
   { id: "sunday", name: "Sunday" },
 ];
 
+const CLASS_TYPES = [
+  { id: "one-time", name: "One-time Session" },
+  { id: "membership", name: "Membership" },
+];
+
+const RECURRENCE_PATTERNS = [
+  { id: "weekly", name: "Weekly" },
+  { id: "monthly", name: "Monthly" },
+  { id: "one-time", name: "One-time Event" },
+];
+
+const REPEAT_EVERY_WEEKS = [
+  { id: "1", name: "1" },
+  { id: "2", name: "2" },
+  { id: "3", name: "3" },
+  { id: "4", name: "4" },
+  { id: "6", name: "6" },
+  { id: "8", name: "8" },
+  { id: "12", name: "12" },
+];
+
 // Custom Dropdown Component
-function CustomDropdown({ value, onChange, options, placeholder, error }) {
+function CustomDropdown({ value, onChange, options, placeholder, error, renderOption }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -95,7 +103,7 @@ function CustomDropdown({ value, onChange, options, placeholder, error }) {
                   : "text-heading-dark"
               }`}
             >
-              {option.name}
+              {renderOption ? renderOption(option) : option.name}
             </button>
           ))}
         </div>
@@ -122,6 +130,55 @@ export default function ClassFormModal({
     updatePaymentOption,
     handleSubmit,
   } = useClassForm(initialData, mode);
+
+  // State for dynamic data from API
+  const [programs, setPrograms] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [schools, setSchools] = useState([]);
+  const [dropdownsLoading, setDropdownsLoading] = useState(true);
+
+  // Fetch programs, areas, and schools on mount
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      setDropdownsLoading(true);
+      try {
+        const [programsData, areasData, schoolsData] = await Promise.all([
+          programsService.getAll(),
+          areasService.getAll(),
+          schoolsService.getAll(),
+        ]);
+
+        // Handle different response structures
+        const programsList = Array.isArray(programsData)
+          ? programsData
+          : (programsData.items || programsData.data || []);
+
+        const areasList = Array.isArray(areasData)
+          ? areasData
+          : (areasData.items || areasData.data || []);
+
+        const schoolsList = Array.isArray(schoolsData)
+          ? schoolsData
+          : (schoolsData.items || schoolsData.data || []);
+
+        setPrograms(programsList);
+        setAreas(areasList);
+        setSchools(schoolsList);
+      } catch (error) {
+        console.error('Failed to fetch dropdown data:', error);
+        toast.error('Failed to load dropdown data');
+        setPrograms([]);
+        setAreas([]);
+        setSchools([]);
+      } finally {
+        setDropdownsLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchDropdownData();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -201,7 +258,64 @@ export default function ClassFormModal({
                     placeholder="Brief description of the class..."
                   />
                 </div>
-               
+              </div>
+
+              {/* Registration Period Section */}
+              <div className="space-y-4 mt-8">
+                <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                  Registration Period
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                      Registration Start Date <span className="text-btn-gold">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.registration_start_date}
+                      onChange={(e) => updateField("registration_start_date", e.target.value)}
+                      className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
+                        errors.registration_start_date ? "border-btn-gold" : "border-border-light"
+                      }`}
+                      style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                    />
+                    {errors.registration_start_date && (
+                      <p className="text-error-darker font-manrope text-xs mt-1">
+                        {errors.registration_start_date}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                      Registration End Date <span className="text-btn-gold">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.registration_end_date}
+                      onChange={(e) => updateField("registration_end_date", e.target.value)}
+                      className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
+                        errors.registration_end_date ? "border-btn-gold" : "border-border-light"
+                      }`}
+                      style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                    />
+                    {errors.registration_end_date && (
+                      <p className="text-error-darker font-manrope text-xs mt-1">
+                        {errors.registration_end_date}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600">
+                  Registration period must end before the class start date
+                </p>
+              </div>
+
+              {/* Basic Information Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Program */}
                 <div>
                   <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Program <span className="text-btn-gold">*</span>
@@ -209,8 +323,8 @@ export default function ClassFormModal({
                   <CustomDropdown
                     value={formData.program_id}
                     onChange={(value) => updateField("program_id", value)}
-                    options={PROGRAMS}
-                    placeholder="Select Program"
+                    options={programs}
+                    placeholder={dropdownsLoading ? "Loading programs..." : "Select Program"}
                     error={errors.program_id}
                   />
                   {errors.program_id && (
@@ -228,13 +342,45 @@ export default function ClassFormModal({
                   <CustomDropdown
                     value={formData.area_id}
                     onChange={(value) => updateField("area_id", value)}
-                    options={AREAS}
-                    placeholder="Select Area"
+                    options={areas}
+                    placeholder={dropdownsLoading ? "Loading areas..." : "Select Area"}
                     error={errors.area_id}
                   />
                   {errors.area_id && (
                     <p className="text-error-darker font-manrope text-xs mt-1">
                       {errors.area_id}
+                    </p>
+                  )}
+                </div>
+
+                {/* School with Code */}
+                <div>
+                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    School/Ledges Code <span className="text-btn-gold">*</span>
+                  </label>
+                  <CustomDropdown
+                    value={formData.school_id}
+                    onChange={(value) => {
+                      const school = schools.find(s => s.id === value);
+                      updateField("school_id", value);
+                      updateField("school_code", school?.code || "");
+                    }}
+                    options={schools}
+                    placeholder="Select School"
+                    error={errors.school_id}
+                    renderOption={(option) => (
+                      <div>
+                        <div className="font-semibold">{option.name}</div>
+                        <div className="text-xs text-gray-500">{option.code}</div>
+                      </div>
+                    )}
+                  />
+                  {formData.school_code && (
+                    <p className="text-xs text-gray-600 mt-1">Code: {formData.school_code}</p>
+                  )}
+                  {errors.school_id && (
+                    <p className="text-error-darker font-manrope text-xs mt-1">
+                      {errors.school_id}
                     </p>
                   )}
                 </div>
@@ -456,6 +602,87 @@ export default function ClassFormModal({
               )}
             </div>
 
+            {/* Recurrence Pattern Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                Recurrence
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    Schedule Pattern <span className="text-btn-gold">*</span>
+                  </label>
+                  <CustomDropdown
+                    value={formData.recurrence_pattern}
+                    onChange={(value) => updateField("recurrence_pattern", value)}
+                    options={RECURRENCE_PATTERNS}
+                    placeholder="Select Pattern"
+                    error={errors.recurrence_pattern}
+                  />
+                  {errors.recurrence_pattern && (
+                    <p className="text-error-darker font-manrope text-xs mt-1">
+                      {errors.recurrence_pattern}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    Repeat Every <span className="text-btn-gold">*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <CustomDropdown
+                        value={formData.repeat_every_weeks}
+                        onChange={(value) => updateField("repeat_every_weeks", value)}
+                        options={REPEAT_EVERY_WEEKS}
+                        placeholder="Select"
+                        error={errors.repeat_every_weeks}
+                      />
+                    </div>
+                    <span className="text-sm font-manrope text-heading-dark">weeks</span>
+                  </div>
+                  {errors.repeat_every_weeks && (
+                    <p className="text-error-darker font-manrope text-xs mt-1">
+                      {errors.repeat_every_weeks}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-600">
+                {formData.recurrence_pattern === 'weekly' && `Class repeats every ${formData.repeat_every_weeks} ${parseInt(formData.repeat_every_weeks) === 1 ? 'week' : 'weeks'} on the selected days`}
+                {formData.recurrence_pattern === 'monthly' && 'Class repeats monthly on the same dates'}
+                {formData.recurrence_pattern === 'one-time' && 'Class occurs only once'}
+              </p>
+            </div>
+
+            {/* Class Type Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                Class Type
+              </h3>
+
+              <div>
+                <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  Type <span className="text-btn-gold">*</span>
+                </label>
+                <CustomDropdown
+                  value={formData.class_type}
+                  onChange={(value) => updateField("class_type", value)}
+                  options={CLASS_TYPES}
+                  placeholder="Select Class Type"
+                  error={errors.class_type}
+                />
+                {errors.class_type && (
+                  <p className="text-error-darker font-manrope text-xs mt-1">
+                    {errors.class_type}
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Payment Options Section */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
@@ -468,94 +695,104 @@ export default function ClassFormModal({
                 </div>
               )}
 
-              <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Select ONE payment option for this class
+              </p>
+
+              <div className="space-y-3">
                 {/* Pay in Full */}
                 <div className="border border-border-light rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="flex items-center space-x-2">
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center space-x-2 w-48">
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="payment_option"
                         checked={formData.payment_options[0].enabled}
-                        onChange={(e) =>
-                          updatePaymentOption(0, "enabled", e.target.checked)
-                        }
-                        className="w-4 h-4 text-[#F3BC48] border-border-light rounded focus:ring-btn-gold"
+                        onChange={() => {
+                          // Disable all other options
+                          [1, 2, 3, 4, 5].forEach((i) => {
+                            updatePaymentOption(i, "enabled", false);
+                          });
+                          // Enable this option
+                          updatePaymentOption(0, "enabled", true);
+                        }}
+                        className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
                       />
                       <span className="font-semibold text-heading-dark font-manrope">
                         Pay in Full (One-time)
                       </span>
                     </label>
+                    {formData.payment_options[0].enabled && (
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.payment_options[0].price}
+                          onChange={(e) =>
+                            updatePaymentOption(0, "price", e.target.value)
+                          }
+                          className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                          style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                          placeholder="299.00"
+                        />
+                        {errors.payment_full_payment && (
+                          <p className="text-error-darkest text-xs mt-1">
+                            {errors.payment_full_payment}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {formData.payment_options[0].enabled && (
-                    <div>
-                      <label className="block text-sm font-medium text-heading-dark font-manrope mb-1">
-                        Price <span className="text-btn-gold">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={formData.payment_options[0].price}
-                        onChange={(e) =>
-                          updatePaymentOption(0, "price", e.target.value)
-                        }
-                         className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                        style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
-                        placeholder="299.00"
-                      />
-                      {errors.payment_full_payment && (
-                        <p className="text-error-darkest text-xs mt-1">
-                          {errors.payment_full_payment}
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 {/* Monthly Subscription */}
                 <div className="border border-border-light rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="flex items-center space-x-2">
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center space-x-2 w-48">
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="payment_option"
                         checked={formData.payment_options[1].enabled}
-                        onChange={(e) =>
-                          updatePaymentOption(1, "enabled", e.target.checked)
-                        }
-                        className="w-4 h-4 text-[#F3BC48] border-border-light rounded focus:ring-btn-gold"
+                        onChange={() => {
+                          // Disable all other options
+                          [0, 2, 3, 4, 5].forEach((i) => {
+                            updatePaymentOption(i, "enabled", false);
+                          });
+                          // Enable this option
+                          updatePaymentOption(1, "enabled", true);
+                        }}
+                        className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
                       />
                       <span className="font-semibold text-heading-dark font-manrope">
                         Monthly Subscription
                       </span>
                     </label>
+                    {formData.payment_options[1].enabled && (
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData.payment_options[1].price}
+                          onChange={(e) =>
+                            updatePaymentOption(1, "price", e.target.value)
+                          }
+                          className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                          style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                          placeholder="69.00"
+                        />
+                        {errors.payment_monthly_subscription && (
+                          <p className="text-error-darkest text-xs mt-1">
+                            {errors.payment_monthly_subscription}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {formData.payment_options[1].enabled && (
-                    <div>
-                      <label className="block text-sm font-medium text-heading-dark font-manrope mb-1">
-                        Monthly Price <span className="text-btn-gold">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={formData.payment_options[1].price}
-                        onChange={(e) =>
-                          updatePaymentOption(1, "price", e.target.value)
-                        }
-                         className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                        style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
-                        placeholder="69.00"
-                      />
-                      {errors.payment_monthly_subscription && (
-                        <p className="text-error-darkest text-xs mt-1">
-                          {errors.payment_monthly_subscription}
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </div>
 
-                {/* Installments */}
+                {/* Installment Plans */}
                 <div className="border border-border-light rounded-lg p-4">
                   <h4 className="font-semibold text-heading-dark font-manrope mb-3">
                     Installment Plans
@@ -568,18 +805,22 @@ export default function ClassFormModal({
                       { index: 5, label: "6 Months", type: "installment_6" },
                     ].map(({ index, label, type }) => (
                       <div key={index} className="flex items-center gap-4">
-                        <label className="flex items-center space-x-2 w-32">
+                        <label className="flex items-center space-x-2 w-48">
                           <input
-                            type="checkbox"
+                            type="radio"
+                            name="payment_option"
                             checked={formData.payment_options[index].enabled}
-                            onChange={(e) =>
-                              updatePaymentOption(
-                                index,
-                                "enabled",
-                                e.target.checked
-                              )
-                            }
-                            className="w-4 h-4 text-[#F3BC48] border-border-light rounded focus:ring-btn-gold"
+                            onChange={() => {
+                              // Disable all other options (including Pay in Full and Monthly)
+                              [0, 1, 2, 3, 4, 5].forEach((i) => {
+                                if (i !== index) {
+                                  updatePaymentOption(i, "enabled", false);
+                                }
+                              });
+                              // Enable the selected one
+                              updatePaymentOption(index, "enabled", true);
+                            }}
+                            className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
                           />
                           <span className="text-sm font-medium font-manrope text-heading-dark">
                             {label}
@@ -599,8 +840,8 @@ export default function ClassFormModal({
                                   e.target.value
                                 )
                               }
-                               className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                        style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                              style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
                               placeholder="Monthly payment"
                             />
                             {errors[`payment_${type}`] && (
@@ -614,6 +855,94 @@ export default function ClassFormModal({
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Class Image/Logo Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                Class Image/Logo
+              </h3>
+
+              <div>
+                <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  Upload Image
+                </label>
+                <div className="mt-1 flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        updateField("class_image", file);
+                      }
+                    }}
+                    className="block w-full text-sm text-gray-900 border border-border-light rounded-[12px] cursor-pointer bg-gray-50 focus:outline-none px-3 py-2"
+                  />
+                </div>
+
+                {formData.class_image && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-16 w-16 rounded-lg border border-border-light overflow-hidden">
+                      {typeof formData.class_image === 'string' ? (
+                        <img src={formData.class_image} alt="Class" className="h-full w-full object-cover" />
+                      ) : (
+                        <img src={URL.createObjectURL(formData.class_image)} alt="Class preview" className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => updateField("class_image", null)}
+                      className="text-sm text-btn-gold hover:text-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                <p className="text-xs text-gray-600 mt-1">
+                  Recommended: Square image, min 400x400px
+                </p>
+              </div>
+            </div>
+
+            {/* Website Link Section */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                Additional Information
+              </h3>
+
+              <div>
+                <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  Class Website/Info Link
+                </label>
+                <input
+                  type="url"
+                  value={formData.website_link}
+                  onChange={(e) => updateField("website_link", e.target.value)}
+                  className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
+                    errors.website_link ? "border-btn-gold" : "border-border-light"
+                  }`}
+                  style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                  placeholder="https://example.com/class-info"
+                />
+                {errors.website_link && (
+                  <p className="text-error-darker font-manrope text-xs mt-1">
+                    {errors.website_link}
+                  </p>
+                )}
+
+                {formData.website_link && !errors.website_link && (
+                  <a
+                    href={formData.website_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-btn-secondary hover:underline mt-1 inline-block"
+                  >
+                    Preview link →
+                  </a>
+                )}
               </div>
             </div>
           </div>

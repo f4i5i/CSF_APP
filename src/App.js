@@ -26,6 +26,8 @@ import AddStudent from './components/AddStudent'
 import Waivers from './pages/Waivers'
 import ProgramOverview from './pages/ProgramOverview'
 import Checkout from './pages/CheckOut'
+import PaymentSuccess from './pages/PaymentSuccess'
+import PaymentCancel from './pages/PaymentCancel'
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
@@ -38,6 +40,8 @@ import Waitlist from './pages/AdminDashboard/Waitlist'
 import Invoices from './pages/AdminDashboard/Invoices'
 import Resgister from './pages/AdminDashboard/Resgister'
 import ClassList from './pages/AdminDashboard/ClassList'
+import WaiversManagement from './pages/admin/WaiversManagement'
+import WaiverReports from './pages/admin/WaiverReports'
 
 export default function App(){
 return (
@@ -101,6 +105,8 @@ return (
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/classes" element={<AdminClasses />} />
+        <Route path="/admin/waivers" element={<WaiversManagement />} />
+        <Route path="/admin/waiver-reports" element={<WaiverReports />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/calendar" element={<Calender />} />
         <Route path="/financials" element={<Financials />} />
@@ -206,8 +212,11 @@ return (
   <Elements stripe={stripePromise}>
     <Checkout />
   </Elements>
-} /> 
+} />
 
+{/* Payment result pages */}
+<Route path="/payment/success" element={<PaymentSuccess />} />
+<Route path="/payment/cancel" element={<PaymentCancel />} />
 
 <Route path="/registerchild" element={
   <ProtectedRoute>
