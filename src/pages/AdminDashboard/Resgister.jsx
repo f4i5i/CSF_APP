@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 
 export default function Resgister() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
-      <div
-        className="w-full max-w-[790px] bg-[#FFFFFF80] rounded-3xl  pt-[30px] pb-[13px] shadow-lg"
-        style={{ boxShadow: "0 10px 40px rgba(16,24,40,0.08)" }}
-      >
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] relative">
+      {/* <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div> */}
+
+      <div className="w-full max-w-[790px] bg-[#FFFFFF80] rounded-3xl  pt-[30px] pb-[13px]">
         <div className="flex flex-col items-center gap-2">
           {/* <Logo /> */}
           <img

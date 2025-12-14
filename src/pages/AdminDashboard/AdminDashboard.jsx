@@ -59,25 +59,24 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen max-sm:h-fit  opacity-8 max-sm:pb-20">
+    <div className="min-h-screen max-sm:h-fit  opacity-8 max-sm:pb-20 bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8">
       <Header />
       <div
-        className="max-w-9xl sm:px-6 px-3 py-8 max-sm:py-2 rounded-lg border border-border-light  bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]"
-        style={{ boxShadow: "0 5px 20px 0 rgb(0 0 0 / 0.05)" }}
+        className="max-w-9xl sm:px-6 px-3 pb-8 max-sm:py-2 rounded-lg "
       >
         <div className="flex items-center justify-between mb-6 gap-4">
           <div className="flex flex-col gap-2">
-            <div className="text-fluid-2xl text-text-primary font-normal font-kollektif flex items-center gap-2">
+            <div className="lg:text-[46px] text-[20px] md:text-[30px] text-text-primary font-normal font-kollektif flex items-center gap-2">
               Welcome back, Admin! 👋
             </div>
             {/* locations and active students */}
-            <p className="text-heading-dark font-manrope font-medium text-base">
+            <p className="text-heading-dark font-manrope font-medium md:text-base text-xs">
               Managing 3 locations • 45 active students
             </p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-kollektif font-semibold text-heading-dark">50</p>
-            <p className="text-sm font-manrope text-neutral-main">
+            <p className="lg:text-[30px] text-[18px] md:text-[24px] font-kollektif font-semibold text-heading-dark">50</p>
+            <p className="sm:text-sm text-xs font-manrope text-neutral-main">
               Checked In Today
             </p>
           </div>

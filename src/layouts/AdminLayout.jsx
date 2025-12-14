@@ -16,8 +16,8 @@ export default function AdminLayout(){
       {/* Sidebar area (fixed on desktop) */}
       <div className={`hidden md:block`}>
         <div
-          className={`fixed left-0 top-0 h-screen p-4 transition-all z-40 ${
-            collapsed ? "w-20" : "w-64"
+          className={`fixed left-0 top-0 h-screen transition-all z-40 ${
+            collapsed ? "w-[80px]" : "w-[270px]"
           }`}
         >
           <AdminSidebar collapsed={collapsed} setCollapsed={setCollapsed} onNavigate={handleNavigate} />

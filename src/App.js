@@ -117,7 +117,7 @@ return (
     <Gallery />
   </ProtectedRoute>
 } />
-<Route path="/resgister" element={
+<Route path="/home" element={
   // <ProtectedRoute>
     <Resgister />
   // </ProtectedRoute>

@@ -39,7 +39,7 @@ const CalenderMini = () => {
     <div className="rounded-3xl max-sm:py-1 w-full">
       <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4 ">Calendar</h2>
 
-      <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-fit">
+      <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm lg:w-fit w-full">
 
         {/* Month Header */}
         <div className="flex justify-between items-center mb-3">

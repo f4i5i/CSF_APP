@@ -13,7 +13,8 @@ import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
-import Header from "../../components/Header";
+import Header from "@/components/Header";
+import GenericButton from "@/components/GenericButton";
 
 export default function Classes() {
   const [classes, setClasses] = useState([]);
@@ -121,7 +122,19 @@ export default function Classes() {
     } finally {
       setLoading(false);
     }
-  };
+
+    setClasses(classesData);
+    setTotalItems(total);
+  } catch (error) {
+    console.error("Failed to fetch classes, using dummy data:", error);
+    toast.error("Failed to load classes, showing dummy data");
+    setClasses(dummyClasses);
+    setTotalItems(dummyClasses.length);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleCreateClass = () => {
     setModalMode("create");
@@ -198,7 +211,7 @@ export default function Classes() {
       key: "capacity",
       label: "Capacity",
       render: (value, row) => (
-        <div className="text-sm font-manrope text-text-primary">
+        <div className="text-sm font-manrope text-text-primary">flex items-center justify-end gap-2
           <span className="font-semibold text-text-primary">
             {row.current_enrollment || 0}
           </span>
@@ -239,12 +252,12 @@ export default function Classes() {
       align: "right",
       actions: (row) => [
         {
-          label: "Edit Class",
+          label: "Edit ",
           icon: Edit,
           onClick: () => handleEditClass(row),
         },
         {
-          label: "Delete Class",
+          label: "Delete ",
           icon: Trash2,
           variant: "destructive",
           onClick: () => {
@@ -313,17 +326,13 @@ export default function Classes() {
   };
 
   return (
-    <div
-      className="min-h-screen max-sm:h-fit  opacity-8 max-sm:pb-20"
-      
-    >
-               <Header />
+    <div className="min-h-screen  bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8">
+      <Header />
 
-      <div className="max-w-9xl sm:px-6 px-3 py-8 max-sm:py-2 rounded-lg border border-border-light  bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]"
-        style={{ boxShadow: "0 5px 20px 0 rgb(0 0 0 / 0.05)" }}>
-        <div className="mb-8 flex items-center justify-between">
+      <div className="max-w-9xl mx-auto sm:px-4 px-0">
+        <div className="mb-8 flex lg:flex-row flex-col  lg:items-center items-start lg:gap-0 gap-4  justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary font-kollektif">
+            <h1 className="lg:text-[46px] text-[20px] md:text-[30px] font-bold text-text-primary font-kollektif">
               Classes Management
             </h1>
             <p className="text-neutral-main font-manrope mt-1">
@@ -333,13 +342,12 @@ export default function Classes() {
 
           <button
             onClick={handleCreateClass}
-            className="flex items-center gap-2 font-manrope bg-btn-gold  text-text-body px-6 py-3 rounded-xl font-semibold transition-colors"
+            className="flex items-center gap-2 font-manrope bg-btn-gold  text-text-body px-6 py-3 rounded-lg font-semibold transition-colors"
           >
             <Plus className="w-5 h-5" />
             Create Class
           </button>
         </div>
-
         <FilterBar
           searchValue={searchQuery}
           searchPlaceholder="Search by class name or description..."
@@ -348,7 +356,6 @@ export default function Classes() {
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearFilters}
         />
-
         <DataTable
           columns={columns}
           data={classes}
@@ -380,4 +387,3 @@ export default function Classes() {
       />
     </div>
   );
-}

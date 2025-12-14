@@ -24,9 +24,9 @@ export default function GenericButton({
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-sm font-semibold",
-    lg: "px-5 py-3 text-base",
+    sm: "px-2 py-1.5 text-[10px]",
+    md: "px-2.5 py-2 text-[12px] ",
+    lg: "px-5 py-3 text-[16px]",
   };
 
   return (
