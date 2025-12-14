@@ -1,0 +1,173 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+const IconClock = ({ className = "w-4 h-4 text-gray-400" }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 6v6l4 2M12 3a9 9 0 110 18 9 9 0 010-18z"
+    />
+  </svg>
+);
+
+const IconCalendar = ({ className = "w-4 h-4 text-gray-400" }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={1.5}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+    />
+  </svg>
+);
+export default function ClassDetail() {
+  return (
+    <div className="min-h-screen flex items-start justify-center sm:p-6 p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+      <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-4 md:p-8 shadow-lg">
+        <div className="flex items-center justify-between mb-6 bg-white px-4 rounded-xl">
+          <div className="flex items-center gap-4 ">
+            <Link
+              to="/class-list"
+              className="rounded-full p-2 hover:bg-white/60"
+            >
+              <ArrowLeft className="text-[#00000099]" />
+            </Link>
+            <h1 className="text-xl font-semibold font-manrope text-text-primary">
+              Back to Available Classes
+            </h1>
+          </div>
+          <img
+            src="/images/logo.png"
+            alt="logo"
+            className="size-[80px] object-contain mix-blend-exclusion"
+          />
+        </div>
+
+        <div className="col-span-2  rounded-lg py-6">
+          <div className="flex flex-col md:flex-row items-start justify-center gap-4">
+            <img
+              src="/images/detail_page.png"
+              alt="class detail"
+              className="w-full sm:max-w-[327px] h-56 object-cover rounded-lg"
+            />
+            <div className="">
+              <h2 className="sm:text-[30px] text-[22px] mt-3 font-bold font-manrope text-text-primary">
+                Davidson Elementary - Grade 4
+              </h2>
+              <p className="mt-3 text-base leading-[28px] font-manrope text-text-muted">
+                Join us for an exciting semester of soccer skills and teamwork!
+                This class is designed specifically for 4th graders to develop
+                their fundamental techniques including dribbling, passing, and
+                shooting. ed.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row items-start gap-6 mt-6 w-full">
+            <div className="flex flex-col items-start gap-4 w-full sm:max-w-[60%]">
+              <div className=" w-full flex flex-col gap-4">
+                {/* location card */}
+                 <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
+                  <div className="flex items-center gap-4">
+                    <div className="sm:w-[190px] w-[130px] h-full  rounded-lg overflow-hidden flex-shrink-0">
+                      <iframe
+                        title="location-map"
+                        src="https://www.google.com/maps?q=635+South+St+Davidson+NC+28036&output=embed"
+                        className="w-full h-full border-0"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#f1b500]">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" fill="#f1b500"/>
+                          </svg>
+                        </div>
+                        <h4 className="font-bold text-lg font-manrope text-text-primary">Location</h4>
+                      </div>
+                      <p className="sm:text-base text-xs leading-[30px] font-manrope text-text-muted mt-2">
+                        Davidson Elementary School Field
+                        <br />
+                        635 South St, Davidson, NC 28036
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm ">
+                <h3 className="font-semibold font-manrope text-text-primary">
+                  Day & Time
+                </h3>
+
+                <div className="flex items-center gap-2 mt-2 ">
+                  <IconCalendar />
+                  <span className="text-text-muted font-manrope">
+                    Wednesdays, 3:00 PM - 4:00 PM
+                  </span>
+                </div>
+                <h5 className="font-semibold font-manrope text-text-primary mt-4">
+                  Age Group
+                </h5>
+
+                <div className="flex items-center gap-2 mt-2 ">
+                  <IconClock />{" "}
+                  <span className="text-text-muted font-manrope">
+                    9 - 10 Years Old (Grade 4)PM
+                  </span>
+                </div>
+              </div>
+            </div>
+            <aside className="bg-[#FFFFFF80] rounded-[20px] p-6 flex flex-col w-full sm:max-w-[40%]">
+              <div>
+                <div className="flex justify-between items-center w-full">
+                  <h4 className="font-bold text-lg font-manrope text-text-primary">
+                    Total Price
+                  </h4>
+                  <div className="mt-2 text-[32px] font-semibold font-manrope">
+                    $150
+                  </div>
+                </div>
+                <hr className="w-full border border-border-light my-2" />
+                <ul className="mt-6 space-y-2 font-manrope text-sm text-text-muted">
+                  <li className="font-manrope flex items-center gap-2">
+                    <img src="/images/price_info.png" alt="" />
+                    <span>Includes uniform kit</span>
+                  </li>
+                  <li className="font-manrope flex items-center gap-2">
+                    <img src="/images/price_info.png" alt="" />
+                    <span>15 weeks of training</span>
+                  </li>
+                  <li className="font-manrope flex items-center gap-2">
+                    <img src="/images/price_info.png" alt="" />
+                    <span>Certified coaching staff</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-6">
+                <Link
+                  to="/register"
+                  className="block w-full text-center px-4 py-3 bg-[#f1b500] hover:bg-[#e0a400] rounded-[12px] font-manrope font-semibold"
+                >
+                  Register Now
+                </Link>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

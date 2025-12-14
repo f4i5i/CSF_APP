@@ -18,10 +18,10 @@ const CustomEvent = ({ event }) => {
         ${isYellow ? 'bg-[#F3BC48] border-[#F3BC48] text-[#000]' : 'bg-[#173963] border-[#173963] text-white'}`}
       style={{ minWidth: '120px' }}
     >
-      <span className="font-['Inter'] text-[12px] font-medium tracking-[0.01em]">
+      <span className=" text-[12px] font-medium tracking-[0.01em] font-manrope">
         {event.title}
       </span>
-      <span className="font-['Inter'] text-[12px] font-medium tracking-[0.01em] opacity-90">
+      <span className="font-manrope text-[12px] font-medium tracking-[0.01em] opacity-90">
         {startTime} - {endTime}
       </span>
     </div>

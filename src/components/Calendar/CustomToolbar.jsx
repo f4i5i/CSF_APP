@@ -5,7 +5,7 @@ export default function CustomToolbar({ label, onNavigate }) {
     <div className="flex items-center justify-between px-4 pb-3 max-xxl:mb-0 mb-4">
       
       {/* Month - Year */}
-      <h2 className="text-xl font-semibold text-[#1D3557]">
+      <h2 className="text-xl font-semibold text-[#1D3557] font-manrope">
         {label}
       </h2>
 

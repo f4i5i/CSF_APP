@@ -30,24 +30,24 @@ export default function AccountTable({ data = [], allData = [] }) {
   };
 
   return (
-    <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow overflow-hidden">
+    <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow overflow-hidden font-manrope">
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-3">
           <label className="inline-flex items-center gap-2">
             <input
               type="checkbox"
-              className="w-4 h-4"
+              className="w-4 h-4 font-manrope"
               checked={selected.length === pageData.length && pageData.length > 0}
               onChange={toggleAll}
             />
-            <span className="text-sm text-gray-700">Select page</span>
+            <span className="text-sm text-gray-700 font-manrope">Select page</span>
           </label>
-          <div className="text-sm text-gray-500">{total} accounts</div>
+          <div className="text-sm text-gray-500 font-manrope">{total} accounts</div>
         </div>
 
         <div className="flex items-center gap-2">
           <select
-            className="border px-2 py-2 rounded text-sm bg-gray-50 "
+            className="border px-2 py-2 rounded text-sm bg-gray-50 font-manrope"
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
@@ -66,7 +66,7 @@ export default function AccountTable({ data = [], allData = [] }) {
       {/* Responsive table container */}
       <div className="w-full overflow-auto">
         <table className="min-w-[960px] w-full table-auto border-separate border-spacing-0">
-          <thead className="sticky top-0 bg-[#FFFFFF80] z-10">
+          <thead className="sticky top-0 bg-[#FFFFFF80] z-10 font-manrope">
             <tr>
               <th className="p-3 text-left">
                 <span className="sr-only">select</span>
@@ -87,7 +87,7 @@ export default function AccountTable({ data = [], allData = [] }) {
             {pageData.map((r) => (
               <tr
                 key={r.id}
-                className="hover:bg-gray-50 even:bg-gray-50/50 transition"
+                className="hover:bg-gray-50 even:bg-gray-50/50 transition font-manrope"
               >
                 <td className="p-3">
                   <input
@@ -110,8 +110,8 @@ export default function AccountTable({ data = [], allData = [] }) {
                 <td className="p-3 text-right">${Number(r.balance).toFixed(2)}</td>
                 <td className="p-3 text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <button  onClick={() => setShowFormAccount(r.id)} className="px-3 py-1 text-sm rounded bg-gray-50 border">Edit</button>
-                    <button className="px-3 py-1 text-sm rounded bg-[#E6F2FF] text-[#0F66B6]">Message</button>
+                    <button  onClick={() => setShowFormAccount(r.id)} className="px-3 py-1 text-sm rounded bg-gray-50 border font-manrope">Edit</button>
+                    <button className="px-3 py-1 text-sm rounded bg-[#E6F2FF] text-[#0F66B6] font-manrope">Message</button>
                   </div>
                 </td>
                  {/* Inline Edit Drawer (mobile-friendly) */}
@@ -123,7 +123,7 @@ export default function AccountTable({ data = [], allData = [] }) {
 
             {pageData.length === 0 && (
               <tr>
-                <td colSpan={10} className="p-6 text-center text-gray-500">
+                <td colSpan={10} className="p-6 text-center text-gray-500 font-manrope">
                   No accounts found.
                 </td>
               </tr>
@@ -134,7 +134,7 @@ export default function AccountTable({ data = [], allData = [] }) {
 
       <div className="mt-4 flex items-center justify-between">
         <Pagination page={page} setPage={setPage} pages={Math.max(1, Math.ceil(total / pageSize))} />
-        <div className="text-sm text-gray-500">Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}</div>
+        <div className="text-sm text-gray-500 font-manrope">Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}</div>
       </div>
     </div>
   );
@@ -148,7 +148,7 @@ function StatusBadge({ status }) {
       : status === "Inactive"
       ? "bg-gray-100 text-gray-700"
       : "bg-yellow-100 text-yellow-800";
-  return <span className={`px-2 py-1 rounded-full text-xs font-medium ${cls}`}>{status}</span>;
+  return <span className={`px-2 py-1 rounded-full font-manrope text-xs font-medium ${cls}`}>{status}</span>;
 }
 
 function formatDate(d) {
@@ -179,7 +179,7 @@ function AccountEditDrawer({ account, onClose }) {
  
          {/* HEADER */}
          <div className="flex items-center justify-between mb-4">
-           <h4 className="font-semibold text-lg">Edit Account — {account.id}</h4>
+           <h4 className="font-semibold text-lg font-manrope">Edit Account — {account.id}</h4>
            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Close</button>
          </div>
  
@@ -188,9 +188,9 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* FIRST NAME */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">First Name</label>
+             <label className="text-sm font-medium mb-1 font-manrope">First Name</label>
              <input
-               className="border p-2 rounded"
+               className="border p-2 rounded font-manrope"
                value={form.firstName}
                onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))}
              />
@@ -198,7 +198,7 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* LAST NAME */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">Last Name</label>
+             <label className="text-sm font-medium mb-1 font-manrope">Last Name</label>
              <input
                className="border p-2 rounded"
                value={form.lastName}
@@ -208,9 +208,9 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* EMAIL */}
            <div className="flex flex-col md:col-span-2">
-             <label className="text-sm font-medium mb-1">Email</label>
+             <label className="text-sm font-medium mb-1 font-manrope">Email</label>
              <input
-               className="border p-2 rounded"
+               className="border p-2 rounded font-manrope"
                value={form.email}
                onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))}
              />
@@ -218,7 +218,7 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* PHONE */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">Phone</label>
+             <label className="text-sm font-medium mb-1font-manrope">Phone</label>
              <input
                className="border p-2 rounded"
                value={form.phone}
@@ -228,7 +228,7 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* CLASS */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">Class</label>
+             <label className="text-sm font-medium mb-1 font-manrope">Class</label>
              <input
                className="border p-2 rounded"
                value={form.class}
@@ -238,10 +238,10 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* REG DATE */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">Registration Date</label>
+             <label className="text-sm font-medium mb-1 font-manrope">Registration Date</label>
              <input
                type="date"
-               className="border p-2 rounded"
+               className="border p-2 rounded font-manrope"
                value={form.reg_date}
                onChange={(e) => setForm((s) => ({ ...s, reg_date: e.target.value }))}
              />
@@ -249,10 +249,10 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* balance */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">Balance</label>
+             <label className="text-sm font-medium mb-1 font-manrope">Balance</label>
              <input
                type="date"
-               className="border p-2 rounded"
+               className="border p-2 rounded font-manrope"
                value={form.balance}
                onChange={(e) => setForm((s) => ({ ...s, balance: e.target.value }))}
              />
@@ -262,7 +262,7 @@ function AccountEditDrawer({ account, onClose }) {
  
            {/* STATUS */}
            <div className="flex flex-col">
-             <label className="text-sm font-medium mb-1">Account Status</label>
+             <label className="text-sm font-medium mb-1 font-manrope">Account Status</label>
              <select
                className="border p-2 rounded"
                value={form.status}
@@ -278,13 +278,13 @@ function AccountEditDrawer({ account, onClose }) {
              <button
                type="button"
                onClick={onClose}
-               className="px-4 py-2 rounded border bg-gray-100 hover:bg-gray-200"
+               className="px-4 py-2 rounded border bg-gray-100 hover:bg-gray-200 font-manrope"
              >
                Cancel
              </button>
              <button
                type="button"
-               className="px-4 py-2 rounded bg-[#F3BC48] text-white hover:bg-[#e2a73f]"
+               className="px-4 py-2 rounded bg-[#F3BC48] text-white hover:bg-[#e2a73f] font-manrope"
              >
                Save
              </button>

@@ -5,8 +5,8 @@ export default function ClientsHeader({ title, description, query, setQuery }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 className="text-3xl md:text-4xl font-bold text-[#173151]">{title}</h1>
-        <p className="text-sm text-gray-600 mt-1">{description}</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-[#173151] font-kollektif">{title}</h1>
+        <p className="text-sm text-gray-600 mt-1 font-manrope">{description}</p>
       </div>
 
       <div className="flex items-center gap-3">
@@ -16,7 +16,7 @@ export default function ClientsHeader({ title, description, query, setQuery }) {
             <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.6" />
           </svg>
           <input
-            className="w-full outline-none bg-transparent text-sm"
+            className="w-full outline-none font-manrope placeholder:font-manrope bg-transparent text-sm"
             placeholder="Search accounts, members or coach..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

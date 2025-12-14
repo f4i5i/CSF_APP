@@ -11,7 +11,7 @@ const StatCard = ({ title, items }) => {
         <div className="flex gap-4 mt-3">
           {Object.entries(items).map(([k, v]) => (
             <div key={k} className="text-center">
-              <p className="text-base font-semibold text-heading-dark">{v}</p>
+              <p className="text-base font-semibold font-manrope text-heading-dark">{v}</p>
               <p className="text-xs font-manrope text-neutral-main">{k}</p>
             </div>
           ))}

@@ -17,14 +17,14 @@ const formatDate = (date) =>
 const AttachmentChip = ({ label }) => (
   <div className="inline-flex items-center gap-2.5 bg-white/50 rounded-full px-5 py-2.5 text-black font-manrope font-medium text-sm opacity-70 w-fit">
     <Paperclip className="w-3 h-3" />
-    <span>{label}</span>
+    <span className='font-manrope'>{label}</span>
   </div>
 );
 
 const EmptyState = () => (
   <div className="w-full">
     <div className="bg-white/20 border border-white/20 rounded-fluid-md p-fluid-4 flex flex-col items-center justify-center text-center text-gray-500 min-h-fluid-event-card">
-      <p className="text-sm">No upcoming events scheduled</p>
+      <p className="text-sm font-manrope">No upcoming events scheduled</p>
     </div>
   </div>
 );
