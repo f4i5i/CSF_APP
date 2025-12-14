@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock, User } from "lucide-react";
 const IconClock = ({ className = "w-4 h-4 text-gray-400" }) => (
   <svg
     className={className}
@@ -75,10 +75,10 @@ export default function ClassDetail() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-start gap-6 mt-6 w-full">
-            <div className="flex flex-col items-start gap-4 w-full sm:max-w-[60%]">
+            <div className="flex flex-col items-start gap-4 w-full sm:max-w-[65%]">
               <div className=" w-full flex flex-col gap-4">
                 {/* location card */}
-                 <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
+                <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
                   <div className="flex items-center gap-4">
                     <div className="sm:w-[190px] w-[130px] h-full  rounded-lg overflow-hidden flex-shrink-0">
                       <iframe
@@ -91,11 +91,23 @@ export default function ClassDetail() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#f1b500]">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" fill="#f1b500"/>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="text-[#f1b500]"
+                          >
+                            <path
+                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+                              fill="#f1b500"
+                            />
                           </svg>
                         </div>
-                        <h4 className="font-bold text-lg font-manrope text-text-primary">Location</h4>
+                        <h4 className="font-bold text-lg font-manrope text-text-primary">
+                          Location
+                        </h4>
                       </div>
                       <p className="sm:text-base text-xs leading-[30px] font-manrope text-text-muted mt-2">
                         Davidson Elementary School Field
@@ -106,30 +118,53 @@ export default function ClassDetail() {
                   </div>
                 </div>
               </div>
-              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm ">
-                <h3 className="font-semibold font-manrope text-text-primary">
-                  Day & Time
-                </h3>
+              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col sm:flex-row gap-8">
+                <div className="">
+                  <h3 className="font-semibold font-manrope text-text-primary">
+                    Day & Time
+                  </h3>
 
-                <div className="flex items-center gap-2 mt-2 ">
-                  <IconCalendar />
-                  <span className="text-text-muted font-manrope">
-                    Wednesdays, 3:00 PM - 4:00 PM
-                  </span>
+                  <div className="flex items-center gap-2 mt-2 ">
+                    <Clock className="w-4 h-4 text-gray-400 " />
+                    <span className="text-text-muted text-[14px] font-manrope">
+                      Wednesdays, 3:00 PM - 4:00 PM
+                    </span>
+                  </div>
+                  <h5 className="font-semibold font-manrope text-text-primary mt-4">
+                    Age Group
+                  </h5>
+
+                  <div className="flex items-center gap-2 mt-2 ">
+                    <User className="w-4 h-4 text-gray-400 " />{" "}
+                    <span className="text-text-muted font-manrope">
+                      9 - 10 Years Old (Grade 4)PM
+                    </span>
+                  </div>
                 </div>
-                <h5 className="font-semibold font-manrope text-text-primary mt-4">
-                  Age Group
-                </h5>
+                <div className="">
+                  <h3 className="font-semibold font-manrope text-text-primary">
+                    Dates{" "}
+                  </h3>
 
-                <div className="flex items-center gap-2 mt-2 ">
-                  <IconClock />{" "}
-                  <span className="text-text-muted font-manrope">
-                    9 - 10 Years Old (Grade 4)PM
-                  </span>
+                  <div className="flex items-center gap-2 mt-2 ">
+                    <IconCalendar />
+                    <span className="text-text-muted text-[14px] font-manrope">
+                      Sep, 3:00 PM - 4:00 PM
+                    </span>
+                  </div>
+                  <h5 className="font-semibold font-manrope text-text-primary mt-4">
+                    Age Group
+                  </h5>
+
+                  <div className="flex items-center gap-2 mt-2 ">
+                    <span className="text-text-muted font-manrope">
+                      Coach Martinez{" "}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-            <aside className="bg-[#FFFFFF80] rounded-[20px] p-6 flex flex-col w-full sm:max-w-[40%]">
+            <aside className="bg-[#FFFFFF80] rounded-[20px] p-6 flex flex-col w-full sm:max-w-[35%]">
               <div>
                 <div className="flex justify-between items-center w-full">
                   <h4 className="font-bold text-lg font-manrope text-text-primary">
@@ -140,7 +175,7 @@ export default function ClassDetail() {
                   </div>
                 </div>
                 <hr className="w-full border border-border-light my-2" />
-                <ul className="mt-6 space-y-2 font-manrope text-sm text-text-muted">
+                <ul className="mt-6 space-y-4 font-manrope text-sm text-text-muted">
                   <li className="font-manrope flex items-center gap-2">
                     <img src="/images/price_info.png" alt="" />
                     <span>Includes uniform kit</span>
@@ -159,7 +194,7 @@ export default function ClassDetail() {
               <div className="mt-6">
                 <Link
                   to="/register"
-                  className="block w-full text-center px-4 py-3 bg-[#f1b500] hover:bg-[#e0a400] rounded-[12px] font-manrope font-semibold"
+                  className="block w-full text-center px-4 py-3 bg-[#f1b500] hover:bg-[#e0a400] rounded-[12px] font-manrope font-semibold mt-[21px]"
                 >
                   Register Now
                 </Link>

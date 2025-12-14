@@ -11,7 +11,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import ActionMenu from "./ActionMenu";
 import StatusBadge from "./StatusBadge";
 
 export default function DataTable({
@@ -52,8 +51,16 @@ export default function DataTable({
     });
   }, [data, sortColumn, sortDirection]);
 
+  // Determine data to display for current page (client-side pagination fallback)
+  const displayedData = React.useMemo(() => {
+    if (!pagination) return sortedData || [];
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = currentPage * itemsPerPage;
+    return (sortedData || []).slice(start, end);
+  }, [sortedData, pagination, currentPage, itemsPerPage]);
+
   // Pagination calculations
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = itemsPerPage ? Math.ceil(totalItems / itemsPerPage) : 1;
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -96,13 +103,42 @@ export default function DataTable({
     }
 
     // Actions menu
-    if (column.type === "actions" && column.actions) {
-      const actions =
-        typeof column.actions === "function"
-          ? column.actions(row)
-          : column.actions;
-      return <ActionMenu actions={actions} />;
-    }
+      if (column.type === "actions" && column.actions) {
+        const actions =
+          typeof column.actions === "function"
+            ? column.actions(row)
+            : column.actions;
+
+        return (
+          <div className="flex items-center justify-start gap-2">
+            {actions.map((action, i) => {
+              const Icon = action.icon;
+              const onClick = (e) => {
+                e.stopPropagation();
+                action.onClick && action.onClick();
+              };
+
+              const baseClass =
+                "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold transition";
+              const variantClass = action.variant === "destructive"
+                ? "bg-error-dark text-white hover:bg-red-700"
+                : "bg-btn-gold text-text-body hover:bg-btn-gold/90";
+
+              return (
+                <button
+                  key={i}
+                  onClick={onClick}
+                  className={`${baseClass} ${variantClass}`}
+                  type="button"
+                >
+                  {Icon && <Icon className="w-4 h-4 mr-2" />}
+                  <span className="whitespace-nowrap">{action.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      }
 
     // Default: text
     return value || "-";
@@ -171,9 +207,12 @@ export default function DataTable({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden">
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto pb-24 custom-scrollbar"
+        style={{ maxHeight: "calc(100vh - 240px)", overflowY: "auto" }}
+      >
         <table className="w-full">
           <thead className="bg-white border-b border-border-light">
             <tr>
@@ -210,7 +249,7 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border-light bg-white ">
-            {sortedData?.map((row, rowIndex) => (
+            {displayedData?.map((row, rowIndex) => (
               <tr
                 key={row.id || rowIndex}
                 onClick={() => onRowClick && onRowClick(row)}
@@ -237,42 +276,44 @@ export default function DataTable({
 
       {/* Pagination */}
       {pagination && totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-border-light flex items-center justify-between bg-white">
-          {/* Results info */}
-          <div className="text-sm text-text-muted font-semibold font-manrope">
-            Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}
-            <span className="font-bold text-text-primary">{endItem}</span> of{" "}
-            <span className="font-bold text-text-primary">{totalItems}</span> results
-          </div>
+        <div className="sm:absolute relative left-0 right-0 bottom-0 sm:z-10">
+          <div className="">
+            <div className="sm:px-6 px-2 py-4 border-t border-border-light flex items-center justify-between bg-white shadow-sm rounded-t-lg">
+              {/* Results info */}
+              <div className="text-sm text-text-muted font-semibold font-manrope">
+                Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}
+                <span className="font-bold text-text-primary">{endItem}</span> of{" "}
+                <span className="font-bold text-text-primary">{totalItems}</span> results
+              </div>
 
-          {/* Pagination Controls */}
-          <div className="flex items-center gap-2">
-            {/* Prev Button */}
-            <button
-              onClick={() => onPageChange && onPageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg transition
-          text-text-muted hover:bg-btn-gold/10
-          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+              {/* Pagination Controls */}
+              <div className="flex items-center gap-2">
+                {/* Prev Button */}
+                <button
+                  onClick={() => onPageChange && onPageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg transition
+              text-text-muted hover:bg-btn-gold/10
+              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
 
-            {/* Page Numbers */}
-            <div className="flex items-center gap-1 font-manrope">
-              {[...Array(totalPages)].map((_, index) => {
-                const page = index + 1;
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1 font-manrope">
+                  {[...Array(totalPages)].map((_, index) => {
+                    const page = index + 1;
 
-                if (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => onPageChange && onPageChange(page)}
-                      className={`
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => onPageChange && onPageChange(page)}
+                          className={`
                   px-3 py-1.5 rounded-lg text-sm font-semibold transition
                   ${
                     page === currentPage
@@ -280,35 +321,37 @@ export default function DataTable({
                       : "text-text-muted hover:bg-btn-gold/10 hover:text-heading-dark"
                   }
                 `}
-                    >
-                      {page}
-                    </button>
-                  );
-                } else if (
-                  page === currentPage - 2 ||
-                  page === currentPage + 2
-                ) {
-                  return (
-                    <span key={page} className="px-2 text-text-muted">
-                      •••
-                    </span>
-                  );
-                }
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return (
+                        <span key={page} className="px-2 text-text-muted">
+                          •••
+                        </span>
+                      );
+                    }
 
-                return null;
-              })}
+                    return null;
+                  })}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => onPageChange && onPageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg transition
+              text-text-muted hover:bg-btn-gold/10
+              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-
-            {/* Next Button */}
-            <button
-              onClick={() => onPageChange && onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-lg transition
-          text-text-muted hover:bg-btn-gold/10
-          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
           </div>
         </div>
       )}

@@ -32,15 +32,15 @@ export default function AccountTable({ data = [], allData = [] }) {
   return (
     <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow overflow-hidden font-manrope">
       <div className="flex items-center justify-between mb-4 gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex sm:flex-row flex-col sm:items-center items-start gap-3 ">
           <label className="inline-flex items-center gap-2">
             <input
               type="checkbox"
-              className="w-4 h-4 font-manrope"
+              className="sm:size-4 size-3 font-manrope"
               checked={selected.length === pageData.length && pageData.length > 0}
               onChange={toggleAll}
             />
-            <span className="text-sm text-gray-700 font-manrope">Select page</span>
+            <span className="sm:text-sm text-xs text-gray-700 font-manrope">Select page</span>
           </label>
           <div className="text-sm text-gray-500 font-manrope">{total} accounts</div>
         </div>

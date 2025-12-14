@@ -4,7 +4,7 @@ import React from "react";
 import baseLogo from "../assets/logo.png";
 
 import Logo from "./Logo";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   Home,
   Calendar,
@@ -124,14 +124,15 @@ const Header = () => {
           </button>
 
           <img
-            src="/images/logo.png"
+            src="/images/logo3.png"
             alt="Outline"
             className="size-[80px] object-contain mix-blend-exclusion mx-2"
           />
           <div className="md:hidden flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end ">
             <img
-              onClick={() => setOpen(!open)}
-              ref={dropdownRef}
+              onClick={() => {
+                navigate("/settings");
+              }}
               src={logo}
               alt="profile"
               className="w-fluid-avatar-lg h-fluid-avatar-lg rounded-full object-cover"
@@ -428,6 +429,16 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-1 cursor-pointer p-1 rounded-full pr-2">
           <div className="flex items-center gap-3 cursor-pointer">
             <img
+              onClick={() => {
+                navigate("/settings");
+              }}
+              src={logo}
+              alt="profile"
+              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover"
+            />
+          </div>
+          {/* <div className="flex items-center gap-3 cursor-pointer">
+            <img
               src={logo}
               alt="profile"
               className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover"
@@ -441,8 +452,8 @@ const Header = () => {
                 {user?.role || "User"}
               </p>
             </div>
-          </div>
-          <div className="relative">
+          </div> */}
+          {/* <div className="relative">
             <ChevronDown
               onClick={() => setOpen(!open)}
               size={24}
@@ -451,16 +462,16 @@ const Header = () => {
               } transition cursor-pointer text-black ml-2`}
             />
 
-            {/* <svg  onClick={() => setOpen(!open)}
+            <svg  onClick={() => setOpen(!open)}
         ref={dropdownRef} xmlns="http://www.w3.org/2000/svg" className="flex max-sm:hidden" viewBox="0 0 512 512" height="14" width="14"> <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>
-         */}
-          </div>
+        
+          </div> */}
 
           {/* MOBILE MENU BTN */}
         </div>
 
         {/* ✅ DROPDOWN PANEL */}
-        {open && (
+        {/* {open && (
           <div className="absolute right-8 top-24 w-48 bg-white shadow-xl rounded-xl border p-2 z-50">
             <MenuItem
               icon={User}
@@ -503,7 +514,7 @@ const Header = () => {
               }}
             />
           </div>
-        )}
+        )} */}
       </div>
 
       {/* mobile navbar */}

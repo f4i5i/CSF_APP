@@ -67,7 +67,7 @@ function CustomDropdown({ value, onChange, options, placeholder, error, renderOp
         }`}
         style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
       >
-        <span className={selectedOption ? "text-gray-900 font-manrope" : "text-gray-400 font-manrope"}>
+        <span className={`text-xs sm:text-base ${selectedOption ? "text-gray-900 font-manrope" : "text-gray-400 font-manrope"}`}>
           {displayText}
         </span>
         <motion.div
@@ -224,7 +224,7 @@ export default function ClassFormModal({
               <div className="grid grid-cols-2 gap-4">
                 {/* Class Name */}
                 <div className="col-span-2">
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Class Name <span className="text-btn-gold">*</span>
                   </label>
                   <input
@@ -246,7 +246,7 @@ export default function ClassFormModal({
 
                 {/* Description */}
                 <div className="col-span-2">
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Description
                   </label>
                   <textarea
@@ -317,7 +317,7 @@ export default function ClassFormModal({
               <div className="grid grid-cols-2 gap-4">
                 {/* Program */}
                 <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Program <span className="text-btn-gold">*</span>
                   </label>
                   <CustomDropdown
@@ -336,7 +336,7 @@ export default function ClassFormModal({
 
                 {/* Area */}
                 <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Area/Location <span className="text-btn-gold">*</span>
                   </label>
                   <CustomDropdown
@@ -387,7 +387,7 @@ export default function ClassFormModal({
 
                 {/* Capacity */}
                 <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Capacity <span className="text-btn-gold">*</span>
                   </label>
                   <input
@@ -413,7 +413,7 @@ export default function ClassFormModal({
                 {/* Age Range */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                       Min Age <span className="text-btn-gold">*</span>
                     </label>
                     <input
@@ -436,7 +436,7 @@ export default function ClassFormModal({
                     )}
                   </div>
                   <div>
-                    <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                       Max Age <span className="text-btn-gold">*</span>
                     </label>
                     <input
@@ -462,7 +462,7 @@ export default function ClassFormModal({
 
                 {/* Date Range */}
                 <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     Start Date <span className="text-btn-gold">*</span>
                   </label>
                   <input
@@ -484,7 +484,7 @@ export default function ClassFormModal({
                 </div>
 
                 <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                     End Date <span className="text-btn-gold">*</span>
                   </label>
                   <input
@@ -546,7 +546,7 @@ export default function ClassFormModal({
                 >
                   <div className="flex-1 grid sm:grid-cols-3 grid-cols-1 gap-3">
                     <div>
-                        <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                        <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                           Day of Week
                         </label>
                         <CustomDropdown
@@ -558,7 +558,7 @@ export default function ClassFormModal({
                         />
                     </div>
                     <div>
-                      <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                      <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                         Start Time
                       </label>
                       <input
@@ -572,7 +572,7 @@ export default function ClassFormModal({
                       />
                     </div>
                     <div>
-                      <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                      <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                         End Time
                       </label>
                       <input

@@ -19,7 +19,7 @@ export default function ExportButton({ itemsToExport = null, allData = [] }) {
   };
 
   return (
-    <button onClick={handleExport} className="sm:px-3 px-2 py-2 rounded border font-manrope bg-gray-50  sm:text-sm text-[10px]">
+    <button onClick={handleExport} className="sm:px-3 px-2 py-2 rounded-lg border font-manrope bg-gray-50  sm:text-sm text-[10px]">
       Export CSV
     </button>
   );

@@ -37,7 +37,7 @@ function CustomDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((s) => !s)}
-        className={`w-full sm:w-auto px-3 py-2  border  rounded-[12px] font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-btn-gold flex items-center justify-between bg-white transition-colors ${className} ${
+        className={`w-full lg:w-auto px-3 py-2  border  rounded-[12px] font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-btn-gold flex items-center justify-between bg-white transition-colors ${className} ${
           selected ? "border-border-light" : "border-border-light"
         }`}
         style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
@@ -104,7 +104,7 @@ export default function FilterBar({
 }) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1">
           <div className="relative">
