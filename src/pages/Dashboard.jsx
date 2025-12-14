@@ -378,10 +378,10 @@ export default function Dashboard() {
         </div>
 
         {/* Waivers Alert */}
-        {/* <WaiversAlert
-          pendingWaivers={pendingWaivers}
+        <WaiversAlert
+          pendingWaivers={pendingWaivers?.items || []}
           loading={loadingWaivers}
-        /> */}
+        />
 
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
           {/* Left Column - Announcements */}

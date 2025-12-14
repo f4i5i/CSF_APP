@@ -204,6 +204,18 @@ const discountsService = {
     });
     return data;
   },
+
+  /**
+   * Check sibling discount eligibility
+   * @param {string} childId - Child ID to check eligibility for
+   * @returns {Promise<Object>} Eligibility info {eligible: boolean, sibling_count: number, discount_percentage: number, discount_label: string}
+   */
+  async checkSiblingDiscount(childId) {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.DISCOUNTS.SIBLING_ELIGIBILITY(childId)
+    );
+    return data;
+  },
 };
 
 export default discountsService;

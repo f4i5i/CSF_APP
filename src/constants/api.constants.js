@@ -152,6 +152,7 @@ export const API_ENDPOINTS = {
   DISCOUNTS: {
     VALIDATE: '/discounts/validate', // Validate discount code
     MY_SCHOLARSHIPS: '/discounts/my-scholarships', // User's scholarships
+    SIBLING_ELIGIBILITY: (childId) => `/discounts/sibling-eligibility/${childId}`, // Check sibling discount eligibility
 
     // Discount Codes (ADMIN)
     CODES: '/discounts/codes',
@@ -166,9 +167,9 @@ export const API_ENDPOINTS = {
   // WAIVERS
   // ===================
   WAIVERS: {
-    REQUIRED: '/waivers/required', // Get required waivers (pending waivers)
-    PENDING: '/waivers/required', // Alias for required (pending waivers)
-    ACCEPT: '/waivers/accept', // Accept waiver
+    REQUIRED: '/waivers/required', // Get required waivers with acceptance status
+    PENDING: '/waivers/pending', // Get ONLY pending/unsigned waivers
+    ACCEPT: '/waivers/accept', // Accept single waiver
     MY_ACCEPTANCES: '/waivers/my-acceptances', // User's acceptances
     ACCEPTANCE_BY_ID: (id) => `/waivers/acceptances/${id}`,
 
