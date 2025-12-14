@@ -124,7 +124,7 @@ const Header = () => {
           </button>
 
           <img
-            src="/images/logo.png"
+            src="/images/logo3.png"
             alt="Outline"
             className="size-[80px] object-contain mix-blend-exclusion mx-2"
           />
