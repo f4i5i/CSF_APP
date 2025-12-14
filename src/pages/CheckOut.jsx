@@ -67,8 +67,9 @@ export default function CheckOut() {
       return;
     }
 
+    console.log('🔄 useEffect triggered - calling initializeCheckout');
     initializeCheckout(classId);
-  }, [classId]);
+  }, [classId, navigate, initializeCheckout]);
 
   // Handle discount application
   const handleApplyDiscount = async (code) => {
@@ -108,7 +109,11 @@ export default function CheckOut() {
   }
 
   // Show waitlist flow if class is full
+  console.log('🚨 CheckOut render - hasCapacity value:', hasCapacity, 'Type:', typeof hasCapacity);
+  console.log('🚨 CheckOut render - !hasCapacity evaluates to:', !hasCapacity);
+
   if (!hasCapacity) {
+    console.log('❌ SHOWING WAITLIST FLOW because hasCapacity is:', hasCapacity);
     return (
       <WaitlistFlow
         classData={classData}
@@ -117,6 +122,8 @@ export default function CheckOut() {
       />
     );
   }
+
+  console.log('✅ SHOWING NORMAL CHECKOUT FLOW because hasCapacity is:', hasCapacity);
 
   // Calculate totals for OrderSummary
   const classPrice = classData?.price || 0;
@@ -142,13 +149,13 @@ export default function CheckOut() {
           {/* Left Column - Main Checkout Flow */}
           <div className="lg:col-span-2 space-y-6">
             {/* Class Details */}
-            <ClassDetailsSummary classData={classData} />
+            <ClassDetailsSummary classData={classData} hasCapacity={hasCapacity} />
 
             {/* Child Selection */}
             <ChildSelector
               children={children}
-              selectedChildId={selectedChildId}
-              onSelectChild={selectChild}
+              selectedId={selectedChildId}
+              onSelect={selectChild}
               classData={classData}
             />
 
@@ -158,6 +165,7 @@ export default function CheckOut() {
                 selected={paymentMethod}
                 onSelect={selectPaymentMethod}
                 classPrice={classPrice}
+                classData={classData}
               />
             )}
 

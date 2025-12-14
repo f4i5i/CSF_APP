@@ -60,11 +60,22 @@ export const API_ENDPOINTS = {
   },
 
   // ===================
+  // SCHOOLS
+  // ===================
+  SCHOOLS: {
+    LIST: '/schools', // List all schools (public)
+    BY_ID: (id) => `/schools/${id}`, // Get school by ID
+    CREATE: '/schools', // Create school (ADMIN)
+    UPDATE: (id) => `/schools/${id}`, // Update school (ADMIN)
+    DELETE: (id) => `/schools/${id}`, // Delete school (ADMIN)
+  },
+
+  // ===================
   // CLASSES
   // ===================
   CLASSES: {
     LIST: '/classes', // List classes with filters (public)
-    BY_ID: (id) => `/classes/${id}`, // Get class details
+    BY_ID: (id) => `/classes/${id}`, // Get class details (includes schedule, capacity)
     CREATE: '/classes', // Create class (ADMIN)
     UPDATE: (id) => `/classes/${id}`, // Update class (ADMIN)
     DELETE: (id) => `/classes/${id}`, // Delete class (ADMIN)
@@ -104,10 +115,19 @@ export const API_ENDPOINTS = {
     MY: '/payments/my', // List user's payment history
     LIST: '/payments', // List all payments (ADMIN)
     BY_ID: (id) => `/payments/${id}`, // Get payment details
+    CREATE_INTENT: (orderId) => `/orders/${orderId}/pay`, // Create payment intent for order
+    CONFIRM: (paymentIntentId) => `/payments/${paymentIntentId}/confirm`, // Confirm payment
+    PROCESS: '/payments/process', // Process direct payment
     METHODS: '/payments/methods', // List saved payment methods
-    METHOD_BY_ID: (id) => `/payments/methods/${id}`, // Delete payment method
+    ADD_METHOD: '/payments/methods', // Add payment method
+    REMOVE_METHOD: (id) => `/payments/methods/${id}`, // Delete payment method
+    SET_DEFAULT_METHOD: (id) => `/payments/methods/${id}/default`, // Set default payment method
     SETUP_INTENT: '/payments/setup-intent', // Create SetupIntent for card saving
-    REFUND: '/payments/refund', // Create refund (ADMIN)
+    REFUND: (paymentId) => `/payments/${paymentId}/refund`, // Create refund
+    RECEIPT: (paymentId) => `/payments/${paymentId}/receipt`, // Get receipt
+    RECEIPT_PDF: (paymentId) => `/payments/${paymentId}/receipt/pdf`, // Download PDF receipt
+    STATS: '/payments/stats', // Payment statistics
+    VERIFY_STATUS: (paymentId) => `/payments/${paymentId}/verify`, // Verify payment status
   },
 
   // ===================

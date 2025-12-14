@@ -37,15 +37,16 @@ const paymentsService = {
    * Create payment intent
    * @param {Object} paymentData - Payment information
    * @param {string} paymentData.order_id - Order ID
-   * @param {number} paymentData.amount - Payment amount
+   * @param {number} paymentData.amount - Payment amount (not used, backend calculates from order)
    * @param {string} paymentData.payment_method - Payment method (card, ach, cash)
    * @param {string} [paymentData.description] - Payment description
    * @returns {Promise<Object>} Payment intent with client secret
    */
   async createIntent(paymentData) {
+    const { order_id, payment_method_id } = paymentData;
     const { data } = await apiClient.post(
-      API_ENDPOINTS.PAYMENTS.CREATE_INTENT,
-      paymentData
+      API_ENDPOINTS.PAYMENTS.CREATE_INTENT(order_id),
+      payment_method_id ? { payment_method_id } : {}
     );
     return data;
   },

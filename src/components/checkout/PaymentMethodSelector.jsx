@@ -6,8 +6,8 @@
 import React from 'react';
 import { CreditCard, RefreshCw, Calendar } from 'lucide-react';
 
-export default function PaymentMethodSelector({ selected, onSelect, classPrice = 0 }) {
-  const paymentMethods = [
+export default function PaymentMethodSelector({ selected, onSelect, classPrice = 0, classData }) {
+  const allPaymentMethods = [
     {
       id: 'full',
       name: 'Pay in Full',
@@ -15,6 +15,7 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
       description: 'Pay the full amount now',
       badge: null,
       price: classPrice,
+      enabled: true, // Always available
     },
     {
       id: 'subscribe',
@@ -22,7 +23,8 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
       icon: RefreshCw,
       description: 'Recurring monthly membership',
       badge: 'Auto-renew',
-      price: classPrice, // Backend will calculate monthly rate
+      price: classData?.membership_price || classPrice,
+      enabled: classData?.membership_price != null, // Only if membership_price is set
     },
     {
       id: 'installments',
@@ -31,8 +33,12 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
       description: 'Split payment over time',
       badge: 'Flexible',
       price: classPrice,
+      enabled: classData?.installments_enabled === true, // Only if explicitly enabled
     },
   ];
+
+  // Filter to only show enabled payment methods
+  const paymentMethods = allPaymentMethods.filter(method => method.enabled);
 
   return (
     <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">

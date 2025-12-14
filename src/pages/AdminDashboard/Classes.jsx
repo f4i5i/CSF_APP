@@ -10,6 +10,8 @@ import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import ClassFormModal from "../../components/admin/ClassFormModal";
 import classesService from "../../api/services/classes.service";
+import programsService from "../../api/services/programs.service";
+import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
 
 export default function Classes() {
@@ -19,6 +21,11 @@ export default function Classes() {
   const [programFilter, setProgramFilter] = useState("");
   const [areaFilter, setAreaFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  // Filter options from API
+  const [programs, setPrograms] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -35,39 +42,72 @@ export default function Classes() {
     action: null,
   });
 
+  // Fetch filter options on mount
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
+
+  // Fetch classes when filters change
   useEffect(() => {
     fetchClasses();
   }, [currentPage, programFilter, areaFilter, statusFilter, searchQuery]);
-  
+
+  const fetchFilterOptions = async () => {
+    setFiltersLoading(true);
+    try {
+      const [programsData, areasData] = await Promise.all([
+        programsService.getAll(),
+        areasService.getAll(),
+      ]);
+
+      // Handle different response structures
+      const programsList = Array.isArray(programsData)
+        ? programsData
+        : (programsData.items || programsData.data || []);
+
+      const areasList = Array.isArray(areasData)
+        ? areasData
+        : (areasData.items || areasData.data || []);
+
+      setPrograms(programsList);
+      setAreas(areasList);
+    } catch (error) {
+      console.error('Failed to fetch filter options:', error);
+      toast.error('Failed to load filter options');
+      setPrograms([]);
+      setAreas([]);
+    } finally {
+      setFiltersLoading(false);
+    }
+  };
+
 
   const fetchClasses = async () => {
     setLoading(true);
     try {
-      const response = await classesService.getAll({
-        page: currentPage,
+      // Calculate skip for pagination (backend uses skip/limit, not page)
+      const skip = (currentPage - 1) * itemsPerPage;
+
+      // Build filter params (only include non-empty values)
+      const params = {
+        skip,
         limit: itemsPerPage,
-        program_id: programFilter,
-        area_id: areaFilter,
-        is_active: statusFilter,
-        search: searchQuery,
-      });
+      };
 
-      // Handle different response structures
-      let classesData = [];
-      let total = 0;
+      if (programFilter) params.program_id = programFilter;
+      if (areaFilter) params.area_id = areaFilter;
+      if (searchQuery) params.search = searchQuery;
 
-      if (Array.isArray(response)) {
-        // Response is directly an array
-        classesData = response;
-        total = response.length;
-      } else if (response && Array.isArray(response.data)) {
-        // Response has a data property that is an array
-        classesData = response.data;
-        total = response.total || response.data.length;
-      } else if (response && response.data) {
-        // Response.data exists but might be an object with items
-        classesData = Array.isArray(response.data.items) ? response.data.items : [];
-        total = response.data.total || response.total || classesData.length;
+      const response = await classesService.getAll(params);
+
+      // Backend returns: { items: [], total: number, skip: number, limit: number }
+      let classesData = response.items || [];
+      let total = response.total || 0;
+
+      // Filter by active status on frontend if needed
+      if (statusFilter !== "") {
+        const isActive = statusFilter === "true";
+        classesData = classesData.filter((c) => c.is_active === isActive);
       }
 
       setClasses(classesData);
@@ -75,7 +115,7 @@ export default function Classes() {
     } catch (error) {
       console.error('Failed to fetch classes:', error);
       toast.error('Failed to load classes');
-      setClasses([]); // Ensure classes is always an array
+      setClasses([]);
       setTotalItems(0);
     } finally {
       setLoading(false);
@@ -227,8 +267,12 @@ export default function Classes() {
       onChange: setProgramFilter,
       options: [
         { value: "", label: "All Programs" },
-        // TODO: Fetch actual programs from API
+        ...programs.map((program) => ({
+          value: program.id,
+          label: program.name,
+        })),
       ],
+      disabled: filtersLoading,
     },
     {
       type: "select",
@@ -237,8 +281,12 @@ export default function Classes() {
       onChange: setAreaFilter,
       options: [
         { value: "", label: "All Areas" },
-        // TODO: Fetch actual areas from API
+        ...areas.map((area) => ({
+          value: area.id,
+          label: area.name,
+        })),
       ],
+      disabled: filtersLoading,
     },
     {
       type: "select",

@@ -18,7 +18,7 @@ const waitlistService = {
     if (filters.search) params.append('search', filters.search);
     if (filters.status) params.append('status', filters.status);
 
-    const response = await apiClient.get(`/api/v1/waitlist?${params.toString()}`);
+    const response = await apiClient.get(`/waitlist?${params.toString()}`);
     return response.data;
   },
 
@@ -28,7 +28,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   getById: async (id) => {
-    const response = await apiClient.get(`/api/v1/waitlist/${id}`);
+    const response = await apiClient.get(`/waitlist/${id}`);
     return response.data;
   },
 
@@ -38,7 +38,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   add: async (data) => {
-    const response = await apiClient.post('/api/v1/waitlist', data);
+    const response = await apiClient.post('/waitlist', data);
     return response.data;
   },
 
@@ -49,7 +49,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   moveToEnrolled: async (id, options = {}) => {
-    const response = await apiClient.post(`/api/v1/waitlist/${id}/enroll`, options);
+    const response = await apiClient.post(`/waitlist/${id}/enroll`, options);
     return response.data;
   },
 
@@ -59,7 +59,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   remove: async (id) => {
-    const response = await apiClient.delete(`/api/v1/waitlist/${id}`);
+    const response = await apiClient.delete(`/waitlist/${id}`);
     return response.data;
   },
 
@@ -69,7 +69,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   notifyAvailable: async (id) => {
-    const response = await apiClient.post(`/api/v1/waitlist/${id}/notify`);
+    const response = await apiClient.post(`/waitlist/${id}/notify`);
     return response.data;
   },
 
@@ -79,7 +79,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   getPosition: async (id) => {
-    const response = await apiClient.get(`/api/v1/waitlist/${id}/position`);
+    const response = await apiClient.get(`/waitlist/${id}/position`);
     return response.data;
   },
 
@@ -89,7 +89,7 @@ const waitlistService = {
    * @returns {Promise}
    */
   getCountByClass: async (classId) => {
-    const response = await apiClient.get(`/api/v1/waitlist/class/${classId}/count`);
+    const response = await apiClient.get(`/waitlist/class/${classId}/count`);
     return response.data;
   },
 };
