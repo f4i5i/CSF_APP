@@ -13,7 +13,7 @@ import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
-import Header from "@/components/Header";
+import Header from "../../components/Header";
 
 export default function Classes() {
   const [classes, setClasses] = useState([]);

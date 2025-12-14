@@ -5,7 +5,7 @@ import { useClasses } from "../../api/hooks/classes/useClasses";
 import childrenService from "../../api/services/children.service";
 import waiversService from "../../api/services/waivers.service";
 import Logo from "../../components/Logo";
-import WaiverCheckModal from "../../components/WaiverCheckModal";
+import WaiverCheckModal from "../../components/checkout/WaiverCheckModal";
 
 export default function RegisterChild() {
   const navigate = useNavigate();

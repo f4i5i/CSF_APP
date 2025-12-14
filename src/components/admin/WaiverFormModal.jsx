@@ -8,7 +8,7 @@ import { X, Save, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import waiversService from '../../api/services/waivers.service';
 import { useApi } from '../../hooks';
-import { programsService, schoolsService } from '../../api/services';
+import { programsService } from '../../api/services';
 
 const WAIVER_TYPES = [
   { value: 'liability', label: 'Liability Waiver' },
@@ -27,18 +27,13 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
     is_active: true,
     is_required: true,
     applies_to_program_id: '',
-    applies_to_school_id: '',
   });
 
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Load programs and schools for scoping
+  // Load programs for scoping
   const { data: programs = [] } = useApi(() => programsService.getAll(), {
-    initialData: [],
-  });
-
-  const { data: schools = [] } = useApi(() => schoolsService.getAll(), {
     initialData: [],
   });
 
@@ -52,7 +47,6 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
         is_active: waiver.is_active !== undefined ? waiver.is_active : true,
         is_required: waiver.is_required !== undefined ? waiver.is_required : true,
         applies_to_program_id: waiver.applies_to_program_id || '',
-        applies_to_school_id: waiver.applies_to_school_id || '',
       });
     }
   }, [waiver]);
@@ -103,7 +97,6 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
         is_active: formData.is_active,
         is_required: formData.is_required,
         applies_to_program_id: formData.applies_to_program_id || null,
-        applies_to_school_id: formData.applies_to_school_id || null,
       };
 
       if (isEdit) {
@@ -160,9 +153,8 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
                     Waiver Template Guidelines
                   </p>
                   <ul className="text-sm text-blue-700 mt-2 space-y-1 list-disc list-inside">
-                    <li>Global waivers apply to all users (leave scope fields empty)</li>
+                    <li>Global waivers apply to all users (leave program field empty)</li>
                     <li>Program-specific waivers only apply to that program</li>
-                    <li>School-specific waivers only apply to that school</li>
                     <li>
                       Content changes will increment version and require users to re-sign
                     </li>
@@ -240,7 +232,7 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
             </div>
 
             {/* Scope (Optional) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               {/* Program Scope */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -256,29 +248,6 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
                   {programs.map((program) => (
                     <option key={program.id} value={program.id}>
                       {program.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Leave empty for global waiver
-                </p>
-              </div>
-
-              {/* School Scope */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Apply to School (Optional)
-                </label>
-                <select
-                  name="applies_to_school_id"
-                  value={formData.applies_to_school_id}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#173151] outline-none"
-                >
-                  <option value="">All Schools (Global)</option>
-                  {schools.map((school) => (
-                    <option key={school.id} value={school.id}>
-                      {school.name}
                     </option>
                   ))}
                 </select>
