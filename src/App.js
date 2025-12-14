@@ -26,6 +26,8 @@ import AddStudent from './components/AddStudent'
 import Waivers from './pages/Waivers'
 import ProgramOverview from './pages/ProgramOverview'
 import Checkout from './pages/CheckOut'
+import PaymentSuccess from './pages/PaymentSuccess'
+import PaymentCancel from './pages/PaymentCancel'
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
@@ -189,8 +191,11 @@ return (
   <Elements stripe={stripePromise}>
     <Checkout />
   </Elements>
-} /> 
+} />
 
+{/* Payment result pages */}
+<Route path="/payment/success" element={<PaymentSuccess />} />
+<Route path="/payment/cancel" element={<PaymentCancel />} />
 
 <Route path="/registerchild" element={
   <ProtectedRoute>
