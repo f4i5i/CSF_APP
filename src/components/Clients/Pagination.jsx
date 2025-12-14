@@ -12,11 +12,11 @@ export default function Pagination({ page, setPage, pages }) {
 
   return (
     <div className="flex items-center gap-2">
-      <button onClick={prev} className="px-3 py-1 rounded border bg-gray-50">Prev</button>
+      <button onClick={prev} className="px-3 py-1 rounded border bg-gray-50 font-manrope">Prev</button>
 
       {start > 1 && (
         <>
-          <button onClick={() => setPage(1)} className="px-3 py-1 rounded border bg-white">1</button>
+          <button onClick={() => setPage(1)} className="px-3 py-1 rounded border font-manrope bg-white">1</button>
           {start > 2 && <span className="px-2">…</span>}
         </>
       )}
@@ -25,7 +25,7 @@ export default function Pagination({ page, setPage, pages }) {
         <button
           key={n}
           onClick={() => setPage(n)}
-          className={`px-3 py-1 rounded ${n === page ? "bg-[#173151] text-white" : "bg-white border"}`}
+          className={`px-3 py-1 rounded ${n === page ? "bg-[#173151] font-manrope text-white" : "bg-white border"}`}
         >
           {n}
         </button>
@@ -34,11 +34,11 @@ export default function Pagination({ page, setPage, pages }) {
       {end < pages && (
         <>
           {end < pages - 1 && <span className="px-2">…</span>}
-          <button onClick={() => setPage(pages)} className="px-3 py-1 rounded border bg-white">{pages}</button>
+          <button onClick={() => setPage(pages)} className="px-3 py-1 rounded border bg-white font-manrope">{pages}</button>
         </>
       )}
 
-      <button onClick={next} className="px-3 py-1 rounded border bg-gray-50">Next</button>
+      <button onClick={next} className="px-3 py-1 rounded border bg-gray-50 font-manrope">Next</button>
     </div>
   );
 }

@@ -19,7 +19,7 @@ const StatsSidebar = ({ stats }) => {
           {stats.programs.map((p) => (
             <li key={p.name} className="flex justify-between items-center">
               <span className="text-sm text-neutral-main font-manrope">{p.name}</span>
-              <span className="text-sm font-semibold text-heading-dark">{p.count}</span>
+              <span className="text-sm font-semibold text-heading-dark font-manrope">{p.count}</span>
             </li>
           ))}
         </ul>

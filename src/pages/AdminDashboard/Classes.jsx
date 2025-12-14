@@ -13,6 +13,7 @@ import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
+import Header from "@/components/Header";
 
 export default function Classes() {
   const [classes, setClasses] = useState([]);
@@ -313,10 +314,13 @@ export default function Classes() {
 
   return (
     <div
-      className="min-h-screen  py-8 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]"
+      className="min-h-screen max-sm:h-fit  opacity-8 max-sm:pb-20"
       
     >
-      <div className="max-w-7xl mx-auto px-4">
+               <Header />
+
+      <div className="max-w-9xl sm:px-6 px-3 py-8 max-sm:py-2 rounded-lg border border-border-light  bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]"
+        style={{ boxShadow: "0 5px 20px 0 rgb(0 0 0 / 0.05)" }}>
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-text-primary font-kollektif">
@@ -329,7 +333,7 @@ export default function Classes() {
 
           <button
             onClick={handleCreateClass}
-            className="flex items-center gap-2 bg-btn-gold  text-text-body px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="flex items-center gap-2 font-manrope bg-btn-gold  text-text-body px-6 py-3 rounded-xl font-semibold transition-colors"
           >
             <Plus className="w-5 h-5" />
             Create Class

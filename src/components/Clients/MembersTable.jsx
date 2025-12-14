@@ -49,7 +49,7 @@ export default function MembersTable({ data = [], allData = [] }) {
   };
 
   return (
-    <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow overflow-hidden">
+    <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow overflow-hidden font-manrope">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <label className="inline-flex items-center gap-2">
@@ -59,14 +59,14 @@ export default function MembersTable({ data = [], allData = [] }) {
               checked={selected.length === pageData.length && pageData.length > 0}
               onChange={toggleAll}
             />
-            <span className="text-sm text-gray-700">Select page</span>
+            <span className="font-manrope text-sm text-gray-700">Select page</span>
           </label>
-          <div className="text-sm text-gray-500">{total} members</div>
+          <div className="text-sm text-gray-500 font-manrope">{total} members</div>
         </div>
 
         <div className="flex items-center gap-2">
           <select
-            className="border px-2 py-1 rounded text-sm"
+            className="border px-2 py-1 rounded text-sm font-manrope"
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
@@ -83,8 +83,8 @@ export default function MembersTable({ data = [], allData = [] }) {
       </div>
 
       <div className="w-full overflow-auto">
-        <table className="min-w-[960px] w-full table-auto border-separate border-spacing-0">
-          <thead className="sticky top-0 bg-[#FFFFFF80] z-10">
+        <table className="min-w-[960px] w-full table-auto border-separate border-spacing-0 font-manrope">
+          <thead className="sticky top-0 bg-[#FFFFFF80] z-10 font-manrope">
             <tr>
               <th className="p-3 text-left" />
               <th className="p-3 text-left">Last name</th>
@@ -102,14 +102,14 @@ export default function MembersTable({ data = [], allData = [] }) {
 
           <tbody>
             {pageData.map((r) => (
-              <tr key={r.id} className="hover:bg-gray-50 even:bg-gray-50/50 transition">
+              <tr key={r.id} className="hover:bg-gray-50 even:bg-gray-50/50 transition font-manrope">
                 <td className="p-3">
                   <input type="checkbox" className="w-4 h-4" checked={selected.includes(r.id)} onChange={() => toggle(r.id)} />
                 </td>
 
                 <td className="p-3">{r.lastName}</td>
                 <td className="p-3">{r.firstName}</td>
-                <td className="p-3 text-sm text-gray-700">{r.email}</td>
+                <td className="p-3 font-manrope text-sm text-gray-700">{r.email}</td>
                 <td className="p-3 text-sm">{r.phone}</td>
                 <td className="p-3"><StatusBadge status={r.status} /></td>
                 <td className="p-3">{r.class}</td>
@@ -136,7 +136,7 @@ export default function MembersTable({ data = [], allData = [] }) {
 
             {pageData.length === 0 && (
               <tr>
-                <td colSpan={10} className="p-6 text-center text-gray-500">No members found.</td>
+                <td colSpan={10} className="p-6 text-center text-gray-500 font-manrope">No members found.</td>
               </tr>
             )}
           </tbody>
@@ -198,9 +198,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* FIRST NAME */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">First Name</label>
+            <label className="text-sm font-medium mb-1 font-manrope ">First Name</label>
             <input
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.firstName}
               onChange={(e) => setForm((s) => ({ ...s, firstName: e.target.value }))}
             />
@@ -208,9 +208,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* LAST NAME */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Last Name</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Last Name</label>
             <input
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.lastName}
               onChange={(e) => setForm((s) => ({ ...s, lastName: e.target.value }))}
             />
@@ -218,9 +218,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* EMAIL */}
           <div className="flex flex-col md:col-span-2">
-            <label className="text-sm font-medium mb-1">Email</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Email</label>
             <input
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.email}
               onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))}
             />
@@ -228,9 +228,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* PHONE */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Phone</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Phone</label>
             <input
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.phone}
               onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))}
             />
@@ -238,9 +238,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* CLASS */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Class</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Class</label>
             <input
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.class}
               onChange={(e) => setForm((s) => ({ ...s, class: e.target.value }))}
             />
@@ -248,10 +248,10 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* REG DATE */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Registration Date</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Registration Date</label>
             <input
               type="date"
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.reg_date}
               onChange={(e) => setForm((s) => ({ ...s, reg_date: e.target.value }))}
             />
@@ -259,10 +259,10 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* DOB */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Date of Birth</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Date of Birth</label>
             <input
               type="date"
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.dob}
               onChange={(e) => setForm((s) => ({ ...s, dob: e.target.value }))}
             />
@@ -270,9 +270,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* JERSEY SIZE */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Jersey Size</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Jersey Size</label>
             <input
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.jersey_size}
               onChange={(e) => setForm((s) => ({ ...s, jersey_size: e.target.value }))}
             />
@@ -280,9 +280,9 @@ function MemberEditDrawer({ account, onClose }) {
 
           {/* STATUS */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Account Status</label>
+            <label className="text-sm font-medium mb-1 font-manrope">Account Status</label>
             <select
-              className="border p-2 rounded"
+              className="border p-2 rounded font-manrope"
               value={form.status}
               onChange={(e) => setForm((s) => ({ ...s, status: e.target.value }))}
             >

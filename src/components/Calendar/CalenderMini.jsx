@@ -37,13 +37,13 @@ const CalenderMini = () => {
 
   return (
     <div className="rounded-3xl max-sm:py-1 w-full">
-      <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4">Calendar</h2>
+      <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4 ">Calendar</h2>
 
       <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm w-fit">
 
         {/* Month Header */}
         <div className="flex justify-between items-center mb-3">
-          <span className="font-medium text-[#1B1B1B]">
+          <span className="font-medium text-[#1B1B1B] font-manrope">
             {new Date(currentYear, currentMonth).toLocaleString("default", {
               month: "short",
               year: "numeric",
@@ -61,16 +61,16 @@ const CalenderMini = () => {
         </div>
 
         {/* Days Header */}
-        <div className="grid grid-cols-7 text-center text-xs text-[#6F6F6F] mb-2">
+        <div className="grid grid-cols-7 text-center text-xs font-manrope text-[#6F6F6F] mb-2">
           {days.map((d) => (
-            <div key={d}>{d}</div>
+            <div className="font-manrope" key={d}>{d}</div>
           ))}
         </div>
 
         {/* Dates Grid */}
         <div className="grid grid-cols-7 text-center">
           {[...Array(startingIndex)].map((_, i) => (
-            <div key={i} className="text-[#6F6F6F]">.</div>
+            <div key={i} className="text-[#6F6F6F] ">.</div>
           ))}
 
           {[...Array(totalDays)].map((_, i) => {
@@ -92,7 +92,7 @@ const CalenderMini = () => {
                 onClick={() =>
                   setSelectedDay(new Date(currentYear, currentMonth, day))
                 }
-                className={`mx-auto w-9 h-9 flex items-center justify-center
+                className={`mx-auto w-9 h-9 font-manrope flex items-center justify-center
                 rounded-full cursor-pointer text-xs
                 ${
                   isSelected
@@ -112,7 +112,7 @@ const CalenderMini = () => {
       </div>
 
       {/* Selected Date Text */}
-      <p className="mt-6 text-[20px] font-kollektif text-[#1B1B1B]">
+      <p className="mt-6 text-[20px]  font-kollektif text-[#1B1B1B]">
         {selectedDay
           ? selectedDay.toLocaleDateString("en-US", {
               day: "numeric",

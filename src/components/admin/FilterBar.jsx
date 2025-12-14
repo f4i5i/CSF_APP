@@ -37,12 +37,12 @@ function CustomDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((s) => !s)}
-        className={`w-full sm:w-auto px-3 py-2  border rounded-[12px] font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-btn-gold flex items-center justify-between bg-white transition-colors ${className} ${
+        className={`w-full sm:w-auto px-3 py-2  border  rounded-[12px] font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-btn-gold flex items-center justify-between bg-white transition-colors ${className} ${
           selected ? "border-border-light" : "border-border-light"
         }`}
         style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
       >
-        <span className={selected ? "text-text-primary" : "text-heading-dark"}>
+        <span className={  selected ? "text-text-primary font-manrope" : "text-heading-dark font-manrope"}>
           {display}
         </span>
         <motion.span
@@ -77,7 +77,7 @@ function CustomDropdown({
                   onChange(val);
                   setIsOpen(false);
                 }}
-                className={`w-full px-4 py-2 text-left hover:bg-btn-gold hover:text-heading-dark transition-colors ${
+                className={`w-full px-4 py-2 text-left hover:bg-btn-gold font-manrope hover:text-heading-dark transition-colors ${
                   selectedMatch
                     ? "bg-btn-gold text-text-primary"
                     : "text-heading-dark"
@@ -114,7 +114,7 @@ export default function FilterBar({
               value={searchValue}
               onChange={(e) => onSearch(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full pl-10 pr-4 py-2 border border-border-light rounded-xl font-manrope text-sm focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48] outline-none"
+              className="w-full pl-10 pr-4 py-2 border border-border-light rounded-xl font-manrope placeholder:font-manrope text-sm focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48] outline-none"
               style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
             />
           </div>
@@ -135,7 +135,7 @@ export default function FilterBar({
                   placeholder={filter.placeholder || "All"}
                   className={`${
                     filter.icon ? "pl-10" : "pl-4"
-                  } pr-1 gap-7 py-2 border border-gray-300 rounded-lg font-manrope text-sm focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]`}
+                  } pr-1 gap-7 py-2 border border-gray-300  rounded-lg font-manrope text-sm focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]`}
                 />
               </div>
             )}
@@ -193,7 +193,7 @@ export default function FilterBar({
     <div className="flex items-center gap-2 px-3 py-1 
                     bg-btn-gold/10 text-heading-dark rounded-full 
                     text-xs font-manrope font-semibold transition-colors duration-200">
-      <Filter className="w-3 h-3 text-heading-dark" />
+      <Filter className="w-3 h-3 text-heading-dark font-manrope" />
       Filters Active
     </div>
   </div>
