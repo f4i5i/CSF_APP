@@ -1,12 +1,14 @@
 import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, Calendar, DollarSign, ChevronRight, PanelRightOpen, PanelLeftOpen } from "lucide-react";
+import { Home, BookOpen, Users, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen } from "lucide-react";
 import baseLogo from "../../assets/logo.png";
 import crown from "../../assets/Carolina.png";
 import logo from "../../assets/person.png";
 const routes = [
   { name: "Home", to: "/admin", icon: Home, end: true },
   { name: "Classes Management", to: "/admin/classes", icon: BookOpen },
+  { name: "Waivers", to: "/admin/waivers", icon: FileText },
+  { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3 },
   { name: "Clients", to: "/clients", icon: Users },
   { name: "Calender", to: "/calendar", icon: Calendar },
   { name: "Financials", to: "/financials", icon: DollarSign },

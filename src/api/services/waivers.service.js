@@ -196,6 +196,43 @@ const waiversService = {
       pending_count,
     };
   },
+
+  // ============== Admin Reporting Endpoints ==============
+
+  /**
+   * Get all waiver acceptances for reporting (admin)
+   * @param {Object} filters - { template_id, user_id }
+   * @returns {Promise<Object>} {items: [], total}
+   */
+  async getAcceptances(filters = {}) {
+    const { data } = await apiClient.get(`${API_ENDPOINTS.WAIVERS.BASE}/admin/acceptances`, {
+      params: filters,
+    });
+    return data;
+  },
+
+  /**
+   * Get waiver acceptance statistics (admin)
+   * @param {string} templateId
+   * @returns {Promise<Object>}
+   */
+  async getStats(templateId) {
+    const acceptances = await this.getAcceptances({ template_id: templateId });
+    const total = acceptances.total || 0;
+
+    // Group by version
+    const byVersion = {};
+    acceptances.items?.forEach((acc) => {
+      const version = acc.waiver_version || 1;
+      byVersion[version] = (byVersion[version] || 0) + 1;
+    });
+
+    return {
+      total_acceptances: total,
+      acceptances_by_version: byVersion,
+      latest_acceptance: acceptances.items?.[0],
+    };
+  },
 };
 
 export default waiversService;

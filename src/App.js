@@ -40,6 +40,8 @@ import Waitlist from './pages/AdminDashboard/Waitlist'
 import Invoices from './pages/AdminDashboard/Invoices'
 import Resgister from './pages/AdminDashboard/Resgister'
 import ClassList from './pages/AdminDashboard/ClassList'
+import WaiversManagement from './pages/admin/WaiversManagement'
+import WaiverReports from './pages/admin/WaiverReports'
 
 export default function App(){
 return (
@@ -103,6 +105,8 @@ return (
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/classes" element={<AdminClasses />} />
+        <Route path="/admin/waivers" element={<WaiversManagement />} />
+        <Route path="/admin/waiver-reports" element={<WaiverReports />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/calendar" element={<Calender />} />
         <Route path="/financials" element={<Financials />} />

@@ -3,9 +3,10 @@
  * Integrates all checkout components for class enrollment with Stripe payment
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useCheckoutFlow } from '../hooks/useCheckoutFlow';
+import waiversService from '../api/services/waivers.service';
 
 // Import all checkout components
 import CheckoutLoading from '../components/checkout/CheckoutLoading';
@@ -19,6 +20,7 @@ import InstallmentPlanSelector from '../components/checkout/InstallmentPlanSelec
 import DiscountCodeInput from '../components/checkout/DiscountCodeInput';
 import OrderSummary from '../components/checkout/OrderSummary';
 import StripePaymentForm from '../components/checkout/StripePaymentForm';
+import WaiverCheckModal from '../components/checkout/WaiverCheckModal';
 
 export default function CheckOut() {
   const [searchParams] = useSearchParams();
@@ -60,6 +62,11 @@ export default function CheckOut() {
   // State for discount loading
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
 
+  // State for waiver check
+  const [showWaiverModal, setShowWaiverModal] = useState(false);
+  const [waiversChecked, setWaiversChecked] = useState(false);
+  const [checkingWaivers, setCheckingWaivers] = useState(false);
+
   // Initialize checkout on mount
   useEffect(() => {
     if (!classId) {
@@ -70,6 +77,48 @@ export default function CheckOut() {
     console.log('🔄 useEffect triggered - calling initializeCheckout');
     initializeCheckout(classId);
   }, [classId, navigate, initializeCheckout]);
+
+  // Check for pending waivers when child is selected
+  const checkPendingWaivers = useCallback(async () => {
+    if (!selectedChildId || !classData || waiversChecked) {
+      return;
+    }
+
+    try {
+      setCheckingWaivers(true);
+      const response = await waiversService.getPending({
+        program_id: classData?.program?.id || classData?.program_id,
+        school_id: classData?.school?.id || classData?.school_id,
+      });
+
+      const pendingCount = response?.pending_count || 0;
+
+      if (pendingCount > 0) {
+        // Show waiver modal - blocks payment until signed
+        setShowWaiverModal(true);
+      } else {
+        // No pending waivers, mark as checked
+        setWaiversChecked(true);
+      }
+    } catch (error) {
+      console.error('Failed to check pending waivers:', error);
+      // Don't block checkout on error, but log it
+      setWaiversChecked(true);
+    } finally {
+      setCheckingWaivers(false);
+    }
+  }, [selectedChildId, classData, waiversChecked]);
+
+  // Run waiver check when child is selected
+  useEffect(() => {
+    checkPendingWaivers();
+  }, [checkPendingWaivers]);
+
+  // Handle waiver signing completion
+  const handleWaiversSigned = () => {
+    setWaiversChecked(true);
+    setShowWaiverModal(false);
+  };
 
   // Handle discount application
   const handleApplyDiscount = async (code) => {
@@ -159,8 +208,20 @@ export default function CheckOut() {
               classData={classData}
             />
 
-            {/* Payment Method Selection */}
-            {selectedChildId && (
+            {/* Waiver Check Notice (if checking) */}
+            {selectedChildId && checkingWaivers && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-r-transparent"></div>
+                  <p className="font-manrope text-sm text-blue-800">
+                    Checking for required waivers...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Method Selection (only show after waivers checked) */}
+            {selectedChildId && waiversChecked && (
               <PaymentMethodSelector
                 selected={paymentMethod}
                 onSelect={selectPaymentMethod}
@@ -281,6 +342,15 @@ export default function CheckOut() {
           </p>
         </div>
       </div>
+
+      {/* Waiver Check Modal */}
+      {showWaiverModal && classData && (
+        <WaiverCheckModal
+          classData={classData}
+          onClose={() => setShowWaiverModal(false)}
+          onWaiversSigned={handleWaiversSigned}
+        />
+      )}
     </div>
   );
 }
