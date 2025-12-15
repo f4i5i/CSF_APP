@@ -141,7 +141,7 @@ const Header = () => {
         </div>
 
         {/* MIDDLE NAVBAR */}
-        {/* {role === "parent" && (
+        {role === "parent" && (
           <nav>
             <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
               <li>
@@ -225,9 +225,9 @@ const Header = () => {
               </li>
             </ul>
           </nav>
-        )} */}
+        )}
 
-        {role === "admin" && (
+        {role === "ADMIN" && (
           <nav>
             <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
               <li>

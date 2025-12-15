@@ -13,8 +13,8 @@ import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
-import Header from "@/components/Header";
-import GenericButton from "@/components/GenericButton";
+import Header from "../../components/Header";
+import GenericButton from "../../components/GenericButton";
 
 export default function Classes() {
   const [classes, setClasses] = useState([]);
@@ -122,18 +122,7 @@ export default function Classes() {
     } finally {
       setLoading(false);
     }
-
-    setClasses(classesData);
-    setTotalItems(total);
-  } catch (error) {
-    console.error("Failed to fetch classes, using dummy data:", error);
-    toast.error("Failed to load classes, showing dummy data");
-    setClasses(dummyClasses);
-    setTotalItems(dummyClasses.length);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleCreateClass = () => {
@@ -387,3 +376,4 @@ export default function Classes() {
       />
     </div>
   );
+}

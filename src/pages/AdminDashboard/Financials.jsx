@@ -4,7 +4,7 @@ import RevenuePrograms from "../../components/Financial/RevenuePrograms";
 import RevenueClassChart from "../../components/Financial/RevenueClassChart";
 import RevenueAverage from "../../components/Financial/RevenueAverage";
 import Header from "../../components/Header";
-import GenericButton from "@/components/GenericButton";
+import GenericButton from "../../components/GenericButton";
 
 /**
  * Admin Financials Page

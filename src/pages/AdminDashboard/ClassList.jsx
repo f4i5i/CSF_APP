@@ -1,39 +1,10 @@
 import { ArrowLeft } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-
-const categories = ["Preschool", "Elementary", "TDC", "Camps", "Leagues"];
-
-const sampleClasses = [
-  {
-    id: 1,
-    title: "Davidson Elementary - Grade 4",
-    time: "Wednesdays @ 3:00 PM - 4:00 PM",
-    dates: "Sep 1, 2025 - Dec 15, 2025",
-    image: "/images/class_list1.png",
-  },
-  {
-    id: 2,
-    title: "Davidson Elementary - Grade 5",
-    time: "Thursdays @ 3:00 PM - 4:00 PM",
-    dates: "Sep 1, 2025 - Dec 15, 2025",
-    image: "/images/class_list2.png",
-  },
-  {
-    id: 3,
-    title: "Vance Academy - Grade 2",
-    time: "Tuesdays @ 4:00 PM - 5:00 PM",
-    dates: "Aug 20, 2025 - Dec 10, 2025",
-    image: "/images/class_list3.png",
-  },
-  {
-    id: 4,
-    title: "Cornelius Elementary - Grade 3",
-    time: "Thursdays @ 3:00 PM - 4:00 PM",
-    dates: "Sep 1, 2025 - Dec 15, 2025",
-    image: "/images/class_list4.png",
-  },
-];
+import React, { useMemo, useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import classesService from "../../api/services/classes.service";
+import programsService from "../../api/services/programs.service";
+import { useAuth } from "../../context/auth";
+import toast from "react-hot-toast";
 
 const IconClock = ({ className = "w-4 h-4 text-gray-400" }) => (
   <svg
@@ -68,21 +39,130 @@ const IconCalendar = ({ className = "w-4 h-4 text-gray-400" }) => (
 );
 
 export default function ClassList() {
-  const [active, setActive] = useState("Elementary");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth(); // Get auth state
+
+  const [classes, setClasses] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeProgram, setActiveProgram] = useState("");
   const [query, setQuery] = useState("");
 
+  // Get area from URL params
+  const areaId = searchParams.get('area');
+
+  // Fetch programs and classes on mount
+  useEffect(() => {
+    loadPrograms();
+    loadClasses();
+  }, []);
+
+  // Reload classes when filters change
+  useEffect(() => {
+    loadClasses();
+  }, [activeProgram, areaId]);
+
+  const loadPrograms = async () => {
+    try {
+      const response = await programsService.getAll();
+      const programsList = Array.isArray(response)
+        ? response
+        : (response.items || response.data || []);
+      setPrograms(programsList);
+    } catch (error) {
+      console.error('Failed to fetch programs:', error);
+      toast.error('Failed to load programs');
+    }
+  };
+
+  const loadClasses = async () => {
+    try {
+      setLoading(true);
+      const filters = {
+        is_active: true, // Only show active classes
+      };
+
+      if (areaId) {
+        filters.area_id = areaId;
+      }
+
+      if (activeProgram) {
+        filters.program_id = activeProgram;
+      }
+
+      const response = await classesService.getAll(filters);
+      const classList = response.items || response.data || [];
+      setClasses(classList);
+    } catch (error) {
+      console.error('Failed to fetch classes:', error);
+      toast.error('Failed to load classes');
+      setClasses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter classes by search query
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return sampleClasses.filter((c) =>
-      q ? c.title.toLowerCase().includes(q) : true
+    return classes.filter((c) =>
+      q ? c.name.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q) : true
     );
-  }, [query]);
+  }, [query, classes]);
+
+  // Handle register button click
+  const handleRegister = (classId) => {
+    // Check if user is logged in
+    if (!user) {
+      // Not logged in - save intended class and redirect to login
+      sessionStorage.setItem('intendedClass', classId);
+      toast('Please log in to register for this class');
+      navigate('/login');
+    } else {
+      // Logged in - go to checkout
+      navigate(`/checkout?classId=${classId}`);
+    }
+  };
+
+  // Format schedule display
+  const formatSchedule = (cls) => {
+    if (!cls.weekdays || cls.weekdays.length === 0) {
+      return 'Schedule TBD';
+    }
+
+    const days = cls.weekdays.map(day =>
+      day.charAt(0).toUpperCase() + day.slice(1, 3)
+    ).join(', ');
+
+    const time = cls.start_time && cls.end_time
+      ? `${cls.start_time} - ${cls.end_time}`
+      : '';
+
+    return `${days}${time ? ' @ ' + time : ''}`;
+  };
+
+  // Format dates display
+  const formatDates = (cls) => {
+    if (!cls.start_date || !cls.end_date) {
+      return 'Dates TBD';
+    }
+
+    const start = new Date(cls.start_date).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+    const end = new Date(cls.end_date).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+
+    return `${start} - ${end}`;
+  };
 
   return (
     <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
       <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 shadow-lg">
         <div className="flex items-center gap-2">
-          <button>
+          <button onClick={() => navigate('/home')}>
             <ArrowLeft  className="text-[#00000099] size-[16px]" />
           </button>
 
@@ -103,17 +183,27 @@ export default function ClassList() {
 
         <div className="mt-6 flex flex-col  items-start w-full justify-center gap-4">
           <div className="flex flex-wrap gap-2">
-            {categories.map((c) => (
+            <button
+              onClick={() => setActiveProgram("")}
+              className={`px-4 py-2 rounded-full text-sm font-semibold font-manrope transition-colors border ${
+                activeProgram === ""
+                  ? "bg-[#101D2E] text-white border-transparent"
+                  : "bg-white text-neutral-dark border-gray-200"
+              }`}
+            >
+              All Programs
+            </button>
+            {programs.map((program) => (
               <button
-                key={c}
-                onClick={() => setActive(c)}
+                key={program.id}
+                onClick={() => setActiveProgram(program.id)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold font-manrope transition-colors border ${
-                  active === c
+                  activeProgram === program.id
                     ? "bg-[#101D2E] text-white border-transparent"
                     : "bg-white text-neutral-dark border-gray-200"
                 }`}
               >
-                {c}
+                {program.name}
               </button>
             ))}
           </div>
@@ -123,7 +213,7 @@ export default function ClassList() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search"
+                placeholder="Search classes..."
                 className="w-full pl-10 pr-4 py-3 bg-[#FFFFFF66] outline-none rounded-full border font-manrope border-gray-200 text-base placeholder:font-medium placeholder:text-gray-600"
               />
               <svg
@@ -144,56 +234,60 @@ export default function ClassList() {
         </div>
 
         <div className="mt-6 space-y-4">
-          {filtered.map((cl, idx) => (
-            <div
-              key={cl.id}
-              className="flex flex-col md:flex-row items-stretch gap-4 bg-[#FFFFFF80] rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
-            >
-              <div className="w-full md:w-44 flex-shrink-0">
-                <Link to={`/class/${cl.id}`} className="block w-full h-full">
-                  <img
-                    src={cl.image}
-                    alt={cl.title}
-                    className="w-full h-32 md:h-full object-cover"
-                  />
-                </Link>
-              </div>
-
-              <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                   <Link to={`/class/${cl.id}`} className="hover:underline text-[23px] font-kollektif  text-text-primary">{cl.title}</Link>
-                  <div className="mt-2 flex  flex-col items-start gap-3 text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <IconClock />
-                      <span className="text-text-muted font-manrope">
-                        {cl.time}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                      <IconCalendar />
-                      <span className="text-text-muted font-manrope">
-                        {cl.dates}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 md:ml-6">
-                  <Link
-                    to="/register"
-                    className="inline-block font-manrope px-8 py-2 bg-[#f1b500] hover:bg-[#e0a400] text-sm font-semibold rounded-[8px] shadow-sm"
-                  >
-                    Register
-                  </Link>
-                </div>
-              </div>
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">
+              Loading classes...
             </div>
-          ))}
-
-          {filtered.length === 0 && (
+          ) : filtered.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               No classes found.
             </div>
+          ) : (
+            filtered.map((cls) => (
+              <div
+                key={cls.id}
+                className="flex flex-col md:flex-row items-stretch gap-4 bg-[#FFFFFF80] rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
+              >
+                <div className="w-full md:w-44 flex-shrink-0">
+                  <Link to={`/class-detail?id=${cls.id}`} className="block w-full h-full">
+                    <img
+                      src={cls.image_url || "/images/class_list1.png"}
+                      alt={cls.name}
+                      className="w-full h-32 md:h-full object-cover"
+                    />
+                  </Link>
+                </div>
+
+                <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                     <Link to={`/class-detail?id=${cls.id}`} className="hover:underline text-[23px] font-kollektif  text-text-primary">{cls.name}</Link>
+                    <div className="mt-2 flex  flex-col items-start gap-3 text-sm text-gray-500">
+                      <div className="flex items-center gap-2">
+                        <IconClock />
+                        <span className="text-text-muted font-manrope">
+                          {formatSchedule(cls)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                        <IconCalendar />
+                        <span className="text-text-muted font-manrope">
+                          {formatDates(cls)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 md:ml-6">
+                    <button
+                      onClick={() => handleRegister(cls.id)}
+                      className="inline-block font-manrope px-8 py-2 bg-[#f1b500] hover:bg-[#e0a400] text-sm font-semibold rounded-[8px] shadow-sm"
+                    >
+                      Register
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

@@ -641,7 +641,9 @@ export default function ClassFormModal({
                         error={errors.repeat_every_weeks}
                       />
                     </div>
-                    <span className="text-sm font-manrope text-heading-dark">weeks</span>
+                    <span className="text-sm font-manrope text-heading-dark">
+                      {formData.recurrence_pattern === 'monthly' ? 'months' : 'weeks'}
+                    </span>
                   </div>
                   {errors.repeat_every_weeks && (
                     <p className="text-error-darker font-manrope text-xs mt-1">

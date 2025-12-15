@@ -174,7 +174,8 @@ export default function RegisterChild() {
             'jersey_size': 'jersey',
             'name': 'emergencyName',
             'phone': 'emergencyPhone',
-            'relation': 'emergencyRelation'
+            'relation': 'emergencyRelation',
+            'how_heard_about_us': 'hearAbout'
           };
 
           const formField = fieldMap[field] || field;
@@ -448,13 +449,23 @@ export default function RegisterChild() {
             <label className="font-medium text-gray-700">
               How did you hear about us?
             </label>
-            <input
-              type="text"
+            <select
               name="hearAbout"
               value={form.hearAbout}
               onChange={handleChange}
               className={inputStyle("hearAbout")}
-            />
+            >
+              <option value="">Select an option</option>
+              <option value="friend">Friend/Word of Mouth</option>
+              <option value="social_media">Social Media (Facebook, Instagram, etc.)</option>
+              <option value="school">School</option>
+              <option value="flyer">Flyer</option>
+              <option value="google">Google Search</option>
+              <option value="other">Other</option>
+            </select>
+            {errors.hearAbout && (
+              <p className="text-red-500 text-xs mt-1">{errors.hearAbout}</p>
+            )}
           </div>
         </div>
 

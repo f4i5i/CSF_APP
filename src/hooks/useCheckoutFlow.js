@@ -270,17 +270,9 @@ export const useCheckoutFlow = () => {
         payment_method: 'card',
       });
 
-      // Check if backend returned a Stripe Checkout Session URL
-      // Backend now uses client_secret field to send the checkout URL
-      if (paymentIntent.client_secret && paymentIntent.client_secret.startsWith('http')) {
-        console.log('🔗 Redirecting to Stripe Checkout Session:', paymentIntent.client_secret);
-        // Redirect to Stripe's hosted checkout page
-        // All payment processing happens on Stripe's secure page
-        window.location.href = paymentIntent.client_secret;
-        return paymentIntent;
-      }
-
-      // Legacy: Payment Intent flow (keeping for backwards compatibility)
+      // Store the checkout URL in clientSecret
+      // The user will click a button to redirect manually
+      console.log('💳 Payment intent created, storing checkout URL for manual redirect');
       setState((prev) => ({
         ...prev,
         clientSecret: paymentIntent.client_secret,

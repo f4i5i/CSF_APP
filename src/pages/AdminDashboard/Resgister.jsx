@@ -1,7 +1,46 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import areasService from "../../api/services/areas.service";
+import toast from "react-hot-toast";
 
 export default function Resgister() {
+  const navigate = useNavigate();
+  const [areas, setAreas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch areas on mount
+  useEffect(() => {
+    loadAreas();
+  }, []);
+
+  const loadAreas = async () => {
+    try {
+      setLoading(true);
+      const response = await areasService.getAll();
+      // Handle different response structures
+      const areasList = Array.isArray(response)
+        ? response
+        : (response.items || response.data || []);
+      setAreas(areasList);
+    } catch (error) {
+      console.error('Failed to fetch areas:', error);
+      toast.error('Failed to load areas');
+      // Fallback to default areas if API fails
+      setAreas([
+        { id: "1", name: "Charlotte" },
+        { id: "2", name: "Triangle" },
+        { id: "3", name: "Greensboro" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAreaClick = (areaId) => {
+    // Navigate to class list with area filter
+    navigate(`/class-list?area=${areaId}`);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] relative">
       {/* <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div> */}
@@ -12,7 +51,7 @@ export default function Resgister() {
           <img
             src="/images/logo.png"
             alt="location"
-            className="size-[140px]  object-contain 
+            className="size-[140px]  object-contain
           mix-blend-exclusion"
           />
 
@@ -23,25 +62,26 @@ export default function Resgister() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4 items-center justify-center">
-          {[
-            { id: "charlotte", label: "Charlotte" },
-            { id: "triangle", label: "Triangle" },
-            { id: "greensboro", label: "Greensboro" },
-          ].map((area) => (
-            <button
-              key={area.id}
-              className="flex flex-col items-center justify-center w-full md:max-w-[225px]  gap-3 bg-[#FFFFFF80] rounded-[20px] py-[52px] shadow-sm text-center"
-            >
-              <img
-                src="/images/location.png"
-                alt="location"
-                className="size-[20px] "
-              />
-              <span className="text-lg font-kollektif font-bold text-text-primary">
-                {area.label}
-              </span>
-            </button>
-          ))}
+          {loading ? (
+            <div className="text-text-muted">Loading areas...</div>
+          ) : (
+            areas.map((area) => (
+              <button
+                key={area.id}
+                onClick={() => handleAreaClick(area.id)}
+                className="flex flex-col items-center justify-center w-full md:max-w-[225px]  gap-3 bg-[#FFFFFF80] rounded-[20px] py-[52px] shadow-sm text-center hover:bg-white transition-colors"
+              >
+                <img
+                  src="/images/location.png"
+                  alt="location"
+                  className="size-[20px] "
+                />
+                <span className="text-lg font-kollektif font-bold text-text-primary">
+                  {area.name}
+                </span>
+              </button>
+            ))
+          )}
         </div>
 
         <div className="mt-[70px] text-center">

@@ -84,12 +84,31 @@ export default function useClassForm(initialData = null, mode = 'create') {
   // Initialize form with existing class data when editing
   useEffect(() => {
     if (initialData && mode === 'edit') {
-      setFormData({
+      // Map backend data to form structure
+      const mappedData = {
         ...initialFormData,
         ...initialData,
+        // Extract IDs from nested objects
+        program_id: initialData.program?.id || initialData.program_id || '',
+        area_id: initialData.area?.id || initialData.area_id || '',
+        school_id: initialData.school?.id || initialData.school_id || '',
+        coach_id: initialData.coach?.id || initialData.coach_id || null,
+        // Handle schedule
         schedule: initialData.schedule || initialFormData.schedule,
+        // Handle payment options
         payment_options: initialData.payment_options || initialFormData.payment_options,
-      });
+        // Ensure dates are in proper format
+        start_date: initialData.start_date ? initialData.start_date.split('T')[0] : '',
+        end_date: initialData.end_date ? initialData.end_date.split('T')[0] : '',
+        registration_start_date: initialData.registration_start_date ? initialData.registration_start_date.split('T')[0] : '',
+        registration_end_date: initialData.registration_end_date ? initialData.registration_end_date.split('T')[0] : '',
+        // Ensure numeric fields are properly formatted
+        capacity: initialData.capacity?.toString() || '',
+        min_age: initialData.min_age?.toString() || '',
+        max_age: initialData.max_age?.toString() || '',
+      };
+
+      setFormData(mappedData);
     } else {
       setFormData(initialFormData);
     }

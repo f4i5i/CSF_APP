@@ -19,7 +19,6 @@ import PaymentMethodSelector from '../components/checkout/PaymentMethodSelector'
 import InstallmentPlanSelector from '../components/checkout/InstallmentPlanSelector';
 import DiscountCodeInput from '../components/checkout/DiscountCodeInput';
 import OrderSummary from '../components/checkout/OrderSummary';
-import StripePaymentForm from '../components/checkout/StripePaymentForm';
 import WaiverCheckModal from '../components/checkout/WaiverCheckModal';
 
 export default function CheckOut() {
@@ -249,17 +248,46 @@ export default function CheckOut() {
               />
             )}
 
-            {/* Stripe Payment Form (only when ready) */}
+            {/* Proceed to Stripe Checkout Button */}
             {selectedChildId &&
               paymentMethod &&
               (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
               clientSecret && (
-                <StripePaymentForm
-                  clientSecret={clientSecret}
-                  amount={orderTotal}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                />
+                <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
+                  <div className="text-center">
+                    <h3 className="text-fluid-lg font-semibold font-manrope text-[#173151] mb-2">
+                      Ready to Complete Payment
+                    </h3>
+                    <p className="text-sm font-manrope text-[#666D80] mb-6">
+                      Review your order summary on the right, then proceed to secure Stripe checkout
+                    </p>
+                    <button
+                      onClick={() => {
+                        // Redirect to Stripe Checkout Session URL
+                        window.location.href = clientSecret;
+                      }}
+                      className="w-full py-4 bg-[#F3BC48] hover:bg-[#e0a400] text-[#173151] font-manrope font-bold text-lg rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                      </svg>
+                      Proceed to Stripe Checkout
+                    </button>
+                    <p className="text-xs font-manrope text-[#666D80] mt-3">
+                      🔒 You'll be securely redirected to Stripe to complete your payment
+                    </p>
+                  </div>
+                </div>
               )}
 
             {/* Error Message (if any during checkout) */}

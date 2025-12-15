@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen } from "lucide-react";
+import { Home, BookOpen, Users, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen, LogOut } from "lucide-react";
 import baseLogo from "../../assets/logo.png";
 import crown from "../../assets/Carolina.png";
 import logo from "../../assets/person.png";
-import { useAuth } from "@/context/auth";
+import { useAuth } from "../../context/auth";
 const routes = [
   { name: "Home", to: "/admin", icon: Home, end: true },
   { name: "Classes Management", to: "/admin/classes", icon: BookOpen },
