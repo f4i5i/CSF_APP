@@ -167,6 +167,7 @@ export const API_ENDPOINTS = {
   // WAIVERS
   // ===================
   WAIVERS: {
+    BASE: '/waivers',
     REQUIRED: '/waivers/required', // Get required waivers with acceptance status
     PENDING: '/waivers/pending', // Get ONLY pending/unsigned waivers
     ACCEPT: '/waivers/accept', // Accept single waiver

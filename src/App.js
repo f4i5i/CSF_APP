@@ -74,7 +74,7 @@ return (
 
 <Routes>
 {/* Public marketing/overview page */}
-<Route path="/" element={<ProgramOverview />} />
+{/* <Route path="/" element={<ProgramOverview />} /> */}
 
 {/* Public auth routes share the AuthLayout shell */}
 <Route element={<AuthLayout />}>
@@ -117,20 +117,14 @@ return (
     <Gallery />
   </ProtectedRoute>
 } />
-<Route path="/home" element={
-  // <ProtectedRoute>
+<Route path="/" element={
     <Resgister />
-  // </ProtectedRoute>
 } />
 <Route path="/class-list" element={
-  // <ProtectedRoute>
     <ClassList />
-  // </ProtectedRoute>
 } />
 <Route path="/class-detail" element={
-  // <ProtectedRoute>
     <ClassDetail />
-  // </ProtectedRoute>
 } />
 
 <Route path="/Gallery" element={

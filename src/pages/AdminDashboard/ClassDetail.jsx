@@ -59,6 +59,18 @@ export default function ClassDetail() {
     try {
       setLoading(true);
       const data = await classesService.getById(classId);
+
+      // Construct school object from individual fields for backward compatibility
+      if (data.school_name && !data.school) {
+        data.school = {
+          name: data.school_name,
+          address: data.school_address || '',
+          city: data.school_city || '',
+          state: data.school_state || '',
+          zip_code: data.school_zip_code || '',
+        };
+      }
+
       setClassData(data);
     } catch (error) {
       console.error('Failed to fetch class details:', error);
@@ -170,37 +182,49 @@ export default function ClassDetail() {
               <div className=" w-full flex flex-col gap-4">
                 {/* location card */}
                 {classData.school && (
-                  <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
-                    <div className="flex items-center gap-4">
-                      <div className="sm:w-[190px] w-[130px] h-full  rounded-lg overflow-hidden flex-shrink-0">
-                        <iframe
-                          title="location-map"
-                          src={`https://www.google.com/maps?q=${encodeURIComponent(classData.school.address || '')}&output=embed`}
-                          className="w-full h-full border-0"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
-                            <MapPin className="w-4 h-4 text-[#f1b500]" />
-                          </div>
-                          <h4 className="font-bold text-lg font-manrope text-text-primary">
-                            Location
-                          </h4>
+                <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
+                  <div className="flex items-center gap-4">
+                    <div className="sm:w-[190px] w-[130px] h-full  rounded-lg overflow-hidden flex-shrink-0">
+                      <iframe
+                        title="location-map"
+                        src={`https://www.google.com/maps?q=${encodeURIComponent(classData.school.address || '')}&output=embed`}
+                        className="w-full h-full border-0"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="text-[#f1b500]"
+                          >
+                            <path
+                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+                              fill="#f1b500"
+                            />
+                          </svg>
                         </div>
-                        <p className="sm:text-base text-xs leading-[30px] font-manrope text-text-muted mt-2">
-                          {classData.school.name}
+                        <h4 className="font-bold text-lg font-manrope text-text-primary">
+                          Location
+                        </h4>
+                      </div>
+                      <p className="sm:text-base text-xs leading-[30px] font-manrope text-text-muted mt-2">
+                        {classData.school.name}
                           {classData.school.address && (
                             <>
-                              <br />
-                              {classData.school.address}
-                            </>
-                          )}
-                        </p>
-                      </div>
+                        <br />
+                        {classData.school.address}
+                        </>
+                        )}
+                      </p>
                     </div>
                   </div>
+                </div>
                 )}
               </div>
               <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col sm:flex-row gap-8">
@@ -239,16 +263,16 @@ export default function ClassDetail() {
                   </div>
                   {classData.coach && (
                     <>
-                      <h5 className="font-semibold font-manrope text-text-primary mt-4">
-                        Coach
-                      </h5>
+                  <h5 className="font-semibold font-manrope text-text-primary mt-4">
+                    Coach
+                  </h5>
 
-                      <div className="flex items-center gap-2 mt-2 ">
-                        <span className="text-text-muted font-manrope">
-                          {classData.coach.name || 'TBD'}
-                        </span>
-                      </div>
-                    </>
+                  <div className="flex items-center gap-2 mt-2 ">
+                    <span className="text-text-muted font-manrope">
+                      {classData.coach.name || 'TBD'}
+                    </span>
+                  </div>
+                   </>
                   )}
                 </div>
               </div>
@@ -267,15 +291,11 @@ export default function ClassDetail() {
                 <ul className="mt-6 space-y-4 font-manrope text-sm text-text-muted">
                   <li className="font-manrope flex items-center gap-2">
                     <img src="/images/price_info.png" alt="" />
-                    <span>Professional coaching</span>
+                    <span>15 weeks of training</span>
                   </li>
                   <li className="font-manrope flex items-center gap-2">
                     <img src="/images/price_info.png" alt="" />
-                    <span>Quality training equipment</span>
-                  </li>
-                  <li className="font-manrope flex items-center gap-2">
-                    <img src="/images/price_info.png" alt="" />
-                    <span>Safe and fun environment</span>
+                    <span>Certified coaching staff</span>
                   </li>
                 </ul>
                 {classData.capacity && classData.current_enrollment !== undefined && (

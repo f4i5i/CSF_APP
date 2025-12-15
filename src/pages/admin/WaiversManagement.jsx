@@ -35,17 +35,19 @@ const WaiversManagement = () => {
 
   // Fetch waivers
   const {
-    data: waivers = [],
+    data: waiversResponse,
     loading,
     error,
     refetch,
   } = useApi(
     () => waiversService.getTemplates({ include_inactive: true }),
     {
-      initialData: [],
-      transform: (data) => data?.items || data || [],
+      initialData: { items: [], total: 0 },
     }
   );
+
+  // Extract waivers from response
+  const waivers = waiversResponse?.items || [];
 
   // Filtered waivers
   const filteredWaivers = waivers.filter((waiver) => {
@@ -253,8 +255,8 @@ const WaiversManagement = () => {
 
           {/* Results count */}
           <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredWaivers.length} of {waivers.length} waiver
-            {waivers.length !== 1 ? 's' : ''}
+            Showing {filteredWaivers.length} of {waiversResponse?.total || 0} waiver
+            {(waiversResponse?.total || 0) !== 1 ? 's' : ''}
           </div>
         </div>
 

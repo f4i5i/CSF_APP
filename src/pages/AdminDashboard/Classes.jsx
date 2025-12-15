@@ -160,14 +160,24 @@ export default function Classes() {
     fetchClasses();
   };
 
-  const formatSchedule = (schedule) => {
-    if (!schedule || schedule.length === 0) return "No schedule";
-    return schedule
-      .map((s) => {
-        const day = s.day_of_week?.substring(0, 3).toUpperCase();
-        return `${day} ${s.start_time}-${s.end_time}`;
-      })
-      .join(", ");
+  const formatSchedule = (classData) => {
+    // Handle backend format: {weekdays: [...], start_time, end_time}
+    if (classData.weekdays && classData.weekdays.length > 0) {
+      const days = classData.weekdays.map(d => d.substring(0, 3).toUpperCase()).join(", ");
+      return `${days} ${classData.start_time || ''}-${classData.end_time || ''}`;
+    }
+
+    // Handle frontend/array format: [{day_of_week, start_time, end_time}]
+    if (classData.schedule && Array.isArray(classData.schedule) && classData.schedule.length > 0) {
+      return classData.schedule
+        .map((s) => {
+          const day = s.day_of_week?.substring(0, 3).toUpperCase();
+          return `${day} ${s.start_time}-${s.end_time}`;
+        })
+        .join(", ");
+    }
+
+    return "No schedule";
   };
 
   const columns = [
@@ -175,16 +185,46 @@ export default function Classes() {
       key: "name",
       label: "Class Name",
       sortable: true,
-      render: (value, row) => (
-        <div>
-          <p className="font-semibold font-manrope text-text-primary">
-            {value}
-          </p>
-          <p className="text-xs font-manrope text-text-muted">
-            {row.program?.name || "No Program"}
-          </p>
-        </div>
-      ),
+      render: (value, row) => {
+        const programName = row.program?.name || row.program_name;
+        const areaName = row.area?.name || row.area_name;
+
+        // Build subtitle parts
+        const parts = [];
+        if (programName) parts.push(programName);
+        if (areaName) parts.push(areaName);
+        const subtitle = parts.length > 0 ? parts.join(" • ") : null;
+
+        return (
+          <div>
+            <p className="font-semibold font-manrope text-text-primary">
+              {value}
+            </p>
+            {subtitle && (
+              <p className="text-xs font-manrope text-text-muted">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: "school",
+      label: "School/Code",
+      render: (value, row) => {
+        const schoolName = row.school?.name || row.school_name;
+        const schoolCode = row.school_code || row.school?.code;
+
+        return (
+          <div className="text-sm font-manrope">
+            <p className="text-text-primary">{schoolName || "—"}</p>
+            {schoolCode && (
+              <p className="text-xs text-text-muted font-mono">{schoolCode}</p>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "schedule",
@@ -192,7 +232,17 @@ export default function Classes() {
       render: (value, row) => (
         <div className="text-sm font-manrope text-text-muted flex items-center">
           <Calendar className="inline w-4 h-4 mr-1 text-text-muted" />
-          <span> {formatSchedule(row.schedule)}</span>
+          <span>{formatSchedule(row)}</span>
+        </div>
+      ),
+    },
+    {
+      key: "dates",
+      label: "Start - End Date",
+      render: (value, row) => (
+        <div className="text-xs font-manrope text-text-muted">
+          <p>{row.start_date ? new Date(row.start_date).toLocaleDateString() : "N/A"}</p>
+          <p>{row.end_date ? new Date(row.end_date).toLocaleDateString() : "N/A"}</p>
         </div>
       ),
     },
@@ -200,7 +250,7 @@ export default function Classes() {
       key: "capacity",
       label: "Capacity",
       render: (value, row) => (
-        <div className="text-sm font-manrope text-text-primary">flex items-center justify-end gap-2
+        <div className="text-sm font-manrope text-text-primary flex items-center gap-2">
           <span className="font-semibold text-text-primary">
             {row.current_enrollment || 0}
           </span>
@@ -214,6 +264,15 @@ export default function Classes() {
       render: (value, row) => (
         <span className="text-sm font-manrope text-text-muted">
           {row.min_age || 0} - {row.max_age || 18} yrs
+        </span>
+      ),
+    },
+    {
+      key: "class_type",
+      label: "Type",
+      render: (value) => (
+        <span className="text-xs font-manrope px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+          {value === "one-time" ? "One-time" : value === "membership" ? "Membership" : "N/A"}
         </span>
       ),
     },

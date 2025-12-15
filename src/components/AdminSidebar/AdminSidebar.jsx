@@ -31,7 +31,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
         <div className="flex items-center justify-center gap-2">
           <div
             className={` flex justify-center items-center relative cursor-pointer ${
-              collapsed ? "w-0 h-0" : "w-16 h-16 "
+              collapsed ? "w-0 h-0" : "w-24 h-24"
             }`}
             onClick={() => {
               if (onNavigate) onNavigate();
@@ -42,7 +42,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
             <img
               src="/images/logo3.png"
               alt="Outline"
-              className="w-[54px] h-[50px] md:block hidden  object-contain 
+              className="w-[80px] h-[75px] md:block hidden object-contain
           mix-blend-exclusion"
             />
           </div>
@@ -118,8 +118,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
           );
         })}
       </nav>
+      <div className="flex-1" />
       <button
-        className="w-full flex items-end justify-start  gap-3 px-3 py-2 ml-[12px] mb-[20px] rounded-md text-sm text-gray-700 flex-1 "
+        className="w-full flex items-center justify-start gap-3 px-3 py-2 ml-[12px] mb-[20px] rounded-md text-sm text-gray-700 hover:bg-gray-100"
         onClick={async () => {
           await logout();
           navigate("/login");

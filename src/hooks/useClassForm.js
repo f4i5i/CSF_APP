@@ -81,33 +81,111 @@ export default function useClassForm(initialData = null, mode = 'create') {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Transform backend payment options to frontend format
+  const transformPaymentOptionsFromBackend = (backendOptions) => {
+    if (!backendOptions || backendOptions.length === 0) {
+      return initialFormData.payment_options;
+    }
+
+    // Map backend format to frontend format
+    const typeMapping = {
+      'Full Payment': 'full_payment',
+      'Monthly Subscription': 'monthly_subscription',
+      '2 Installments': 'installment_2',
+      '3 Installments': 'installment_3',
+      '4 Installments': 'installment_4',
+      '6 Installments': 'installment_6',
+    };
+
+    // Start with default structure (all disabled)
+    const frontendOptions = [...initialFormData.payment_options];
+
+    // Enable and set prices for options returned from backend
+    backendOptions.forEach(backendOpt => {
+      const frontendType = typeMapping[backendOpt.name] || backendOpt.type;
+      const index = frontendOptions.findIndex(opt => opt.type === frontendType);
+
+      if (index !== -1) {
+        frontendOptions[index] = {
+          type: frontendOptions[index].type,
+          enabled: true,
+          price: backendOpt.amount || backendOpt.price || 0,
+        };
+      }
+    });
+
+    return frontendOptions;
+  };
+
   // Initialize form with existing class data when editing
   useEffect(() => {
     if (initialData && mode === 'edit') {
-      // Map backend data to form structure
+      // Transform backend schedule format to frontend format
+      let schedule = initialFormData.schedule;
+      if (initialData.weekdays && Array.isArray(initialData.weekdays) && initialData.weekdays.length > 0) {
+        // Backend format: {weekdays: [...], start_time, end_time}
+        schedule = initialData.weekdays.map(day => ({
+          day_of_week: day.toLowerCase(),
+          start_time: initialData.start_time || '09:00',
+          end_time: initialData.end_time || '10:00',
+        }));
+      } else if (initialData.schedule && Array.isArray(initialData.schedule) && initialData.schedule.length > 0) {
+        // Frontend format already
+        schedule = initialData.schedule;
+      }
+
+      // Transform payment options from backend format
+      const paymentOptions = transformPaymentOptionsFromBackend(initialData.payment_options);
+
+      // Map backend data to form structure - be explicit about all fields
       const mappedData = {
-        ...initialFormData,
-        ...initialData,
-        // Extract IDs from nested objects
+        // Basic text fields
+        name: initialData.name || '',
+        description: initialData.description || '',
+
+        // Extract IDs from nested objects (override any raw values from backend)
         program_id: initialData.program?.id || initialData.program_id || '',
         area_id: initialData.area?.id || initialData.area_id || '',
         school_id: initialData.school?.id || initialData.school_id || '',
+        school_code: initialData.school?.code || initialData.school_code || '',
         coach_id: initialData.coach?.id || initialData.coach_id || null,
-        // Handle schedule
-        schedule: initialData.schedule || initialFormData.schedule,
-        // Handle payment options
-        payment_options: initialData.payment_options || initialFormData.payment_options,
-        // Ensure dates are in proper format
-        start_date: initialData.start_date ? initialData.start_date.split('T')[0] : '',
-        end_date: initialData.end_date ? initialData.end_date.split('T')[0] : '',
-        registration_start_date: initialData.registration_start_date ? initialData.registration_start_date.split('T')[0] : '',
-        registration_end_date: initialData.registration_end_date ? initialData.registration_end_date.split('T')[0] : '',
-        // Ensure numeric fields are properly formatted
+
+        // Numeric fields
         capacity: initialData.capacity?.toString() || '',
         min_age: initialData.min_age?.toString() || '',
         max_age: initialData.max_age?.toString() || '',
+
+        // Date fields - ensure proper format
+        start_date: initialData.start_date ? initialData.start_date.split('T')[0] : '',
+        end_date: initialData.end_date ? initialData.end_date.split('T')[0] : '',
+        registration_start_date: initialData.registration_start_date
+          ? initialData.registration_start_date.split('T')[0]
+          : (initialData.registration_start ? initialData.registration_start.split('T')[0] : ''),
+        registration_end_date: initialData.registration_end_date
+          ? initialData.registration_end_date.split('T')[0]
+          : (initialData.registration_end ? initialData.registration_end.split('T')[0] : ''),
+
+        // Boolean
+        is_active: initialData.is_active !== undefined ? initialData.is_active : true,
+
+        // New fields
+        recurrence_pattern: initialData.recurrence_pattern || 'weekly',
+        repeat_every_weeks: initialData.repeat_every_weeks?.toString() || '1',
+        class_type: initialData.class_type || '',
+        website_link: initialData.website_link || '',
+        class_image: initialData.class_image_url || initialData.class_image || null,
+
+        // Transformed schedule
+        schedule: schedule,
+
+        // Transformed payment options
+        payment_options: paymentOptions,
       };
 
+      console.log('Edit mode - initialData:', initialData);
+      console.log('Edit mode - payment_options from backend:', initialData.payment_options);
+      console.log('Edit mode - transformed payment_options:', paymentOptions);
+      console.log('Edit mode - mappedData:', mappedData);
       setFormData(mappedData);
     } else {
       setFormData(initialFormData);
