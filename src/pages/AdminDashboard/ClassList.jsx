@@ -5,7 +5,8 @@ import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import { useAuth } from "../../context/auth";
 import toast from "react-hot-toast";
-
+import DottedOverlay from "@/components/DottedOverlay";
+import Footer from "@/components/Footer";
 const IconClock = ({ className = "w-4 h-4 text-gray-400" }) => (
   <svg
     className={className}
@@ -160,7 +161,10 @@ export default function ClassList() {
 
   return (
     <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
-      <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 shadow-lg">
+      <DottedOverlay
+        className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
+      />
+      <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 shadow-lg z-50">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)}>
             <ArrowLeft  className="text-[#00000099] size-[16px]" />
@@ -291,6 +295,7 @@ export default function ClassList() {
           )}
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }
