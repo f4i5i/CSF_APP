@@ -40,7 +40,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
           >
             {/* Logo Outline (turns black using blend mode) */}
             <img
-              src="/images/logo3.png"
+              src="/images/logo4.png"
               alt="Outline"
               className="w-[80px] h-[75px] md:block hidden object-contain
           mix-blend-exclusion"
