@@ -356,7 +356,7 @@ export default function ClassFormModal({
                 {/* School with Code */}
                 <div>
                   <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                    School/Ledges Code <span className="text-btn-gold">*</span>
+                   Ledges Code <span className="text-btn-gold">*</span>
                   </label>
                   <CustomDropdown
                     value={formData.school_id}

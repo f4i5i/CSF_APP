@@ -5,6 +5,7 @@ import MiddleSummary from "../../components/AdminDashboard/MiddleSummary";
 import MembersBarChart from "../../components/AdminDashboard/MembersBarChart";
 import TodayClasses from "../../components/AdminDashboard/TodayClasses";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const AdminDashboard = () => {
   // Mock / demo data (replace with API data)

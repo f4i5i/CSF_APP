@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import Calendar from '../components/Calender';
 import NextEvent from '../components/NextEvent';
 import PhotoCard from '../components/PhotoCard';
@@ -385,7 +386,7 @@ export default function Dashboard() {
 
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
           {/* Left Column - Announcements */}
-          <div className="w-full lg:w-[48%] max-sm:hidden">
+          {/* <div className="w-full lg:w-[48%] max-sm:hidden">
 
             <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm">
             <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px] mb-4">Announcements</h2>
@@ -394,7 +395,7 @@ export default function Dashboard() {
                 loading={loadingAnnouncements}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Right Column */}
           <div className="w-full lg:w-[48%] space-y-4 max-sm:space-y-6">
@@ -402,28 +403,28 @@ export default function Dashboard() {
             <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm">
               <div className="flex gap-6 max-md:flex-col">
                 {/* Calendar Section */}
-                <div className="flex-1">
+                {/* <div className="flex-1">
                   <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Calendar</h2>
                   <Calender1 events={calendarEvents} />
-                </div>
+                </div> */}
 
                 {/* Next Event Section */}
-                <div className="flex-1">
+                {/* <div className="flex-1">
                   <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Next Event</h2>
                   <NextEvent event={nextEvent} loading={nextEventLoading} />
-                </div>
+                </div> */}
               </div>
             </div>
 
             {/* Program Photos & Badges - Stacked Vertically */}
-            <div className="flex flex-col gap-4">
+            {/* <div className="flex flex-col gap-4">
               <ProgramPhotoCard photo={recentPhotos?.[0]} loading={loadingPhotos} />
               <BadgeCard badges={recentBadges} loading={loadingBadges} />
-            </div>
+            </div> */}
           </div>
 
           {/* Mobile: Announcements */}
-          <div className="hidden max-sm:block w-full">
+          {/* <div className="hidden max-sm:block w-full">
             <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px] mb-4">Announcements</h2>
             <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm">
               <AnnouncementCard
@@ -431,10 +432,11 @@ export default function Dashboard() {
                 loading={loadingAnnouncements}
               />
             </div>
-          </div>
+          </div> */}
         </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

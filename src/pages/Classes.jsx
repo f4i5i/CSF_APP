@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import ClassCard from "../components/ClassCard";
 import { useClasses } from "../api/hooks/classes/useClasses";
 import { formatDateRange, formatSchedule } from "../utils/formatters";
@@ -91,6 +92,7 @@ export default function Classes() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

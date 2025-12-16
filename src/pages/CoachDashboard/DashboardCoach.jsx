@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 import Calendar from '../../components/Calender';
 import NextEvent from '../../components/NextEvent';
 import PhotoCard from '../../components/PhotoCard';
@@ -295,7 +296,8 @@ export default function DashboardCoach() {
       </main>
        {/* Modal */}
             {openModal && <CreatePostModal onClose={() => setOpenModal(false)} />}
-        
+
+      <Footer />
     </div>
   );
 }

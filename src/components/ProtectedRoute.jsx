@@ -29,9 +29,20 @@ export default function ProtectedRoute({ children, requiredRole }) {
   }
 
   // Check role if required
-  if (requiredRole && user.role !== requiredRole) {
-    // User doesn't have required role - redirect to dashboard
-    return <Navigate to="/dashboard" replace />;
+  if (requiredRole) {
+    const userRole = user.role?.toLowerCase();
+    const requiredRoleLower = requiredRole.toLowerCase();
+
+    if (userRole !== requiredRoleLower) {
+      // User doesn't have required role - redirect to appropriate dashboard
+      const roleRedirects = {
+        'admin': '/admin',
+        'coach': '/coachdashboard',
+        'parent': '/dashboard',
+      };
+      const redirectPath = roleRedirects[userRole] || '/dashboard';
+      return <Navigate to={redirectPath} replace />;
+    }
   }
 
   // User is authenticated (and has correct role if required)

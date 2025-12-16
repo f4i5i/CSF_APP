@@ -44,9 +44,17 @@ const paymentsService = {
    */
   async createIntent(paymentData) {
     const { order_id, payment_method_id } = paymentData;
+
+    // Get the current app's base URL for dynamic redirect URLs
+    const appBaseUrl = window.location.origin;
+
     const { data } = await apiClient.post(
       API_ENDPOINTS.PAYMENTS.CREATE_INTENT(order_id),
-      payment_method_id ? { payment_method_id } : {}
+      {
+        ...(payment_method_id ? { payment_method_id } : {}),
+        success_url: `${appBaseUrl}/payment/success`,
+        cancel_url: `${appBaseUrl}/payment/cancel`,
+      }
     );
     return data;
   },

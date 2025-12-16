@@ -1,5 +1,6 @@
 import React from 'react'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import img1 from "../assets/image (1).png"
 import img2 from "../assets/image (2).png"
 import img3 from "../assets/image (3).png"
@@ -47,7 +48,7 @@ const Gallery = () => {
   </div>
 
 </main>
-
+    <Footer />
     </div>
   )
 }

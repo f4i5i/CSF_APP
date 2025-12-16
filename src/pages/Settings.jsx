@@ -1,11 +1,70 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Sidebar from "../components/Sidebar";
 import Logo from "../components/Logo";
+import { useAuth } from "../context/auth";
+import usersService from "../api/services/users.service";
+import toast from "react-hot-toast";
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState("payment");
+  const { user, updateUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+  });
+
+  // Load user data when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const updatedUser = await usersService.update(formData);
+      updateUser(updatedUser); // Update user in auth context
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset form to original user data
+    if (user) {
+      setFormData({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+    toast.success("Changes cancelled");
+  };
 
   const menuItems = [
     { key: "account", label: "My Account" },
@@ -29,11 +88,21 @@ export default function Settings() {
       </div>
  {/* BUTTONS */}
           <div className="flex justify-end max-sm:justify-between max-sm:px-3 max-sm:w-full max-sm:flex max-sm:mt-4 gap-4 mt-10">
-            <button className="px-6 py-3 text-[#0D0D12] max-sm:w-[168px] rounded-full bg-white border">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={loading}
+              className="px-6 py-3 text-[#0D0D12] max-sm:w-[168px] rounded-full bg-white border hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Cancel
             </button>
-            <button className="px-6 py-3 max-sm:w-[168px] text-[#0D0D12] rounded-full bg-[#f4b728] ">
-              Save Changes
+            <button
+              type="submit"
+              form="profile-form"
+              disabled={loading}
+              className="px-6 py-3 max-sm:w-[168px] text-[#0D0D12] rounded-full bg-[#f4b728] hover:bg-[#e5a920] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
           </div>
@@ -54,16 +123,37 @@ export default function Settings() {
             View and update your account details, profile, and more.
           </p>
 </div>
-          <form className="space-y-6">
+          <form id="profile-form" onSubmit={handleSave} className="space-y-6">
 
             <div>
               <label className="text-sm font-medium text-[#666D80]">
-                Full Name *
+                First Name *
               </label>
               <input
                 type="text"
-                defaultValue="Robert Johnson"
-                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-[#f4b728] disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="Enter your first name"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-[#666D80]">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-[#f4b728] disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="Enter your last name"
               />
             </div>
 
@@ -73,8 +163,13 @@ export default function Settings() {
               </label>
               <input
                 type="email"
-                defaultValue="robertjohnson@gmail.com"
-                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="mt-2 w-full border text-[#0D0D12] rounded-lg px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-[#f4b728] disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -83,18 +178,18 @@ export default function Settings() {
                 Phone Number (optional)
               </label>
               <input
-                type="text"
-                defaultValue="+1 (212) 555 4567"
-                className="mt-2 w-full text-[#0D0D12] border rounded-lg px-4 py-3 bg-white outline-none"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                disabled={loading}
+                className="mt-2 w-full text-[#0D0D12] border rounded-lg px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-[#f4b728] disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="+1 (212) 555 4567"
               />
             </div>
           </form>
-
-         
         </div>
       </div>
-
-     
       </main>
       <Footer/> 
     </div>

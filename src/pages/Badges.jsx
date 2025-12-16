@@ -1,5 +1,6 @@
 import React from 'react'
 import Header from '../components/Header'
+import Footer from '../components/Footer'
 import icon1 from "../assets/Mask group.png"
 import icon2 from '../assets/Mask group (1).png'
 import icon3 from '../assets/Mask group (2).png'
@@ -93,8 +94,9 @@ const Badges = () => {
         ))}
       </div>
     
-      
+
       </main>
+      <Footer />
 </div>
   )
 }

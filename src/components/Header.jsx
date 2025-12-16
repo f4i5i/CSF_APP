@@ -1,55 +1,93 @@
-import { useEffect, useRef, useState } from "react";
-import logo from "../assets/person.png";
-import React from "react";
-import baseLogo from "../assets/logo.png";
+// ============================================================================
+// IMPORTS
+// ============================================================================
 
-import Logo from "./Logo";
-import { Link, NavLink } from "react-router-dom";
+// React core and hooks
+import { useEffect, useRef, useState } from "react";
+import React from "react";
+
+// Routing
+import { Link, NavLink, useNavigate } from "react-router-dom";
+
+// Icons - Lucide React
 import {
   Home,
   Calendar,
   CheckCircle,
+  CheckCircle2,
   Image,
   User,
   CreditCard,
   Phone,
   Lock,
   LogOut,
-  CheckCircle2,
   ChevronDown,
   UserPlus,
-} from "lucide-react";
-import { useAuth } from "../context/auth";
-import {
   Settings,
   Users,
   GraduationCap,
   Wallet,
   MessageCircle,
+  X,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+
+// Icons - Material UI
 import { Person } from "@mui/icons-material";
+
+// Components
+import Logo from "./Logo";
 import AdminSidebar from "./AdminSidebar/AdminSidebar";
-import { X } from "lucide-react";
+
+// Context
+import { useAuth } from "../context/auth";
+
+// Assets
+import logo from "../assets/person.png";
+import baseLogo from "../assets/logo.png";
+
+// ============================================================================
+// HEADER COMPONENT
+// ============================================================================
 const Header = () => {
+  // ------------------------------------------------------------------------
+  // STATE & REFS
+  // ------------------------------------------------------------------------
+  // Get user role from localStorage for role-based rendering
   const role = localStorage.getItem("role");
 
+  // Navigation hook for programmatic routing
   const navigate = useNavigate();
+
+  // Auth context for user data and logout functionality
   const { user, logout } = useAuth();
+
+  // Dropdown menu state for admin profile menu
   const [open, setOpen] = useState(false);
+
+  // Mobile sidebar state for hamburger menu
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Ref for click-outside detection on dropdown
   const dropdownRef = useRef(null);
 
-  // ✅ Close dropdown when clicking outside
-  // useEffect(() => {
-  //   const handleClick = (e) => {
-  //     if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-  //       setOpen(false);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleClick);
-  //   return () => document.removeEventListener("mousedown", handleClick);
-  // }, []);
+  // ------------------------------------------------------------------------
+  // EFFECTS
+  // ------------------------------------------------------------------------
+  // Close dropdown when clicking outside (for admin dropdown)
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // ------------------------------------------------------------------------
+  // HELPER COMPONENTS
+  // ------------------------------------------------------------------------
+  // Reusable dropdown menu item component
   const MenuItem = ({ icon: Icon, label, onClick }) => (
     <button
       onClick={onClick}
@@ -60,6 +98,10 @@ const Header = () => {
     </button>
   );
 
+  // ------------------------------------------------------------------------
+  // NAVIGATION CONFIGURATION
+  // ------------------------------------------------------------------------
+  // Parent role navigation items (displayed in horizontal nav bar on desktop)
   const navItems = [
     { name: "Home", icon: Home, path: "/dashboard" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
@@ -68,6 +110,7 @@ const Header = () => {
     { name: "Account", icon: User, path: "/account" },
   ];
 
+  // Coach role navigation items (displayed in horizontal nav bar on desktop)
   const navItemscoach = [
     { name: "Home", icon: Home, path: "/coachdashboard" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
@@ -75,6 +118,9 @@ const Header = () => {
     { name: "Attendance", icon: CheckCircle2, path: "/attendance" },
     { name: "Photos", icon: Image, path: "/Gallery" },
   ];
+
+  // Admin role navigation items (for mobile bottom nav only)
+  // Desktop admin uses sidebar navigation in AdminLayout
   const navItemsadmin = [
     { name: "Home", icon: Home, path: "/admin" },
     { name: "Account", icon: Settings, path: "/company-settings" },
@@ -83,24 +129,36 @@ const Header = () => {
     { name: "Calendar", icon: Calendar, path: "/calendar" },
     { name: "Finance", icon: Wallet, path: "/financials" },
     { name: "Register", icon: Person, path: "/registerchild" },
-
     { name: "Communication", icon: MessageCircle, path: "/communication" },
   ];
+
+  // Select appropriate navigation items based on user role
   const itemsToShow =
     role === "coach"
       ? navItemscoach
       : role === "admin"
       ? navItemsadmin
       : navItems;
-  return (
-    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:px-3 mb-[15px]">
-      <div className="w-full ml-1 max-sm:mx-auto flex items-center justify-end max-sm:justify-between">
-        {/* LEFT: Logo */}
-        {/* <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start  invisible">
-          <Logo />
-        </div> */}
 
-        {/* SMALL SCREEN: toggle, centered logo, profile - spaced evenly */}
+  // ------------------------------------------------------------------------
+  // RENDER
+  // ------------------------------------------------------------------------
+  return (
+    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:px-3 mb-[15px] mt-6">
+      <div className="w-full ml-1 max-sm:mx-auto flex items-center justify-between max-sm:justify-between">
+        {/* ================================================================ */}
+        {/* LOGO SECTION */}
+        {/* Displays company logo on the left side of header */}
+        {/* ================================================================ */}
+        <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start">
+          <Logo />
+        </div>
+
+        {/* ================================================================ */}
+        {/* MOBILE HEADER (visible on small screens only) */}
+        {/* Shows: Hamburger menu button, centered logo, profile image */}
+        {/* Hamburger opens AdminSidebar for admin users */}
+        {/* ================================================================ */}
         <div className="md:hidden flex items-center justify-between w-full">
           <button
             onClick={() => setMobileOpen(true)}
@@ -140,7 +198,11 @@ const Header = () => {
           </div>
         </div>
 
-        {/* MIDDLE NAVBAR */}
+        {/* ================================================================ */}
+        {/* PARENT NAVIGATION BAR (desktop only) */}
+        {/* Horizontal navigation bar with Dashboard, Calendar, Attendance, Photos, Badges */}
+        {/* Only visible for parent role users on desktop screens */}
+        {/* ================================================================ */}
         {role === "parent" && (
           <nav>
             <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
@@ -227,119 +289,11 @@ const Header = () => {
           </nav>
         )}
 
-        {role === "ADMIN" && (
-          <nav>
-            <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
-              <li>
-                <NavLink
-                  to="/admin"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Dashboard
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/company-setting"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Account
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/clients"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Clients
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/class"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Classes
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/calendar"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Calendar
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/financials"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Finance
-                </NavLink>
-              </li>
-
-              <li>
-                <NavLink
-                  to="/communication"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Communication
-                </NavLink>
-              </li>
-            </ul>
-          </nav>
-        )}
-
+        {/* ================================================================ */}
+        {/* COACH NAVIGATION BAR (desktop only) */}
+        {/* Horizontal navigation bar with Dashboard, Calendar, Check-In, Attendance, Photos */}
+        {/* Only visible for coach role users on desktop screens */}
+        {/* ================================================================ */}
         {role === "coach" && (
           <nav>
             <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
@@ -425,25 +379,29 @@ const Header = () => {
             </ul>
           </nav>
         )}
-        {/* RIGHT: PROFILE */}
-        <div className="hidden md:flex items-center gap-1 cursor-pointer p-1 rounded-full pr-2">
-          <div className="flex items-center gap-3 cursor-pointer">
+
+        {/* ================================================================ */}
+        {/* DESKTOP PROFILE SECTION */}
+        {/* Parent/Coach: Profile image redirects to settings (no dropdown) */}
+        {/* Admin: Profile image with dropdown menu for additional options */}
+        {/* ================================================================ */}
+        <div className="hidden md:flex items-center gap-3 mr-12 relative">
+          <div className="flex items-center gap-3" ref={dropdownRef}>
+            {/* Profile image - clickable for all roles */}
             <img
               onClick={() => {
-                navigate("/settings");
+                if (role === "admin") {
+                  setOpen(!open);  // Toggle dropdown for admin
+                } else {
+                  navigate("/settings");  // Direct navigation for parent/coach
+                }
               }}
               src={logo}
               alt="profile"
-              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover"
-            />
-          </div>
-          {/* <div className="flex items-center gap-3 cursor-pointer">
-            <img
-              src={logo}
-              alt="profile"
-              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover"
+              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover cursor-pointer"
             />
 
+            {/* User name and role display */}
             <div className="leading-tight max-sm:hidden text-end">
               <p className="text-[#173151] font-manrope font-medium text-fluid-md leading-[140%] tracking-[-0.02em] capitalize">
                 {user?.first_name} {user?.last_name?.charAt(0)}.
@@ -452,27 +410,26 @@ const Header = () => {
                 {user?.role || "User"}
               </p>
             </div>
-          </div> */}
-          {/* <div className="relative">
-            <ChevronDown
-              onClick={() => setOpen(!open)}
-              size={24}
-              className={`${
-                open ? "rotate-180" : ""
-              } transition cursor-pointer text-black ml-2`}
-            />
 
-            <svg  onClick={() => setOpen(!open)}
-        ref={dropdownRef} xmlns="http://www.w3.org/2000/svg" className="flex max-sm:hidden" viewBox="0 0 512 512" height="14" width="14"> <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>
-        
-          </div> */}
+            {/* Dropdown indicator (chevron) - visible for admin role */}
+            <div className="flex items-center justify-center cursor-pointer ml-3" onClick={() => setOpen(!open)}>
+              <ChevronDown
+                size={25}
+                className={`${
+                  open ? "rotate-180" : ""
+                } transition-transform duration-200 text-[#173151]`}
+                strokeWidth={3}
+              />
+            </div>
+          </div>
 
-          {/* MOBILE MENU BTN */}
-        </div>
-
-        {/* ✅ DROPDOWN PANEL */}
-        {/* {open && (
-          <div className="absolute right-8 top-24 w-48 bg-white shadow-xl rounded-xl border p-2 z-50">
+          {/* ================================================================ */}
+          {/* ADMIN DROPDOWN MENU */}
+          {/* Displays menu options for admin users when dropdown is open */}
+          {/* Menu items: Profile, Payment & Billing, Contact, Add Child, Password, Log out */}
+          {/* ================================================================ */}
+          {open && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-xl rounded-xl border p-2 z-50">
             <MenuItem
               icon={User}
               label="Profile"
@@ -485,6 +442,7 @@ const Header = () => {
               icon={CreditCard}
               label="Payment & Billing"
               onClick={() => {
+                setOpen(false);
                 navigate("/paymentbilling");
               }}
             />
@@ -492,6 +450,7 @@ const Header = () => {
               icon={Phone}
               label="Contact"
               onClick={() => {
+                setOpen(false);
                 navigate("/contactus");
               }}
             />
@@ -503,7 +462,14 @@ const Header = () => {
                 navigate("/registerchild");
               }}
             />
-            <MenuItem icon={Lock} label="Password" />
+            <MenuItem
+              icon={Lock}
+              label="Password"
+              onClick={() => {
+                setOpen(false);
+                // TODO: Implement password change modal
+              }}
+            />
             <MenuItem
               icon={LogOut}
               label="Log out"
@@ -514,11 +480,15 @@ const Header = () => {
               }}
             />
           </div>
-        )} */}
+        )}
+        </div>
       </div>
 
-      {/* mobile navbar */}
-
+      {/* ==================================================================== */}
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      {/* Sticky bottom navigation bar displayed on mobile for all roles */}
+      {/* Shows navigation icons based on user role (parent/coach/admin) */}
+      {/* ==================================================================== */}
       <div className="fixed bottom-0  w-full left-0 right-0 bg-[#0D1B2A] py-3 px-6 flex justify-between items-center sm:hidden z-10">
         {itemsToShow.map((item) => {
           const Icon = item.icon;
@@ -560,9 +530,15 @@ const Header = () => {
           );
         })}
 
+        {/* Bottom navigation indicator bar */}
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 rounded-full bg-gray-400 opacity-60" />
       </div>
-      {/* Mobile overlay sidebar (full width) */}
+
+      {/* ==================================================================== */}
+      {/* MOBILE SIDEBAR OVERLAY (Admin only) */}
+      {/* Full-screen sidebar overlay with AdminSidebar component */}
+      {/* Opens when hamburger menu is clicked on mobile */}
+      {/* ==================================================================== */}
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 z-50 bg-black/40"

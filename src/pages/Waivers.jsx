@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Logo from "../components/Logo";
+import Footer from "../components/Footer";
 import waiversService from "../api/services/waivers.service";
 
 const Waivers = () => {
@@ -243,6 +244,7 @@ const Waivers = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

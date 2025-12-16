@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import StudentList from "../../components/checkIn/StudentList";
 import { ChevronDown, MessageSquare, Search } from "lucide-react";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import StudentDetailsModal from "../../components/checkIn/StudentDetailsModal";
 
 const CheckIn = () => {
@@ -129,6 +130,7 @@ const CheckIn = () => {
              {/* Modal */}
       {openModal && <StudentDetailsModal onClose={() => setOpenModal(false)} />}
   
+      <Footer />
     </div>
   );
 };

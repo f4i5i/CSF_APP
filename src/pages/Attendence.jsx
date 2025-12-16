@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AttendanceRow from '../components/attendence/AttendenceRow';
 import BadgeCarousel from '../components/attendence/BadgeCarousel';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import icon1 from "../assets/Mask group.png";
@@ -97,6 +98,7 @@ const Attendence = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

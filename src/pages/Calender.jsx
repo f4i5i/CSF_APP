@@ -1,5 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import Calendar from "../components/Calender";
 import NextEvent from "../components/NextEvent";
 import CalenderMini from "../components/Calendar/CalenderMini";
@@ -24,6 +25,7 @@ const Calender = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

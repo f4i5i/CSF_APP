@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Header from '../../components/Header'
+import Footer from '../../components/Footer'
 
 import Gallery from '../../components/Gallery'
 import { Upload } from 'lucide-react'
@@ -37,6 +38,7 @@ const CoachGallery = () => {
 </main>
 {open && <UploadPhotosModal onClose={() => setOpen(false)} />}
   
+      <Footer />
     </div>
   )
 }

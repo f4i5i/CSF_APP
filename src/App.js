@@ -102,7 +102,11 @@ return (
    </ProtectedRoute>
 } />
 
-      <Route element={<AdminLayout />}>
+      <Route element={
+        <ProtectedRoute requiredRole="admin">
+          <AdminLayout />
+        </ProtectedRoute>
+      }>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/classes" element={<AdminClasses />} />
         <Route path="/admin/waivers" element={<WaiversManagement />} />
@@ -223,25 +227,25 @@ return (
  
 
 <Route path="/admin/installments" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="admin">
     <Installments />
   </ProtectedRoute>
 } />
 
 <Route path="/admin/enrollments" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="admin">
     <Enrollments />
   </ProtectedRoute>
 } />
 
 <Route path="/admin/waitlist" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="admin">
     <Waitlist />
   </ProtectedRoute>
 } />
 
 <Route path="/admin/invoices" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="admin">
     <Invoices />
   </ProtectedRoute>
 } />

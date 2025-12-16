@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { XCircle, ArrowLeft } from 'lucide-react';
+import Footer from '../components/Footer';
 
 /**
  * Payment Cancel Page
@@ -53,6 +54,7 @@ const PaymentCancel = () => {
           </a>
         </p>
       </div>
+      <Footer />
     </div>
   );
 };

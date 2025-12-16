@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
+import Footer from '../components/Footer';
 
 /**
  * Payment Success Page
@@ -67,6 +68,7 @@ const PaymentSuccess = () => {
           Go to Dashboard Now
         </button>
       </div>
+      <Footer />
     </div>
   );
 };

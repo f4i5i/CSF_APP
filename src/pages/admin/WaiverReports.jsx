@@ -39,14 +39,22 @@ const WaiverReports = () => {
   const {
     data: acceptancesData,
     loading: loadingAcceptances,
+    error: acceptancesError,
     refetch,
   } = useApi(
-    () => waiversService.getAcceptances({
-      template_id: selectedTemplate || undefined,
-    }),
+    () => {
+      console.log('Fetching acceptances with template_id:', selectedTemplate);
+      return waiversService.getAcceptances({
+        template_id: selectedTemplate || undefined,
+      });
+    },
     {
       initialData: { items: [], total: 0 },
       dependencies: [selectedTemplate],
+      onError: (error) => {
+        console.error('Failed to fetch acceptances:', error);
+        toast.error(error.response?.data?.message || 'Failed to load waiver acceptances');
+      }
     }
   );
 

@@ -5,7 +5,7 @@ import crown from "../assets/Carolina.png"; // golden crown
 
 const Logo = () => {
   return (
-    <Link to="/" className="inline-block">
+    <Link to="/dashboard" className="inline-block">
     <div className="flex justify-center items-center  w-[108px]
           h-[108px]  relative cursor-pointer">
 
