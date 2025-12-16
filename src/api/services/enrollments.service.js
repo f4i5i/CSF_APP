@@ -15,17 +15,13 @@ const enrollmentsService = {
    * @returns {Promise<Array>} List of enrollments
    */
   async getMy(filters = {}) {
-    console.log('enrollmentsService.getMy - Calling with filters:', filters);
     const response = await apiClient.get(API_ENDPOINTS.ENROLLMENTS.MY, {
       params: filters,
     });
-    console.log('enrollmentsService.getMy - Response:', response);
-    console.log('enrollmentsService.getMy - response.data:', response.data);
     const { data } = response;
 
     // Handle paginated response format {items: [...], total: X}
     if (data && data.items) {
-      console.log('enrollmentsService.getMy - Extracting items from paginated response:', data.items);
       return data.items;
     }
 

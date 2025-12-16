@@ -76,9 +76,11 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
           />
           {!collapsed && (
             <div className="text-left">
-              <div className="text-sm font-medium font-manrope">Admin User</div>
-              <div className="text-xs text-gray-500 font-manrope">
-                Administrator
+              <div className="text-sm font-medium font-manrope capitalize">
+                {user?.first_name} {user?.last_name}
+              </div>
+              <div className="text-xs text-gray-500 font-manrope capitalize">
+                {user?.role || "Administrator"}
               </div>
             </div>
           )}

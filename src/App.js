@@ -112,9 +112,14 @@ return (
         <Route path="/admin/waivers" element={<WaiversManagement />} />
         <Route path="/admin/waiver-reports" element={<WaiverReports />} />
         <Route path="/clients" element={<Clients />} />
-        <Route path="/calendar" element={<Calender />} />
         <Route path="/financials" element={<Financials />} />
       </Route>
+
+<Route path="/calendar" element={
+  <ProtectedRoute>
+    <Calender />
+  </ProtectedRoute>
+} />
 
 <Route path="/photos" element={
   <ProtectedRoute>
@@ -207,9 +212,11 @@ return (
 /> 
 
 <Route path="/checkout" element={
-  <Elements stripe={stripePromise}>
-    <Checkout />
-  </Elements>
+  <ProtectedRoute>
+    <Elements stripe={stripePromise}>
+      <Checkout />
+    </Elements>
+  </ProtectedRoute>
 } />
 
 {/* Payment result pages */}

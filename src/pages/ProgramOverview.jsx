@@ -72,16 +72,6 @@ export default function ProgramOverview() {
   const classesLoading = classesQuery.isLoading;
   const classesError = classesQuery.error;
 
-  // Debug logging
-  console.log('ProgramOverview Debug:', {
-    selectedProgram,
-    openArea,
-    classesData,
-    classesLoading,
-    classesError,
-    queryEnabled: !!(selectedProgram && openArea)
-  });
-
   const weekdayOptions = ['all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const timeOfDayOptions = ['all', 'morning', 'afternoon', 'evening'];
   const ageRangeOptions = ['all', 'under8', '8to12', '13plus'];

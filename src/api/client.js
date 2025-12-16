@@ -60,11 +60,6 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Log request in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[API Request] ${config.method.toUpperCase()} ${config.url}`);
-    }
-
     return config;
   },
   (error) => {
@@ -78,11 +73,6 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   (response) => {
-    // Log successful response in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[API Response] ${response.config.url} - ${response.status}`);
-    }
-
     return response;
   },
   async (error) => {
@@ -171,11 +161,6 @@ apiClient.interceptors.response.use(
 
     // Transform error to standard format and reject
     const transformedError = handleApiError(error);
-
-    // Log error in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[API Error]', transformedError);
-    }
 
     return Promise.reject(transformedError);
   }

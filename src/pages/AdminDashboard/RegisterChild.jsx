@@ -152,8 +152,14 @@ export default function RegisterChild() {
         // Don't block registration if waiver check fails
       }
 
-      // Navigate to dashboard if no waivers needed
-      navigate("/dashboard");
+      // Navigate back to intended route or dashboard
+      const intendedRoute = sessionStorage.getItem('intendedRoute');
+      if (intendedRoute) {
+        sessionStorage.removeItem('intendedRoute');
+        navigate(intendedRoute);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Failed to register child:", error);
 
@@ -496,12 +502,28 @@ export default function RegisterChild() {
           onComplete={() => {
             setShowWaiverModal(false);
             toast.success("All waivers signed successfully!");
-            navigate("/dashboard");
+
+            // Navigate back to intended route or dashboard
+            const intendedRoute = sessionStorage.getItem('intendedRoute');
+            if (intendedRoute) {
+              sessionStorage.removeItem('intendedRoute');
+              navigate(intendedRoute);
+            } else {
+              navigate("/dashboard");
+            }
           }}
           onSkip={() => {
             setShowWaiverModal(false);
             toast.info("You can sign waivers later from your dashboard");
-            navigate("/dashboard");
+
+            // Navigate back to intended route or dashboard
+            const intendedRoute = sessionStorage.getItem('intendedRoute');
+            if (intendedRoute) {
+              sessionStorage.removeItem('intendedRoute');
+              navigate(intendedRoute);
+            } else {
+              navigate("/dashboard");
+            }
           }}
         />
       )}

@@ -25,7 +25,7 @@ const WaiverReports = () => {
 
   // Fetch all waiver templates
   const {
-    data: templates = [],
+    data: templatesData = [],
     loading: loadingTemplates,
   } = useApi(
     () => waiversService.getTemplates({ include_inactive: true }),
@@ -35,6 +35,9 @@ const WaiverReports = () => {
     }
   );
 
+  // Ensure templates is always an array
+  const templates = Array.isArray(templatesData) ? templatesData : [];
+
   // Fetch acceptances
   const {
     data: acceptancesData,
@@ -43,7 +46,6 @@ const WaiverReports = () => {
     refetch,
   } = useApi(
     () => {
-      console.log('Fetching acceptances with template_id:', selectedTemplate);
       return waiversService.getAcceptances({
         template_id: selectedTemplate || undefined,
       });
@@ -261,7 +263,7 @@ const WaiverReports = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#173151] outline-none"
               >
                 <option value="">All Templates</option>
-                {templates.map((template) => (
+                {Array.isArray(templates) && templates.map((template) => (
                   <option key={template.id} value={template.id}>
                     {template.name} (v{template.version})
                   </option>

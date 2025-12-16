@@ -13,13 +13,10 @@ const childrenService = {
    */
   async getMy() {
     const response = await apiClient.get(API_ENDPOINTS.CHILDREN.MY);
-    console.log('childrenService.getMy - Full response:', response);
-    console.log('childrenService.getMy - response.data:', response.data);
     const { data } = response;
 
     // Handle paginated response format {items: [...], total: X}
     if (data && data.items) {
-      console.log('childrenService.getMy - Extracting items from paginated response:', data.items);
       return data.items;
     }
 

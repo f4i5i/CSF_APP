@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import InputField from "../components/InputField";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import LogoLogin from "../components/LogoLogin";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const redirectForRole = (user) => {
     const normalizedRole = user?.role?.toUpperCase();
@@ -28,7 +30,30 @@ export default function Login() {
 
     if (target) {
       localStorage.setItem("role", target.storage);
-      navigate(target.route, { replace: true });
+
+      // Priority 1: Check if user was trying to register for a class
+      const intendedClass = sessionStorage.getItem('intendedClass');
+      if (intendedClass) {
+        sessionStorage.removeItem('intendedClass');
+
+        // Only allow parents to access checkout
+        if (normalizedRole === 'PARENT') {
+          navigate(`/checkout?classId=${intendedClass}`, { replace: true });
+          return;
+        } else {
+          // Non-parent user - show error and go to their dashboard
+          toast.error('Only parents can register for classes');
+          navigate(target.route, { replace: true });
+          return;
+        }
+      }
+
+      // Priority 2: Check if user was redirected from another page
+      const from = location.state?.from?.pathname;
+      const intendedRoute = from && from !== '/login' ? from : target.route;
+
+      // Navigate to intended page or fallback to role-based default
+      navigate(intendedRoute, { replace: true });
     } else {
       console.warn("Unknown role:", user?.role);
       localStorage.setItem("role", "parent");
@@ -185,7 +210,11 @@ export default function Login() {
 
           <p className="text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal  text-[#666d80] mt-3 sm:mt-4 md:mt-6">
             Don't have an account?
-            <Link to="/register" className="text-[#F3BC48] font-medium ml-1">
+            <Link
+              to="/register"
+              state={location.state}
+              className="text-[#F3BC48] font-medium ml-1"
+            >
               Register
             </Link>
           </p>

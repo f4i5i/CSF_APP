@@ -23,7 +23,6 @@ const AddStudent = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Student Registered:", formData);
     alert("Student Registration Successful!");
   };
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import InputField from '../components/InputField'
 import Logo from '../components/Logo'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/auth'
 import LogoLogin from '../components/LogoLogin'
 import { Eye, EyeOff } from 'lucide-react'
@@ -23,6 +23,52 @@ export default function Register(){
   const [errors, setErrors] = useState({})
   const { register } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const redirectForRole = (user) => {
+    const normalizedRole = user?.role?.toUpperCase();
+    const roleMapping = {
+      COACH: { route: "/coachdashboard", storage: "coach" },
+      ADMIN: { route: "/admin", storage: "admin" },
+      OWNER: { route: "/admin", storage: "admin" },
+      PARENT: { route: "/dashboard", storage: "parent" },
+      STUDENT: { route: "/dashboard", storage: "student" },
+    };
+
+    const target = normalizedRole ? roleMapping[normalizedRole] : undefined;
+
+    if (target) {
+      localStorage.setItem("role", target.storage);
+
+      // Priority 1: Check if user was trying to register for a class
+      const intendedClass = sessionStorage.getItem('intendedClass');
+      if (intendedClass) {
+        sessionStorage.removeItem('intendedClass');
+
+        // Only allow parents to access checkout
+        if (normalizedRole === 'PARENT') {
+          navigate(`/checkout?classId=${intendedClass}`, { replace: true });
+          return;
+        } else {
+          // Non-parent user - show error and go to their dashboard
+          toast.error('Only parents can register for classes');
+          navigate(target.route, { replace: true });
+          return;
+        }
+      }
+
+      // Priority 2: Check if user was redirected from another page
+      const from = location.state?.from?.pathname;
+      const intendedRoute = from && from !== '/register' ? from : target.route;
+
+      // Navigate to intended page or fallback to role-based default
+      navigate(intendedRoute, { replace: true });
+    } else {
+      console.warn("Unknown role:", user?.role);
+      localStorage.setItem("role", "parent");
+      navigate("/dashboard", { replace: true });
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -90,9 +136,9 @@ export default function Register(){
     setLoading(true)
 
     try {
-      await register(formData)
+      const user = await register(formData)
       toast.success('Account created successfully!')
-      navigate("/dashboard")
+      redirectForRole(user)
     } catch (error) {
       // Error already handled by auth context (toast shown)
       console.error('Registration error:', error)

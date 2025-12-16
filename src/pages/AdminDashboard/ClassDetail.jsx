@@ -88,10 +88,18 @@ export default function ClassDetail() {
       sessionStorage.setItem('intendedClass', classId);
       toast('Please log in to register for this class');
       navigate('/login');
-    } else {
-      // Logged in - go to checkout
-      navigate(`/checkout?classId=${classId}`);
+      return;
     }
+
+    // Check if user is a parent
+    const userRole = user?.role?.toUpperCase();
+    if (userRole !== 'PARENT') {
+      toast.error('Only parents can register for classes');
+      return;
+    }
+
+    // Logged in as parent - go to checkout
+    navigate(`/checkout?classId=${classId}`);
   };
 
   // Format schedule display

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronDown, UserPlus } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Calendar from '../components/Calender';
@@ -34,6 +34,7 @@ import Calender1 from '../components/Calender1';
 export default function Dashboard() {
   // 1. User from auth context
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // 2. Children data
   const {
@@ -43,15 +44,6 @@ export default function Dashboard() {
     loading: loadingChildren,
     error: childrenError,
   } = useChildren();
-
-  // Debug: Log children data
-  console.log('Dashboard - Children Debug:', {
-    children,
-    childrenCount: children?.length,
-    loadingChildren,
-    childrenError,
-    selectedChild
-  });
 
   // We'll fetch announcements once we derive an accurate class_id below
   // 4 & 5. Events - Will be loaded after we have enrollment with class_id
@@ -80,25 +72,8 @@ export default function Dashboard() {
       enrollment => enrollment.child_id === selectedChild.id
     );
 
-    console.log('Dashboard - Enrollments Filtering:', {
-      rawEnrollments: enrollmentsData,
-      selectedChildId: selectedChild.id,
-      filteredEnrollments: filtered,
-      filteredCount: filtered.length
-    });
-
     return filtered;
   }, [enrollmentsData, selectedChild]);
-
-  // Debug: Log enrollments data
-  console.log('Dashboard - Enrollments Debug:', {
-    enrollmentsData,
-    activeEnrollments,
-    enrollmentsCount: activeEnrollments?.length,
-    loadingEnrollments,
-    selectedChildId: selectedChild?.id,
-    willFetch: !!selectedChild
-  });
 
   // Get first active enrollment for enrollment-based data
   const firstEnrollment = useMemo(() => {
@@ -323,48 +298,52 @@ export default function Dashboard() {
               Welcome back, {user?.first_name || 'Parent'}! 👋
             </h1>
 
-            {/* Child Selector */}
+            {/* Child Selector or Add Child Button */}
             {loadingChildren ? (
+              // Loading skeleton
               <div className="py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-fluid-2xl animate-pulse max-sm:self-end max-sm:mr-2">
                 <div className="h-6 bg-gray-200 rounded-full w-64"></div>
               </div>
+            ) : children.length === 0 ? (
+              // Add Child Button - shown when no children registered
+              <button
+                onClick={() => navigate('/registerchild')}
+                className="flex items-center gap-2 py-2 px-4 bg-[#F3BC48] hover:bg-[#e5a920] border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#173151] max-sm:self-end max-sm:mr-2 transition-colors shadow-sm"
+              >
+                <UserPlus size={20} className="text-[#173151]" />
+                <span>Add Your First Child</span>
+              </button>
             ) : (
+              // Child Selector Dropdown - shown when children exist
               <div className="relative py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#1B1B1B] max-sm:self-end max-sm:mr-2 flex items-center gap-2">
                 <select
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   value={selectedChild?.id || ''}
                   onChange={handleChildChange}
-                  disabled={children.length === 0}
                 >
-                  {children.length === 0 ? (
-                    <option>No children available</option>
-                  ) : (
-                    children.map((child) => {
-                      const school = getSchoolName(child);
-                      const childName = `${child.first_name || ''} ${child.last_name || ''}`.trim();
-                      const childClassDays = getClassDays(child);
-                      return (
-                        <option key={child.id} value={child.id}>
-                          {childName || 'Student'}
-                          {school ? ` • ${school}` : ''}
-                          {child.grade ? ` • Grade ${child.grade}` : ''}
-                          {childClassDays ? ` • ${childClassDays}` : ''}
-                        </option>
-                      );
-                    })
-                  )}
+                  {children.map((child) => {
+                    const school = getSchoolName(child);
+                    const childName = `${child.first_name || ''} ${child.last_name || ''}`.trim();
+                    const childClassDays = getClassDays(child);
+                    return (
+                      <option key={child.id} value={child.id}>
+                        {childName || 'Student'}
+                        {school ? ` • ${school}` : ''}
+                        {child.grade ? ` • Grade ${child.grade}` : ''}
+                        {childClassDays ? ` • ${childClassDays}` : ''}
+                      </option>
+                    );
+                  })}
                 </select>
                 <span className="font-manrope font-medium text-base text-[#1B1B1B] pointer-events-none">
-                  {children.length > 0 && selectedChild ? (
+                  {selectedChild ? (
                     <>
                       {`${selectedChild.first_name || ''} ${selectedChild.last_name || ''}`.trim() || 'Student'}
                       {getSchoolName(selectedChild) ? ` • ${getSchoolName(selectedChild)}` : ''}
                       {selectedChild.grade ? ` • Grade ${selectedChild.grade}` : ''}
                       {getClassDays(selectedChild) ? ` • ${getClassDays(selectedChild)}` : ''}
                     </>
-                  ) : (
-                    'No children available'
-                  )}
+                  ) : null}
                 </span>
                 <ChevronDown size={20} className="text-[#1B1B1B] pointer-events-none" />
               </div>

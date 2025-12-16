@@ -7,6 +7,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useCheckoutFlow } from '../hooks/useCheckoutFlow';
 import waiversService from '../api/services/waivers.service';
+import { ArrowLeft, Home } from 'lucide-react';
 
 // Import all checkout components
 import CheckoutLoading from '../components/checkout/CheckoutLoading';
@@ -73,7 +74,6 @@ export default function CheckOut() {
       return;
     }
 
-    console.log('🔄 useEffect triggered - calling initializeCheckout');
     initializeCheckout(classId);
   }, [classId, navigate, initializeCheckout]);
 
@@ -157,11 +157,7 @@ export default function CheckOut() {
   }
 
   // Show waitlist flow if class is full
-  console.log('🚨 CheckOut render - hasCapacity value:', hasCapacity, 'Type:', typeof hasCapacity);
-  console.log('🚨 CheckOut render - !hasCapacity evaluates to:', !hasCapacity);
-
   if (!hasCapacity) {
-    console.log('❌ SHOWING WAITLIST FLOW because hasCapacity is:', hasCapacity);
     return (
       <WaitlistFlow
         classData={classData}
@@ -170,8 +166,6 @@ export default function CheckOut() {
       />
     );
   }
-
-  console.log('✅ SHOWING NORMAL CHECKOUT FLOW because hasCapacity is:', hasCapacity);
 
   // Calculate totals for OrderSummary
   const classPrice = classData?.price || 0;
@@ -182,6 +176,25 @@ export default function CheckOut() {
   return (
     <div className="min-h-screen w-full bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] py-8">
       <div className="max-w-7xl mx-auto px-4">
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 px-4 py-2 text-[#173151] hover:bg-white/50 rounded-lg transition-colors font-manrope font-medium"
+          >
+            <ArrowLeft size={20} />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white/80 text-[#173151] rounded-lg transition-colors font-manrope font-medium border border-gray-200"
+          >
+            <Home size={20} />
+            <span className="hidden sm:inline">Go to Dashboard</span>
+          </button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-[#173151] font-kollektif mb-2">

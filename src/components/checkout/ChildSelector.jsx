@@ -4,18 +4,40 @@
  */
 
 import React from 'react';
-import { User } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { User, UserPlus } from 'lucide-react';
 
 export default function ChildSelector({ children, selectedId, onSelect, classData }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleAddChild = () => {
+    // Save current checkout route to sessionStorage so we can return here
+    sessionStorage.setItem('intendedRoute', location.pathname + location.search);
+    navigate('/registerchild');
+  };
+
   if (!children || children.length === 0) {
     return (
       <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
         <h2 className="text-fluid-lg font-semibold font-manrope text-[#173151] mb-4">
           Select Child
         </h2>
-        <p className="text-fluid-base font-manrope text-[#666D80]">
-          No children found. Please add a child to your account first.
-        </p>
+        <div className="text-center py-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F3BC48]/10 flex items-center justify-center">
+            <UserPlus className="w-8 h-8 text-[#173151]" />
+          </div>
+          <p className="text-fluid-base font-manrope text-[#666D80] mb-4">
+            No children found. Please add a child to your account to continue enrollment.
+          </p>
+          <button
+            onClick={handleAddChild}
+            className="flex items-center gap-2 mx-auto py-3 px-6 bg-[#F3BC48] hover:bg-[#e5a920] border border-[#e1e1e1] text-base font-medium font-manrope rounded-lg text-[#173151] transition-colors shadow-sm"
+          >
+            <UserPlus size={20} className="text-[#173151]" />
+            <span>Add Your First Child</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -33,14 +55,35 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
     return age;
   };
 
+  // Check if child is already enrolled in this class
+  const checkAlreadyEnrolled = (child) => {
+    if (!classData || !child.enrollments) return false;
+
+    // Check if child has an active enrollment for this class
+    return child.enrollments.some(
+      (enrollment) =>
+        enrollment.class_id === classData.id &&
+        (enrollment.status === 'active' || enrollment.status === 'ACTIVE' || enrollment.status === 'pending' || enrollment.status === 'PENDING')
+    );
+  };
+
   // Check if child is eligible based on age
   const checkEligibility = (child) => {
+    // First check if already enrolled
+    if (checkAlreadyEnrolled(child)) {
+      return {
+        eligible: false,
+        message: 'Already enrolled in this class',
+        alreadyEnrolled: true,
+      };
+    }
+
     if (!classData || (!classData.min_age && !classData.max_age)) {
-      return { eligible: true, message: null };
+      return { eligible: true, message: null, alreadyEnrolled: false };
     }
 
     const age = calculateAge(child.date_of_birth);
-    if (!age) return { eligible: true, message: null };
+    if (!age) return { eligible: true, message: null, alreadyEnrolled: false };
 
     const minAge = classData.min_age;
     const maxAge = classData.max_age;
@@ -49,6 +92,7 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
       return {
         eligible: false,
         message: `Must be at least ${minAge} years old`,
+        alreadyEnrolled: false,
       };
     }
 
@@ -56,10 +100,11 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
       return {
         eligible: false,
         message: `Must be ${maxAge} years old or younger`,
+        alreadyEnrolled: false,
       };
     }
 
-    return { eligible: true, message: null };
+    return { eligible: true, message: null, alreadyEnrolled: false };
   };
 
   return (
@@ -134,8 +179,12 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
 
                   {/* Eligibility Warning */}
                   {!eligibility.eligible && eligibility.message && (
-                    <div className="mt-2 text-xs font-manrope text-red-600 bg-red-50 px-2 py-1 rounded">
-                      ⚠️ {eligibility.message}
+                    <div className={`mt-2 text-xs font-manrope px-2 py-1 rounded ${
+                      eligibility.alreadyEnrolled
+                        ? 'text-blue-700 bg-blue-50 border border-blue-200'
+                        : 'text-red-600 bg-red-50'
+                    }`}>
+                      {eligibility.alreadyEnrolled ? '✓' : '⚠️'} {eligibility.message}
                     </div>
                   )}
                 </div>

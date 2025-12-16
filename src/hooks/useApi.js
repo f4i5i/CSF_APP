@@ -43,7 +43,6 @@ export const useApi = (apiFunction, options = {}) => {
 
       try {
         const result = await apiFunction(...args);
-        console.log('useApi - API function result:', result);
 
         // Only update state if component is still mounted
         if (isMountedRef.current) {

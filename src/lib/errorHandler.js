@@ -16,6 +16,7 @@ export const ERROR_CODES = {
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   BAD_REQUEST: 'BAD_REQUEST',
   DUPLICATE_EMAIL: 'DUPLICATE_EMAIL',
+  DUPLICATE_ENROLLMENT: 'DUPLICATE_ENROLLMENT',
 
   // Resources
   NOT_FOUND: 'NOT_FOUND',
@@ -42,6 +43,7 @@ const ERROR_MESSAGES = {
   [ERROR_CODES.VALIDATION_ERROR]: 'Please check your input and try again',
   [ERROR_CODES.BAD_REQUEST]: 'Invalid request. Please check your input.',
   [ERROR_CODES.DUPLICATE_EMAIL]: 'This email address is already registered',
+  [ERROR_CODES.DUPLICATE_ENROLLMENT]: 'This child is already enrolled in this class',
   [ERROR_CODES.CONFLICT]: 'A conflict occurred. The resource may already exist.',
 };
 
@@ -62,6 +64,23 @@ export const handleApiError = (error) => {
   }
 
   const { status, data } = error.response;
+
+  // Check for specific database constraint errors
+  const errorDetail = data?.detail || '';
+
+  // Check for duplicate enrollment constraint
+  if (
+    errorDetail.includes('uq_enrollment_child_class_organization') ||
+    errorDetail.includes('duplicate key value') ||
+    (errorDetail.includes('already exists') && errorDetail.includes('enrollment'))
+  ) {
+    return {
+      message: ERROR_MESSAGES[ERROR_CODES.DUPLICATE_ENROLLMENT],
+      code: ERROR_CODES.DUPLICATE_ENROLLMENT,
+      status,
+      details: data?.data || null,
+    };
+  }
 
   // FastAPI error format: { error_code, message, data }
   const errorCode = data?.error_code || `HTTP_${status}`;

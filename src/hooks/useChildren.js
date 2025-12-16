@@ -37,17 +37,8 @@ export const useChildren = (options = {}) => {
     autoFetch,
     initialData: [],
     onSuccess: (data) => {
-      console.log('useChildren - onSuccess callback:', {
-        data,
-        dataType: typeof data,
-        isArray: Array.isArray(data),
-        length: data?.length,
-        selectedChild
-      });
-
       // Auto-select first child if none selected
       if (data && data.length > 0 && !selectedChild) {
-        console.log('useChildren - Auto-selecting first child:', data[0]);
         setSelectedChild(data[0]);
       }
     },

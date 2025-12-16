@@ -61,7 +61,6 @@ export const useCheckoutFlow = () => {
    * Initialize checkout - fetch class details, children, and check capacity
    */
   const initializeCheckout = useCallback(async (classId) => {
-    console.log('🔍 Initializing checkout for class:', classId);
     setState((prev) => ({ ...prev, isLoading: true, loading: true, error: null }));
 
     try {
@@ -71,18 +70,6 @@ export const useCheckoutFlow = () => {
         childrenService.getMy(),
         classesService.checkCapacity(classId),
       ]);
-
-      console.log('📦 Class data received:', {
-        id: classData.id,
-        name: classData.name,
-        capacity: classData.capacity,
-        current_enrollment: classData.current_enrollment,
-        has_capacity: classData.has_capacity,
-        available_spots: classData.available_spots,
-      });
-
-      console.log('✅ Capacity check result:', capacity);
-      console.log('🎯 Setting hasCapacity to:', capacity?.available !== false);
 
       setState((prev) => ({
         ...prev,
@@ -272,7 +259,6 @@ export const useCheckoutFlow = () => {
 
       // Store the checkout URL in clientSecret
       // The user will click a button to redirect manually
-      console.log('💳 Payment intent created, storing checkout URL for manual redirect');
       setState((prev) => ({
         ...prev,
         clientSecret: paymentIntent.client_secret,
@@ -408,7 +394,6 @@ export const useCheckoutFlow = () => {
    */
   const joinWaitlist = useCallback(async () => {
     // TODO: Implement waitlist functionality
-    console.log('Join waitlist not yet implemented');
   }, []);
 
   /**
@@ -416,7 +401,6 @@ export const useCheckoutFlow = () => {
    */
   const downloadReceipt = useCallback(() => {
     // TODO: Implement receipt download
-    console.log('Download receipt not yet implemented');
   }, []);
 
   /**
@@ -442,7 +426,6 @@ export const useCheckoutFlow = () => {
       !orderCreationFailed.current; // Don't retry if order creation failed
 
     if (shouldCreateOrder) {
-      console.log('🔄 Auto-creating order...');
       isCreatingOrder.current = true;
       createOrder().finally(() => {
         isCreatingOrder.current = false;
@@ -468,7 +451,6 @@ export const useCheckoutFlow = () => {
       !paymentCreationFailed.current; // Don't retry if payment creation failed
 
     if (shouldCreatePaymentIntent) {
-      console.log('🔄 Auto-creating payment intent...');
       isCreatingPayment.current = true;
       initiatePayment().finally(() => {
         isCreatingPayment.current = false;

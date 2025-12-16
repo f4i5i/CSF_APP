@@ -182,10 +182,6 @@ export default function useClassForm(initialData = null, mode = 'create') {
         payment_options: paymentOptions,
       };
 
-      console.log('Edit mode - initialData:', initialData);
-      console.log('Edit mode - payment_options from backend:', initialData.payment_options);
-      console.log('Edit mode - transformed payment_options:', paymentOptions);
-      console.log('Edit mode - mappedData:', mappedData);
       setFormData(mappedData);
     } else {
       setFormData(initialFormData);
@@ -443,8 +439,6 @@ export default function useClassForm(initialData = null, mode = 'create') {
       if (formData.class_image instanceof File) {
         // TODO: Upload image to storage and get URL
         // apiData.class_image_url = await uploadImage(formData.class_image);
-        // For now, just log that an image would be uploaded
-        console.log('Image file detected, would upload:', formData.class_image.name);
       } else if (typeof formData.class_image === 'string') {
         // If it's already a URL (edit mode)
         apiData.class_image_url = formData.class_image;
@@ -462,7 +456,6 @@ export default function useClassForm(initialData = null, mode = 'create') {
         onSuccess();
       }
     } catch (error) {
-      console.error('Failed to save class:', error);
       const errorMessage = error.response?.data?.message || 'Failed to save class';
       toast.error(errorMessage);
     } finally {

@@ -90,8 +90,13 @@ const Header = () => {
   // Reusable dropdown menu item component
   const MenuItem = ({ icon: Icon, label, onClick }) => (
     <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-sm text-gray-700"
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
+      className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-sm text-gray-700 transition-colors cursor-pointer"
     >
       <Icon size={16} />
       {label}
@@ -149,10 +154,16 @@ const Header = () => {
         {/* ================================================================ */}
         {/* LOGO SECTION */}
         {/* Displays company logo on the left side of header */}
+        {/* Hidden for admin users (logo already in sidebar) */}
+        {/* Spacer added for admin to maintain layout */}
         {/* ================================================================ */}
-        <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start">
-          <Logo />
-        </div>
+        {role !== "admin" ? (
+          <div className="flex w-fluid-avatar-lg h-fluid-avatar-lg items-center max-sm:mx-auto max-sm:justify-start">
+            <Logo />
+          </div>
+        ) : (
+          <div className="flex-1"></div>
+        )}
 
         {/* ================================================================ */}
         {/* MOBILE HEADER (visible on small screens only) */}
@@ -382,23 +393,16 @@ const Header = () => {
 
         {/* ================================================================ */}
         {/* DESKTOP PROFILE SECTION */}
-        {/* Parent/Coach: Profile image redirects to settings (no dropdown) */}
-        {/* Admin: Profile image with dropdown menu for additional options */}
+        {/* Parent/Coach: Profile image redirects to settings with dropdown */}
+        {/* Admin: Profile image only (no dropdown menu) */}
         {/* ================================================================ */}
-        <div className="hidden md:flex items-center gap-3 mr-12 relative">
-          <div className="flex items-center gap-3" ref={dropdownRef}>
-            {/* Profile image - clickable for all roles */}
+        <div className="hidden md:flex items-center gap-3 mr-12 relative" ref={dropdownRef}>
+          <div className="flex items-center gap-3">
+            {/* Profile image - display only (not clickable) */}
             <img
-              onClick={() => {
-                if (role === "admin") {
-                  setOpen(!open);  // Toggle dropdown for admin
-                } else {
-                  navigate("/settings");  // Direct navigation for parent/coach
-                }
-              }}
               src={logo}
               alt="profile"
-              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover cursor-pointer"
+              className="w-fluid-avatar-sm h-fluid-avatar-sm rounded-full object-cover"
             />
 
             {/* User name and role display */}
@@ -411,25 +415,33 @@ const Header = () => {
               </p>
             </div>
 
-            {/* Dropdown indicator (chevron) - visible for admin role */}
-            <div className="flex items-center justify-center cursor-pointer ml-3" onClick={() => setOpen(!open)}>
-              <ChevronDown
-                size={25}
-                className={`${
-                  open ? "rotate-180" : ""
-                } transition-transform duration-200 text-[#173151]`}
-                strokeWidth={3}
-              />
-            </div>
+            {/* Dropdown indicator (chevron) - hidden for admin role */}
+            {role !== "admin" && (
+              <div
+                className="flex items-center justify-center cursor-pointer ml-3"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(!open);
+                }}
+              >
+                <ChevronDown
+                  size={25}
+                  className={`${
+                    open ? "rotate-180" : ""
+                  } transition-transform duration-200 text-[#173151]`}
+                  strokeWidth={3}
+                />
+              </div>
+            )}
           </div>
 
           {/* ================================================================ */}
-          {/* ADMIN DROPDOWN MENU */}
-          {/* Displays menu options for admin users when dropdown is open */}
+          {/* PARENT/COACH DROPDOWN MENU */}
+          {/* Displays menu options for non-admin users when dropdown is open */}
           {/* Menu items: Profile, Payment & Billing, Contact, Add Child, Password, Log out */}
           {/* ================================================================ */}
-          {open && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-xl rounded-xl border p-2 z-50">
+          {open && role !== "admin" && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-xl rounded-xl border border-gray-200 p-2 z-50 pointer-events-auto">
             <MenuItem
               icon={User}
               label="Profile"
@@ -467,7 +479,7 @@ const Header = () => {
               label="Password"
               onClick={() => {
                 setOpen(false);
-                // TODO: Implement password change modal
+                navigate("/settings/password");
               }}
             />
             <MenuItem

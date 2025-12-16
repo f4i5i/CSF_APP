@@ -345,7 +345,7 @@ function AssignBadge({ m, onClose }) {
             Cancel
           </button>
           <button
-            onClick={() => console.log("Assigned badge:", selectedBadge)}
+            onClick={() => {}}
             className="px-4 py-2 bg-[#1D3557] text-white rounded"
           >
             Assign
