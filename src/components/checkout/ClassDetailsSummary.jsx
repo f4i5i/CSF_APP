@@ -50,33 +50,7 @@ export default function ClassDetailsSummary({ classData, hasCapacity }) {
     return `$${parseFloat(price).toFixed(2)}`;
   };
 
-  // Get capacity info
-  const getCapacityInfo = () => {
-    if (!hasCapacity) {
-      return {
-        text: 'Class Full',
-        color: 'text-red-600',
-        bg: 'bg-red-100',
-      };
-    }
-
-    const available = (classData.capacity || 0) - (classData.current_enrollment || 0);
-    if (available <= 3 && available > 0) {
-      return {
-        text: `Only ${available} spot${available === 1 ? '' : 's'} left`,
-        color: 'text-orange-600',
-        bg: 'bg-orange-100',
-      };
-    }
-
-    return {
-      text: `${available} spots available`,
-      color: 'text-green-600',
-      bg: 'bg-green-100',
-    };
-  };
-
-  const capacityInfo = getCapacityInfo();
+  // Capacity display removed per requirements
 
   return (
     <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
@@ -152,14 +126,7 @@ export default function ClassDetailsSummary({ classData, hasCapacity }) {
           </span>
         </div>
 
-        {/* Capacity Status */}
-        <div className="pt-2">
-          <span
-            className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${capacityInfo.bg} ${capacityInfo.color}`}
-          >
-            {capacityInfo.text}
-          </span>
-        </div>
+        {/* Capacity status removed per requirements */}
       </div>
     </div>
   );

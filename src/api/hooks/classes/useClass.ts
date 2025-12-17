@@ -41,7 +41,7 @@ export function useClass({ classId, queryOptions }: UseClassOptions) {
   return useQuery({
     queryKey: queryKeys.classes.detail(classId),
     queryFn: () => classService.getById(classId),
-    staleTime: 2 * 60 * 1000, // 2 minutes (capacity can change)
+    staleTime: 0, // Always fetch fresh data (capacity changes frequently)
     gcTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!classId, // Only fetch if classId is provided
     ...queryOptions,

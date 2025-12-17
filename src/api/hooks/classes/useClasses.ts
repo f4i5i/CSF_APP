@@ -48,7 +48,7 @@ export function useClasses(options: UseClassesOptions = {}) {
   return useQuery({
     queryKey: queryKeys.classes.list(filters),
     queryFn: () => classService.getAll(filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes (capacity changes frequently)
+    staleTime: 0, // Always fetch fresh data (capacity changes frequently)
     gcTime: 5 * 60 * 1000, // 5 minutes
     ...queryOptions,
   });

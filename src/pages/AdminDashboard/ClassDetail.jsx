@@ -272,12 +272,12 @@ export default function ClassDetail() {
                   {classData.coach && (
                     <>
                   <h5 className="font-semibold font-manrope text-text-primary mt-4">
-                    Coach
+                    Coordinator
                   </h5>
 
                   <div className="flex items-center gap-2 mt-2 ">
                     <span className="text-text-muted font-manrope">
-                      {classData.coach.name || 'TBD'}
+                      {classData.coach.first_name || 'TBD'}
                     </span>
                   </div>
                    </>
@@ -306,13 +306,7 @@ export default function ClassDetail() {
                     <span>Certified coaching staff</span>
                   </li>
                 </ul>
-                {classData.capacity && classData.current_enrollment !== undefined && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-700">
-                      <span className="font-semibold">{classData.current_enrollment}</span> / {classData.capacity} spots filled
-                    </p>
-                  </div>
-                )}
+                {/* Capacity display removed per requirements */}
               </div>
 
               <div className="mt-6">

@@ -126,24 +126,7 @@ export default function ClassDetail() {
                 )}
               </div>
 
-              <div className="rounded-2xl bg-gray-50 p-6 space-y-2">
-                <p className="text-sm uppercase tracking-wide text-gray-500">Capacity</p>
-                <p className={`text-2xl font-semibold ${capacityMeta.hasCapacity ? 'text-emerald-700' : 'text-rose-600'}`}>
-                  {capacityMeta.hasCapacity
-                    ? `${capacityMeta.availableSpots} spots open`
-                    : 'Currently waitlisted'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {capacityMeta.total ? `${capacityMeta.current}/${capacityMeta.total} enrolled` : `${capacityMeta.current} enrolled`}
-                </p>
-                {!capacityMeta.hasCapacity && (
-                  <p className="text-xs text-gray-500">
-                    {capacityMeta.waitlistCount > 0
-                      ? `${capacityMeta.waitlistCount} families waiting`
-                      : 'Join the waitlist to be notified next.'}
-                  </p>
-                )}
-              </div>
+              {/* Capacity display removed per requirements */}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -185,15 +168,12 @@ export default function ClassDetail() {
               <div>
                 <p className="text-sm uppercase tracking-wide text-gray-500">Investment ({priceModel})</p>
                 <p className="text-3xl font-bold text-[#173151]">{priceLabel}</p>
-                {!capacityMeta.hasCapacity && (
-                  <p className="text-sm text-rose-600">This class is full – secure your waitlist spot.</p>
-                )}
               </div>
               <button
                 onClick={() => navigate(`/checkout?classId=${classDetail.id}`)}
                 className="w-full rounded-full bg-[#F3BC48] px-8 py-3 font-semibold text-[#173151] shadow sm:w-auto"
               >
-                {capacityMeta.hasCapacity ? 'Reserve Spot' : 'Join Waitlist'}
+                Reserve Spot
               </button>
             </div>
           </div>
