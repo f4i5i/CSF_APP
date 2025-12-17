@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
-
+import Footer from "@/components/Footer";
 export default function AuthLayout() {
   return (
      <div className="min-h-screen w-full flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-80">
@@ -12,7 +12,7 @@ export default function AuthLayout() {
       </div>
 
       {/* FOOTER */}
-      <footer className="w-full py-2 bg-transparent">
+      {/* <footer className="w-full py-2 bg-transparent">
         <div className="w-full flex flex-row max-sm:flex max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-[#000] text-xs sm:text-sm">
 
           <p className="text-center text-[#000] sm:text-left font-['inter'] font-normal text-sm mb-2 sm:mb-0">
@@ -25,7 +25,8 @@ export default function AuthLayout() {
           </div>
 
         </div>
-      </footer>
+      </footer> */}
+      <Footer isFixed={false} />
     </div>
   );
 }
