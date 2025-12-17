@@ -148,10 +148,12 @@ export default function ClassDetail() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col w-full items-center justify-center sm:p-6 p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+    <div className="min-h-screen flex flex-col w-full items-center justify-center md:px-6 md:p-0 p-6  bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+      <div className="flex flex-1 items-center justify-center sm:pt-6 p-0" >
       <DottedOverlay
         className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
       />
+      <div className="w-full flex items-center justify-center ">
       <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-4 md:p-8 shadow-lg z-50 ">
         <div className="flex items-center justify-between mb-6 bg-white px-4 rounded-xl">
           <div className="flex items-center gap-4 ">
@@ -244,14 +246,14 @@ export default function ClassDetail() {
                 </div>
                 )}
               </div>
-              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col sm:flex-row gap-8">
+              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col justify-evenly sm:flex-row gap-8">
                 <div className="">
                   <h3 className="font-semibold font-manrope text-text-primary">
                     Day & Time
                   </h3>
 
                   <div className="flex items-center gap-2 mt-2 ">
-                    <Clock className="w-4 h-4 text-gray-400 " />
+                    <Clock className="w-4 h-4 text-text-muted " />
                     <span className="text-text-muted text-[14px] font-manrope">
                       {formatSchedule(classData)}
                     </span>
@@ -261,8 +263,8 @@ export default function ClassDetail() {
                   </h5>
 
                   <div className="flex items-center gap-2 mt-2 ">
-                    <User className="w-4 h-4 text-gray-400 " />{" "}
-                    <span className="text-text-muted font-manrope">
+                    <User className="w-4 h-4 text-text-muted " />{" "}
+                    <span className="text-text-muted text-[14px] font-manrope">
                       {classData.min_age || 0} - {classData.max_age || 18} Years Old
                     </span>
                   </div>
@@ -273,7 +275,7 @@ export default function ClassDetail() {
                   </h3>
 
                   <div className="flex items-center gap-2 mt-2 ">
-                    <IconCalendar />
+                    <IconCalendar className="text-text-muted w-4 h-4" />
                     <span className="text-text-muted text-[14px] font-manrope">
                       {formatDates(classData)}
                     </span>
@@ -285,7 +287,7 @@ export default function ClassDetail() {
                   </h5>
 
                   <div className="flex items-center gap-2 mt-2 ">
-                    <span className="text-text-muted font-manrope">
+                    <span className="text-text-muted text-[14px] font-manrope">
                       {classData.coach.first_name || 'TBD'}
                     </span>
                   </div>
@@ -300,7 +302,7 @@ export default function ClassDetail() {
                   <h4 className="font-bold text-lg font-manrope text-text-primary">
                     Total Price
                   </h4>
-                  <div className="mt-2 text-[32px] font-semibold font-manrope">
+                  <div className="text-[32px] font-semibold font-manrope">
                     ${classData.price || '0'}
                   </div>
                 </div>
@@ -329,6 +331,8 @@ export default function ClassDetail() {
             </aside>
           </div>
         </div>
+      </div>
+      </div>
       </div>
       <Footer isFixed={false} />
     </div>
