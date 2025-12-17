@@ -1,8 +1,8 @@
 import React from 'react'
 
-const Footer = () => {
+const Footer = ({ isFixed = true }) => {
   return (
-     <footer className="fixed bottom-0 left-0 right-0 w-full py-5 transparent backdrop-blur-sm max-sm:hidden">
+     <footer className={`${isFixed ? "fixed bottom-0 left-0 right-0" : "relative"} w-full py-5 transparent backdrop-blur-sm max-sm:hidden`}>
         <div className="w-full flex flex-row max-sm:flex max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-gray-600 text-xs sm:text-sm">
 
           <p className="text-center sm:text-left font-['inter'] font-normal text-black text-sm mb-2 sm:mb-0">

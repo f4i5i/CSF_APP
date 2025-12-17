@@ -141,7 +141,7 @@ export default function ClassDetail() {
   }
 
   return (
-    <div className="min-h-screen flex items-start justify-center sm:p-6 p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+    <div className="min-h-screen flex flex-col w-full items-center justify-center sm:p-6 p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
       <DottedOverlay
         className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
       />
@@ -158,11 +158,17 @@ export default function ClassDetail() {
               Back to Available Classes
             </h1>
           </div>
+          <div className="isolation-auto" >
           <img
             src="/images/logo.png"
             alt="logo"
-            className="size-[80px] object-contain mix-blend-exclusion"
+            className="size-[80px] object-contain"
+            style={{
+              filter: 'brightness(0.2) contrast(1.5)',
+              mixBlendMode: 'normal'
+            }}
           />
+          </div>
         </div>
 
         <div className="col-span-2  rounded-lg py-6">
@@ -323,7 +329,7 @@ export default function ClassDetail() {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer isFixed={false} />
     </div>
   );
 }

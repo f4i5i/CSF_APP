@@ -160,21 +160,28 @@ export default function ClassList() {
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+    <div className="min-h-screen flex flex-col items-center justify-between p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
       <DottedOverlay
         className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
       />
+      <div className="w-full flex-grow flex items-center justify-center">
       <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 shadow-lg z-50">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)}>
             <ArrowLeft  className="text-[#00000099] size-[16px]" />
           </button>
+          <div>
+            <img
+              src="/images/logo.png"
+              alt="logo"
+              className="size-[90px] object-contain "
+              style={{
+                filter: 'brightness(0.2) contrast(1.5)',
+                mixBlendMode: 'normal'
+              }}
+            />
+          </div>
 
-          <img
-            src="/images/logo.png"
-            alt="logo"
-            className="size-[90px] object-contain mix-blend-exclusion"
-          />
           <div>
             <h2 className="text-xl md:text-[28px] font-kollektif text-text-primary">
               Available Classes
@@ -295,7 +302,9 @@ export default function ClassList() {
           )}
         </div>
       </div>
-      <Footer/>
+      </div>
+
+      <Footer isFixed={false} />
     </div>
   );
 }

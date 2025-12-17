@@ -52,12 +52,18 @@ export default function Resgister() {
       <div className="w-full z-30 m-4 max-w-[790px] bg-[#FFFFFF80] rounded-3xl  pt-[30px] pb-[13px]">
         <div className="flex flex-col items-center gap-2">
           {/* <Logo /> */}
+          <div className="isolation-auto" >
           <img
             src="/images/logo.png"
             alt="location"
             className="size-[140px]  object-contain 
           mix-blend-exclusion"
+            style={{
+              filter: 'brightness(0.2) contrast(1.5)',
+              mixBlendMode: 'normal'
+            }}
           />
+          </div>
 
           <h1 className="text-[24px] md:text-[28px] font-kollektif font-normal text-text-primary">
             Carolina Soccer Factory
