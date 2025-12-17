@@ -140,9 +140,8 @@ export default function ClassList() {
       return 'Schedule TBD';
     }
 
-    const days = cls.weekdays.map(day =>
-      day.charAt(0).toUpperCase() + day.slice(1, 3)
-    ).join(', ');
+    // Backend now sends full day names (Monday, Wednesday) and times in 12-hour format
+    const days = cls.weekdays.join(', ');
 
     const time = cls.start_time && cls.end_time
       ? `${cls.start_time} - ${cls.end_time}`

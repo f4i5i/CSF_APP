@@ -109,9 +109,8 @@ export default function ClassDetail() {
       return 'Schedule TBD';
     }
 
-    const days = cls.weekdays.map(day =>
-      day.charAt(0).toUpperCase() + day.slice(1, 3)
-    ).join(', ');
+    // Backend now sends full day names (Monday, Wednesday) and times in 12-hour format
+    const days = cls.weekdays.join(', ');
 
     const time = cls.start_time && cls.end_time
       ? `${cls.start_time} - ${cls.end_time}`
@@ -202,11 +201,11 @@ export default function ClassDetail() {
                 {classData.school && (
                 <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
                   <div className="flex items-center gap-4">
-                    <div className="sm:w-[190px] w-[130px] h-full  rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="sm:w-[190px] w-[130px] sm:h-[140px] h-[100px] rounded-lg overflow-hidden flex-shrink-0 relative">
                       <iframe
                         title="location-map"
                         src={`https://www.google.com/maps?q=${encodeURIComponent(classData.school.address || '')}&output=embed`}
-                        className="w-full h-full border-0"
+                        className="w-full h-[140%] border-0 absolute top-0 left-0"
                         loading="lazy"
                       />
                     </div>
