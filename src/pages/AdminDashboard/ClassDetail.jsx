@@ -4,7 +4,8 @@ import { ArrowLeft, Clock, User, MapPin } from "lucide-react";
 import classesService from "../../api/services/classes.service";
 import { useAuth } from "../../context/auth";
 import toast from "react-hot-toast";
-
+import DottedOverlay from "@/components/DottedOverlay";
+import Footer from "@/components/Footer";
 const IconClock = ({ className = "w-4 h-4 text-gray-400" }) => (
   <svg
     className={className}
@@ -148,8 +149,11 @@ export default function ClassDetail() {
   }
 
   return (
-    <div className="min-h-screen flex items-start justify-center sm:p-6 p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
-      <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-4 md:p-8 shadow-lg">
+    <div className="min-h-screen flex flex-col w-full items-center justify-center sm:p-6 p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+      <DottedOverlay
+        className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
+      />
+      <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-4 md:p-8 shadow-lg z-50 ">
         <div className="flex items-center justify-between mb-6 bg-white px-4 rounded-xl">
           <div className="flex items-center gap-4 ">
             <Link
@@ -162,21 +166,27 @@ export default function ClassDetail() {
               Back to Available Classes
             </h1>
           </div>
+          <div className="isolation-auto" >
           <img
             src="/images/logo.png"
             alt="logo"
-            className="size-[80px] object-contain mix-blend-exclusion"
+            className="size-[80px] object-contain"
+            style={{
+              filter: 'brightness(0.2) contrast(1.5)',
+              mixBlendMode: 'normal'
+            }}
           />
+          </div>
         </div>
 
         <div className="col-span-2  rounded-lg py-6">
-          <div className="flex flex-col md:flex-row items-start justify-center gap-4">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-4">
             <img
               src={classData.image_url || "/images/detail_page.png"}
               alt={classData.name}
               className="w-full sm:max-w-[327px] h-56 object-cover rounded-lg"
             />
-            <div className="">
+            <div className="w-full">
               <h2 className="sm:text-[30px] text-[22px] mt-3 font-bold font-manrope text-text-primary">
                 {classData.name}
               </h2>
@@ -321,6 +331,7 @@ export default function ClassDetail() {
           </div>
         </div>
       </div>
+      <Footer isFixed={false} />
     </div>
   );
 }
