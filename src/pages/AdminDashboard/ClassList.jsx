@@ -203,7 +203,7 @@ export default function ClassList() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveProgram("")}
-              className={`px-4 py-2 rounded-full text-sm font-semibold font-manrope transition-colors border ${
+              className={`px-4 py-1 sm:py-2 rounded-full text-[8px] sm:text-sm font-semibold font-manrope transition-colors border ${
                 activeProgram === ""
                   ? "bg-[#101D2E] text-white border-transparent"
                   : "bg-white text-neutral-dark border-gray-200"
@@ -215,7 +215,7 @@ export default function ClassList() {
               <button
                 key={program.id}
                 onClick={() => setActiveProgram(program.id)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold font-manrope transition-colors border ${
+                className={`px-4 py-1 sm:py-2 rounded-full text-[8px] sm:text-sm font-semibold font-manrope transition-colors border ${
                   activeProgram === program.id
                     ? "bg-[#101D2E] text-white border-transparent"
                     : "bg-white text-neutral-dark border-gray-200"
@@ -279,14 +279,14 @@ export default function ClassList() {
                 <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                      <Link to={`/class-detail?id=${cls.id}`} className="hover:underline text-[23px] font-kollektif  text-text-primary">{cls.name}</Link>
-                    <div className="mt-2 flex  flex-col items-start gap-3 text-sm text-gray-500">
+                    <div className="sm:mt-2 mt-1 flex  flex-col items-start gap-2 sm:gap-3 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
                         <IconClock />
                         <span className="text-text-muted font-manrope">
                           {formatSchedule(cls)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                      <div className="flex items-center gap-2  mt-1 sm:mt-0">
                         <IconCalendar />
                         <span className="text-text-muted font-manrope">
                           {formatDates(cls)}

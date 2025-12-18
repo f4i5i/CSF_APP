@@ -43,12 +43,12 @@ export default function Resgister() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] relative">
+    <div className="min-h-screen flex flex-col items-center justify-between bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] relative">
       {/* <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div> */}
       <DottedOverlay
         className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
       />
-
+      <div className="w-full flex-grow flex items-center justify-center">
       <div className="w-full z-30 m-4 max-w-[790px] bg-[#FFFFFF80] rounded-3xl  pt-[30px] pb-[13px]">
         <div className="flex flex-col items-center gap-2">
           {/* <Logo /> */}
@@ -106,7 +106,8 @@ export default function Resgister() {
           </p>
         </div>
       </div>
-      <Footer/>
+      </div>
+      <Footer isFixed={false} />
     </div>
   );
 }
