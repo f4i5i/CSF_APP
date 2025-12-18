@@ -348,7 +348,7 @@ export default function ClassDetail() {
               <div className="flex flex-col md:flex-row items-start gap-6 mt-6 w-full">
 
                 {/* LEFT COLUMN - Class details (65% width) */}
-                <div className="flex flex-col items-start gap-4 w-full sm:max-w-[65%]">
+                <div className="flex flex-1 flex-col items-start gap-2 sm:gap-4 w-full sm:max-w-[65%]">
 
                   {/* ============================================
                       LOCATION CARD - Map and address
@@ -371,9 +371,9 @@ export default function ClassDetail() {
                           </div>
 
                           {/* Location information */}
-                          <div className="flex-1">
+                          <div className="flex-1 p-2 ">
                             {/* Location icon and label */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 mt-4 sm:mt-0 ">
                               <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
                                 <svg
                                   width="16"
@@ -395,12 +395,12 @@ export default function ClassDetail() {
                             </div>
 
                             {/* School name and address */}
-                            <p className="sm:text-base text-xs leading-[30px] font-manrope text-text-muted mt-2">
+                            <p className="sm:text-sm text-xs leading-[30px] max-w-60 font-manrope text-text-muted mt-2">
                               {classData.school.name}
                               {classData.school.address && (
                                 <>
                                   <br />
-                                  {classData.school.address}
+                                 <span className="mt-2">{classData.school.address}</span> 
                                 </>
                               )}
                             </p>
@@ -413,7 +413,7 @@ export default function ClassDetail() {
                   {/* ============================================
                       SCHEDULE CARD - Days, times, dates, age, coordinator
                       ============================================ */}
-                  <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col justify-evenly sm:flex-row gap-8">
+                  <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col justify-evenly sm:flex-row  gap-4 sm:gap-8">
 
                     {/* Left section - Day & Time, Age Group */}
                     <div>
@@ -473,7 +473,7 @@ export default function ClassDetail() {
                 {/* ============================================
                     RIGHT COLUMN - Pricing and registration (35% width)
                     ============================================ */}
-                <aside className="bg-[#FFFFFF80] rounded-[20px] p-6 flex flex-col w-full sm:max-w-[35%]">
+                <aside className="bg-[#FFFFFF80] flex-1 rounded-[20px] p-6 flex flex-col w-full sm:max-w-[35%]">
                   <div>
                     {/* Price display */}
                     <div className="flex justify-between items-center w-full">
