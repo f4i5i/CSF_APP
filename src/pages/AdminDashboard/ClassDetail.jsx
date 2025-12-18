@@ -197,7 +197,7 @@ export default function ClassDetail() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-start gap-6 mt-6 w-full">
-            <div className="flex flex-col items-start gap-4 w-full sm:max-w-[65%]">
+            <div className="flex flex-1 flex-col items-start gap-2 sm:gap-4 w-full sm:max-w-[65%]">
               <div className=" w-full flex flex-col gap-4">
                 {/* location card */}
                 {classData.school && (
@@ -211,8 +211,8 @@ export default function ClassDetail() {
                         loading="lazy"
                       />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                    <div className="flex-1 p-2 ">
+                      <div className="flex items-center gap-2 mt-4 sm:mt-0 ">
                         <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
                           <svg
                             width="16"
@@ -232,12 +232,12 @@ export default function ClassDetail() {
                           Location
                         </h4>
                       </div>
-                      <p className="sm:text-base text-xs leading-[30px] font-manrope text-text-muted mt-2">
+                      <p className="sm:text-sm text-xs leading-[30px] max-w-60 font-manrope text-text-muted mt-2">
                         {classData.school.name}
                           {classData.school.address && (
                             <>
                         <br />
-                        {classData.school.address}
+                       <span className="mt-2">{classData.school.address}</span> 
                         </>
                         )}
                       </p>
@@ -246,7 +246,7 @@ export default function ClassDetail() {
                 </div>
                 )}
               </div>
-              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col justify-evenly sm:flex-row gap-8">
+              <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col justify-evenly sm:flex-row  gap-4 sm:gap-8">
                 <div className="">
                   <h3 className="font-semibold font-manrope text-text-primary">
                     Day & Time
@@ -296,7 +296,7 @@ export default function ClassDetail() {
                 </div>
               </div>
             </div>
-            <aside className="bg-[#FFFFFF80] rounded-[20px] p-6 flex flex-col w-full sm:max-w-[35%]">
+            <aside className="bg-[#FFFFFF80] flex-1 rounded-[20px] p-6 flex flex-col w-full sm:max-w-[35%]">
               <div>
                 <div className="flex justify-between items-center w-full">
                   <h4 className="font-bold text-lg font-manrope text-text-primary">
