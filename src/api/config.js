@@ -5,10 +5,10 @@
 
 const API_CONFIG = {
   // Base API URL - defaults to localhost:8000
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api',
 
   // API version prefix
-  API_PREFIX: '/api/v1',
+  API_PREFIX: '/v1',
 
   // Request timeout (30 seconds)
   TIMEOUT: 30000,
