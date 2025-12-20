@@ -1,0 +1,18 @@
+[Unit]
+Description=CSF Frontend Next.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/CSF_APP
+Environment="NODE_ENV=production"
+Environment="NEXT_PUBLIC_API_URL=http://72.61.159.163/api"
+Environment="PORT=3000"
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
