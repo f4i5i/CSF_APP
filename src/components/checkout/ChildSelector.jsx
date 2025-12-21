@@ -59,11 +59,11 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
   const checkAlreadyEnrolled = (child) => {
     if (!classData || !child.enrollments) return false;
 
-    // Check if child has an active enrollment for this class
+    // Only check for ACTIVE (paid) enrollments - PENDING enrollments from failed checkouts should not block
     return child.enrollments.some(
       (enrollment) =>
         enrollment.class_id === classData.id &&
-        (enrollment.status === 'active' || enrollment.status === 'ACTIVE' || enrollment.status === 'pending' || enrollment.status === 'PENDING')
+        (enrollment.status === 'active' || enrollment.status === 'ACTIVE')
     );
   };
 
