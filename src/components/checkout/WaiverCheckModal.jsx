@@ -8,57 +8,80 @@ import { X, AlertCircle, CheckCircle, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import waiversService from '../../api/services/waivers.service';
 
-const WaiverCheckModal = ({ classData, onClose, onWaiversSigned }) => {
+const WaiverCheckModal = ({ classData, onClose, onWaiversSigned, initialWaiversData = null }) => {
   const [pendingWaivers, setPendingWaivers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialWaiversData);
   const [submitting, setSubmitting] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const [formData, setFormData] = useState({
     signature: '',
     acceptedWaivers: {},
   });
 
+  // Initialize waivers from pre-fetched data or fetch if not provided
   useEffect(() => {
-    fetchPendingWaivers();
-  }, [classData]);
+    if (initialized) return;
 
-  const fetchPendingWaivers = async () => {
-    try {
-      setLoading(true);
-      const response = await waiversService.getPending({
-        program_id: classData?.program?.id || classData?.program_id,
-        school_id: classData?.school?.id || classData?.school_id,
-      });
+    const initializeWaivers = async () => {
+      let waiversData = [];
 
-      const waiversData = (response?.items || []).map((item) => ({
-        id: item.waiver_template.id,
-        name: item.waiver_template.name,
-        content: item.waiver_template.content,
-        type: item.waiver_template.waiver_type,
-        version: item.waiver_template.version,
-        needs_reconsent: item.needs_reconsent,
-        is_accepted: item.is_accepted,
-      }));
+      try {
+        if (initialWaiversData?.items) {
+          // Use pre-fetched data
+          waiversData = (initialWaiversData.items || []).map((item) => ({
+            id: item.waiver_template.id,
+            name: item.waiver_template.name,
+            content: item.waiver_template.content,
+            type: item.waiver_template.waiver_type,
+            version: item.waiver_template.version,
+            needs_reconsent: item.needs_reconsent,
+            is_accepted: item.is_accepted,
+          }));
+        } else {
+          // Fetch if no pre-fetched data
+          setLoading(true);
+          const response = await waiversService.getPending({
+            program_id: classData?.program?.id || classData?.program_id,
+            school_id: classData?.school?.id || classData?.school_id,
+          });
 
-      setPendingWaivers(waiversData);
+          waiversData = (response?.items || []).map((item) => ({
+            id: item.waiver_template.id,
+            name: item.waiver_template.name,
+            content: item.waiver_template.content,
+            type: item.waiver_template.waiver_type,
+            version: item.waiver_template.version,
+            needs_reconsent: item.needs_reconsent,
+            is_accepted: item.is_accepted,
+          }));
+        }
 
-      // Initialize acceptedWaivers state
-      const initialAcceptedState = {};
-      waiversData.forEach((waiver) => {
-        initialAcceptedState[waiver.id] = false;
-      });
-      setFormData((prev) => ({
-        ...prev,
-        acceptedWaivers: initialAcceptedState,
-      }));
-    } catch (error) {
-      console.error('Failed to fetch pending waivers:', error);
-      toast.error('Failed to load waivers');
-      setPendingWaivers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setPendingWaivers(waiversData);
+
+        // Initialize acceptedWaivers state
+        const initialAcceptedState = {};
+        waiversData.forEach((waiver) => {
+          initialAcceptedState[waiver.id] = false;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          acceptedWaivers: initialAcceptedState,
+        }));
+
+        setInitialized(true);
+      } catch (error) {
+        console.error('Failed to fetch pending waivers:', error);
+        toast.error('Failed to load waivers');
+        setPendingWaivers([]);
+        setInitialized(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeWaivers();
+  }, [classData, initialWaiversData, initialized]);
 
   const handleWaiverCheck = (waiverId, checked) => {
     setFormData((prev) => ({
@@ -116,15 +139,10 @@ const WaiverCheckModal = ({ classData, onClose, onWaiversSigned }) => {
 
       toast.success('Waivers signed successfully!');
 
-      // Notify parent component
+      // Notify parent component immediately - no delay needed
       if (onWaiversSigned) {
         onWaiversSigned();
       }
-
-      // Close modal after short delay
-      setTimeout(() => {
-        onClose();
-      }, 500);
     } catch (error) {
       console.error('Failed to sign waivers:', error);
       const errorMessage =
@@ -137,15 +155,18 @@ const WaiverCheckModal = ({ classData, onClose, onWaiversSigned }) => {
     }
   };
 
-  // If no pending waivers, close modal automatically
+  // If no pending waivers after initialization, close modal and mark as signed
   useEffect(() => {
-    if (!loading && pendingWaivers.length === 0) {
-      if (onWaiversSigned) {
-        onWaiversSigned();
-      }
-      onClose();
+    if (initialized && !loading && pendingWaivers.length === 0) {
+      // Use setTimeout to ensure state updates happen cleanly
+      const timer = setTimeout(() => {
+        if (onWaiversSigned) {
+          onWaiversSigned();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [loading, pendingWaivers.length, onClose, onWaiversSigned]);
+  }, [initialized, loading, pendingWaivers.length, onWaiversSigned]);
 
   if (loading) {
     return (

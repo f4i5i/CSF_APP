@@ -34,7 +34,7 @@
 import React, { useState, useEffect } from "react";
 
 // Routing
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 // Icons
 import { ArrowLeft, Clock, User, MapPin } from "lucide-react";
@@ -104,11 +104,18 @@ export default function ClassDetail() {
   // --------------------------------------------------------------------------
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user } = useAuth(); // Get current authenticated user
 
   // Extract class ID from URL query parameters
   const classId = searchParams.get('id');
+
+  // Get area ID from location state (passed from ClassList)
+  const areaId = location.state?.areaId;
+
+  // Build back URL with area parameter if available
+  const backToClassListUrl = areaId ? `/class-list?area=${areaId}` : '/class-list';
 
   // Component state
   const [classData, setClassData] = useState(null); // Stores fetched class details
@@ -124,7 +131,7 @@ export default function ClassDetail() {
     } else {
       // No class ID in URL - redirect to class list
       toast.error('No class ID provided');
-      navigate('/class-list');
+      navigate(backToClassListUrl);
     }
   }, [classId]);
 
@@ -157,7 +164,7 @@ export default function ClassDetail() {
     } catch (error) {
       console.error('Failed to fetch class details:', error);
       toast.error('Failed to load class details');
-      navigate('/class-list'); // Redirect on error
+      navigate(backToClassListUrl); // Redirect on error
     } finally {
       setLoading(false);
     }
@@ -291,7 +298,8 @@ export default function ClassDetail() {
               {/* Left side: Back button */}
               <div className="flex items-center gap-4">
                 <Link
-                  to="/class-list"
+                  to={backToClassListUrl}
+                  state={{ from: '/' }}
                   className="rounded-full p-2 hover:bg-white/60"
                 >
                   <ArrowLeft className="text-[#00000099]" />

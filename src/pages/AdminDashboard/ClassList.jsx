@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import React, { useMemo, useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import { useAuth } from "../../context/auth";
@@ -41,6 +41,7 @@ const IconCalendar = ({ className = "w-4 h-4 text-gray-400" }) => (
 
 export default function ClassList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user } = useAuth(); // Get auth state
 
@@ -52,6 +53,9 @@ export default function ClassList() {
 
   // Get area from URL params
   const areaId = searchParams.get('area');
+
+  // Get the previous location from state, or use landing page as default
+  const previousPath = location.state?.from || '/';
 
   // Fetch programs and classes on mount
   useEffect(() => {
@@ -174,7 +178,7 @@ export default function ClassList() {
       <div className="w-full flex-grow flex items-center justify-center">
       <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 md:mt-8 shadow-lg z-50">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate(-1)}>
+          <button onClick={() => navigate(previousPath)}>
             <ArrowLeft  className="text-[#00000099] size-[16px]" />
           </button>
           <div>
@@ -267,7 +271,11 @@ export default function ClassList() {
                 className="flex flex-col md:flex-row items-stretch gap-4 bg-[#FFFFFF80] rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
               >
                 <div className="w-full md:w-44 flex-shrink-0">
-                  <Link to={`/class-detail?id=${cls.id}`} className="block w-full h-full">
+                  <Link
+                    to={`/class-detail?id=${cls.id}`}
+                    state={{ areaId: areaId, from: '/class-list' }}
+                    className="block w-full h-full"
+                  >
                     <img
                       src={cls.image_url || "/images/class_list1.png"}
                       alt={cls.name}
@@ -278,7 +286,11 @@ export default function ClassList() {
 
                 <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                     <Link to={`/class-detail?id=${cls.id}`} className="hover:underline text-[23px] font-kollektif  text-text-primary">{cls.name}</Link>
+                     <Link
+                       to={`/class-detail?id=${cls.id}`}
+                       state={{ areaId: areaId, from: '/class-list' }}
+                       className="hover:underline text-[23px] font-kollektif  text-text-primary"
+                     >{cls.name}</Link>
                     <div className="sm:mt-2 mt-1 flex  flex-col items-start gap-2 sm:gap-3 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
                         <IconClock />

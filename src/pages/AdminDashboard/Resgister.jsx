@@ -38,8 +38,8 @@ export default function Resgister() {
   };
 
   const handleAreaClick = (areaId) => {
-    // Navigate to class list with area filter
-    navigate(`/class-list?area=${areaId}`);
+    // Navigate to class list with area filter, passing current path for back navigation
+    navigate(`/class-list?area=${areaId}`, { state: { from: '/' } });
   };
 
   return (

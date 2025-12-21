@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/auth";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ClassCard from "../components/ClassCard";
@@ -14,6 +16,7 @@ import {
 
 export default function Classes() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const { data: classes = [], isLoading, isError } = useClasses({
     filters: { is_active: true },
@@ -53,6 +56,23 @@ export default function Classes() {
       });
   }, [classes, search]);
 
+  const handleRegister = (classId) => {
+    if (!user) {
+      sessionStorage.setItem('intendedClass', classId);
+      toast('Please log in to register for this class');
+      navigate('/login');
+      return;
+    }
+
+    const userRole = user?.role?.toUpperCase();
+    if (userRole !== 'PARENT') {
+      toast.error('Only parents can register for classes');
+      return;
+    }
+
+    navigate(`/checkout?classId=${classId}`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] pb-10">
       <Header />
@@ -83,7 +103,7 @@ export default function Classes() {
                 key={cls.id}
                 cls={cls}
                 onClick={() => navigate(`/class/${cls.id}`)}
-                onRegister={() => navigate(`/checkout?classId=${cls.id}`)}
+                onRegister={() => handleRegister(cls.id)}
               />
             ))}
             {mappedClasses.length === 0 && (

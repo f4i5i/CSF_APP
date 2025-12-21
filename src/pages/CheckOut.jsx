@@ -66,6 +66,10 @@ export default function CheckOut() {
   const [showWaiverModal, setShowWaiverModal] = useState(false);
   const [waiversChecked, setWaiversChecked] = useState(false);
   const [checkingWaivers, setCheckingWaivers] = useState(false);
+  const [pendingWaiversData, setPendingWaiversData] = useState(null);
+
+  // Track if waiver check has been done for current child
+  const waiverCheckDoneForChild = React.useRef(null);
 
   // Initialize checkout on mount
   useEffect(() => {
@@ -77,47 +81,62 @@ export default function CheckOut() {
     initializeCheckout(classId);
   }, [classId, navigate, initializeCheckout]);
 
-  // Check for pending waivers when child is selected
-  const checkPendingWaivers = useCallback(async () => {
-    if (!selectedChildId || !classData || waiversChecked) {
+  // Reset waiver state when child changes
+  useEffect(() => {
+    if (selectedChildId !== waiverCheckDoneForChild.current) {
+      setWaiversChecked(false);
+      setPendingWaiversData(null);
+      waiverCheckDoneForChild.current = null;
+    }
+  }, [selectedChildId]);
+
+  // Check for pending waivers when child is selected (only once per child)
+  useEffect(() => {
+    // Skip if no child selected, no class data, already checked for this child, or already checking
+    if (!selectedChildId || !classData || waiverCheckDoneForChild.current === selectedChildId || checkingWaivers) {
       return;
     }
 
-    try {
-      setCheckingWaivers(true);
-      const response = await waiversService.getPending({
-        program_id: classData?.program?.id || classData?.program_id,
-        school_id: classData?.school?.id || classData?.school_id,
-      });
+    const checkWaivers = async () => {
+      try {
+        setCheckingWaivers(true);
+        const response = await waiversService.getPending({
+          program_id: classData?.program?.id || classData?.program_id,
+          school_id: classData?.school?.id || classData?.school_id,
+        });
 
-      const pendingCount = response?.pending_count || 0;
+        const pendingCount = response?.pending_count || 0;
 
-      if (pendingCount > 0) {
-        // Show waiver modal - blocks payment until signed
-        setShowWaiverModal(true);
-      } else {
-        // No pending waivers, mark as checked
+        // Mark this child as checked
+        waiverCheckDoneForChild.current = selectedChildId;
+
+        if (pendingCount > 0) {
+          // Store waiver data and show modal
+          setPendingWaiversData(response);
+          setShowWaiverModal(true);
+        } else {
+          // No pending waivers, mark as checked immediately
+          setWaiversChecked(true);
+        }
+      } catch (error) {
+        console.error('Failed to check pending waivers:', error);
+        // Mark as checked to not block checkout on error
+        waiverCheckDoneForChild.current = selectedChildId;
         setWaiversChecked(true);
+      } finally {
+        setCheckingWaivers(false);
       }
-    } catch (error) {
-      console.error('Failed to check pending waivers:', error);
-      // Don't block checkout on error, but log it
-      setWaiversChecked(true);
-    } finally {
-      setCheckingWaivers(false);
-    }
-  }, [selectedChildId, classData, waiversChecked]);
+    };
 
-  // Run waiver check when child is selected
-  useEffect(() => {
-    checkPendingWaivers();
-  }, [checkPendingWaivers]);
+    checkWaivers();
+  }, [selectedChildId, classData, checkingWaivers]);
 
-  // Handle waiver signing completion
-  const handleWaiversSigned = () => {
+  // Handle waiver signing completion - immediate state update
+  const handleWaiversSigned = useCallback(() => {
     setWaiversChecked(true);
     setShowWaiverModal(false);
-  };
+    setPendingWaiversData(null);
+  }, []);
 
   // Handle discount application
   const handleApplyDiscount = async (code) => {
@@ -390,6 +409,7 @@ export default function CheckOut() {
           classData={classData}
           onClose={() => setShowWaiverModal(false)}
           onWaiversSigned={handleWaiversSigned}
+          initialWaiversData={pendingWaiversData}
         />
       )}
     </div>

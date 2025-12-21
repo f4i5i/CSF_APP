@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/auth";
 import Header from "../components/Header";
+import { ArrowLeft } from "lucide-react";
 import { useClass } from "../api/hooks/classes/useClass";
 import { formatDateRange, formatSchedule } from "../utils/formatters";
 import {
@@ -15,6 +18,7 @@ import {
 export default function ClassDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const {
     data: classDetail,
@@ -48,10 +52,34 @@ export default function ClassDetail() {
     }
   };
 
+  const handleRegister = () => {
+    if (!user) {
+      sessionStorage.setItem('intendedClass', classDetail.id);
+      toast('Please log in to register for this class');
+      navigate('/login');
+      return;
+    }
+
+    const userRole = user?.role?.toUpperCase();
+    if (userRole !== 'PARENT') {
+      toast.error('Only parents can register for classes');
+      return;
+    }
+
+    navigate(`/checkout?classId=${classDetail.id}`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] pb-12">
       <Header />
       <main className="mx-auto w-full max-w-5xl px-4 py-8">
+        <button
+          onClick={() => navigate('/class')}
+          className="flex items-center gap-2 mb-6 text-[#173151] hover:text-[#F3BC48] transition-colors font-medium"
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Classes</span>
+        </button>
         {isLoading && <p className="text-gray-600">Loading class details...</p>}
         {isError && (
           <p className="text-red-600">Unable to load this class. Please try again later.</p>
@@ -170,7 +198,7 @@ export default function ClassDetail() {
                 <p className="text-3xl font-bold text-[#173151]">{priceLabel}</p>
               </div>
               <button
-                onClick={() => navigate(`/checkout?classId=${classDetail.id}`)}
+                onClick={handleRegister}
                 className="w-full rounded-full bg-[#F3BC48] px-8 py-3 font-semibold text-[#173151] shadow sm:w-auto"
               >
                 Reserve Spot

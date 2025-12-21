@@ -7,6 +7,50 @@ import { useState, useEffect } from 'react';
 import classesService from '../api/services/classes.service';
 import toast from 'react-hot-toast';
 
+/**
+ * Convert 12-hour format (e.g., "9:00 AM", "2:30 PM") to 24-hour format (e.g., "09:00", "14:30")
+ * This is needed because the backend returns 12-hour format, but HTML5 time inputs require 24-hour format.
+ */
+const convertTo24Hour = (time12h) => {
+  if (!time12h) return '';
+
+  // If already in 24-hour format (HH:mm), return as-is
+  if (/^\d{2}:\d{2}$/.test(time12h)) {
+    return time12h;
+  }
+
+  // Parse 12-hour format: "9:00 AM" or "2:30 PM"
+  const match = time12h.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) {
+    // Try without AM/PM in case it's already 24-hour with different format
+    const simpleMatch = time12h.match(/^(\d{1,2}):(\d{2})$/);
+    if (simpleMatch) {
+      const hour = simpleMatch[1].padStart(2, '0');
+      const minute = simpleMatch[2];
+      return `${hour}:${minute}`;
+    }
+    return '';
+  }
+
+  let hour = parseInt(match[1], 10);
+  const minute = match[2];
+  const period = match[3].toUpperCase();
+
+  // Convert to 24-hour format
+  if (period === 'AM') {
+    if (hour === 12) {
+      hour = 0; // 12 AM = 00:00
+    }
+  } else { // PM
+    if (hour !== 12) {
+      hour += 12; // 1 PM = 13:00, 2 PM = 14:00, etc.
+    }
+    // 12 PM stays as 12
+  }
+
+  return `${hour.toString().padStart(2, '0')}:${minute}`;
+};
+
 const initialFormData = {
   // Basic Info
   name: '',
@@ -124,14 +168,20 @@ export default function useClassForm(initialData = null, mode = 'create') {
       let schedule = initialFormData.schedule;
       if (initialData.weekdays && Array.isArray(initialData.weekdays) && initialData.weekdays.length > 0) {
         // Backend format: {weekdays: [...], start_time, end_time}
+        // Convert 12-hour format (from backend) to 24-hour format (for HTML5 time input)
         schedule = initialData.weekdays.map(day => ({
           day_of_week: day.toLowerCase(),
-          start_time: initialData.start_time || '09:00',
-          end_time: initialData.end_time || '10:00',
+          start_time: convertTo24Hour(initialData.start_time) || '09:00',
+          end_time: convertTo24Hour(initialData.end_time) || '10:00',
         }));
       } else if (initialData.schedule && Array.isArray(initialData.schedule) && initialData.schedule.length > 0) {
-        // Frontend format already
-        schedule = initialData.schedule;
+        // Frontend format - still need to convert times in case they came from backend
+        schedule = initialData.schedule.map(sched => ({
+          ...sched,
+          day_of_week: sched.day_of_week?.toLowerCase() || 'monday',
+          start_time: convertTo24Hour(sched.start_time) || '09:00',
+          end_time: convertTo24Hour(sched.end_time) || '10:00',
+        }));
       }
 
       // Transform payment options from backend format

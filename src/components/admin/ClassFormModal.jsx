@@ -6,6 +6,7 @@ import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import schoolsService from "../../api/services/schools.service";
 import toast from "react-hot-toast";
+import TimePicker12Hour from "../ui/TimePicker12Hour";
 
 const DAYS = [
   { id: "monday", name: "Monday" },
@@ -561,28 +562,24 @@ export default function ClassFormModal({
                       <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                         Start Time
                       </label>
-                      <input
-                        type="time"
+                      <TimePicker12Hour
                         value={sched.start_time}
-                        onChange={(e) =>
-                          updateSchedule(index, "start_time", e.target.value)
+                        onChange={(value) =>
+                          updateSchedule(index, "start_time", value)
                         }
-                        className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                        style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                        placeholder="Select start time"
                       />
                     </div>
                     <div>
                       <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
                         End Time
                       </label>
-                      <input
-                        type="time"
+                      <TimePicker12Hour
                         value={sched.end_time}
-                        onChange={(e) =>
-                          updateSchedule(index, "end_time", e.target.value)
+                        onChange={(value) =>
+                          updateSchedule(index, "end_time", value)
                         }
-                        className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                        style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                        placeholder="Select end time"
                       />
                     </div>
                   </div>
