@@ -84,6 +84,10 @@ import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
 import RegisterChild from './pages/AdminDashboard/RegisterChild'
 import AdminClasses from './pages/AdminDashboard/Classes'
+import AdminUsers from './pages/AdminDashboard/Users'
+import AdminPrograms from './pages/AdminDashboard/Programs'
+import AdminAreas from './pages/AdminDashboard/Areas'
+import AdminSchools from './pages/AdminDashboard/Schools'
 import Installments from './pages/AdminDashboard/Installments'
 import Enrollments from './pages/AdminDashboard/Enrollments'
 import Waitlist from './pages/AdminDashboard/Waitlist'
@@ -365,6 +369,18 @@ return (
   {/* Class Management - Create, edit, delete classes and programs */}
   <Route path="/admin/classes" element={<AdminClasses />} />
 
+  {/* User Management - Create, edit, delete users */}
+  <Route path="/admin/users" element={<AdminUsers />} />
+
+  {/* Program Management - Create, edit, delete programs */}
+  <Route path="/admin/programs" element={<AdminPrograms />} />
+
+  {/* Area Management - Create, edit, delete areas */}
+  <Route path="/admin/areas" element={<AdminAreas />} />
+
+  {/* School Management - Create, edit, delete schools */}
+  <Route path="/admin/schools" element={<AdminSchools />} />
+
   {/* Waiver Management - Create and edit waiver forms */}
   <Route path="/admin/waivers" element={<WaiversManagement />} />
 
@@ -376,42 +392,19 @@ return (
 
   {/* Financial Reports - Revenue reports by class, program, date range */}
   <Route path="/financials" element={<Financials />} />
+
+  {/* Installment Management - View and manage payment plans */}
+  <Route path="/admin/installments" element={<Installments />} />
+
+  {/* Enrollment Management - View, transfer, cancel enrollments */}
+  <Route path="/admin/enrollments" element={<Enrollments />} />
+
+  {/* Waitlist Management - Manage class waitlists */}
+  <Route path="/admin/waitlist" element={<Waitlist />} />
+
+  {/* Invoice Management - View and manage invoices */}
+  <Route path="/admin/invoices" element={<Invoices />} />
 </Route>
-
-{/* ========================================
-    ADMIN CRUD ROUTES (Outside AdminLayout)
-    ========================================
-    These admin routes don't use AdminLayout wrapper
-    but still require admin role for access
-*/}
-
-{/* Installment Management - View and manage payment plans */}
-<Route path="/admin/installments" element={
-  <ProtectedRoute requiredRole="admin">
-    <Installments />
-  </ProtectedRoute>
-} />
-
-{/* Enrollment Management - View, transfer, cancel enrollments */}
-<Route path="/admin/enrollments" element={
-  <ProtectedRoute requiredRole="admin">
-    <Enrollments />
-  </ProtectedRoute>
-} />
-
-{/* Waitlist Management - Manage class waitlists */}
-<Route path="/admin/waitlist" element={
-  <ProtectedRoute requiredRole="admin">
-    <Waitlist />
-  </ProtectedRoute>
-} />
-
-{/* Invoice Management - View and manage invoices */}
-<Route path="/admin/invoices" element={
-  <ProtectedRoute requiredRole="admin">
-    <Invoices />
-  </ProtectedRoute>
-} />
 
 </Routes>
 </>
