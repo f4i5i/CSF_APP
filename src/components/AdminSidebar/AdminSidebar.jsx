@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen, LogOut } from "lucide-react";
+import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School } from "lucide-react";
 import baseLogo from "../../assets/logo.png";
 import crown from "../../assets/Carolina.png";
 import logo from "../../assets/person.png";
 import { useAuth } from "../../context/auth";
 const routes = [
   { name: "Home", to: "/admin", icon: Home, end: true },
-  { name: "Classes Management", to: "/admin/classes", icon: BookOpen },
+  { name: "Programs", to: "/admin/programs", icon: Layers },
+  { name: "Areas", to: "/admin/areas", icon: MapPin },
+  { name: "Schools", to: "/admin/schools", icon: School },
+  { name: "Classes", to: "/admin/classes", icon: BookOpen },
+  { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList },
+  { name: "Users", to: "/admin/users", icon: UserCog },
   { name: "Waivers", to: "/admin/waivers", icon: FileText },
   { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3 },
   { name: "Clients", to: "/clients", icon: Users },
-  { name: "Calender", to: "/calendar", icon: Calendar },
+  { name: "Calendar", to: "/calendar", icon: Calendar },
   { name: "Financials", to: "/financials", icon: DollarSign },
 ];
 

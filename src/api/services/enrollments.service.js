@@ -143,6 +143,57 @@ const enrollmentsService = {
   async getCancelled() {
     return this.getMy({ status: 'cancelled' });
   },
+
+  // ============== Admin Methods ==============
+
+  /**
+   * Get all enrollments (admin only)
+   * @param {Object} filters - Filter parameters
+   * @param {string} [filters.status] - Filter by status
+   * @param {string} [filters.class_id] - Filter by class ID
+   * @param {number} [filters.limit] - Limit results
+   * @param {number} [filters.offset] - Offset for pagination
+   * @returns {Promise<Object>} Response with items and total
+   */
+  async getAll(filters = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ENROLLMENTS.LIST, {
+      params: filters,
+    });
+    return data;
+  },
+
+  /**
+   * Delete an enrollment (admin only)
+   * @param {string} id - Enrollment ID
+   * @returns {Promise<Object>} Deletion confirmation
+   */
+  async delete(id) {
+    const { data } = await apiClient.delete(API_ENDPOINTS.ENROLLMENTS.BY_ID(id));
+    return data;
+  },
+
+  /**
+   * Activate a pending enrollment (admin only)
+   * @param {string} id - Enrollment ID
+   * @returns {Promise<Object>} Updated enrollment
+   */
+  async activate(id) {
+    const { data } = await apiClient.post(API_ENDPOINTS.ENROLLMENTS.ACTIVATE(id));
+    return data;
+  },
+
+  /**
+   * Transfer enrollment to another class
+   * @param {string} id - Enrollment ID
+   * @param {string} newClassId - New class ID
+   * @returns {Promise<Object>} Updated enrollment
+   */
+  async transfer(id, newClassId) {
+    const { data } = await apiClient.post(API_ENDPOINTS.ENROLLMENTS.TRANSFER(id), {
+      new_class_id: newClassId,
+    });
+    return data;
+  },
 };
 
 export default enrollmentsService;

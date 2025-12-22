@@ -67,23 +67,56 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
     );
   };
 
-  // Check if child is eligible based on age
+  // Check if child has any active enrollment in any active class
+  const checkHasActiveEnrollment = (child) => {
+    if (!child.enrollments) return null;
+
+    // Find any ACTIVE enrollment in an ACTIVE class (not the current class being enrolled)
+    const activeEnrollment = child.enrollments.find(
+      (enrollment) =>
+        enrollment.class_id !== classData?.id &&
+        (enrollment.status === 'active' || enrollment.status === 'ACTIVE') &&
+        (enrollment.class_status === 'active' || enrollment.class_status === 'ACTIVE' || !enrollment.class_status)
+    );
+
+    if (activeEnrollment) {
+      return {
+        className: activeEnrollment.class_name,
+        enrollmentId: activeEnrollment.enrollment_id,
+      };
+    }
+    return null;
+  };
+
+  // Check if child is eligible based on age and enrollment status
   const checkEligibility = (child) => {
-    // First check if already enrolled
+    // First check if already enrolled in THIS class
     if (checkAlreadyEnrolled(child)) {
       return {
         eligible: false,
         message: 'Already enrolled in this class',
         alreadyEnrolled: true,
+        hasActiveClass: false,
+      };
+    }
+
+    // Check if child has an active enrollment in another active class
+    const activeEnrollment = checkHasActiveEnrollment(child);
+    if (activeEnrollment) {
+      return {
+        eligible: false,
+        message: `Already enrolled in: ${activeEnrollment.className}. Must complete current class first.`,
+        alreadyEnrolled: false,
+        hasActiveClass: true,
       };
     }
 
     if (!classData || (!classData.min_age && !classData.max_age)) {
-      return { eligible: true, message: null, alreadyEnrolled: false };
+      return { eligible: true, message: null, alreadyEnrolled: false, hasActiveClass: false };
     }
 
     const age = calculateAge(child.date_of_birth);
-    if (!age) return { eligible: true, message: null, alreadyEnrolled: false };
+    if (!age) return { eligible: true, message: null, alreadyEnrolled: false, hasActiveClass: false };
 
     const minAge = classData.min_age;
     const maxAge = classData.max_age;
@@ -93,6 +126,7 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
         eligible: false,
         message: `Must be at least ${minAge} years old`,
         alreadyEnrolled: false,
+        hasActiveClass: false,
       };
     }
 
@@ -101,10 +135,11 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
         eligible: false,
         message: `Must be ${maxAge} years old or younger`,
         alreadyEnrolled: false,
+        hasActiveClass: false,
       };
     }
 
-    return { eligible: true, message: null, alreadyEnrolled: false };
+    return { eligible: true, message: null, alreadyEnrolled: false, hasActiveClass: false };
   };
 
   return (
@@ -182,9 +217,11 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
                     <div className={`mt-2 text-xs font-manrope px-2 py-1 rounded ${
                       eligibility.alreadyEnrolled
                         ? 'text-blue-700 bg-blue-50 border border-blue-200'
+                        : eligibility.hasActiveClass
+                        ? 'text-orange-700 bg-orange-50 border border-orange-200'
                         : 'text-red-600 bg-red-50'
                     }`}>
-                      {eligibility.alreadyEnrolled ? '✓' : '⚠️'} {eligibility.message}
+                      {eligibility.alreadyEnrolled ? '✓' : eligibility.hasActiveClass ? '📚' : '⚠️'} {eligibility.message}
                     </div>
                   )}
                 </div>

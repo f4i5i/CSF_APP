@@ -24,6 +24,9 @@ export const API_ENDPOINTS = {
   USERS: {
     ME: '/users/me', // Get current user profile
     UPDATE: '/users/me', // Update current user profile
+    LIST: '/users', // List all users (ADMIN)
+    CREATE: '/users', // Create user (ADMIN)
+    BY_ID: (id) => `/users/${id}`, // Get/Update/Delete user by ID (ADMIN)
   },
 
   // ===================
@@ -87,7 +90,8 @@ export const API_ENDPOINTS = {
   ENROLLMENTS: {
     MY: '/enrollments/my', // List user's enrollments
     LIST: '/enrollments', // List all enrollments (ADMIN)
-    BY_ID: (id) => `/enrollments/${id}`, // Get enrollment details
+    CREATE: '/enrollments', // Create enrollment (ADMIN)
+    BY_ID: (id) => `/enrollments/${id}`, // Get/Update/Delete enrollment
     CANCEL: (id) => `/enrollments/${id}/cancel`, // Cancel enrollment
     CANCELLATION_PREVIEW: (id) => `/enrollments/${id}/cancellation-preview`,
     TRANSFER: (id) => `/enrollments/${id}/transfer`, // Transfer to different class
