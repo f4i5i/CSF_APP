@@ -64,13 +64,13 @@ export default function BadgeCarousel({ badges }) {
       {/* Left Arrow */}
       <button
         onClick={() => scroll("left")}
-        className="w-9 h-9 max-sm:absolute left-0 top-1/2 -translate-y-1/2 z-10 flex items-center bg-[#FFFFFF80] justify-center rounded-full shadow hover:bg-white transition"
+        className="w-10 h-10 max-sm:absolute left-0 top-1/2 -translate-y-1/2 z-10 flex items-center bg-[#FFFFFF80] justify-center rounded-full shadow hover:bg-white transition"
       >
         <ChevronLeft size={18} className="text-black" />
       </button>
 
       {/* Scrollable Container - Infinite loop with tripled badges */}
-      <div
+      {/* <div
         ref={scrollRef}
         className="flex items-center gap-4 max-sm:gap-3 overflow-x-auto no-scrollbar scroll-smooth max-sm:mx-12 sm:px-10 py-2"
         style={{
@@ -81,12 +81,38 @@ export default function BadgeCarousel({ badges }) {
         {tripleAr.map((badge, i) => (
           <BadgeCard key={`badge-${i}`} {...badge} compact={true} />
         ))}
+      </div> */}
+
+      {/* Visible viewport */}
+      <div className="overflow-hidden flex justify-center w-full">
+        <div
+          ref={scrollRef}
+          className="
+            flex items-center
+            gap-4 max-sm:gap-3
+            overflow-x-auto no-scrollbar scroll-smooth
+            py-2
+            w-[1280px]       
+            xl:w-[1280px]
+            lg:w-[848px]      
+            md:w-[848px]
+            sm:w-[332px]     
+          "
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          {tripleAr.map((badge, i) => (
+            <BadgeCard key={`badge-${i}`} {...badge} compact />
+          ))}
+        </div>
       </div>
 
       {/* Right Arrow */}
       <button
         onClick={() => scroll("right")}
-        className="w-9 h-9 flex max-sm:absolute right-0 top-1/2 -translate-y-1/2 z-10 items-center bg-[#FFFFFF80] justify-center rounded-full shadow hover:bg-white transition"
+        className="w-10 h-10 flex max-sm:absolute right-0 top-1/2 -translate-y-1/2 z-10 items-center bg-[#FFFFFF80] justify-center rounded-full shadow hover:bg-white transition"
       >
         <ChevronRight size={18} className="text-black" />
       </button>

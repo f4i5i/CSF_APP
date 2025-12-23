@@ -5,7 +5,7 @@ export default function AttendanceRow({ date, status }) {
   const isPresent = status === "Present";
 
   return (
-    <div className="flex items-center gap-4 bg-white rounded-2xl px-4 py-3 shadow-sm">
+    <div className="flex items-center gap-4 bg-[#f5f6f7] rounded-2xl px-4 py-3 shadow-sm">
       <div
         className={`w-[73px] h-[67px] max-xxl:w-[50px] max-xxl:h-[44px] rounded-[20px] flex items-center justify-center
         ${isPresent ? "bg-[#DEF9CD] text-[#32AE60]" : "bg-[#FFE2E2] text-[#E7000B]"}`}
