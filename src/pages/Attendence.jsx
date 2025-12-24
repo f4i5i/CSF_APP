@@ -48,18 +48,19 @@ const Attendence = () => {
   const nextPage = () => page < totalPages && setPage(page + 1);
 
   return (
-    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    // <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className="min-h-screen max-sm:h-fit bg-page-gradient">
       <Header />
 
       <main className="mx-6 py-8 max-xxl1:py-4 max-sm:py-2 max-sm:mx-3">
-        <h1 className="text-fluid-2xl font-manrope font-bold text-[#173151] mb-4 max-xxl1:mb-0">
+        <h1 className="text-3xl font-manrope font-bold text-[#173151] mb-4 max-xxl1:mb-0">
           Attendance
         </h1>
 
         <BadgeCarousel badges={badges} compact={true} />
 
-        <div className="mt-8 max-xxl1:mt-3 bg-white rounded-3xl p-6 max-xxl1:pt-3 shadow-lg">
-          <h2 className="font-manrope font-semibold text-fluid-md text-[#0f1d2e] mb-4 max-xxl1:mb-2">
+        <div className="mt-8 max-xxl1:mt-3 bg-badge-bg rounded-3xl p-6 max-xxl1:pt-3 shadow-lg">
+          <h2 className="font-kollektif text-xl my-4 font-normal text-fluid-md text-[#0f1d2e] mb-4 max-xxl1:mb-4">
             Attendance History
           </h2>
 
@@ -98,7 +99,7 @@ const Attendence = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer isFixed={false} />
     </div>
   );
 };

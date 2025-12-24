@@ -80,6 +80,14 @@ module.exports = {
         "warning-light": "#FFE644", // Warning/60 – bright yellow (good for badges, alerts)
          // new provided figme  colors ending here
         // <------------------------------------------------>
+        "badge-bg":"#eeeff0",
+        "placeholder-color":"#3B3B3B",
+        "nuetral-100":"#0A0A0A",
+        "nuetral-200":"#0D0D12",
+        "gray":'#EAEAEA',
+        "dark_gray":"#4c5055",
+        "card_bg":"#f1f2f2",
+        "text_gray":"#464647",
       },
       // Fluid responsive utilities using clamp()
       fontSize: {
@@ -125,7 +133,27 @@ module.exports = {
         "fluid-2xl": "clamp(2rem, 1.5rem + 2.08vw, 2.625rem)", // 32px → 42px
         "fluid-3xl": "clamp(2.5rem, 2rem + 2.08vw, 3.125rem)", // 40px → 50px
       },
+      backgroundImage: {
+        "page-gradient":
+          "radial-gradient(circle at top center, #F4F5F7 0%, #E3E5E6 35%, #CFD6DE 60%, #B7C3D1 100%)",
+      },
     },
   },
-  plugins: [],
+  plugins: [    function({ addUtilities }) {
+      addUtilities({
+        '.no-scrollbar::-webkit-scrollbar': {
+          'display': 'none',
+        },
+        '.no-scrollbar': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+        },
+        '.border': {
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: '#DFE1E7',
+      },
+      },
+    )
+    }],
 };

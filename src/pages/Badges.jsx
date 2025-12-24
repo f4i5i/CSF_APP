@@ -44,16 +44,18 @@ const Badges = () => {
     },
   ];
   return (
-    <div className=" min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    // <div className=" min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className=" min-h-screen flex flex-col justify-between max-sm:h-fit bg-page-gradient opacity-8 max-sm:pb-20">
 
       <Header />
  <main className=" mx-6 py-8 max-sm:py-2 max-sm:mx-3">
-      <h1 className="text-fluid-2xl font-manrope font-medium text-[#173151] mb-4">
+      <h1 className="text-fluid-xl font-manrope font-medium text-[#173151] mb-4">
         Achievements
       </h1>
 <div
       
-      className="flex max-xl:grid max-xl:grid-cols-7 max-lg:grid max-lg:grid-cols-4 max-sm:grid-cols-2 max-sm:grid  gap-6 max-sm:px-2 py-2 mb-8"
+      // className="flex max-xl:grid max-xl:grid-cols-7 max-lg:grid max-lg:grid-cols-4 max-sm:grid-cols-2 max-sm:grid  gap-6 max-sm:px-2 py-2 mb-8"
+      className="flex flex-wrap  gap-4 max-sm:justify-center max-sm:px-2 py-2 mb-8"
 
       >
         {badges.map((badge, i) => (
@@ -62,17 +64,18 @@ const Badges = () => {
       </div>
 
        {/* ✅ Locked Badges */}
-      <h2 className="text-fluid-2xl font-medium font-manrope  text-[#0F2D50] mb-1">
+      <h2 className="text-fluid-xl font-medium font-manrope  text-[#0F2D50] mb-1">
         Locked Badges
       </h2>
-      <p className="text-gray-600 font-kollektif text-fluid-md mt-2 mb-6">
+      <p className="text-black opacity-70  font-manrope text-fluid-md mt-2 mb-6">
         Keep working to unlock these achievements
       </p>
-      <div className="flex max-lg:grid max-lg:grid-cols-5 max-md:grid-cols-4 gap-6 max-sm:grid-cols-2 max-sm:grid  pb-12">
+      {/* <div className="flex max-lg:grid max-lg:grid-cols-5 max-md:grid-cols-4 gap-6 max-sm:grid-cols-2 max-sm:grid  pb-12"> */}
+      <div className="flex flex-wrap gap-4 max-sm:grid-cols-2 max-sm:grid  pb-12">
         {locked.map((item, index) => (
           <div
             key={index}
-            className="bg-white/60 w-[200px] max-sm:w-full rounded-2xl py-8 flex flex-col items-center justify-center text-center shadow-sm border border-gray-200"
+            className="bg-[#d8dee3] w-[200px] h-[200px] max-sm:w-full rounded-2xl py-8 flex flex-col items-center justify-center text-center shadow-lg border-gray-200"
           >
             <div className="w-10 h-10  rounded-full border-2 border-gray-400 flex items-center justify-center mb-3">
               <svg
@@ -96,7 +99,7 @@ const Badges = () => {
     
 
       </main>
-      <Footer />
+      <Footer isFixed={false} />
 </div>
   )
 }

@@ -6,7 +6,7 @@ import crown from "../assets/Carolina.png"; // golden crown
 const Logo = () => {
   return (
     <Link to="/dashboard" className="inline-block">
-    <div className="flex justify-center items-center  w-[108px]
+    <div className="hidden md:flex justify-center items-center  w-[108px]
           h-[108px]  relative cursor-pointer">
 
       {/* Logo Outline (turns black using blend mode) */}

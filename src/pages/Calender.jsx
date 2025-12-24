@@ -8,7 +8,8 @@ import FullCalender from "../components/Calendar/FullCalender";
 
 const Calender = () => {
   return (
-    <div className=" min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    // <div className=" min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className=" min-h-screen max-sm:h-fit bg-page-gradient">
       <Header />
       <main className=" max-w-9xl sm:px-6 px-3 py-8 max-sm:py-2 "
         >
@@ -25,7 +26,7 @@ const Calender = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer isFixed={false} />
     </div>
   );
 };
