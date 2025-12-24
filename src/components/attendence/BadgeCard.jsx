@@ -4,9 +4,9 @@ export default function BadgeCard({ title,compact, subtitle, icon, active }) {
   return (
   <div
       className={`
-        ${compact ? "max-sm:w-[200px]" : "max-sm:w-full"}
-        w-[200px] shrink-0 min-h-[160px] max-sm:w-[160px] max-sm:h-[140px]
-        rounded-2xl bg-white shadow-md
+        ${compact ? "sm:w-[200px]" : "sm:w-[200px]"}
+        w-[200px] shrink-0 min-h-[200px] max-sm:min-h-[160px] max-sm:w-[160px] max-sm:h-[160px]
+        rounded-2xl bg-badge-bg shadow-md
         flex flex-col items-center justify-center text-center
         px-4 max-xl:px-2 py-6 transition-all
         ${active ? "border-2 border-[#1D3557]" : "border border-transparent"}

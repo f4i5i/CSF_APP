@@ -97,7 +97,7 @@ const Header = () => {
         e.stopPropagation();
         onClick();
       }}
-      className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-sm text-gray-700 transition-colors cursor-pointer"
+      className="w-full flex text-[#151514] items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-sm text-gray-700 transition-colors cursor-pointer"
     >
       <Icon size={16} />
       {label}
@@ -151,7 +151,7 @@ const Header = () => {
   // RENDER
   // ------------------------------------------------------------------------
   return (
-    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:px-3 mb-[15px] mt-6">
+    <header className="w-full py-1 flex justify-between max-sm:items-center max-sm:px-3 mb-[15px] pt-6">
       <div className="w-full ml-1 max-sm:mx-auto flex items-center justify-between max-sm:justify-between">
         {/* ================================================================ */}
         {/* LOGO SECTION */}
@@ -175,7 +175,7 @@ const Header = () => {
         <div className="md:hidden flex items-center justify-between w-full">
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-2 bg-white rounded-md shadow"
+            className="p-2 bg-white rounded-md shadow hidden "
             aria-label="Open admin menu"
           >
             <svg
@@ -300,7 +300,7 @@ const Header = () => {
               </li>
             </ul>
           </nav>
-        )}
+        )} 
 
         {/* ================================================================ */}
         {/* COACH NAVIGATION BAR (desktop only) */}
@@ -444,7 +444,7 @@ const Header = () => {
           {/* Menu items: Profile, Payment & Billing, Contact, Add Child, Password, Log out */}
           {/* ================================================================ */}
           {open && role !== "admin" && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white shadow-xl rounded-xl border border-gray-200 p-2 z-50 pointer-events-auto">
+            <div className="absolute right-0 top-full mt-2 w-56 h-60 bg-white shadow-xl rounded-xl  p-2 z-50 pointer-events-auto">
             <MenuItem
               icon={User}
               label="Profile"

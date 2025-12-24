@@ -37,7 +37,7 @@ const Sidebar = () => {
   return (
     <>
       {/* ✅ MOBILE DROPDOWN */}
-      <div className="sm:hidden w-full px-4  mt-5 mx-2">
+      <div className="sm:hidden  px-4 w-[96%] mt-5 mx-2 pb-6 ">
         <button
           onClick={() => setOpen(!open)}
           className="w-full flex justify-between items-center bg-[#F6F8FA] border border-[#DFE1E7] rounded-lg px-4 py-3 text-sm font-medium shadow"
@@ -74,12 +74,12 @@ const Sidebar = () => {
       </div>
 
       {/* ✅ DESKTOP SIDEBAR */}
-      <div className="hidden sm:block w-full lg:w-60 border-r p-6 space-y-4">
+      <div className="hidden sm:block w-full lg:w-60 border-r border-border-light p-6 space-y-4">
         {items.map((item, i) => (
           <button
             key={i}
             onClick={() => handleNavigate(item)}
-           className={`text-left w-full py-2 px-3 rounded-lg text-sm
+           className={`text-left w-full py-2 font-manrope px-3 rounded-lg text-sm
   ${
     item.label === "Log out"
       ? "text-red-500" // 🔴 always red

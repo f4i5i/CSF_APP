@@ -14,14 +14,14 @@ const CustomEvent = ({ event }) => {
 
   return (
     <div
-      className={`flex flex-col gap-1 rounded-[15px] px-4 py-2 shadow-sm border
+      className={`flex flex-col gap-1 rounded-lg sm:rounded-[15px] p-1 lg:mx-2 sm:px-4 sm:py-2 shadow-sm border
         ${isYellow ? 'bg-[#F3BC48] border-[#F3BC48] text-[#000]' : 'bg-[#173963] border-[#173963] text-white'}`}
-      style={{ minWidth: '120px' }}
+      // style={{ minWidth: '120px' }}
     >
-      <span className=" text-[12px] font-medium tracking-[0.01em] font-manrope">
+      <span className="text-[8px] sm:text-[12px] font-medium tracking-[0.01em] font-manrope">
         {event.title}
       </span>
-      <span className="font-manrope text-[12px] font-medium tracking-[0.01em] opacity-90">
+      <span className="font-manrope text-[8px] sm:text-[12px] font-medium tracking-[0.01em] opacity-90">
         {startTime} - {endTime}
       </span>
     </div>

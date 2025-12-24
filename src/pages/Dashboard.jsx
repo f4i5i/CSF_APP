@@ -13,7 +13,8 @@ import PaymentStatusCard from '../components/PaymentStatusCard';
 import WaiversAlert from '../components/WaiversAlert';
 import StatCard from '../components/dashboard/StatCard';
 import ProgramPhotoCard from '../components/dashboard/ProgramPhotoCard';
-
+import DashboardWidgets from '@/components/DashboardWidgets';
+import AnnouncementsSection from '@/components/AnnouncementsSection';
 // Hooks
 import { useAuth } from '../context/auth';
 import { useChildren, useApi } from '../hooks';
@@ -364,6 +365,16 @@ export default function Dashboard() {
         />
 
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
+
+
+                    <div className="flex flex-col lg:flex-row items-start justify-center gap-3 w-full">
+            {/* <div className="w-full lg:max-w-[50%]  "> */}
+              <AnnouncementsSection />
+            {/* </div> */}
+            {/* <div className="w-full lg:max-w-[50%] "> */}
+              <DashboardWidgets />
+            {/* </div> */}
+          </div>
           {/* Left Column - Announcements */}
           {/* <div className="w-full lg:w-[48%] max-sm:hidden">
 
@@ -377,10 +388,10 @@ export default function Dashboard() {
           </div> */}
 
           {/* Right Column */}
-          <div className="w-full lg:w-[48%] space-y-4 max-sm:space-y-6">
+          {/* <div className="w-full lg:w-[48%] space-y-4 max-sm:space-y-6"> */}
             {/* Calendar & Next Event Card */}
-            <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm">
-              <div className="flex gap-6 max-md:flex-col">
+            {/* <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm"> */}
+              {/* <div className="flex gap-6 max-md:flex-col"> */}
                 {/* Calendar Section */}
                 {/* <div className="flex-1">
                   <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Calendar</h2>
@@ -392,15 +403,15 @@ export default function Dashboard() {
                   <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Next Event</h2>
                   <NextEvent event={nextEvent} loading={nextEventLoading} />
                 </div> */}
-              </div>
-            </div>
+              {/* </div> */}
+            {/* </div> */}
 
             {/* Program Photos & Badges - Stacked Vertically */}
             {/* <div className="flex flex-col gap-4">
               <ProgramPhotoCard photo={recentPhotos?.[0]} loading={loadingPhotos} />
               <BadgeCard badges={recentBadges} loading={loadingBadges} />
             </div> */}
-          </div>
+          {/* </div> */}
 
           {/* Mobile: Announcements */}
           {/* <div className="hidden max-sm:block w-full">
@@ -415,7 +426,7 @@ export default function Dashboard() {
         </div>
         </div>
       </main>
-      <Footer />
+      <Footer isFixed={false} />
     </div>
   );
 }

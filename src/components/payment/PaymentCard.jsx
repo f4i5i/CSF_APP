@@ -142,7 +142,7 @@ const PaymentCard = () => {
   const [showAddCard, setShowAddCard] = useState(false);
 
   useEffect(() => {
-    loadPaymentMethods();
+    // loadPaymentMethods();
   }, []);
 
   const loadPaymentMethods = async () => {
@@ -206,29 +206,29 @@ const PaymentCard = () => {
     return <CreditCard className="w-6 h-6 text-gray-400" />;
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-btn-gold"></div>
-        <p className="mt-2 text-gray-600 font-manrope">Loading payment methods...</p>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+  //       <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-btn-gold"></div>
+  //       <p className="mt-2 text-gray-600 font-manrope">Loading payment methods...</p>
+  //     </div>
+  //   );
+  // }
 
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-        <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-2" />
-        <p className="text-red-600 font-manrope">{error}</p>
-        <button
-          onClick={loadPaymentMethods}
-          className="mt-4 text-btn-secondary hover:underline font-manrope"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+  //       <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-2" />
+  //       <p className="text-red-600 font-manrope">{error}</p>
+  //       <button
+  //         onClick={loadPaymentMethods}
+  //         className="mt-4 text-btn-secondary hover:underline font-manrope"
+  //       >
+  //         Try Again
+  //       </button>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="space-y-4">
