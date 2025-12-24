@@ -63,6 +63,127 @@ const adminService = {
     const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.ROSTER(classId));
     return data;
   },
+
+  /**
+   * Search refunds with filters
+   * @param {Object} params - Filter parameters
+   * @param {string} [params.start_date] - Filter by refund date (start)
+   * @param {string} [params.end_date] - Filter by refund date (end)
+   * @param {string} [params.user_id] - Filter by user
+   * @param {number} [params.min_amount] - Minimum refund amount
+   * @param {number} [params.max_amount] - Maximum refund amount
+   * @param {string} [params.payment_status] - Filter by status (refunded, partially_refunded)
+   * @param {number} [params.skip] - Pagination offset
+   * @param {number} [params.limit] - Pagination limit
+   * @returns {Promise<Object>} Paginated refunds list
+   */
+  async getRefunds(params = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.REFUNDS_SEARCH, { params });
+    return data;
+  },
+
+  /**
+   * Get pending refund requests
+   * @returns {Promise<Object>} List of pending refunds
+   */
+  async getPendingRefunds() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.REFUNDS_PENDING);
+    return data;
+  },
+
+  /**
+   * Approve a pending refund
+   * @param {string} paymentId - Payment ID to approve refund for
+   * @returns {Promise<Object>} Approval confirmation
+   */
+  async approveRefund(paymentId) {
+    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.REFUND_APPROVE(paymentId));
+    return data;
+  },
+
+  /**
+   * Reject a pending refund
+   * @param {string} paymentId - Payment ID to reject refund for
+   * @param {string} reason - Rejection reason (required)
+   * @returns {Promise<Object>} Rejection confirmation
+   */
+  async rejectRefund(paymentId, reason) {
+    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.REFUND_REJECT(paymentId), {
+      rejection_reason: reason,
+    });
+    return data;
+  },
+
+  // ===================
+  // CANCELLATION REQUESTS
+  // ===================
+
+  /**
+   * Get cancellation requests
+   * @param {Object} params - Filter parameters
+   * @param {string} [params.status] - Filter by status (pending, approved, rejected, auto_approved)
+   * @param {number} [params.limit] - Pagination limit
+   * @param {number} [params.offset] - Pagination offset
+   * @returns {Promise<Object>} List of cancellation requests
+   */
+  async getCancellationRequests(params = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS, { params });
+    return data;
+  },
+
+  /**
+   * Get pending cancellation requests
+   * @returns {Promise<Object>} List of pending requests
+   */
+  async getPendingCancellationRequests() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_PENDING);
+    return data;
+  },
+
+  /**
+   * Get cancellation request by ID
+   * @param {string} requestId - Request ID
+   * @returns {Promise<Object>} Cancellation request details
+   */
+  async getCancellationRequestById(requestId) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_BY_ID(requestId));
+    return data;
+  },
+
+  /**
+   * Approve a cancellation request
+   * @param {string} requestId - Request ID
+   * @param {Object} body - Approval details
+   * @param {number} [body.approved_amount] - Amount to refund (optional, defaults to requested)
+   * @param {string} [body.admin_notes] - Admin notes
+   * @returns {Promise<Object>} Approval result
+   */
+  async approveCancellationRequest(requestId, body = {}) {
+    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_APPROVE(requestId), body);
+    return data;
+  },
+
+  /**
+   * Reject a cancellation request
+   * @param {string} requestId - Request ID
+   * @param {Object} body - Rejection details
+   * @param {string} body.rejection_reason - Reason for rejection (required)
+   * @param {string} [body.admin_notes] - Admin notes
+   * @returns {Promise<Object>} Rejection result
+   */
+  async rejectCancellationRequest(requestId, body) {
+    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_REJECT(requestId), body);
+    return data;
+  },
+
+  /**
+   * Get cancellation request statistics
+   * @returns {Promise<Object>} Stats summary
+   */
+  async getCancellationRequestStats() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_STATS);
+    return data;
+  },
 };
 
 export default adminService;

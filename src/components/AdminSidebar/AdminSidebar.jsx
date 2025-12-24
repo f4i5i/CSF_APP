@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School } from "lucide-react";
+import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle } from "lucide-react";
 import baseLogo from "../../assets/logo.png";
 import crown from "../../assets/Carolina.png";
 import logo from "../../assets/person.png";
@@ -18,6 +18,11 @@ const routes = [
   { name: "Clients", to: "/clients", icon: Users },
   { name: "Calendar", to: "/calendar", icon: Calendar },
   { name: "Financials", to: "/financials", icon: DollarSign },
+  { name: "Refunds", to: "/admin/refunds", icon: RotateCcw },
+  { name: "Cancellations", to: "/admin/cancellations", icon: XCircle },
+  { name: "Events", to: "/admin/events", icon: CalendarDays },
+  { name: "Badges", to: "/admin/badges", icon: Award },
+  { name: "Photos", to: "/admin/photos", icon: Image },
 ];
 
 export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Copy } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -134,6 +134,22 @@ export default function Classes() {
   const handleEditClass = (classData) => {
     setModalMode("edit");
     setSelectedClass(classData);
+    setModalOpen(true);
+  };
+
+  const handleCloneClass = (classData) => {
+    // Create a copy of the class data without the ID
+    const clonedData = {
+      ...classData,
+      id: undefined, // Remove ID so it creates a new class
+      name: `${classData.name} (Copy)`, // Add "(Copy)" to the name
+      // Reset enrollment count for the new class
+      current_enrollment: 0,
+      // Keep the same schedule, dates, capacity, etc.
+    };
+
+    setModalMode("create"); // Use create mode since it's a new class
+    setSelectedClass(clonedData);
     setModalOpen(true);
   };
 
@@ -300,12 +316,17 @@ export default function Classes() {
       align: "right",
       actions: (row) => [
         {
-          label: "Edit ",
+          label: "Edit",
           icon: Edit,
           onClick: () => handleEditClass(row),
         },
         {
-          label: "Delete ",
+          label: "Clone",
+          icon: Copy,
+          onClick: () => handleCloneClass(row),
+        },
+        {
+          label: "Delete",
           icon: Trash2,
           variant: "destructive",
           onClick: () => {

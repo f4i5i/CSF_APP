@@ -114,10 +114,6 @@ export default function AccountTable({ data = [], allData = [] }) {
                     <button className="px-3 py-1 text-sm rounded bg-[#E6F2FF] text-[#0F66B6] font-manrope">Message</button>
                   </div>
                 </td>
-                 {/* Inline Edit Drawer (mobile-friendly) */}
-            {showFormAccount === r.id && (
-              <AccountEditDrawer account={r} onClose={() => setShowFormAccount(null)} />
-            )}
               </tr>
             ))}
 
@@ -131,6 +127,14 @@ export default function AccountTable({ data = [], allData = [] }) {
           </tbody>
         </table>
       </div>
+
+      {/* Edit Drawer - rendered outside table to avoid DOM nesting error */}
+      {showFormAccount && (
+        <AccountEditDrawer
+          account={pageData.find(r => r.id === showFormAccount)}
+          onClose={() => setShowFormAccount(null)}
+        />
+      )}
 
       <div className="mt-4 flex items-center justify-between">
         <Pagination page={page} setPage={setPage} pages={Math.max(1, Math.ceil(total / pageSize))} />

@@ -161,9 +161,9 @@ export default function useClassForm(initialData = null, mode = 'create') {
     return frontendOptions;
   };
 
-  // Initialize form with existing class data when editing
+  // Initialize form with existing class data when editing or cloning
   useEffect(() => {
-    if (initialData && mode === 'edit') {
+    if (initialData) {
       // Transform backend schedule format to frontend format
       let schedule = initialFormData.schedule;
       if (initialData.weekdays && Array.isArray(initialData.weekdays) && initialData.weekdays.length > 0) {

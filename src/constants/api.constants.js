@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
   // CHILDREN
   // ===================
   CHILDREN: {
+    LIST: '/children', // List all children (ADMIN only)
     MY: '/children/my', // List current user's children
     CREATE: '/children', // Create new child
     BY_ID: (id) => `/children/${id}`, // Get/Update/Delete child by ID
@@ -264,6 +265,20 @@ export const API_ENDPOINTS = {
     CLIENTS: '/admin/clients', // List clients with filters
     CLIENT_BY_ID: (id) => `/admin/clients/${id}`, // Client details
     ROSTER: (classId) => `/admin/classes/${classId}/roster`, // Class roster
+
+    // Refunds
+    REFUNDS_SEARCH: '/admin/refunds/search', // Search/filter refunds
+    REFUNDS_PENDING: '/admin/refunds/pending', // List pending refunds
+    REFUND_APPROVE: (paymentId) => `/admin/refunds/${paymentId}/approve`, // Approve refund
+    REFUND_REJECT: (paymentId) => `/admin/refunds/${paymentId}/reject`, // Reject refund
+
+    // Cancellation Requests
+    CANCELLATION_REQUESTS: '/cancellation-requests', // List all cancellation requests
+    CANCELLATION_REQUESTS_PENDING: '/cancellation-requests/pending', // List pending only
+    CANCELLATION_REQUEST_BY_ID: (id) => `/cancellation-requests/${id}`, // Get by ID
+    CANCELLATION_REQUEST_APPROVE: (id) => `/cancellation-requests/${id}/approve`, // Approve
+    CANCELLATION_REQUEST_REJECT: (id) => `/cancellation-requests/${id}/reject`, // Reject
+    CANCELLATION_REQUESTS_STATS: '/cancellation-requests/stats/summary', // Get stats
   },
 
   // ===================

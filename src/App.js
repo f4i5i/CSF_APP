@@ -92,6 +92,11 @@ import Installments from './pages/AdminDashboard/Installments'
 import Enrollments from './pages/AdminDashboard/Enrollments'
 import Waitlist from './pages/AdminDashboard/Waitlist'
 import Invoices from './pages/AdminDashboard/Invoices'
+import RefundsManagement from './pages/AdminDashboard/RefundsManagement'
+import CancellationRequests from './pages/AdminDashboard/CancellationRequests'
+import EventsManagement from './pages/AdminDashboard/EventsManagement'
+import BadgesManagement from './pages/AdminDashboard/BadgesManagement'
+import PhotosManagement from './pages/AdminDashboard/PhotosManagement'
 import WaiversManagement from './pages/admin/WaiversManagement'
 import WaiverReports from './pages/admin/WaiverReports'
 
@@ -404,6 +409,21 @@ return (
 
   {/* Invoice Management - View and manage invoices */}
   <Route path="/admin/invoices" element={<Invoices />} />
+
+  {/* Refunds Management - Review and process refund requests */}
+  <Route path="/admin/refunds" element={<RefundsManagement />} />
+
+  {/* Cancellation Requests - Review enrollment cancellation requests */}
+  <Route path="/admin/cancellations" element={<CancellationRequests />} />
+
+  {/* Events Management - Create and manage events */}
+  <Route path="/admin/events" element={<EventsManagement />} />
+
+  {/* Badges Management - Create and award badges */}
+  <Route path="/admin/badges" element={<BadgesManagement />} />
+
+  {/* Photos Management - Upload and manage photos */}
+  <Route path="/admin/photos" element={<PhotosManagement />} />
 </Route>
 
 </Routes>

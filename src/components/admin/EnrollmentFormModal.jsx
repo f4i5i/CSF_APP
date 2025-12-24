@@ -174,11 +174,8 @@ export default function EnrollmentFormModal({
   const fetchDropdownData = async () => {
     setLoadingData(true);
     try {
-      const [classesRes, childrenRes] = await Promise.all([
-        classesService.getAll({ limit: 200 }),
-        childrenService.getAll ? childrenService.getAll({ limit: 200 }) : Promise.resolve({ items: [] }),
-      ]);
-
+      // Fetch classes (required)
+      const classesRes = await classesService.getAll({ limit: 200 });
       setClasses(
         (classesRes.items || []).map((c) => ({
           id: c.id,
@@ -187,15 +184,22 @@ export default function EnrollmentFormModal({
         }))
       );
 
-      // For children, we might need to use a different endpoint
-      // For now, we'll just allow entering child_id manually if no children endpoint
-      if (childrenRes.items) {
-        setChildren(
-          childrenRes.items.map((c) => ({
-            id: c.id,
-            name: `${c.first_name} ${c.last_name}`,
-          }))
-        );
+      // Fetch children separately (optional - gracefully handle failure)
+      try {
+        if (childrenService.getAll) {
+          const childrenRes = await childrenService.getAll({ limit: 200 });
+          if (childrenRes.items) {
+            setChildren(
+              childrenRes.items.map((c) => ({
+                id: c.id,
+                name: `${c.first_name} ${c.last_name}`,
+              }))
+            );
+          }
+        }
+      } catch (childrenError) {
+        console.warn("Could not fetch children list:", childrenError);
+        // Children dropdown will fall back to manual ID input
       }
     } catch (error) {
       console.error("Failed to fetch dropdown data:", error);

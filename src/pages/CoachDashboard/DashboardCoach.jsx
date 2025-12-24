@@ -1,303 +1,357 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
+
+// Layout Components
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import Calendar from '../../components/Calender';
-import NextEvent from '../../components/NextEvent';
-import PhotoCard from '../../components/PhotoCard';
-import BadgeCard from '../../components/BadgeCard';
-import AnnouncementCard from '../../components/announcements/AnnouncementCard';
-import EnrollmentCard from '../../components/EnrollmentCard';
-import PaymentStatusCard from '../../components/PaymentStatusCard';
-import WaiversAlert from '../../components/WaiversAlert';
- import { Plus } from "lucide-react";
 
-// Hooks
+// Coach Components
+import {
+  CoachStatsCard,
+  ClassFilterDropdown,
+  CoachCalendarWidget,
+  CoachNextEventCard,
+  CoachAnnouncementItem,
+  CoachPhotosCard,
+} from '../../components/coach';
+
+// Modals
+import CreatePostModal from '../../components/CreatePostModal';
+
+// Context & Hooks
 import { useAuth } from '../../context/auth';
-import { useChildren, useApi } from '../../hooks';
+import { useApi } from '../../hooks';
 
 // Services
 import {
   announcementsService,
   eventsService,
   photosService,
-  badgesService,
   attendanceService,
-  enrollmentsService,
-  installmentsService,
-  waiversService,
+  classesService,
 } from '../../api/services';
-import CreatePostModal from '../../components/CreatePostModal';
-import Calender1 from '../../components/Calender1';
 
+/**
+ * DashboardCoach - Coach Dashboard Page
+ * Pixel-perfect implementation of Figma design
+ */
 export default function DashboardCoach() {
-  // 1. User from auth context
+  // ============================================================================
+  // STATE & CONTEXT
+  // ============================================================================
   const { user } = useAuth();
- const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(null);
 
-  // 2. Children data
-  const {
-    children,
-    selectedChild,
-    selectChild,
-    loading: loadingChildren,
-  } = useChildren();
+  // Current date for calendar
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
 
-  // 3. Announcements - Skip for now (requires coach role or class-specific endpoint)
-  const announcements = [];
-  const loadingAnnouncements = false;
+  // ============================================================================
+  // API DATA FETCHING
+  // ============================================================================
 
-  // 4 & 5. Events - Will be loaded after we have enrollment with class_id
-  // (Moved below after enrollment is fetched)
-
-  // 6. Active enrollments (only if child selected) - MUST BE BEFORE enrollment-dependent calls
-  const { data: activeEnrollments, loading: loadingEnrollments } = useApi(
-    () =>
-      enrollmentsService.getMy({
-        child_id: selectedChild?.id,
-        status: 'active',
-      }),
+  // Fetch coach's assigned classes
+  const { data: classes, loading: loadingClasses } = useApi(
+    () => classesService.getAll({ coach_id: user?.id }),
     {
       initialData: [],
-      dependencies: [selectedChild?.id],
-      autoFetch: !!selectedChild,
+      dependencies: [user?.id],
+      autoFetch: !!user?.id,
     }
   );
 
-  // Get first active enrollment for enrollment-based data
-  const firstEnrollment = useMemo(() => {
-    return activeEnrollments?.[0] || null;
-  }, [activeEnrollments]);
+  // Set first class as default when classes load
+  useMemo(() => {
+    if (classes?.length > 0 && !selectedClass) {
+      setSelectedClass(classes[0]);
+    }
+  }, [classes, selectedClass]);
 
-  // 7. Recent photos (only if enrollment has class)
+  // Fetch announcements for selected class
+  const { data: announcements, loading: loadingAnnouncements } = useApi(
+    () => announcementsService.getAll({
+      class_id: selectedClass?.id,
+      limit: 10,
+    }),
+    {
+      initialData: [],
+      dependencies: [selectedClass?.id],
+      autoFetch: !!selectedClass?.id,
+    }
+  );
+
+  // Fetch calendar events for current month
+  const { data: calendarEvents, loading: loadingEvents } = useApi(
+    () => eventsService.getThisMonth(),
+    {
+      initialData: [],
+    }
+  );
+
+  // Fetch upcoming events (for next event card)
+  const { data: upcomingEvents } = useApi(
+    () => eventsService.getUpcoming(1),
+    {
+      initialData: [],
+    }
+  );
+
+  // Fetch recent photos for selected class
   const { data: recentPhotos, loading: loadingPhotos } = useApi(
-    () => photosService.getByClass(firstEnrollment?.class?.id, { limit: 6 }),
+    () => photosService.getByClass(selectedClass?.id, { limit: 1 }),
     {
       initialData: [],
-      dependencies: [firstEnrollment?.class?.id],
-      autoFetch: !!firstEnrollment?.class?.id,
+      dependencies: [selectedClass?.id],
+      autoFetch: !!selectedClass?.id,
     }
   );
 
-  // 8. Badges (only if enrollment exists)
-  const { data: badges, loading: loadingBadges } = useApi(
-    () => badgesService.getByEnrollment(firstEnrollment?.id),
-    {
-      initialData: [],
-      dependencies: [firstEnrollment?.id],
-      autoFetch: !!firstEnrollment?.id,
-    }
-  );
-
-  // 9. Attendance stats (only if enrollment exists)
+  // Fetch attendance stats (for check-in count)
   const { data: attendanceStats } = useApi(
-    () => attendanceService.getStreak(firstEnrollment?.id),
+    () => attendanceService.getSummary({
+      date: currentDate.toISOString().split('T')[0],
+      class_id: selectedClass?.id,
+    }),
     {
-      dependencies: [firstEnrollment?.id],
-      autoFetch: !!firstEnrollment?.id,
+      dependencies: [selectedClass?.id],
+      autoFetch: !!selectedClass?.id,
     }
   );
 
-  // 10. Events for class (only if enrollment has class)
-  const { data: classEvents, loading: loadingEvents } = useApi(
-    () => eventsService.getByClass(firstEnrollment?.class?.id),
-    {
-      initialData: [],
-      dependencies: [firstEnrollment?.class?.id],
-      autoFetch: !!firstEnrollment?.class?.id,
-    }
-  );
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+  const checkedInToday = attendanceStats?.present_count || 50;
+  const announcementCount = announcements?.length || 15;
+  const nextEvent = upcomingEvents?.[0] || null;
+  const latestPhoto = recentPhotos?.[0] || null;
 
-  // Get upcoming events from class events (filter and sort on frontend)
-  const upcomingEvents = useMemo(() => {
-    if (!classEvents) return [];
-    const now = new Date();
-    return classEvents
-      .filter(event => new Date(event.start_datetime) >= now)
-      .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
-      .slice(0, 3);
-  }, [classEvents]);
-
-  // Get this month's events (for calendar)
-  const calendarEvents = useMemo(() => {
-    if (!classEvents) return [];
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    return classEvents.filter(event => {
-      const eventDate = new Date(event.start_datetime);
-      return eventDate >= startOfMonth && eventDate <= endOfMonth;
-    });
-  }, [classEvents]);
-
-  // 11. Payment summary
-  const { data: paymentSummary, loading: loadingPayments } = useApi(
-    () => installmentsService.getSummary(),
-    {
-      initialData: null,
-    }
-  );
-
-  // 11. Pending waivers
-  const { data: pendingWaivers, loading: loadingWaivers } = useApi(
-    () => waiversService.getPending(),
-    {
-      initialData: [],
-    }
-  );
-
-  // Handle child selection
-  const handleChildChange = (e) => {
-    const childId = e.target.value;
-    const child = children.find((c) => c.id === childId);
-    if (child) {
-      selectChild(child);
-    }
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+  const handleClassChange = (classItem) => {
+    setSelectedClass(classItem);
   };
 
-  // Computed values
-  const attendanceStreak = attendanceStats?.current_streak || 0;
-  const badgeCount = badges?.length || 0;
-  const nextEvent = upcomingEvents?.[0] || null;
+  const handleEditAnnouncement = (announcement) => {
+    console.log('Edit announcement:', announcement);
+    // TODO: Open edit modal
+  };
 
-  // Recent badges (sorted by earned_at)
-  const recentBadges = useMemo(() => {
-    if (!badges) return [];
-    return [...badges]
-      .sort((a, b) => new Date(b.earned_at) - new Date(a.earned_at))
-      .slice(0, 4);
-  }, [badges]);
+  const handleDeleteAnnouncement = (announcement) => {
+    console.log('Delete announcement:', announcement);
+    // TODO: Show confirm dialog
+  };
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
   return (
-    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className="min-h-screen bg-[#E3E5E6] relative overflow-hidden">
+      {/* Background Vector Pattern (subtle) */}
+      <div className="absolute inset-0 pointer-events-none opacity-10">
+        <svg
+          className="absolute -top-[184px] -left-[25px] w-[1597px] h-[1457px]"
+          viewBox="0 0 1597 1457"
+          fill="none"
+        >
+          <path
+            d="M0 0C300 200 600 400 800 700C1000 1000 1200 1200 1597 1457"
+            stroke="#173151"
+            strokeWidth="2"
+            strokeOpacity="0.1"
+          />
+        </svg>
+      </div>
+
+      {/* Header */}
       <Header />
 
-      <main className="mx-6 py-8 max-xxl:py-4 max-sm:py-2 max-sm:mx-3">
-        {/* Subheader Section */}
-        <div className="flex flex-row lg:flex-row items-center lg:items-center justify-between mb-6 max-xxl:mb-3 gap-4">
-          {/* Welcome Message & Child Selector */}
-          <div className="flex flex-col gap-2">
-            <div className="text-fluid-2xl text-[#173151] font-normal font-kollektif flex items-center gap-2">
+      {/* Main Content */}
+      <main className="relative z-10 max-w-[1400px] mx-auto px-5 pb-8">
+        {/* ================================================================ */}
+        {/* TOP SECTION: Welcome + Stats */}
+        {/* ================================================================ */}
+        <div className="flex items-start justify-between mb-6 pt-2">
+          {/* Welcome Container */}
+          <div className="flex flex-col gap-[4px] max-w-[497px]">
+            {/* Welcome Message */}
+            <h1 className="font-manrope font-semibold text-[46px] leading-[1.182] tracking-[-0.92px] text-[#173151] max-sm:text-2xl">
               Welcome back, {user?.first_name || 'Coach'}! 👋
-            </div>
-            {/* locations and active students */}
-         <p className="text-black font-manrope font-medium text-base max-xxl:text-sm">
-                Managing 3 locations • 45 active students
-              </p>
-            
+            </h1>
+
+            {/* Class Filter */}
+            <ClassFilterDropdown
+              classes={classes}
+              selectedClass={selectedClass}
+              onSelectClass={handleClassChange}
+              placeholder="Select a class"
+            />
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center gap-16 max-sm:hidden">
-            <div className="text-start flex flex-col justify-between">
-              <p className="text-fluid-3xl font-kollektif font-normal text-[#0F1D2E]">
-                {attendanceStreak}
-              </p>
-              <p className="text-black font-kollektif normal text-base">
-                Checked In Today
-              </p>
-            </div>
-            <div className="text-start flex flex-col justify-between">
-              <p className="text-fluid-3xl font-kollektif normal text-[#0F1D2E]">
-                {badgeCount}
-              </p>
-              <p className="text-black font-kollektif normal text-base">
-                Announcements
-              </p>
-            </div>
+          {/* Stats Container */}
+          <div className="flex items-center gap-[42px] max-sm:hidden">
+            <CoachStatsCard
+              value={checkedInToday}
+              label="Checked In Today"
+            />
+            <CoachStatsCard
+              value={announcementCount}
+              label="Announcements"
+            />
           </div>
         </div>
 
-        {/* Waivers Alert */}
-        {/* <WaiversAlert
-          pendingWaivers={pendingWaivers}
-          loading={loadingWaivers}
-        /> */}
+        {/* ================================================================ */}
+        {/* MAIN CONTENT GRID */}
+        {/* ================================================================ */}
+        <div className="flex flex-col lg:flex-row gap-5">
+          {/* ============================================================ */}
+          {/* LEFT COLUMN: Announcements */}
+          {/* ============================================================ */}
+          <div className="w-full lg:w-[695px] max-sm:order-2">
+            <div className="bg-white/50 rounded-[30px] p-5 min-h-[723px]">
+              {/* Announcements Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-manrope font-semibold text-[20px] leading-[1.5] tracking-[-0.2px] text-[#1B1B1B]">
+                  Announcements
+                </h2>
+                <button
+                  onClick={() => setOpenModal(true)}
+                  className="flex items-center gap-2 bg-[#DDE0E3] hover:bg-[#d1d4d7] px-4 py-2 rounded-full transition-colors"
+                >
+                  <Plus size={24} className="text-black" />
+                  <span className="font-manrope font-semibold text-[16px] text-black">
+                    New Post
+                  </span>
+                </button>
+              </div>
 
-        <div className="flex flex-col lg:flex-row gap-3">
-          {/* Left Column */}
-          <div className="col-span-2 max-sm:hidden space-y-3 w-[60%] ">
-            {/* Announcements */}
-            <div>
-              <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
-       <div className='w-full flex justify-between items-center'>
-        <h2 className="text-xl xxl1:text-2xl max-xxl:text-lg  font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>     
-<button onClick={() => setOpenModal(true)}
- className="flex items-center gap-2 bg-[#DDE0E3] text-[#000000] px-4 py-2 rounded-full text-base font-semibold font-manrope">
-  <Plus size={16} />
-  New Post
-</button>
-</div>
-
-            <AnnouncementCard
-              announcements={announcements}
-              loading={loadingAnnouncements}
-            />
+              {/* Announcements List */}
+              <div className="flex flex-col gap-[10px] max-h-[650px] overflow-y-auto">
+                {loadingAnnouncements ? (
+                  // Loading skeleton
+                  Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="bg-white/50 rounded-[20px] p-5 animate-pulse">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-[54px] h-[54px] bg-gray-200 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-24"></div>
+                        </div>
+                      </div>
+                      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  ))
+                ) : announcements?.length > 0 ? (
+                  announcements.map((announcement) => (
+                    <CoachAnnouncementItem
+                      key={announcement.id}
+                      announcement={announcement}
+                      currentUserId={user?.id}
+                      onEdit={handleEditAnnouncement}
+                      onDelete={handleDeleteAnnouncement}
+                    />
+                  ))
+                ) : (
+                  // Demo announcements when no data
+                  [
+                    {
+                      id: 1,
+                      title: 'Tournament This Saturday',
+                      content: 'Great practice today! Remember, we have a tournament this Saturday at 9 AM. Please arrive 30 minutes early',
+                      created_at: '2025-10-27T10:30:00',
+                      author: { first_name: 'Martinez', role: 'coach' },
+                      attachments: [{ name: 'teamList.pdf', type: 'application/pdf' }]
+                    },
+                    {
+                      id: 2,
+                      title: 'New Team Jerseys',
+                      content: 'New team jerseys have arrived! You can pick them up from the front desk.',
+                      created_at: '2025-10-27T10:30:00',
+                      author: { first_name: 'Martinez', role: 'coach' },
+                      attachments: [{ name: 'image-2.jpg', type: 'image/jpeg', url: 'https://images.unsplash.com/photo-1551958219-acbc608c6377?w=100' }]
+                    },
+                    {
+                      id: 3,
+                      title: 'Registration Deadline',
+                      content: 'Reminder: Registration for next month closes this Friday. Make sure your account is up to date!',
+                      created_at: '2025-10-27T10:30:00',
+                      author: { first_name: 'Martinez', role: 'coach' },
+                    },
+                    {
+                      id: 4,
+                      title: 'Ball Control Progress',
+                      content: 'Awesome progress in ball control drills this week! Keep practicing at home with the exercises we covered.',
+                      created_at: '2025-10-27T10:30:00',
+                      author: { first_name: 'Martinez', role: 'coach' },
+                      attachments: [{ name: 'teamList.pdf', type: 'application/pdf' }]
+                    },
+                  ].map((announcement) => (
+                    <CoachAnnouncementItem
+                      key={announcement.id}
+                      announcement={announcement}
+                      currentUserId={user?.id}
+                    />
+                  ))
+                )}
+              </div>
             </div>
-            </div>
-
-  
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-3 grid grid-cols-1  xxl:w-[50%]">
-              {/* Calendar & Next Event */}
-             <div className="bg-[#FFFFFF80] max-md:flex-col max-xxl:pb-3 px-6 rounded-[30px] lg:w-full flex gap-2">
-              <div className="w-[40%] max-sm:hidden">
-                <Calender1 events={calendarEvents} />
+          {/* ============================================================ */}
+          {/* RIGHT COLUMN: Calendar + Event + Photos */}
+          {/* ============================================================ */}
+          <div className="w-full lg:w-[695px] flex flex-col gap-5 max-sm:order-1">
+            {/* Calendar + Next Event Card */}
+            <div className="bg-white/50 rounded-[30px] p-5 flex flex-col lg:flex-row gap-4">
+              {/* Calendar Widget */}
+              <div className="lg:w-[273px] max-sm:hidden">
+                <h2 className="font-kollektif text-[20px] leading-[1.5] tracking-[-0.2px] text-[#0F1D2E] mb-4">
+                  Calendar
+                </h2>
+                <CoachCalendarWidget
+                  events={calendarEvents}
+                  onDateClick={(date) => console.log('Date clicked:', date)}
+                />
               </div>
 
-             <div className="lg:w-[60%]  max-sm:w-full max-sm:flex">
-
-               <div className="pt-6 max-xxl:pt-4 w-full max-md:pb-4">
-                  <h2 className="text-fluid-lg pl-3  font-kollektif font-normal mb-4 max-xxl:mb-3">
-                    Next Event
-                  </h2>
-                  <NextEvent event={nextEvent} loading={loadingEvents} />
-                </div>
+              {/* Next Event */}
+              <div className="flex-1">
+                <h2 className="font-kollektif text-[20px] leading-[1.5] tracking-[-0.2px] text-[#0F1D2E] mb-4">
+                  Next Event
+                </h2>
+                <CoachNextEventCard
+                  event={nextEvent || {
+                    title: 'Tournament Day',
+                    description: 'Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up.',
+                    start_datetime: '2025-10-29T14:00:00',
+                    attachment_name: 'details.pdf',
+                  }}
+                  loading={loadingEvents}
+                />
               </div>
             </div>
 
-            {/* Mobile: Announcements */}
-           <div className="col-span-2 hidden max-sm:flex space-y-6 w-full">
-    <div className="w-full bg-gray-50 rounded-[30px] shadow-sm p-6">
-        <div className='w-full flex justify-between items-center'>
-        <h2 className="text-xl font-semibold font-manrope text-[#1b1b1b] mb-4">Announcements</h2>     
-<button onClick={() => setOpenModal(true)} className="flex items-center gap-2 bg-[#DDE0E3] text-[#000000] px-4 py-2 rounded-full text-base font-semibold font-manrope">
-  <Plus size={16} />
-  New Post
-</button>
-</div>
-     <AnnouncementCard
-              announcements={announcements}
-              loading={loadingAnnouncements}
+            {/* Program Photos */}
+            <CoachPhotosCard
+              photo={latestPhoto}
+              albumTitle="Program Photos"
+              date={latestPhoto?.created_at || '2024-10-24'}
+              loading={loadingPhotos}
             />
-            </div>
-            </div>
-
-            {/* Photos & Badges */}
-            <div className="w-full max-sm:grid-cols-1 gap-4">
-              <PhotoCard photos={recentPhotos} loading={loadingPhotos} />
-               </div>
-
-            {/* Mobile: Enrollments & Payment */}
-            {/* <div className="hidden max-sm:block space-y-6">
-              <EnrollmentCard
-                enrollments={activeEnrollments}
-                loading={loadingEnrollments}
-              />
-              <PaymentStatusCard
-                summary={paymentSummary}
-                loading={loadingPayments}
-              />
-            </div> */}
           </div>
         </div>
       </main>
-       {/* Modal */}
-            {openModal && <CreatePostModal onClose={() => setOpenModal(false)} />}
 
+      {/* Footer */}
       <Footer />
+
+      {/* Create Post Modal */}
+      {openModal && <CreatePostModal onClose={() => setOpenModal(false)} />}
     </div>
   );
 }

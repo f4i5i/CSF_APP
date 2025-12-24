@@ -29,6 +29,7 @@ import {
   Wallet,
   MessageCircle,
   X,
+  Award,
 } from "lucide-react";
 
 // Icons - Material UI
@@ -116,12 +117,13 @@ const Header = () => {
   ];
 
   // Coach role navigation items (displayed in horizontal nav bar on desktop)
+  // Updated to match Figma design: Dashboard, Calendar, Attendance, Photos, Badges
   const navItemscoach = [
-    { name: "Home", icon: Home, path: "/coachdashboard" },
+    { name: "Dashboard", icon: Home, path: "/coachdashboard" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
-    { name: "Check-In", icon: User, path: "/checkIn" },
     { name: "Attendance", icon: CheckCircle2, path: "/attendance" },
     { name: "Photos", icon: Image, path: "/Gallery" },
+    { name: "Badges", icon: Award, path: "/badges" },
   ];
 
   // Admin role navigation items (for mobile bottom nav only)
@@ -305,6 +307,7 @@ const Header = () => {
         {/* Horizontal navigation bar with Dashboard, Calendar, Check-In, Attendance, Photos */}
         {/* Only visible for coach role users on desktop screens */}
         {/* ================================================================ */}
+        {/* Coach Navigation Bar - Matches Figma design */}
         {role === "coach" && (
           <nav>
             <ul className="flex items-center max-sm:hidden font-manrope text-base font-medium bg-[#FFFFFF66] rounded-fluid-3xl shadow p-1 gap-1">
@@ -342,22 +345,6 @@ const Header = () => {
 
               <li>
                 <NavLink
-                  to="/checkIn"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Check-In
-                </NavLink>
-              </li>
-
-              <li>
-                <NavLink
                   to="/attendance"
                   className={({ isActive }) =>
                     `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
@@ -385,6 +372,22 @@ const Header = () => {
                   }
                 >
                   Photos
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/badges"
+                  className={({ isActive }) =>
+                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${
+            isActive
+              ? "bg-[#F3BC48] text-black"
+              : "text-black hover:bg-white/20"
+          }`
+                  }
+                >
+                  Badges
                 </NavLink>
               </li>
             </ul>

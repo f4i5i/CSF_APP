@@ -8,6 +8,21 @@ import { API_ENDPOINTS } from '../../constants/api.constants';
 
 const childrenService = {
   /**
+   * Get all children (Admin only)
+   * @param {Object} filters - Filter parameters
+   * @param {string} [filters.search] - Search query
+   * @param {number} [filters.skip] - Number of items to skip
+   * @param {number} [filters.limit] - Maximum number of items to return
+   * @returns {Promise<Object>} Response with items, total
+   */
+  async getAll(filters = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.CHILDREN.LIST, {
+      params: filters,
+    });
+    return data;
+  },
+
+  /**
    * Get current user's children
    * @returns {Promise<Array>} List of children
    */

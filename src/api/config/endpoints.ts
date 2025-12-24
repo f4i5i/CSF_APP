@@ -30,6 +30,7 @@ export const ENDPOINTS = {
   // CHILDREN
   // ===================
   CHILDREN: {
+    LIST: '/children', // List all children (ADMIN only)
     MY: '/children/my', // List current user's children
     CREATE: '/children', // Create new child
     BY_ID: (id: string) => `/children/${id}`, // Get/Update/Delete child by ID
