@@ -47,7 +47,7 @@ const CoachNextEventCard = ({ event, loading = false }) => {
   };
 
   return (
-    <div className="bg-white/20 border border-white/20 rounded-[14px] px-[12px] py-[13px] flex flex-col gap-[10px]">
+    <div className="bg-white/20 border border-[#DFE1E7] rounded-[14px] px-[12px] py-[13px] flex flex-col gap-[10px]">
       {/* Header: User Info with time and event details */}
       <div className="flex items-center justify-between pb-[15px] border-b border-black/10">
         <div className="flex items-start justify-between w-full">
