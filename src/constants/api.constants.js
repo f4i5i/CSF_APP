@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
     TOKEN: '/auth/token', // OAuth2 compatible endpoint
     GOOGLE: '/auth/google',
     LOGOUT: '/auth/logout',
+    CHANGE_PASSWORD: '/auth/change-password',
   },
 
   // ===================
@@ -114,6 +115,17 @@ export const API_ENDPOINTS = {
   },
 
   // ===================
+  // INVOICES
+  // ===================
+  INVOICES: {
+    MY: '/invoices/my', // List user's invoices
+    LIST: '/invoices', // List all invoices (ADMIN)
+    BY_ID: (id) => `/invoices/${id}`, // Get invoice details
+    DOWNLOAD: (id) => `/invoices/${id}/download`, // Download invoice PDF
+    BILLING_SUMMARY: '/invoices/billing-summary', // Get billing summary
+  },
+
+  // ===================
   // PAYMENTS
   // ===================
   PAYMENTS: {
@@ -130,7 +142,7 @@ export const API_ENDPOINTS = {
     SETUP_INTENT: '/payments/setup-intent', // Create SetupIntent for card saving
     REFUND: (paymentId) => `/payments/${paymentId}/refund`, // Create refund
     RECEIPT: (paymentId) => `/payments/${paymentId}/receipt`, // Get receipt
-    RECEIPT_PDF: (paymentId) => `/payments/${paymentId}/receipt/pdf`, // Download PDF receipt
+    RECEIPT_PDF: (paymentId) => `/payments/${paymentId}/invoice/download`, // Download PDF invoice
     STATS: '/payments/stats', // Payment statistics
     VERIFY_STATUS: (paymentId) => `/payments/${paymentId}/verify`, // Verify payment status
   },

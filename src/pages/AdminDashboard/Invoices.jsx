@@ -204,7 +204,7 @@ export default function Invoices() {
     .reduce((sum, i) => sum + parseFloat(i.total || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="h-full py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-8">
           <div className="flex items-center justify-between">

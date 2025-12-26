@@ -77,7 +77,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7]">
+      <div className="h-full">
         <Header />
         <div className="max-w-9xl sm:px-6 px-3 pb-8">
           <div className="flex items-center justify-center h-64">
@@ -89,7 +89,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen max-sm:h-fit opacity-8 max-sm:pb-20 bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8">
+    <div className="h-full max-sm:pb-20">
       <Header />
       <div className="max-w-9xl sm:px-6 px-3 pb-8 max-sm:py-2 rounded-lg">
         <div className="flex items-center justify-between mb-6 gap-4">

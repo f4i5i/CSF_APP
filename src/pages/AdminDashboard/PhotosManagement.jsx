@@ -180,7 +180,7 @@ export default function PhotosManagement() {
   );
 
   return (
-    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className="h-full max-sm:pb-20">
       <Header />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">

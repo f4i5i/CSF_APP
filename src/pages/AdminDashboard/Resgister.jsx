@@ -43,7 +43,7 @@ export default function Resgister() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] relative">
+    <div className="h-full flex flex-col items-center justify-between bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] relative">
       {/* <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div> */}
       <DottedOverlay
         className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"

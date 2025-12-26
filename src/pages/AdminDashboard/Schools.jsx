@@ -265,7 +265,7 @@ export default function Schools() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full">
       <Header />
 
       <div className="max-w-9xl mx-auto sm:px-4 px-0">

@@ -72,10 +72,10 @@ export default function AnnouncementsSection() {
     <>
       {/* MOBILE NEXT EVENT */}
       <div className="flex sm:hidden mb-3 flex-col gap-3">
-        <div className="w-full bg-[#f1f2f2] p-4 rounded-4xl">
+        <div className="w-full bg-white/50 p-4 rounded-4xl">
           <h3 className="text-lg font-normal text-[#0F1D2E]">Next Event</h3>
 
-          <div className="flex flex-col gap-2 bg-bg-white/50 shadow-sm rounded-[10px] px-2 py-2 mt-2">
+          <div className="flex flex-col gap-2 bg-white/50 shadow-sm rounded-[10px] px-2 py-2 mt-2">
             <div className="flex items-center gap-3 mb-2">
               <div className="text-lg font-normal text-[#0F1D2E]">02:00</div>
               <div className="w-1 bg-[#F3BC48] h-9 rounded" />
@@ -106,7 +106,7 @@ export default function AnnouncementsSection() {
         </div>
       </div>
 
-      <section className="bg-card_bg rounded-3xl md:max-h-[723px] md:overflow-auto no-scrollbar px-3 sm:px-4 py-2 font-manrope sm:py-5 w-full">
+      <section className="bg-white/50 rounded-3xl md:max-h-[723px] md:overflow-auto no-scrollbar px-3 sm:px-4 py-2 font-manrope sm:py-5 w-full">
         <h2 className="text-lg sm:text-xl font-manrope font-semibold mb-3">
           Announcements
         </h2>
@@ -115,7 +115,7 @@ export default function AnnouncementsSection() {
           {announcements.map((announcement) => (
             <div
               key={announcement.id}
-              className="bg-[#f7f8f8] rounded-[20px] p-3 sm:p-5 shadow-sm"
+              className="bg-white/50 rounded-[20px] p-3 sm:p-5 shadow-sm"
             >
               <div className="flex items-start justify-between mb-3 gap-2">
                 <div className="flex items-center gap-3 flex-1">

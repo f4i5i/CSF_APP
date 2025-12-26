@@ -30,6 +30,19 @@ const usersService = {
     return data;
   },
 
+  /**
+   * Change current user password
+   * @param {Object} passwordData - Password change data
+   * @param {string} passwordData.current_password - Current password
+   * @param {string} passwordData.new_password - New password
+   * @param {string} passwordData.confirm_password - Confirm new password
+   * @returns {Promise<Object>} Success message
+   */
+  async changePassword(passwordData) {
+    const { data } = await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, passwordData);
+    return data;
+  },
+
   // ============== Admin User Management ==============
 
   /**

@@ -133,6 +133,15 @@ const paymentsService = {
   },
 
   /**
+   * Create a SetupIntent to save a payment method
+   * @returns {Promise<Object>} SetupIntent with client_secret
+   */
+  async createSetupIntent() {
+    const { data } = await apiClient.post(API_ENDPOINTS.PAYMENTS.SETUP_INTENT);
+    return data;
+  },
+
+  /**
    * Get saved payment methods
    * @returns {Promise<Array>} List of saved payment methods
    */

@@ -210,7 +210,7 @@ export default function RegisterChild() {
      ${errors[field] ? "border-red-500" : "border-gray-300"}`;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center relative">
+    <div className="h-full w-full flex flex-col items-center relative">
 
       {/* Dotted Background */}
       <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>

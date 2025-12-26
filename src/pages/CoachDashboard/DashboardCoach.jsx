@@ -149,36 +149,21 @@ export default function DashboardCoach() {
   // RENDER
   // ============================================================================
   return (
-    <div className="min-h-screen bg-[#E3E5E6] relative overflow-hidden">
-      {/* Background Vector Pattern (subtle) */}
-      <div className="absolute inset-0 pointer-events-none opacity-10">
-        <svg
-          className="absolute -top-[184px] -left-[25px] w-[1597px] h-[1457px]"
-          viewBox="0 0 1597 1457"
-          fill="none"
-        >
-          <path
-            d="M0 0C300 200 600 400 800 700C1000 1000 1200 1200 1597 1457"
-            stroke="#173151"
-            strokeWidth="2"
-            strokeOpacity="0.1"
-          />
-        </svg>
-      </div>
-
+    <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] max-sm:pb-20">
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-[1400px] mx-auto px-5 pb-8">
+      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 mt-8">
+        <div className="w-full">
         {/* ================================================================ */}
         {/* TOP SECTION: Welcome + Stats */}
         {/* ================================================================ */}
-        <div className="flex items-start justify-between mb-6 pt-2">
+        <div className="flex flex-row lg:flex-row items-start lg:items-start justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
           {/* Welcome Container */}
-          <div className="flex flex-col gap-[4px] max-w-[497px]">
+          <div className="flex flex-col gap-1">
             {/* Welcome Message */}
-            <h1 className="font-manrope font-semibold text-[46px] leading-[1.182] tracking-[-0.92px] text-[#173151] max-sm:text-2xl">
+            <h1 className="text-fluid-2xl text-[#173151] font-kollektif font-normal leading-[1.002] tracking-[-0.02em] max-sm:ml-3">
               Welcome back, {user?.first_name || 'Coach'}! 👋
             </h1>
 
@@ -192,7 +177,7 @@ export default function DashboardCoach() {
           </div>
 
           {/* Stats Container */}
-          <div className="flex items-center gap-[42px] max-sm:hidden">
+          <div className="flex items-center gap-[42px] max-sm:hidden pr-20">
             <CoachStatsCard
               value={checkedInToday}
               label="Checked In Today"
@@ -207,11 +192,12 @@ export default function DashboardCoach() {
         {/* ================================================================ */}
         {/* MAIN CONTENT GRID */}
         {/* ================================================================ */}
-        <div className="flex flex-col lg:flex-row gap-5">
+        <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
+          <div className="flex flex-col lg:flex-row items-start justify-center gap-3 w-full">
           {/* ============================================================ */}
           {/* LEFT COLUMN: Announcements */}
           {/* ============================================================ */}
-          <div className="w-full lg:w-[695px] max-sm:order-2">
+          <div className="w-full max-sm:order-2">
             <div className="bg-white/50 rounded-[30px] p-5 min-h-[723px]">
               {/* Announcements Header */}
               <div className="flex items-center justify-between mb-4">
@@ -305,7 +291,7 @@ export default function DashboardCoach() {
           {/* ============================================================ */}
           {/* RIGHT COLUMN: Calendar + Event + Photos */}
           {/* ============================================================ */}
-          <div className="w-full lg:w-[695px] flex flex-col gap-5 max-sm:order-1">
+          <div className="w-full flex flex-col gap-5 max-sm:order-1">
             {/* Calendar + Next Event Card */}
             <div className="bg-white/50 rounded-[30px] p-5 flex flex-col lg:flex-row gap-4">
               {/* Calendar Widget */}
@@ -344,11 +330,13 @@ export default function DashboardCoach() {
               loading={loadingPhotos}
             />
           </div>
+          </div>
+        </div>
         </div>
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer isFixed={false} />
 
       {/* Create Post Modal */}
       {openModal && <CreatePostModal onClose={() => setOpenModal(false)} />}

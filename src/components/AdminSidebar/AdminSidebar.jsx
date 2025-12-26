@@ -1,35 +1,84 @@
 import React, { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle } from "lucide-react";
-import baseLogo from "../../assets/logo.png";
-import crown from "../../assets/Carolina.png";
-import logo from "../../assets/person.png";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings } from "lucide-react";
 import { useAuth } from "../../context/auth";
-const routes = [
+
+// Categorized navigation structure
+const categorizedRoutes = [
   { name: "Home", to: "/admin", icon: Home, end: true },
-  { name: "Programs", to: "/admin/programs", icon: Layers },
-  { name: "Areas", to: "/admin/areas", icon: MapPin },
-  { name: "Schools", to: "/admin/schools", icon: School },
-  { name: "Classes", to: "/admin/classes", icon: BookOpen },
-  { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList },
-  { name: "Users", to: "/admin/users", icon: UserCog },
-  { name: "Waivers", to: "/admin/waivers", icon: FileText },
-  { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3 },
-  { name: "Clients", to: "/clients", icon: Users },
-  { name: "Calendar", to: "/calendar", icon: Calendar },
-  { name: "Financials", to: "/financials", icon: DollarSign },
-  { name: "Refunds", to: "/admin/refunds", icon: RotateCcw },
-  { name: "Cancellations", to: "/admin/cancellations", icon: XCircle },
-  { name: "Events", to: "/admin/events", icon: CalendarDays },
-  { name: "Badges", to: "/admin/badges", icon: Award },
-  { name: "Photos", to: "/admin/photos", icon: Image },
+  {
+    category: "Setup",
+    icon: Settings,
+    items: [
+      { name: "Programs", to: "/admin/programs", icon: Layers },
+      { name: "Areas", to: "/admin/areas", icon: MapPin },
+      { name: "Schools", to: "/admin/schools", icon: School },
+    ]
+  },
+  {
+    category: "Classes",
+    icon: BookOpen,
+    items: [
+      { name: "Classes", to: "/admin/classes", icon: BookOpen },
+      { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList },
+    ]
+  },
+  {
+    category: "People",
+    icon: Users,
+    items: [
+      { name: "Users", to: "/admin/users", icon: UserCog },
+      { name: "Clients", to: "/clients", icon: Users },
+    ]
+  },
+  {
+    category: "Documents",
+    icon: FileText,
+    items: [
+      { name: "Waivers", to: "/admin/waivers", icon: FileText },
+      { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3 },
+    ]
+  },
+  {
+    category: "Finance",
+    icon: DollarSign,
+    items: [
+      { name: "Financials", to: "/financials", icon: DollarSign },
+      { name: "Refunds", to: "/admin/refunds", icon: RotateCcw },
+      { name: "Cancellations", to: "/admin/cancellations", icon: XCircle },
+    ]
+  },
+  {
+    category: "Media",
+    icon: Image,
+    items: [
+      { name: "Calendar", to: "/calendar", icon: Calendar },
+      { name: "Events", to: "/admin/events", icon: CalendarDays },
+      { name: "Badges", to: "/admin/badges", icon: Award },
+      { name: "Photos", to: "/admin/photos", icon: Image },
+    ]
+  },
 ];
 
 export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
   const { user, logout } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState({
+    Setup: false,
+    Classes: false,
+    People: false,
+    Documents: false,
+    Finance: false,
+    Media: false,
+  });
 
   const navigate = useNavigate();
+
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
   return (
     <div
       className={`flex flex-col h-full  border border-border-light  bg-gradient-to-b from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] shadow transition-all ${
@@ -70,63 +119,112 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
         </button>
       </div>
       <hr className="w-full border border-border-light" />
-
-      <div className="px-3 py-4 border-t">
-        <button
-          className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-100"
-          onClick={() => {
-            if (onNavigate) onNavigate();
-            navigate("/account");
-          }}
-        >
-          <img
-            src={logo}
-            alt="Profile"
-            className="w-9 h-9 rounded-full object-cover"
-          />
-          {!collapsed && (
-            <div className="text-left">
-              <div className="text-sm font-medium font-manrope capitalize">
-                {user?.first_name} {user?.last_name}
-              </div>
-              <div className="text-xs text-gray-500 font-manrope capitalize">
-                {user?.role || "Administrator"}
-              </div>
-            </div>
-          )}
-        </button>
-      </div>
-      <hr className="w-full border border-border-light" />
       {/* Links */}
       <nav className=" px-1 py-3 overflow-auto bg-[#ffffff80] rounded-xl mx-3 mt-[2rem]">
-        {routes.map((r) => {
-          const Icon = r.icon;
+        {categorizedRoutes.map((item, index) => {
+          // Standalone route (like Home)
+          if (item.to) {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2 my-1 rounded-md transition-colors group ${
+                    isActive
+                      ? "bg-[#F3BC48]/20 text-[#173151] font-semibold"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`
+                }
+                onClick={() => {
+                  if (onNavigate) onNavigate();
+                }}
+              >
+                <div className="flex items-center justify-center w-8">
+                  <Icon size={18} />
+                </div>
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 truncate font-manrope">{item.name}</span>
+                    <ChevronRight size={16} className="text-gray-700" />
+                  </>
+                )}
+              </NavLink>
+            );
+          }
+
+          // Category with items
+          const CategoryIcon = item.icon;
+          const isExpanded = expandedCategories[item.category];
+
           return (
-            <NavLink
-              key={r.to}
-              to={r.to}
-              end={r.end}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 my-1 rounded-md transition-colors group ${
-                  isActive
-                    ? "bg-[#F3BC48]/20 text-[#173151] font-semibold"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`
-              }
-              onClick={() => {
-                if (onNavigate) onNavigate();
-              }}
-            >
-              <div className="flex items-center justify-center w-8">
-                <Icon size={18} />
+            <div key={item.category} className="mb-1">
+              {/* Category Header */}
+              <button
+                onClick={() => !collapsed && toggleCategory(item.category)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                  collapsed ? "justify-center" : ""
+                } text-gray-600 hover:bg-gray-100`}
+              >
+                <div className="flex items-center justify-center w-8">
+                  <CategoryIcon size={18} />
+                </div>
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 text-left text-xs font-semibold uppercase tracking-wider font-manrope">
+                      {item.category}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`text-gray-500 transition-transform duration-200 ${
+                        isExpanded ? "rotate-180" : ""
+                      }`}
+                    />
+                  </>
+                )}
+              </button>
+
+              {/* Category Items */}
+              <div
+                className={`overflow-hidden transition-all duration-200 ${
+                  collapsed || isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                {item.items.map((subItem) => {
+                  const SubIcon = subItem.icon;
+                  return (
+                    <NavLink
+                      key={subItem.to}
+                      to={subItem.to}
+                      end={subItem.end}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2 my-0.5 rounded-md transition-colors group ${
+                          collapsed ? "" : "ml-4"
+                        } ${
+                          isActive
+                            ? "bg-[#F3BC48]/20 text-[#173151] font-semibold"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`
+                      }
+                      onClick={() => {
+                        if (onNavigate) onNavigate();
+                      }}
+                    >
+                      <div className="flex items-center justify-center w-8">
+                        <SubIcon size={16} />
+                      </div>
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1 truncate font-manrope text-sm">{subItem.name}</span>
+                          <ChevronRight size={14} className="text-gray-500" />
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                })}
               </div>
-              {!collapsed && (
-                <>
-                  <span className="flex-1 truncate font-manrope">{r.name}</span>
-                  <ChevronRight size={16} className="text-gray-700" />
-                </>
-              )}
-            </NavLink>
+            </div>
           );
         })}
       </nav>

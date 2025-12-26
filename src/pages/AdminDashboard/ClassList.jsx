@@ -171,7 +171,7 @@ export default function ClassList() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between p-6 md:p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+    <div className="h-full flex flex-col items-center justify-between p-6 md:p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
       <DottedOverlay
         className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
       />

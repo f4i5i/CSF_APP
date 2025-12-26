@@ -138,7 +138,7 @@ return (
     - Different icons for success/error states
 */}
 <Toaster
-  position="top-right"
+  position="top-center"
   toastOptions={{
     duration: 4000,
     style: {

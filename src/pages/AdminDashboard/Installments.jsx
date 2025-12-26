@@ -279,7 +279,7 @@ export default function Installments() {
   const totalActive = plans.filter((p) => p.status === 'active').length;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="h-full py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">

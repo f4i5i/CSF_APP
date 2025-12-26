@@ -78,7 +78,7 @@ export default function DashboardWidgets() {
   return (
     <section className="w-full">
       <div className="grid grid-cols-1 gap-3 sm:gap-4">
-        <div className="sm:flex hidden flex-col sm:flex-row shadow-sm items-start justify-center gap-3 bg-[#dfe4ea] sm:bg-card_bg rounded-2xl sm:rounded-3xl px-3 sm:px-5 py-2 sm:py-5 w-full">
+        <div className="sm:flex hidden flex-col sm:flex-row shadow-sm items-start justify-center gap-3 bg-white/50 rounded-2xl sm:rounded-3xl px-3 sm:px-5 py-2 sm:py-5 w-full">
           <div className="w-[40%] ">
             <h3 className="text-lg sm:text-xl font-kollektif font-medium text-heading-dark">Calendar</h3>
             <div className="flex items-center justify-between mt-2 sm:mt-3 mb-1">

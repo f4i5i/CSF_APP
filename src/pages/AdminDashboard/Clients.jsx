@@ -1,143 +1,295 @@
+/**
+ * Clients Management Page
+ * Admin page for managing client accounts (parents)
+ */
+
 import React, { useState, useEffect } from "react";
-import ClientsHeader from "../../components/Clients/ClientsHeader";
-import ClientsTabs from "../../components/Clients/ClientsTabs";
-import AccountTable from "../../components/Clients/AccountTable";
-import MembersTable from "../../components/Clients/MembersTable";
+import { Plus, Edit, Trash2, Mail, Phone, Users, Eye } from "lucide-react";
+import DataTable from "../../components/admin/DataTable";
+import FilterBar from "../../components/admin/FilterBar";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import Header from "../../components/Header";
 import adminService from "../../api/services/admin.service";
-import enrollmentsService from "../../api/services/enrollments.service";
 import toast from "react-hot-toast";
 
 export default function Clients() {
-  const [activeTab, setActiveTab] = useState("account");
-  const [accounts, setAccounts] = useState([]);
-  const [members, setMembers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [pagination, setPagination] = useState({ total: 0, skip: 0, limit: 50 });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10;
+
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    action: null,
+  });
 
   useEffect(() => {
     fetchClients();
-    fetchMembers();
-  }, []);
+  }, [currentPage, statusFilter, searchQuery]);
 
   const fetchClients = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await adminService.getClients({ skip: 0, limit: 100 });
+      const skip = (currentPage - 1) * itemsPerPage;
 
-      // Transform API data to match AccountTable expected format
-      const transformedAccounts = (response.items || []).map(client => {
-        // Split full_name into firstName and lastName
+      const params = {
+        skip,
+        limit: itemsPerPage,
+      };
+
+      if (searchQuery) params.search = searchQuery;
+
+      const response = await adminService.getClients(params);
+
+      // Transform API data
+      let clientsData = (response.items || []).map(client => {
         const nameParts = (client.full_name || "").split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
 
         return {
           id: client.id,
-          firstName,
-          lastName,
+          first_name: firstName,
+          last_name: lastName,
           email: client.email || "",
-          phone: client.phone || "N/A",
-          status: client.active_enrollments > 0 ? "Active" : "Inactive",
-          class: client.active_enrollments > 0 ? `${client.active_enrollments} enrollment(s)` : "None",
-          reg_date: client.created_at,
-          balance: "0.00",
-          childrenCount: client.children_count || 0,
+          phone: client.phone || "",
+          is_active: client.active_enrollments > 0,
+          active_enrollments: client.active_enrollments || 0,
+          children_count: client.children_count || 0,
+          created_at: client.created_at,
         };
       });
 
-      setAccounts(transformedAccounts);
-      setPagination({
-        total: response.total || transformedAccounts.length,
-        skip: response.skip || 0,
-        limit: response.limit || 50,
-      });
+      // Filter by status on frontend if needed
+      if (statusFilter !== "") {
+        const isActive = statusFilter === "true";
+        clientsData = clientsData.filter((c) => c.is_active === isActive);
+      }
+
+      setClients(clientsData);
+      setTotalItems(response.total || 0);
     } catch (error) {
       console.error("Failed to fetch clients:", error);
       toast.error("Failed to load clients");
+      setClients([]);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchMembers = async () => {
+  const handleViewClient = (clientData) => {
+    // TODO: Navigate to client detail page or open modal
+    toast.success(`Viewing client: ${clientData.first_name} ${clientData.last_name}`);
+  };
+
+  const handleDeleteClient = async (clientId) => {
     try {
-      // Fetch enrollments which include child and class info
-      const response = await enrollmentsService.getAll({ limit: 100 });
-
-      // Transform enrollments to members format
-      const transformedMembers = (response.items || response || []).map(enrollment => ({
-        id: enrollment.id,
-        accountId: enrollment.user_id || enrollment.parent_id,
-        firstName: enrollment.child_first_name || enrollment.child?.first_name || "",
-        lastName: enrollment.child_last_name || enrollment.child?.last_name || "",
-        dob: enrollment.child_dob || enrollment.child?.date_of_birth || "",
-        shoeSize: enrollment.child?.shoe_size || "N/A",
-        jerseySize: enrollment.child?.shirt_size || "N/A",
-        coach: enrollment.coach_name || "TBD",
-        lastCheckIn: enrollment.last_check_in || "N/A",
-        badges: enrollment.badges || [],
-        email: enrollment.parent_email || enrollment.user_email || "",
-        phone: enrollment.parent_phone || "",
-        status: enrollment.status === "active" ? "Active" :
-                enrollment.status === "pending" ? "Pending" : "Inactive",
-        class: enrollment.class_name || enrollment.class?.name || "N/A",
-        reg_date: enrollment.created_at || enrollment.enrolled_at,
-      }));
-
-      setMembers(transformedMembers);
+      await adminService.deleteClient(clientId);
+      toast.success("Client deleted successfully");
+      fetchClients();
+      setConfirmDialog({ isOpen: false });
     } catch (error) {
-      console.error("Failed to fetch members:", error);
-      // Don't show error toast for members if it fails - accounts is primary
+      console.error("Failed to delete client:", error);
+      const errorMessage = error.response?.data?.message || "Failed to delete client";
+      toast.error(errorMessage);
     }
   };
 
-  // Filter based on search query
-  const filteredAccounts = accounts.filter((a) =>
-    `${a.firstName} ${a.lastName} ${a.email}`
-      .toLowerCase()
-      .includes(query.toLowerCase())
-  );
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
-  const filteredMembers = members.filter((m) =>
-    `${m.firstName} ${m.lastName} ${m.coach} ${m.class}`
-      .toLowerCase()
-      .includes(query.toLowerCase())
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7]">
-        <Header />
-        <div className="max-w-9xl sm:px-6 px-3 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-btn-gold"></div>
+  const columns = [
+    {
+      key: "name",
+      label: "Client",
+      sortable: true,
+      render: (value, row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#173151] flex items-center justify-center text-white font-semibold text-sm">
+            {row.first_name?.[0]?.toUpperCase()}{row.last_name?.[0]?.toUpperCase()}
+          </div>
+          <div>
+            <p className="font-semibold font-manrope text-text-primary">
+              {row.first_name} {row.last_name}
+            </p>
+            <div className="flex items-center gap-1 text-xs text-text-muted">
+              <Mail className="w-3 h-3" />
+              <span>{row.email}</span>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
-      <Header />
-      <div className="max-w-9xl sm:px-6 px-3 py-8 max-sm:py-2">
-        <ClientsHeader
-          title="Clients"
-          description="Manage accounts and members — search, export, and communicate."
-          query={query}
-          setQuery={setQuery}
-        />
-        <ClientsTabs active={activeTab} onChange={setActiveTab} />
-        <div className="mt-6">
-          {activeTab === "account" ? (
-            <AccountTable data={filteredAccounts} allData={accounts} />
+      ),
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      render: (value) => (
+        <div className="flex items-center gap-1 text-sm font-manrope text-text-muted">
+          {value ? (
+            <>
+              <Phone className="w-4 h-4" />
+              <span>{value}</span>
+            </>
           ) : (
-            <MembersTable data={filteredMembers} allData={members} />
+            <span className="text-gray-400">—</span>
           )}
         </div>
+      ),
+    },
+    {
+      key: "children_count",
+      label: "Children",
+      render: (value) => (
+        <div className="flex items-center gap-1 text-sm font-manrope text-text-muted">
+          <Users className="w-4 h-4" />
+          <span>{value || 0}</span>
+        </div>
+      ),
+    },
+    {
+      key: "active_enrollments",
+      label: "Enrollments",
+      render: (value) => (
+        <span className="text-sm font-manrope text-text-primary font-semibold">
+          {value || 0}
+        </span>
+      ),
+    },
+    {
+      key: "is_active",
+      label: "Status",
+      type: "status",
+      sortable: true,
+      render: (value) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+            value
+              ? "bg-[#DFF5E8] text-status-success"
+              : "bg-neutral-lightest text-neutral-dark"
+          }`}
+        >
+          {value ? "Active" : "Inactive"}
+        </span>
+      ),
+    },
+    {
+      key: "created_at",
+      label: "Joined",
+      sortable: true,
+      render: (value) => (
+        <span className="text-sm font-manrope text-text-muted">
+          {formatDate(value)}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      type: "actions",
+      align: "right",
+      actions: (row) => [
+        {
+          label: "View",
+          icon: Eye,
+          onClick: () => handleViewClient(row),
+        },
+        {
+          label: "Delete",
+          icon: Trash2,
+          variant: "destructive",
+          onClick: () => {
+            setConfirmDialog({
+              isOpen: true,
+              title: "Delete Client",
+              message: `Are you sure you want to delete "${row.first_name} ${row.last_name}"? This action cannot be undone.`,
+              action: () => handleDeleteClient(row.id),
+            });
+          },
+        },
+      ],
+    },
+  ];
+
+  const filters = [
+    {
+      type: "select",
+      placeholder: "All Statuses",
+      value: statusFilter,
+      onChange: setStatusFilter,
+      options: [
+        { value: "", label: "All Statuses" },
+        { value: "true", label: "Active" },
+        { value: "false", label: "Inactive" },
+      ],
+    },
+  ];
+
+  const hasActiveFilters = statusFilter || searchQuery;
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("");
+    setCurrentPage(1);
+  };
+
+  return (
+    <div className="h-full">
+      <Header />
+
+      <div className="max-w-9xl mx-auto sm:px-4 px-0">
+        <div className="mb-8 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-4 justify-between">
+          <div>
+            <h1 className="lg:text-[46px] text-[20px] md:text-[30px] font-bold text-text-primary font-kollektif">
+              Clients Management
+            </h1>
+            <p className="text-neutral-main font-manrope mt-1">
+              Manage client accounts and their enrollments
+            </p>
+          </div>
+        </div>
+
+        <FilterBar
+          searchValue={searchQuery}
+          searchPlaceholder="Search by name or email..."
+          onSearch={setSearchQuery}
+          filters={filters}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+        />
+
+        <DataTable
+          columns={columns}
+          data={clients}
+          loading={loading}
+          emptyMessage="No clients found"
+          pagination={true}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+        />
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onConfirm={confirmDialog.action}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        variant="danger"
+      />
     </div>
   );
 }

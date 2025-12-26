@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, Filter, ChevronDown } from 'lucide-react';
-import paymentsService from '../../api/services/payments.service';
+import invoicesService from '../../api/services/invoices.service';
 import { formatDate, formatCurrency } from '../../utils/format';
 
 const InvoiceTable = () => {
-  const [payments, setPayments] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, succeeded, pending, failed
+  const [filter, setFilter] = useState('all'); // all, paid, sent, overdue
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    loadPayments();
+    loadInvoices();
   }, [filter]);
 
-  const loadPayments = async () => {
+  const loadInvoices = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -23,50 +23,52 @@ const InvoiceTable = () => {
         filters.status = filter;
       }
 
-      const data = await paymentsService.getAll(filters);
-      setPayments(data.items || []);
+      const data = await invoicesService.getMyInvoices(filters);
+      setInvoices(data.items || []);
     } catch (error) {
-      console.error('Failed to load payments:', error);
-      setError('Failed to load payment history. Please try again.');
+      console.error('Failed to load invoices:', error);
+      setError('Failed to load invoices. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownloadReceipt = async (paymentId) => {
+  const handleDownloadInvoice = async (invoiceId, invoiceNumber) => {
     try {
-      const blob = await paymentsService.downloadReceipt(paymentId);
+      const blob = await invoicesService.downloadPdf(invoiceId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `receipt-${paymentId}.pdf`;
+      a.download = `invoice-${invoiceNumber}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to download receipt:', error);
-      alert('Failed to download receipt. Please try again.');
+      console.error('Failed to download invoice:', error);
+      alert('Failed to download invoice. Please try again.');
     }
   };
 
   const getStatusBadge = (status) => {
     const styles = {
-      succeeded: 'bg-green-100 text-green-800 border-green-200',
-      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      processing: 'bg-blue-100 text-blue-800 border-blue-200',
-      failed: 'bg-red-100 text-red-800 border-red-200',
-      refunded: 'bg-gray-100 text-gray-800 border-gray-200',
-      partially_refunded: 'bg-orange-100 text-orange-800 border-orange-200',
+      paid: 'bg-green-100 text-green-800 border-green-200',
+      sent: 'bg-blue-100 text-blue-800 border-blue-200',
+      draft: 'bg-gray-100 text-gray-800 border-gray-200',
+      overdue: 'bg-red-100 text-red-800 border-red-200',
+      partially_paid: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
+      refunded: 'bg-orange-100 text-orange-800 border-orange-200',
     };
 
     const labels = {
-      succeeded: 'Paid',
-      pending: 'Pending',
-      processing: 'Processing',
-      failed: 'Failed',
+      paid: 'Paid',
+      sent: 'Sent',
+      draft: 'Draft',
+      overdue: 'Overdue',
+      partially_paid: 'Partial',
+      cancelled: 'Cancelled',
       refunded: 'Refunded',
-      partially_refunded: 'Partial Refund',
     };
 
     return (
@@ -76,25 +78,11 @@ const InvoiceTable = () => {
     );
   };
 
-  const getPaymentTypeLabel = (payment) => {
-    if (payment.payment_type === 'installment' && payment.installment_plan) {
-      return `Installment ${payment.installment_plan.installment_number}/${payment.installment_plan.num_installments}`;
-    }
-
-    const labels = {
-      one_time: 'One-Time',
-      subscription: 'Subscription',
-      installment: 'Installment',
-    };
-
-    return labels[payment.payment_type] || payment.payment_type;
-  };
-
   if (loading) {
     return (
       <div className="border rounded-xl p-8 text-center">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-btn-gold"></div>
-        <p className="mt-2 text-gray-600">Loading payment history...</p>
+        <p className="mt-2 text-gray-600">Loading invoices...</p>
       </div>
     );
   }
@@ -104,7 +92,7 @@ const InvoiceTable = () => {
       <div className="border rounded-xl p-8 text-center">
         <p className="text-red-600">{error}</p>
         <button
-          onClick={loadPayments}
+          onClick={loadInvoices}
           className="mt-4 px-4 py-2 bg-btn-gold text-heading-dark rounded-lg hover:bg-yellow-500 transition-colors"
         >
           Retry
@@ -139,9 +127,9 @@ const InvoiceTable = () => {
               All
             </button>
             <button
-              onClick={() => setFilter('succeeded')}
+              onClick={() => setFilter('paid')}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                filter === 'succeeded'
+                filter === 'paid'
                   ? 'bg-green-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -149,24 +137,24 @@ const InvoiceTable = () => {
               Paid
             </button>
             <button
-              onClick={() => setFilter('pending')}
+              onClick={() => setFilter('sent')}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                filter === 'pending'
-                  ? 'bg-yellow-600 text-white'
+                filter === 'sent'
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               Pending
             </button>
             <button
-              onClick={() => setFilter('failed')}
+              onClick={() => setFilter('overdue')}
               className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                filter === 'failed'
+                filter === 'overdue'
                   ? 'bg-red-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Failed
+              Overdue
             </button>
           </div>
         )}
@@ -180,7 +168,7 @@ const InvoiceTable = () => {
               <tr>
                 <th className="py-3 px-4 text-left font-medium">Invoice #</th>
                 <th className="py-3 px-4 text-left font-medium">Date</th>
-                <th className="py-3 px-4 text-left font-medium">Type</th>
+                <th className="py-3 px-4 text-left font-medium">Description</th>
                 <th className="py-3 px-4 text-right font-medium">Amount</th>
                 <th className="py-3 px-4 text-center font-medium">Status</th>
                 <th className="py-3 px-4 text-center font-medium">Actions</th>
@@ -188,60 +176,58 @@ const InvoiceTable = () => {
             </thead>
 
             <tbody>
-              {payments.length === 0 ? (
+              {invoices.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-8 text-center text-gray-500">
-                    No payments found
+                    No invoices found
                   </td>
                 </tr>
               ) : (
-                payments.map((payment) => (
-                  <tr key={payment.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                invoices.map((invoice) => (
+                  <tr key={invoice.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         <span className="font-medium text-heading-dark">
-                          #{payment.id.slice(0, 8).toUpperCase()}
+                          {invoice.invoice_number}
                         </span>
                       </div>
                     </td>
                     <td className="py-4 px-4 text-gray-600">
-                      {formatDate(payment.paid_at || payment.created_at)}
+                      {formatDate(invoice.invoice_date)}
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-gray-700">
-                        {getPaymentTypeLabel(payment)}
+                        {invoice.description || 'Class Registration'}
                       </span>
-                      {payment.installment_plan && (
+                      {invoice.billing_period_start && invoice.billing_period_end && (
                         <div className="text-xs text-gray-500 mt-0.5">
-                          {formatCurrency(payment.installment_plan.remaining_amount)} remaining
+                          {formatDate(invoice.billing_period_start, { month: 'short', day: 'numeric' })} - {formatDate(invoice.billing_period_end, { month: 'short', day: 'numeric' })}
                         </div>
                       )}
                     </td>
                     <td className="py-4 px-4 text-right">
                       <span className="font-semibold text-heading-dark">
-                        {formatCurrency(payment.amount)}
+                        {formatCurrency(invoice.total)}
                       </span>
-                      {payment.refund_amount > 0 && (
-                        <div className="text-xs text-orange-600 mt-0.5">
-                          -{formatCurrency(payment.refund_amount)} refunded
+                      {invoice.discount > 0 && (
+                        <div className="text-xs text-green-600 mt-0.5">
+                          -{formatCurrency(invoice.discount)} discount
                         </div>
                       )}
                     </td>
                     <td className="py-4 px-4 text-center">
-                      {getStatusBadge(payment.status)}
+                      {getStatusBadge(invoice.status)}
                     </td>
                     <td className="py-4 px-4 text-center">
-                      {payment.status === 'succeeded' && (
-                        <button
-                          onClick={() => handleDownloadReceipt(payment.id)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-btn-secondary hover:text-btn-gold hover:bg-yellow-50 rounded-lg transition-colors"
-                          title="Download Receipt"
-                        >
-                          <Download className="w-4 h-4" />
-                          Receipt
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleDownloadInvoice(invoice.id, invoice.invoice_number)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-btn-secondary hover:text-btn-gold hover:bg-yellow-50 rounded-lg transition-colors"
+                        title="Download Invoice"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -252,9 +238,9 @@ const InvoiceTable = () => {
       </div>
 
       {/* Summary */}
-      {payments.length > 0 && (
+      {invoices.length > 0 && (
         <div className="text-sm text-gray-600 text-right">
-          Showing {payments.length} payment{payments.length !== 1 ? 's' : ''}
+          Showing {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}
         </div>
       )}
     </div>

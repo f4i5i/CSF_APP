@@ -395,7 +395,7 @@ export default function Classes() {
   };
 
   return (
-    <div className="min-h-screen  bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8">
+    <div className="h-full">
       <Header />
 
       <div className="max-w-9xl mx-auto sm:px-4 px-0">

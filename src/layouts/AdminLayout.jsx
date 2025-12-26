@@ -12,7 +12,7 @@ export default function AdminLayout(){
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7]">
+    <div className="h-screen flex overflow-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7]">
       {/* Sidebar area (fixed on desktop) */}
       <div className={`hidden md:block`}>
         <div
@@ -35,7 +35,7 @@ export default function AdminLayout(){
       )}
 
       {/* Main content */}
-      <main className={`flex-1 transition-all pt-3 sm:px-6 px-0 pb-12 overflow-auto ${
+      <main className={`flex-1 transition-all pt-3 sm:px-6 px-0 pb-12 overflow-hidden ${
         collapsed ? "md:ml-20" : "md:ml-64"
       }`}>
         <div className="max-w-9xl max-sm:py-2 max-sm:mx-3">

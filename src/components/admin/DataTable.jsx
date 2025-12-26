@@ -51,13 +51,19 @@ export default function DataTable({
     });
   }, [data, sortColumn, sortDirection]);
 
-  // Determine data to display for current page (client-side pagination fallback)
+  // Determine data to display for current page
+  // If server-side pagination is used (data.length <= itemsPerPage), don't slice again
   const displayedData = React.useMemo(() => {
     if (!pagination) return sortedData || [];
+    // Server-side pagination: data is already paginated
+    if (totalItems > 0 && data.length <= itemsPerPage) {
+      return sortedData || [];
+    }
+    // Client-side pagination fallback
     const start = (currentPage - 1) * itemsPerPage;
     const end = currentPage * itemsPerPage;
     return (sortedData || []).slice(start, end);
-  }, [sortedData, pagination, currentPage, itemsPerPage]);
+  }, [sortedData, pagination, currentPage, itemsPerPage, totalItems, data.length]);
 
   // Pagination calculations
   const totalPages = itemsPerPage ? Math.ceil(totalItems / itemsPerPage) : 1;
@@ -209,10 +215,7 @@ export default function DataTable({
   return (
     <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden">
       {/* Table */}
-      <div
-        className="overflow-x-auto pb-24 custom-scrollbar"
-        style={{ maxHeight: "calc(100vh - 240px)", overflowY: "auto" }}
-      >
+      <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full">
           <thead className="bg-white border-b border-border-light">
             <tr>
@@ -275,83 +278,72 @@ export default function DataTable({
       </div>
 
       {/* Pagination */}
-      {pagination && totalPages > 1 && (
-        <div className="sm:absolute relative left-0 right-0 bottom-0 sm:z-10">
-          <div className="">
-            <div className="sm:px-6 px-2 py-4 border-t border-border-light flex items-center justify-between bg-white shadow-sm rounded-t-lg">
-              {/* Results info */}
-              <div className="text-sm text-text-muted font-semibold font-manrope">
-                Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}
-                <span className="font-bold text-text-primary">{endItem}</span> of{" "}
-                <span className="font-bold text-text-primary">{totalItems}</span> results
-              </div>
+      {pagination && (
+        <div className="sm:px-6 px-2 py-4 border-t border-border-light flex items-center justify-between bg-white">
+          {/* Results info */}
+          <div className="text-sm text-text-muted font-semibold font-manrope">
+            Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}
+            <span className="font-bold text-text-primary">{endItem}</span> of{" "}
+            <span className="font-bold text-text-primary">{totalItems}</span> results
+          </div>
 
-              {/* Pagination Controls */}
-              <div className="flex items-center gap-2">
-                {/* Prev Button */}
-                <button
-                  onClick={() => onPageChange && onPageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="p-2 rounded-lg transition
-              text-text-muted hover:bg-btn-gold/10
-              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
+          {/* Pagination Controls */}
+          <div className="flex items-center gap-2">
+            {/* Prev Button */}
+            <button
+              onClick={() => onPageChange && onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg transition text-text-muted hover:bg-btn-gold/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-                {/* Page Numbers */}
-                <div className="flex items-center gap-1 font-manrope">
-                  {[...Array(totalPages)].map((_, index) => {
-                    const page = index + 1;
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1 font-manrope">
+              {totalPages > 0 && [...Array(totalPages)].map((_, index) => {
+                const page = index + 1;
 
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => onPageChange && onPageChange(page)}
-                          className={`
-                  px-3 py-1.5 rounded-lg text-sm font-semibold transition
-                  ${
-                    page === currentPage
-                      ? "bg-btn-gold text-neutral-white shadow-sm"
-                      : "text-text-muted hover:bg-btn-gold/10 hover:text-heading-dark"
-                  }
-                `}
-                        >
-                          {page}
-                        </button>
-                      );
-                    } else if (
-                      page === currentPage - 2 ||
-                      page === currentPage + 2
-                    ) {
-                      return (
-                        <span key={page} className="px-2 text-text-muted">
-                          •••
-                        </span>
-                      );
-                    }
+                if (
+                  page === 1 ||
+                  page === totalPages ||
+                  (page >= currentPage - 1 && page <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => onPageChange && onPageChange(page)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition ${
+                        page === currentPage
+                          ? "bg-btn-gold text-neutral-white shadow-sm"
+                          : "text-text-muted hover:bg-btn-gold/10 hover:text-heading-dark"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                } else if (
+                  page === currentPage - 2 ||
+                  page === currentPage + 2
+                ) {
+                  return (
+                    <span key={page} className="px-2 text-text-muted">
+                      •••
+                    </span>
+                  );
+                }
 
-                    return null;
-                  })}
-                </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => onPageChange && onPageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg transition
-              text-text-muted hover:bg-btn-gold/10
-              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+                return null;
+              })}
             </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => onPageChange && onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="p-2 rounded-lg transition text-text-muted hover:bg-btn-gold/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
       )}

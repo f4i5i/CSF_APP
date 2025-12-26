@@ -3,6 +3,7 @@ import { CreditCard, Trash2, Star, Plus, X, AlertCircle } from 'lucide-react';
 import paymentsService from '../../api/services/payments.service';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import toast from 'react-hot-toast';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -29,11 +30,26 @@ const AddCardModal = ({ onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [setAsDefault, setSetAsDefault] = useState(false);
+  const [clientSecret, setClientSecret] = useState(null);
+
+  // Create SetupIntent when modal opens
+  useEffect(() => {
+    const createSetupIntent = async () => {
+      try {
+        const response = await paymentsService.createSetupIntent();
+        setClientSecret(response.client_secret);
+      } catch (err) {
+        console.error('Failed to create setup intent:', err);
+        setError('Failed to initialize payment form. Please try again.');
+      }
+    };
+    createSetupIntent();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements || !clientSecret) {
       return;
     }
 
@@ -41,23 +57,27 @@ const AddCardModal = ({ onClose, onSuccess }) => {
     setError(null);
 
     try {
-      // Create payment method
+      // Confirm the SetupIntent with card details
       const cardElement = elements.getElement(CardElement);
-      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-      });
+      const { error: stripeError, setupIntent } = await stripe.confirmCardSetup(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+          },
+        }
+      );
 
       if (stripeError) {
         throw new Error(stripeError.message);
       }
 
-      // Add payment method to backend
-      await paymentsService.addPaymentMethod({
-        payment_method_id: paymentMethod.id,
-        set_as_default: setAsDefault,
-      });
+      // If user wants this as default, call backend to set it
+      if (setAsDefault && setupIntent.payment_method) {
+        await paymentsService.setDefaultPaymentMethod(setupIntent.payment_method);
+      }
 
+      toast.success('Payment method added successfully');
       onSuccess();
     } catch (err) {
       console.error('Failed to add payment method:', err);
@@ -123,10 +143,10 @@ const AddCardModal = ({ onClose, onSuccess }) => {
             </button>
             <button
               type="submit"
-              disabled={!stripe || loading}
+              disabled={!stripe || !clientSecret || loading}
               className="flex-1 px-4 py-2 bg-btn-gold text-heading-dark rounded-lg hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed font-manrope"
             >
-              {loading ? 'Adding...' : 'Add Card'}
+              {loading ? 'Adding...' : !clientSecret ? 'Loading...' : 'Add Card'}
             </button>
           </div>
         </form>
@@ -142,15 +162,17 @@ const PaymentCard = () => {
   const [showAddCard, setShowAddCard] = useState(false);
 
   useEffect(() => {
-    // loadPaymentMethods();
+    loadPaymentMethods();
   }, []);
 
   const loadPaymentMethods = async () => {
     setLoading(true);
     setError(null);
     try {
-      const methods = await paymentsService.getPaymentMethods();
-      setPaymentMethods(methods || []);
+      const response = await paymentsService.getPaymentMethods();
+      // Handle both array and { items: [...] } response formats
+      const methods = response?.items || response || [];
+      setPaymentMethods(methods);
     } catch (err) {
       console.error('Failed to load payment methods:', err);
       setError('Failed to load payment methods');
@@ -162,10 +184,11 @@ const PaymentCard = () => {
   const handleSetDefault = async (methodId) => {
     try {
       await paymentsService.setDefaultPaymentMethod(methodId);
+      toast.success('Default payment method updated');
       await loadPaymentMethods(); // Reload to reflect changes
     } catch (err) {
       console.error('Failed to set default:', err);
-      alert('Failed to set default payment method');
+      toast.error('Failed to set default payment method');
     }
   };
 
@@ -176,10 +199,11 @@ const PaymentCard = () => {
 
     try {
       await paymentsService.removePaymentMethod(methodId);
+      toast.success('Payment method removed');
       await loadPaymentMethods();
     } catch (err) {
       console.error('Failed to remove payment method:', err);
-      alert('Failed to remove payment method');
+      toast.error('Failed to remove payment method');
     }
   };
 
@@ -206,29 +230,29 @@ const PaymentCard = () => {
     return <CreditCard className="w-6 h-6 text-gray-400" />;
   };
 
-  // if (loading) {
-  //   return (
-  //     <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-  //       <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-btn-gold"></div>
-  //       <p className="mt-2 text-gray-600 font-manrope">Loading payment methods...</p>
-  //     </div>
-  //   );
-  // }
+  if (loading) {
+    return (
+      <div className="py-8 text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-btn-gold"></div>
+        <p className="mt-2 text-gray-600 font-manrope">Loading payment methods...</p>
+      </div>
+    );
+  }
 
-  // if (error) {
-  //   return (
-  //     <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-  //       <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-2" />
-  //       <p className="text-red-600 font-manrope">{error}</p>
-  //       <button
-  //         onClick={loadPaymentMethods}
-  //         className="mt-4 text-btn-secondary hover:underline font-manrope"
-  //       >
-  //         Try Again
-  //       </button>
-  //     </div>
-  //   );
-  // }
+  if (error) {
+    return (
+      <div className="py-8 text-center">
+        <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-2" />
+        <p className="text-red-600 font-manrope">{error}</p>
+        <button
+          onClick={loadPaymentMethods}
+          className="mt-4 text-btn-secondary hover:underline font-manrope"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
