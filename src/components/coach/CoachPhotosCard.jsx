@@ -44,9 +44,9 @@ const CoachPhotosCard = ({ photo, albumTitle, date, loading = false }) => {
       {/* Arrow Button (top-right) */}
       <Link
         to="/Gallery"
-        className="absolute top-[10px] right-[10px] w-[54px] h-[54px] rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center hover:bg-white/50 transition-colors"
+        className="absolute top-[10px] right-[10px] w-[54px] h-[54px] xl:w-[80px] xl:h-[80px] rounded-full bg-white/50    flex items-center justify-center hover:bg-white/50 "
       >
-        <ArrowUpRight size={14} className="text-white" />
+        <ArrowUpRight style={{width:"35px", height:"35px"}}  className="text-white" />
       </Link>
 
       {/* Title and Date (bottom-left) */}
@@ -54,7 +54,7 @@ const CoachPhotosCard = ({ photo, albumTitle, date, loading = false }) => {
         <p className="font-manrope font-bold text-[20px] leading-[1.5] text-white tracking-[-0.2px]">
           {albumTitle || 'Program Photos'}
         </p>
-        <p className="font-manrope font-normal text-[19.529px] leading-normal text-white/72">
+        <p className="font-manrope font-normal text-[19.529px] leading-normal text-white opacity-70">
           {formatDate(date || photo?.created_at)}
         </p>
       </div>

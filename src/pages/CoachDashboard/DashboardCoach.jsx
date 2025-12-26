@@ -154,8 +154,7 @@ export default function DashboardCoach() {
       <Header />
 
       {/* Main Content */}
-      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 mt-8">
-        <div className="w-full">
+      <main className="relative z-10 max-w-[1400px] mx-auto px-5 pb-8 max-md:pb-20 ">
         {/* ================================================================ */}
         {/* TOP SECTION: Welcome + Stats */}
         {/* ================================================================ */}
@@ -206,7 +205,7 @@ export default function DashboardCoach() {
                 </h2>
                 <button
                   onClick={() => setOpenModal(true)}
-                  className="flex items-center gap-2 bg-[#DDE0E3] hover:bg-[#d1d4d7] px-4 py-2 rounded-full transition-colors"
+                  className="flex items-center gap-2 bg-[#DDE0E3] hover:bg-[#d1d4d7] px-4 py-2 w-[140px] h-12 rounded-full transition-colors"
                 >
                   <Plus size={24} className="text-black" />
                   <span className="font-manrope font-semibold text-[16px] text-black">
@@ -216,7 +215,7 @@ export default function DashboardCoach() {
               </div>
 
               {/* Announcements List */}
-              <div className="flex flex-col gap-[10px] max-h-[650px] overflow-y-auto">
+              <div className="flex flex-col gap-[10px] max-h-[650px] overflow-y-auto no-scrollbar ">
                 {loadingAnnouncements ? (
                   // Loading skeleton
                   Array(3).fill(0).map((_, i) => (
@@ -286,6 +285,14 @@ export default function DashboardCoach() {
                 )}
               </div>
             </div>
+           <div className='mt-3 -z-10 sm:hidden' >
+            <CoachPhotosCard
+              photo={latestPhoto}
+              albumTitle="Program Photos"
+              date={latestPhoto?.created_at || '2024-10-24'}
+              loading={loadingPhotos}
+            />
+            </div>
           </div>
 
           {/* ============================================================ */}
@@ -323,15 +330,15 @@ export default function DashboardCoach() {
             </div>
 
             {/* Program Photos */}
+            <div className='hidden sm:block' >
             <CoachPhotosCard
               photo={latestPhoto}
               albumTitle="Program Photos"
               date={latestPhoto?.created_at || '2024-10-24'}
               loading={loadingPhotos}
             />
+            </div>
           </div>
-          </div>
-        </div>
         </div>
       </main>
 

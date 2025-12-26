@@ -99,7 +99,7 @@ const CoachAnnouncementItem = ({
   return (
     <div className="bg-white/50 rounded-[20px] p-[20px] flex flex-col gap-[14px]">
       {/* User Info Header */}
-      <div className="flex items-center justify-between pb-[15px] border-b border-black/10">
+      <div className="flex items-center justify-between pb-[15px] border-b border-text-body border-opacity-20 ">
         {/* User Details */}
         <div className="flex items-center gap-[10px]">
           {/* Avatar */}

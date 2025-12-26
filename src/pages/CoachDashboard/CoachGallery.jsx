@@ -14,18 +14,18 @@ const CoachGallery = () => {
 
       <Header />
  <main className="mx-10 py-6 max-sm:py-2 max-sm:mx-3">
-  <div className='w-full flex justify-between items-center max-sm:mb-6'>
- <h1 className="text-fluid-2xl font-manrope font-bold text-[#173151] mb-6 max-sm:mb-0">
+  <div className='w-full flex justify-between items-center lg:mb-6'>
+ <h1 className="text-[26px] sm:text-[32px] font-manrope font-bold text-[#173151] mb-6 max-sm:mb-0">
                     Photo Gallery
                   </h1>
                    <button className="
-      flex items-center gap-2 
-      bg-[#E4AC37] hover:bg-[#d9a12f]
+      flex items-center justify-center gap-2 
+      bg-[#F3BC48] hover:bg-[#d9a12f]
       text-black font-semibold font-['inter'] 
-      px-4 py-2 
+       py-2 
       rounded-[60px] shadow
       transition
-      text-base
+      text-base w-[178px] h-12 text-center
     "
      onClick={() => setOpen(true)}
       >
