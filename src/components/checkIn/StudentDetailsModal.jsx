@@ -5,25 +5,25 @@ export default function StudentDetailsModal({ onClose }) {
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50 px-4">
       
       {/* MODAL BOX */}
-      <div className="bg-white w-full max-w-xl rounded-2xl shadow-lg p-6 relative animate-fadeIn">
+      <div className="bg-white w-full max-w-xl rounded-2xl shadow-lg relative animate-fadeIn">
         
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg">Anton G.</h2>
+        <div className="flex justify-between items-center px-6 py-4 border-b border-border-light">
+          <h2 className="font-semibold font-manrope text-lg text-nuetral-200 ">Anton G.</h2>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 px-3 py-1.5 border rounded-lg text-sm text-gray-700">
-              <Edit size={16} />
+            <button className="flex items-center justify-center w-[98px] shadow-sm h-12 text-[#2E2E37] font-semibold gap-3 px-3 py-1.5 border border-border-light rounded-lg text-lg text-gray-700">
+              <Edit size={20} />
               Edit
             </button>
-            <button onClick={onClose} className="border border-[#DFE1E7] rounded-full p-2">
-              <X size={12} className="text-[#0D0D12] " />
+            <button onClick={onClose} className="border flex items-center justify-center border-[#DFE1E7] w-10 h-10 rounded-full p-2">
+              <X size={20} className="text-[#0D0D12] font-bold " />
             </button>
           </div>
         </div>
 
         {/* CONTENT */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 px-6 py-4 mb-2 ">
 
           {/* CONTACT INFO */}
           <Section title="Contact Information">
@@ -44,10 +44,10 @@ export default function StudentDetailsModal({ onClose }) {
           </Section>
 
           {/* NOTES */}
-          <Section title="Additional Notes">
-            <div className="w-full p-3 rounded-xl border bg-gray-50 text-sm text-gray-700">
-              Advanced skills, consider moving to competitive team
-            </div>
+          <Section className="h-[131px]" title="Additional Notes">
+            {/* <div className="w-full p-3 rounded-xl border bg-gray-50 text-sm text-gray-700"> */}
+            <p>Advanced skills, consider moving to competitive team</p>  
+            {/* </div> */}
           </Section>
         </div>
       </div>
@@ -57,11 +57,11 @@ export default function StudentDetailsModal({ onClose }) {
 
 /* ---------- REUSABLE SECTION ---------- */
 
-function Section({ title, children }) {
+function Section({ title, children,className }) {
   return (
     <div>
-      <p className="text-sm font-medium mb-2 text-gray-700">{title}</p>
-      <div className="bg-white border rounded-xl p-4 flex flex-col gap-2">
+      <p className="text-sm font-normal mb-2 text-text-body font-manrope">{title}</p>
+      <div className={`bg-white border rounded-xl p-4 flex flex-col gap-2 ${className}`}> 
         {children}
       </div>
     </div>
@@ -72,9 +72,9 @@ function Section({ title, children }) {
 
 function Field({ label, value }) {
   return (
-    <div className="text-sm text-gray-700 flex gap-3">
-      <span className="font-medium">{label}</span>
-      <span className="text-gray-600">{value}</span>
+    <div className="text-sm flex font-manrope">
+      <span className="font-medium text-[#6B7280] ">{label}</span>
+      <span className="text-heading-dark">{value}</span>
     </div>
   );
 }

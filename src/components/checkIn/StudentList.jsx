@@ -17,21 +17,21 @@ const StudentList = ({ students, search, sort, setSort, onOpen }) => {
   const currentStudents = filtered.slice(start, start + perPage);
 
   return (
-    <div className="bg-white/60 p-4 rounded-3xl shadow-md backdrop-blur-md border">
+    <div className="bg-white/60 p-4 lg:p-7 rounded-3xl shadow-md backdrop-blur-md border">
       
       {/* HEADER */}
       <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold text-lg font-manrope text-[#1B1B1B]">
+        <h2 className="font-semibold text-xl font-manrope text-[#1B1B1B]">
           Students ({filtered.filter((s) => s.checked).length}/{filtered.length})
         </h2>
 
-        <button className="flex items-center gap-2 bg-[#FFFFFF80] px-4 py-2 rounded-full shadow text-sm">
+        <button className="flex items-center gap-2 justify-center  bg-[#FFFFFF80] text-black w-[150px] h-10 px-4 py-2 rounded-full shadow text-[16px]">
           {sort} <ChevronDown size={16} />
         </button>
       </div>
 
       {/* STUDENT CARDS */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {currentStudents.length === 0 ? (
           <p className="text-gray-500 text-sm text-center py-4">
             No students found
