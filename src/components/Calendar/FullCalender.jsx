@@ -28,40 +28,54 @@ const CustomEvent = ({ event }) => {
   );
 };
 
-export default function EventCalendar() {
+export default function EventCalendar({ events: propEvents = [], loading = false }) {
   const today = useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = useState(today);
   const [view, setView] = useState("month");
 
- const [events] = useState([
-  {
-    title: "Tournament",
-    start: new Date(today.getFullYear(), today.getMonth(), 8, 10, 0),
-    end: new Date(today.getFullYear(), today.getMonth(), 8, 11, 0),
-    className: "blue",
-  },
-  {
-    title: "Match Day",
-    start: new Date(today.getFullYear(), today.getMonth(), 10, 10, 0),
-    end: new Date(today.getFullYear(), today.getMonth(), 10, 11, 0),
-    className: "yellow",
-  },
-  {
-    title: "Training Session",
-    start: new Date(today.getFullYear(), today.getMonth(), 15, 10, 0),
-    end: new Date(today.getFullYear(), today.getMonth(), 15, 11, 0),
-    className: "yellow",
-  },
-  {
-    title: "Workshop",
-    start: new Date(today.getFullYear(), today.getMonth(), 23, 10, 0),
-    end: new Date(today.getFullYear(), today.getMonth(), 23, 11, 0),
-    className: "blue",
-  }
-]);
+  // Demo events for fallback
+  const demoEvents = useMemo(() => [
+    {
+      title: "Tournament",
+      start: new Date(today.getFullYear(), today.getMonth(), 8, 10, 0),
+      end: new Date(today.getFullYear(), today.getMonth(), 8, 11, 0),
+      className: "blue",
+    },
+    {
+      title: "Match Day",
+      start: new Date(today.getFullYear(), today.getMonth(), 10, 10, 0),
+      end: new Date(today.getFullYear(), today.getMonth(), 10, 11, 0),
+      className: "yellow",
+    },
+    {
+      title: "Training Session",
+      start: new Date(today.getFullYear(), today.getMonth(), 15, 10, 0),
+      end: new Date(today.getFullYear(), today.getMonth(), 15, 11, 0),
+      className: "yellow",
+    },
+    {
+      title: "Workshop",
+      start: new Date(today.getFullYear(), today.getMonth(), 23, 10, 0),
+      end: new Date(today.getFullYear(), today.getMonth(), 23, 11, 0),
+      className: "blue",
+    }
+  ], [today]);
+
+  // Transform API events to calendar format or use demo
+  const events = useMemo(() => {
+    if (propEvents && propEvents.length > 0) {
+      return propEvents.map(event => ({
+        title: event.title || event.name,
+        start: new Date(event.start_datetime || event.start),
+        end: new Date(event.end_datetime || event.end || event.start_datetime || event.start),
+        className: event.type === 'tournament' || event.type === 'match' ? 'yellow' : 'blue',
+      }));
+    }
+    return demoEvents;
+  }, [propEvents, demoEvents]);
 
   return (
-    <div className="w-full h-full">
+    <div className={`w-full h-full ${loading ? 'opacity-60' : ''}`}>
       <Calendar
         localizer={localizer}
         date={currentDate}

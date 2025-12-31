@@ -73,7 +73,9 @@ export const useApi = (apiFunction, options = {}) => {
           }
         }
 
-        throw err;
+        // Don't re-throw - error is already captured in state
+        // Callers can check the error state or use onError callback
+        return null;
       }
     },
     [apiFunction, onSuccess, onError]

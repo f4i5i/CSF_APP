@@ -117,13 +117,13 @@ const Header = () => {
   ];
 
   // Coach role navigation items (displayed in horizontal nav bar on desktop)
-  // Updated to match Figma design: Dashboard, Calendar, Attendance, Photos, Badges
+  // Updated to match Figma design: Dashboard, Calendar, Check-In, Attendance, Photos
   const navItemscoach = [
     { name: "Dashboard", icon: Home, path: "/coachdashboard" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
+    { name: "Check-In", icon: CheckCircle, path: "/checkin" },
     { name: "Attendance", icon: CheckCircle2, path: "/attendance" },
     { name: "Photos", icon: Image, path: "/Gallery" },
-    { name: "Badges", icon: Award, path: "/badges" },
   ];
 
   // Admin role navigation items (for mobile bottom nav only)
@@ -345,6 +345,22 @@ const Header = () => {
 
               <li>
                 <NavLink
+                  to="/checkin"
+                  className={({ isActive }) =>
+                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${
+            isActive
+              ? "bg-[#F3BC48] text-black"
+              : "text-black hover:bg-white/20"
+          }`
+                  }
+                >
+                  Check-In
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
                   to="/attendance"
                   className={({ isActive }) =>
                     `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
@@ -372,22 +388,6 @@ const Header = () => {
                   }
                 >
                   Photos
-                </NavLink>
-              </li>
-
-              <li>
-                <NavLink
-                  to="/badges"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Badges
                 </NavLink>
               </li>
             </ul>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Image as ImageIcon } from 'lucide-react';
+import { getFileUrl } from '../api/config';
 
 const buildPhotoSrc = (photo) => {
   if (!photo) return '';
@@ -31,13 +32,16 @@ const buildPhotoSrc = (photo) => {
     return normalizeDataUrl(inlineBase64, mimeType);
   }
 
-  return (
+  // Get raw URL and convert to full URL using getFileUrl
+  const rawUrl = (
     photo.url ||
     photo.image_url ||
     photo.thumbnail_url ||
     photo?.image?.url ||
     ''
   );
+
+  return rawUrl ? getFileUrl(rawUrl) : '';
 };
 
 const CARD_BASE = 'w-full h-full max-sm:w-full';

@@ -1,9 +1,11 @@
 import { X } from "lucide-react";
+import { getFileUrl } from "../../api/config";
 
 export default function Attachment({ file }) {
   // Determine file type and details
-  const fileName = typeof file === 'string' ? file : file?.name || '';
-  const fileUrl = typeof file === 'string' ? null : file?.url || file?.file_url || null;
+  const fileName = typeof file === 'string' ? file : file?.file_name || file?.name || '';
+  const rawFileUrl = typeof file === 'string' ? null : file?.file_url || file?.url || file?.file_path || null;
+  const fileUrl = rawFileUrl ? getFileUrl(rawFileUrl) : null;
 
   // Check if it's an image based on extension
   const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(fileName);

@@ -1,31 +1,69 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import icon1 from "../assets/Mask group.png"
-import icon2 from '../assets/Mask group (1).png'
-import icon3 from '../assets/Mask group (2).png'
-import icon4 from '../assets/Mask group (3).png'
-import icon5 from '../assets/Mask group (4).png'
 import BadgeCard from '../components/attendence/BadgeCard'
 
+// Hooks
+import { useChildren, useApi } from '../hooks';
+
+// Services
+import { badgesService, enrollmentsService } from '../api/services';
 
 const Badges = () => {
-      const badges = [
-    { title: "Perfect Attendance", icon: icon1 },
-    { title: "Leadership", icon: icon2 },
-    { title: "Star Performer", icon: icon3 },
-    {
-      title: "Quick Learner",
-      subtitle: "Achieved: Sep 28, 2024",
-      icon: icon5,
-      active: true,
-    },
-    { title: "Team Player", icon: icon4 },
-     { title: "Team Player", icon: icon5 },
- 
-  ];
+  // Get selected child from context
+  const { selectedChild } = useChildren();
 
-   const locked = [
+  // Get first active enrollment for the selected child
+  const { data: enrollmentsData, error: enrollmentsError } = useApi(
+    () => enrollmentsService.getMy({
+      child_id: selectedChild?.id,
+      status: 'active',
+    }),
+    {
+      initialData: [],
+      dependencies: [selectedChild?.id],
+      autoFetch: !!selectedChild?.id,
+      onError: (err) => console.error('Failed to load enrollments:', err),
+    }
+  );
+
+  const firstEnrollment = useMemo(() => {
+    if (!enrollmentsData || enrollmentsData.length === 0) return null;
+    return enrollmentsData.find(e => e.child_id === selectedChild?.id) || enrollmentsData[0];
+  }, [enrollmentsData, selectedChild?.id]);
+
+  // Fetch earned badges for the enrollment - child-based
+  const { data: earnedBadgesData, loading: loadingBadges, error: badgesError } = useApi(
+    () => badgesService.getByEnrollment(firstEnrollment?.id),
+    {
+      initialData: [],
+      dependencies: [firstEnrollment?.id],
+      autoFetch: !!firstEnrollment?.id,
+      onError: (err) => console.error('Failed to load badges:', err),
+    }
+  );
+
+  // Combined error state
+  const hasError = enrollmentsError || badgesError;
+
+  // Transform API badges to component format - child-based from API
+  const badges = useMemo(() => {
+    if (!earnedBadgesData) return [];
+    // Handle both array and paginated response
+    const badgesArray = Array.isArray(earnedBadgesData) ? earnedBadgesData : (earnedBadgesData.items || []);
+    if (badgesArray.length === 0) return [];
+    return badgesArray.map((badge, index) => ({
+      title: badge.name || badge.title,
+      subtitle: badge.earned_at
+        ? `Achieved: ${new Date(badge.earned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+        : badge.description,
+      icon: badge.icon_url || badge.image_url,
+      active: index === 0,
+    }));
+  }, [earnedBadgesData]);
+
+  // Locked badges - hardcoded/static
+  const locked = [
     {
       title: "Perfect Attendance",
       desc: "Completed the sprint drill under 10 seconds",
@@ -52,15 +90,30 @@ const Badges = () => {
       <h1 className="text-fluid-xl font-manrope font-medium text-[#173151] mb-4">
         Achievements
       </h1>
-<div
-      
-      // className="flex max-xl:grid max-xl:grid-cols-7 max-lg:grid max-lg:grid-cols-4 max-sm:grid-cols-2 max-sm:grid  gap-6 max-sm:px-2 py-2 mb-8"
-      className="flex flex-wrap  gap-4 max-sm:justify-center max-sm:px-2 py-2 mb-8"
 
-      >
-        {badges.map((badge, i) => (
-          <BadgeCard key={i} {...badge} compact={false} />
-        ))}
+      {/* Error Alert */}
+      {hasError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 font-manrope">
+          <p className="font-medium">Unable to load badges</p>
+          <p className="text-sm mt-1">Please try refreshing the page or check back later.</p>
+        </div>
+      )}
+
+<div className="flex flex-wrap gap-4 max-sm:justify-center max-sm:px-2 py-2 mb-8">
+        {loadingBadges ? (
+          // Loading skeleton
+          Array(6).fill(0).map((_, i) => (
+            <div key={i} className="w-[200px] h-[200px] max-sm:w-full bg-gray-200 rounded-2xl animate-pulse" />
+          ))
+        ) : badges.length > 0 ? (
+          badges.map((badge, i) => (
+            <BadgeCard key={i} {...badge} compact={false} />
+          ))
+        ) : (
+          <div className="w-full text-center py-8 text-gray-500">
+            No badges earned yet. Keep up the good work!
+          </div>
+        )}
       </div>
 
        {/* ✅ Locked Badges */}
@@ -71,28 +124,37 @@ const Badges = () => {
         Keep working to unlock these achievements
       </p>
       {/* <div className="flex max-lg:grid max-lg:grid-cols-5 max-md:grid-cols-4 gap-6 max-sm:grid-cols-2 max-sm:grid  pb-12"> */}
-      <div className="flex flex-wrap gap-4 max-sm:grid-cols-2 max-sm:grid  pb-12">
+      <div className="flex flex-wrap gap-4 max-sm:grid-cols-2 max-sm:grid pb-12">
         {locked.map((item, index) => (
           <div
             key={index}
-            className="bg-[#d8dee3] w-[200px] h-[200px] max-sm:w-full rounded-2xl py-8 flex flex-col items-center justify-center text-center shadow-lg border-gray-200"
+            className="w-48 h-48 max-sm:w-full max-sm:h-48 relative bg-white/40 rounded-[20px]"
           >
-            <div className="w-10 h-10  rounded-full border-2 border-gray-400 flex items-center justify-center mb-3">
-              <svg
-                width="18"
-                height="18"
-                fill="gray"
-                viewBox="0 0 24 24"
-              >
-                <path d="M17 8h-1V6a4 4 0 00-8 0v2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V10a2 2 0 00-2-2zM9 6a3 3 0 016 0v2H9V6zm8 14H7V10h10v10z" />
-              </svg>
+            {/* Lock Icon Container */}
+            <div className="w-14 h-14 px-3 pt-3 left-1/2 -translate-x-1/2 top-[25px] absolute bg-white rounded-full shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.10)] inline-flex flex-col justify-start items-start">
+              <div className="self-stretch h-8 relative overflow-hidden flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M17 8h-1V6a4 4 0 00-8 0v2H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V10a2 2 0 00-2-2zM9 6a3 3 0 016 0v2H9V6zm8 14H7V10h10v10z"
+                    fill="#6B7280"
+                  />
+                </svg>
+              </div>
             </div>
 
-            <p className="text-sm xxl1:text-base font-semibold text-[#0F2D50]">
-              {item.title}
-            </p>
+            {/* Title */}
+            <div className="w-40 left-1/2 -translate-x-1/2 top-[100px] absolute">
+              <p className="text-center text-zinc-900 text-base font-semibold font-manrope leading-6">
+                {item.title}
+              </p>
+            </div>
 
-            <p className="text-xs xxl1:text-sm text-gray-500 mt-1 px-4">{item.desc}</p>
+            {/* Description */}
+            <div className="w-44 left-1/2 -translate-x-1/2 top-[137px] absolute">
+              <p className="text-center text-slate-900 text-xs font-medium font-manrope leading-4">
+                {item.desc}
+              </p>
+            </div>
           </div>
         ))}
       </div>

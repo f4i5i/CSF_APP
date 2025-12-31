@@ -123,6 +123,8 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/invoices/${id}`, // Get invoice details
     DOWNLOAD: (id) => `/invoices/${id}/download`, // Download invoice PDF
     BILLING_SUMMARY: '/invoices/billing-summary', // Get billing summary
+    SYNC: '/invoices/sync', // Sync user's invoices from Stripe
+    SYNC_ALL: '/invoices/sync-all', // Sync all invoices from Stripe (ADMIN)
   },
 
   // ===================
@@ -212,11 +214,17 @@ export const API_ENDPOINTS = {
   // ATTENDANCE
   // ===================
   ATTENDANCE: {
+    LIST: '/attendance', // List attendance records with filters
+    CREATE: '/attendance', // Create attendance record
+    BY_ID: (id) => `/attendance/${id}`, // Get/Update/Delete attendance by ID
     MARK: '/attendance/mark', // Mark attendance (bulk) (COACH)
+    BULK_CREATE: '/attendance/bulk', // Bulk create attendance
+    SUMMARY: '/attendance/summary', // Get attendance summary
     HISTORY: (enrollmentId) => `/attendance/enrollment/${enrollmentId}/history`,
     STREAK: (enrollmentId) => `/attendance/enrollment/${enrollmentId}/streak`,
-    STATS: (enrollmentId) => `/attendance/enrollment/${enrollmentId}/streak`, // Alias for stats
+    STATS: (childId) => `/attendance/child/${childId}/stats`, // Child stats
     CLASS: (classId) => `/attendance/class/${classId}`, // Get class attendance (COACH)
+    BY_CHILD: (childId) => `/attendance/child/${childId}`, // Get child's attendance
   },
 
   // ===================

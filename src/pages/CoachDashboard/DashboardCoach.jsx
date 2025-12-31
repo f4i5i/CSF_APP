@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2, X, FileText, Download } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { getFileUrl } from '../../api/config';
 
 // Layout Components
 import Header from '../../components/Header';
@@ -42,6 +44,11 @@ export default function DashboardCoach() {
   const { user } = useAuth();
   const [openModal, setOpenModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [viewingAnnouncement, setViewingAnnouncement] = useState(null);
+  const [previewAttachment, setPreviewAttachment] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, announcement: null });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Current date for calendar
   const currentDate = new Date();
@@ -53,14 +60,20 @@ export default function DashboardCoach() {
   // ============================================================================
 
   // Fetch coach's assigned classes
-  const { data: classes, loading: loadingClasses } = useApi(
+  const { data: classesData, loading: loadingClasses } = useApi(
     () => classesService.getAll({ coach_id: user?.id }),
     {
-      initialData: [],
+      initialData: { items: [] },
       dependencies: [user?.id],
       autoFetch: !!user?.id,
     }
   );
+
+  // Extract classes array from response (handles both array and paginated response)
+  const classes = useMemo(() => {
+    if (Array.isArray(classesData)) return classesData;
+    return classesData?.items || [];
+  }, [classesData]);
 
   // Set first class as default when classes load
   useMemo(() => {
@@ -70,7 +83,7 @@ export default function DashboardCoach() {
   }, [classes, selectedClass]);
 
   // Fetch announcements for selected class
-  const { data: announcements, loading: loadingAnnouncements } = useApi(
+  const { data: announcements, loading: loadingAnnouncements, refetch: refetchAnnouncements } = useApi(
     () => announcementsService.getAll({
       class_id: selectedClass?.id,
       limit: 10,
@@ -109,9 +122,11 @@ export default function DashboardCoach() {
   );
 
   // Fetch attendance stats (for check-in count)
+  const todayDate = currentDate.toISOString().split('T')[0];
   const { data: attendanceStats } = useApi(
     () => attendanceService.getSummary({
-      date: currentDate.toISOString().split('T')[0],
+      start_date: todayDate,
+      end_date: todayDate,
       class_id: selectedClass?.id,
     }),
     {
@@ -123,10 +138,10 @@ export default function DashboardCoach() {
   // ============================================================================
   // COMPUTED VALUES
   // ============================================================================
-  const checkedInToday = attendanceStats?.present_count || 50;
-  const announcementCount = announcements?.length || 15;
+  const checkedInToday = attendanceStats?.present_count || 0;
+  const announcementCount = Array.isArray(announcements) ? announcements.length : 0;
   const nextEvent = upcomingEvents?.[0] || null;
-  const latestPhoto = recentPhotos?.[0] || null;
+  const latestPhoto = Array.isArray(recentPhotos) ? recentPhotos[0] : (recentPhotos?.items?.[0] || null);
 
   // ============================================================================
   // HANDLERS
@@ -135,30 +150,82 @@ export default function DashboardCoach() {
     setSelectedClass(classItem);
   };
 
+  const handleViewAnnouncement = (announcement) => {
+    setViewingAnnouncement(announcement);
+  };
+
   const handleEditAnnouncement = (announcement) => {
-    console.log('Edit announcement:', announcement);
-    // TODO: Open edit modal
+    setEditingAnnouncement(announcement);
+    setOpenModal(true);
   };
 
   const handleDeleteAnnouncement = (announcement) => {
-    console.log('Delete announcement:', announcement);
-    // TODO: Show confirm dialog
+    setDeleteConfirm({ open: true, announcement });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm.announcement) return;
+
+    setIsDeleting(true);
+    try {
+      await announcementsService.delete(deleteConfirm.announcement.id);
+      toast.success('Announcement deleted successfully!');
+      refetchAnnouncements();
+      setDeleteConfirm({ open: false, announcement: null });
+    } catch (error) {
+      console.error('Failed to delete announcement:', error);
+      toast.error(error?.message || 'Failed to delete announcement');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirm({ open: false, announcement: null });
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setEditingAnnouncement(null);
+  };
+
+  // Parse text and make URLs clickable
+  const renderTextWithLinks = (text) => {
+    if (!text) return null;
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlPattern);
+    return parts.map((part, index) => {
+      if (part.match(urlPattern)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline break-all"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
   };
 
   // ============================================================================
   // RENDER
   // ============================================================================
   return (
-    <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] max-sm:pb-20">
+    <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-page-gradient max-sm:pb-20">
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-[1400px] mx-auto px-5 pb-8 max-md:pb-20 ">
+      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3">
         {/* ================================================================ */}
         {/* TOP SECTION: Welcome + Stats */}
         {/* ================================================================ */}
-        <div className="flex flex-row lg:flex-row items-start lg:items-start justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
+        <div className="flex items-start justify-between mb-6 max-xxl:mb-4 pt-2">
           {/* Welcome Container */}
           <div className="flex flex-col gap-1">
             {/* Welcome Message */}
@@ -192,15 +259,14 @@ export default function DashboardCoach() {
         {/* MAIN CONTENT GRID */}
         {/* ================================================================ */}
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
-          <div className="flex flex-col lg:flex-row items-start justify-center gap-3 w-full">
           {/* ============================================================ */}
           {/* LEFT COLUMN: Announcements */}
           {/* ============================================================ */}
-          <div className="w-full max-sm:order-2">
-            <div className="bg-white/50 rounded-[30px] p-5 min-h-[723px]">
+          <div className="w-full lg:w-[48%] max-sm:order-2">
+            <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm min-h-[650px]">
               {/* Announcements Header */}
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-manrope font-semibold text-[20px] leading-[1.5] tracking-[-0.2px] text-[#1B1B1B]">
+                <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px]">
                   Announcements
                 </h2>
                 <button
@@ -237,51 +303,28 @@ export default function DashboardCoach() {
                       key={announcement.id}
                       announcement={announcement}
                       currentUserId={user?.id}
+                      userRole="coach"
+                      onViewDetails={handleViewAnnouncement}
                       onEdit={handleEditAnnouncement}
                       onDelete={handleDeleteAnnouncement}
                     />
                   ))
                 ) : (
-                  // Demo announcements when no data
-                  [
-                    {
-                      id: 1,
-                      title: 'Tournament This Saturday',
-                      content: 'Great practice today! Remember, we have a tournament this Saturday at 9 AM. Please arrive 30 minutes early',
-                      created_at: '2025-10-27T10:30:00',
-                      author: { first_name: 'Martinez', role: 'coach' },
-                      attachments: [{ name: 'teamList.pdf', type: 'application/pdf' }]
-                    },
-                    {
-                      id: 2,
-                      title: 'New Team Jerseys',
-                      content: 'New team jerseys have arrived! You can pick them up from the front desk.',
-                      created_at: '2025-10-27T10:30:00',
-                      author: { first_name: 'Martinez', role: 'coach' },
-                      attachments: [{ name: 'image-2.jpg', type: 'image/jpeg', url: 'https://images.unsplash.com/photo-1551958219-acbc608c6377?w=100' }]
-                    },
-                    {
-                      id: 3,
-                      title: 'Registration Deadline',
-                      content: 'Reminder: Registration for next month closes this Friday. Make sure your account is up to date!',
-                      created_at: '2025-10-27T10:30:00',
-                      author: { first_name: 'Martinez', role: 'coach' },
-                    },
-                    {
-                      id: 4,
-                      title: 'Ball Control Progress',
-                      content: 'Awesome progress in ball control drills this week! Keep practicing at home with the exercises we covered.',
-                      created_at: '2025-10-27T10:30:00',
-                      author: { first_name: 'Martinez', role: 'coach' },
-                      attachments: [{ name: 'teamList.pdf', type: 'application/pdf' }]
-                    },
-                  ].map((announcement) => (
-                    <CoachAnnouncementItem
-                      key={announcement.id}
-                      announcement={announcement}
-                      currentUserId={user?.id}
-                    />
-                  ))
+                  // Empty state when no announcements
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <Plus size={32} className="text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#173151] mb-2">No announcements yet</h3>
+                    <p className="text-gray-500 text-sm mb-4">Create your first announcement to share with your class</p>
+                    <button
+                      onClick={() => setOpenModal(true)}
+                      className="flex items-center gap-2 bg-[#F3BC48] hover:bg-[#e5a920] px-4 py-2 rounded-full transition-colors"
+                    >
+                      <Plus size={20} className="text-black" />
+                      <span className="font-manrope font-semibold text-black">Create Announcement</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -289,7 +332,7 @@ export default function DashboardCoach() {
             <CoachPhotosCard
               photo={latestPhoto}
               albumTitle="Program Photos"
-              date={latestPhoto?.created_at || '2024-10-24'}
+              date={latestPhoto?.created_at}
               loading={loadingPhotos}
             />
             </div>
@@ -298,12 +341,12 @@ export default function DashboardCoach() {
           {/* ============================================================ */}
           {/* RIGHT COLUMN: Calendar + Event + Photos */}
           {/* ============================================================ */}
-          <div className="w-full flex flex-col gap-5 max-sm:order-1">
+          <div className="w-full lg:w-[48%] flex flex-col gap-4 max-sm:order-1">
             {/* Calendar + Next Event Card */}
-            <div className="bg-white/50 rounded-[30px] p-5 flex flex-col lg:flex-row gap-4">
+            <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm flex flex-col lg:flex-row gap-6">
               {/* Calendar Widget */}
-              <div className="lg:w-[273px] max-sm:hidden">
-                <h2 className="font-kollektif text-[20px] leading-[1.5] tracking-[-0.2px] text-[#0F1D2E] mb-4">
+              <div className="flex-1 max-sm:hidden">
+                <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">
                   Calendar
                 </h2>
                 <CoachCalendarWidget
@@ -314,16 +357,11 @@ export default function DashboardCoach() {
 
               {/* Next Event */}
               <div className="flex-1">
-                <h2 className="font-kollektif text-[20px] leading-[1.5] tracking-[-0.2px] text-[#0F1D2E] mb-4">
+                <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">
                   Next Event
                 </h2>
                 <CoachNextEventCard
-                  event={nextEvent || {
-                    title: 'Tournament Day',
-                    description: 'Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up.',
-                    start_datetime: '2025-10-29T14:00:00',
-                    attachment_name: 'details.pdf',
-                  }}
+                  event={nextEvent}
                   loading={loadingEvents}
                 />
               </div>
@@ -334,7 +372,7 @@ export default function DashboardCoach() {
             <CoachPhotosCard
               photo={latestPhoto}
               albumTitle="Program Photos"
-              date={latestPhoto?.created_at || '2024-10-24'}
+              date={latestPhoto?.created_at}
               loading={loadingPhotos}
             />
             </div>
@@ -345,8 +383,222 @@ export default function DashboardCoach() {
       {/* Footer */}
       <Footer isFixed={false} />
 
-      {/* Create Post Modal */}
-      {openModal && <CreatePostModal onClose={() => setOpenModal(false)} />}
+      {/* Create/Edit Post Modal */}
+      {openModal && (
+        <CreatePostModal
+          onClose={handleCloseModal}
+          onSuccess={refetchAnnouncements}
+          classes={classes}
+          selectedClass={selectedClass}
+          announcement={editingAnnouncement}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.open && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-lg overflow-hidden animate-fadeIn p-6">
+            <h2 className="text-lg font-manrope font-semibold text-[#0F1D2E] mb-2">
+              Delete Announcement
+            </h2>
+            <p className="text-[#1b1b1b] opacity-80 font-manrope mb-6">
+              Are you sure you want to delete "{deleteConfirm.announcement?.title}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelDelete}
+                disabled={isDeleting}
+                className="px-6 py-2 font-manrope rounded-full border border-gray-300 font-semibold text-[#0F1D2E] hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="px-6 py-2 font-manrope rounded-full bg-red-600 text-white font-semibold hover:bg-red-700 disabled:opacity-50 flex items-center justify-center min-w-[100px]"
+              >
+                {isDeleting ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Details Modal */}
+      {viewingAnnouncement && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-lg overflow-hidden animate-fadeIn">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <h2 className="text-xl font-manrope font-semibold text-[#0F1D2E]">
+                Announcement Details
+              </h2>
+              <button
+                onClick={() => setViewingAnnouncement(null)}
+                className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              {/* Author Info */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-[#F3BC48]">
+                  <img
+                    src={viewingAnnouncement.author?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(viewingAnnouncement.author?.first_name || 'Coach')}&background=F3BC48&color=0F1D2E`}
+                    alt={viewingAnnouncement.author?.first_name || 'Coach'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="font-manrope font-semibold text-[#0F1D2E]">
+                    {viewingAnnouncement.author?.role === 'coach' ? 'Coach ' : ''}
+                    {viewingAnnouncement.author?.first_name || 'Coach'}
+                  </p>
+                  <p className="text-sm text-gray-500 font-manrope">
+                    {viewingAnnouncement.created_at && new Date(viewingAnnouncement.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-2xl font-manrope font-semibold text-[#0F1D2E] mb-3">
+                {viewingAnnouncement.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-[#1b1b1b] opacity-80 font-manrope leading-relaxed mb-6 whitespace-pre-wrap">
+                {renderTextWithLinks(viewingAnnouncement.description || viewingAnnouncement.content)}
+              </p>
+
+              {/* Attachments */}
+              {viewingAnnouncement.attachments && viewingAnnouncement.attachments.length > 0 && (
+                <div className="border-t border-gray-200 pt-4">
+                  <p className="text-sm font-manrope font-semibold text-gray-600 mb-3">
+                    Attachments ({viewingAnnouncement.attachments.length})
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {viewingAnnouncement.attachments.map((attachment, index) => {
+                      const url = getFileUrl(attachment.file_path || attachment.url);
+                      const name = attachment.file_name || attachment.name;
+                      const isImage = attachment.file_type === 'image' || attachment.file_type === 'IMAGE' ||
+                        attachment.mime_type?.startsWith('image/');
+
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setPreviewAttachment({ url, name, isImage })}
+                          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-lg px-4 py-2 transition cursor-pointer"
+                        >
+                          {isImage ? (
+                            <img src={url} alt={name} className="w-8 h-8 rounded object-cover" />
+                          ) : (
+                            <FileText size={20} className="text-gray-600" />
+                          )}
+                          <span className="font-manrope text-sm text-gray-700 max-w-[150px] truncate">
+                            {name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 bg-gray-50">
+              <button
+                onClick={() => setViewingAnnouncement(null)}
+                className="px-6 py-2 font-manrope rounded-full border border-gray-300 font-semibold text-[#0F1D2E] hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attachment Preview Modal */}
+      {previewAttachment && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+          onClick={() => setPreviewAttachment(null)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 bg-gray-50">
+              <div className="flex items-center gap-3">
+                {previewAttachment.isImage ? (
+                  <div className="w-10 h-10 rounded-lg overflow-hidden">
+                    <img src={previewAttachment.url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-[#F9EFCD] rounded-lg flex items-center justify-center">
+                    <FileText size={20} className="text-[#0F1D2E]" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-manrope font-semibold text-[#0F1D2E] truncate max-w-[300px]">
+                    {previewAttachment.name}
+                  </p>
+                  <p className="text-xs text-gray-500 font-manrope">
+                    {previewAttachment.isImage ? 'Image' : 'Document'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewAttachment.url}
+                  download={previewAttachment.name}
+                  className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
+                  title="Download"
+                >
+                  <Download size={18} className="text-gray-600" />
+                </a>
+                <button
+                  onClick={() => setPreviewAttachment(null)}
+                  className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
+                >
+                  <X size={18} className="text-gray-600" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 overflow-auto max-h-[calc(90vh-80px)] flex items-center justify-center bg-gray-100">
+              {previewAttachment.isImage ? (
+                <img
+                  src={previewAttachment.url}
+                  alt={previewAttachment.name}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                />
+              ) : (
+                <iframe
+                  src={previewAttachment.url}
+                  title={previewAttachment.name}
+                  className="w-full h-[70vh] rounded-lg bg-white"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

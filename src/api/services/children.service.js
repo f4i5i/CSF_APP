@@ -93,6 +93,23 @@ const childrenService = {
   },
 
   /**
+   * Upload profile image for a child
+   * @param {string} childId - Child ID
+   * @param {File} file - Image file
+   * @returns {Promise<Object>} Updated child with profile image
+   */
+  async uploadProfileImage(childId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await apiClient.post(
+      `${API_ENDPOINTS.CHILDREN.BY_ID(childId)}/profile-image`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return data;
+  },
+
+  /**
    * Get emergency contacts for a child
    * @param {string} childId - Child ID
    * @returns {Promise<Array>} Emergency contacts

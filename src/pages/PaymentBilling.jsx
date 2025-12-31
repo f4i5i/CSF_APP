@@ -2,6 +2,7 @@ import React from "react";
 import Sidebar from "../components/Sidebar";
 import PaymentCard from "../components/payment/PaymentCard";
 import BillingInfo from "../components/payment/BillingInfo";
+import MembershipList from "../components/payment/MembershipList";
 import InvoiceTable from "../components/payment/InvoiceTable";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -40,7 +41,7 @@ const PaymentPage = () => {
         <Sidebar />
 
         {/* RIGHT CONTENT */}
-        <div className="flex max-sm:flex-col gap-6 p-6 max-sm:p-1">
+        <div className="flex max-sm:flex-col gap-6 p-6 max-sm:p-1 flex-1">
             <div className="flex flex-col gap-6 w-[40%] max-sm:px-5 max-sm:pt-5 max-sm:w-full">
           <div className="">
             <h2 className="font-semibold text-[#000000] text-lg">Payment</h2>
@@ -49,16 +50,28 @@ const PaymentPage = () => {
             </p>
           </div>
 
-         
-
           <div className="max-sm:hidden">
             <h2 className="font-semibold text-[#000000] text-lg">Billing</h2>
             <p className="text-sm text-[#666D80] mt-1">
               Review and update your billing information.
             </p>
           </div>
+
+          <div className="max-sm:hidden">
+            <h2 className="font-semibold text-[#000000] text-lg">Memberships</h2>
+            <p className="text-sm text-[#666D80] mt-1">
+              View all your children's class enrollments and membership details.
+            </p>
           </div>
-          <div>
+
+          <div className="max-sm:hidden">
+            <h2 className="font-semibold text-[#000000] text-lg">Invoices</h2>
+            <p className="text-sm text-[#666D80] mt-1">
+              Download and view your payment history and invoices.
+            </p>
+          </div>
+          </div>
+          <div className="flex-1">
           <div className="max-sm:border-b border-border-light max-sm:border-gray-200 max-sm:pb-6 max-sm:px-6">
   <PaymentCard />
 </div>
@@ -69,11 +82,26 @@ const PaymentPage = () => {
             </p>
           </div>
 <div className="max-sm:border-b border-border-light max-sm:border-gray-200 max-sm:py-6  max-sm:px-6">
- 
   <BillingInfo />
 </div>
 
-<div className="max-sm:border-b border-border-light max-sm:border-gray-200 max-sm:py-6  max-sm:px-6">
+ <div className="sm:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
+            <h2 className="font-semibold text-[#000] text-lg">Memberships</h2>
+            <p className="text-sm text-[#666D80] mt-1">
+              View all your children's class enrollments and membership details.
+            </p>
+          </div>
+<div className="max-sm:border-b border-border-light max-sm:border-gray-200 max-sm:py-6 max-sm:px-6">
+  <MembershipList />
+</div>
+
+ <div className="sm:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
+            <h2 className="font-semibold text-[#000] text-lg">Invoices</h2>
+            <p className="text-sm text-[#666D80] mt-1">
+              Download and view your payment history and invoices.
+            </p>
+          </div>
+<div className="max-sm:border-b border-border-light max-sm:border-gray-200 max-sm:py-6 max-sm:px-6">
   <InvoiceTable />
 </div>
           </div>

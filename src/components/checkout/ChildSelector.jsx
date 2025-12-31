@@ -67,30 +67,12 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
     );
   };
 
-  // Check if child has any active enrollment in any active class
-  const checkHasActiveEnrollment = (child) => {
-    if (!child.enrollments) return null;
-
-    // Find any ACTIVE enrollment in an ACTIVE class (not the current class being enrolled)
-    const activeEnrollment = child.enrollments.find(
-      (enrollment) =>
-        enrollment.class_id !== classData?.id &&
-        (enrollment.status === 'active' || enrollment.status === 'ACTIVE') &&
-        (enrollment.class_status === 'active' || enrollment.class_status === 'ACTIVE' || !enrollment.class_status)
-    );
-
-    if (activeEnrollment) {
-      return {
-        className: activeEnrollment.class_name,
-        enrollmentId: activeEnrollment.enrollment_id,
-      };
-    }
-    return null;
-  };
+  // Note: Children can now be enrolled in multiple classes simultaneously
+  // Only duplicate enrollment in the SAME class is prevented
 
   // Check if child is eligible based on age and enrollment status
   const checkEligibility = (child) => {
-    // First check if already enrolled in THIS class
+    // Only check if already enrolled in THIS specific class (prevent duplicates)
     if (checkAlreadyEnrolled(child)) {
       return {
         eligible: false,
@@ -100,16 +82,7 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
       };
     }
 
-    // Check if child has an active enrollment in another active class
-    const activeEnrollment = checkHasActiveEnrollment(child);
-    if (activeEnrollment) {
-      return {
-        eligible: false,
-        message: `Already enrolled in: ${activeEnrollment.className}. Must complete current class first.`,
-        alreadyEnrolled: false,
-        hasActiveClass: true,
-      };
-    }
+    // Children CAN now enroll in multiple different classes
 
     if (!classData || (!classData.min_age && !classData.max_age)) {
       return { eligible: true, message: null, alreadyEnrolled: false, hasActiveClass: false };

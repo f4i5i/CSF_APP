@@ -89,19 +89,9 @@ const CoachNextEventCard = ({ event, loading = false }) => {
         >
           <FileText size={13.724} className="text-black" />
           <span className="font-manrope font-medium text-[14px] leading-[1.6] text-black opacity-70">
-            {event.attachment_name || 'details.pdf'}
+            {event.attachment_name || 'Attachment'}
           </span>
         </a>
-      )}
-
-      {/* Default attachment display for demo purposes */}
-      {!event.attachment_url && (
-        <div className="flex items-center gap-[10px] bg-white/50 px-[20px] py-[10px] rounded-[40px] w-fit">
-          <FileText size={13.724} className="text-black" />
-          <span className="font-manrope font-medium text-[14px] leading-[1.6] text-black opacity-70">
-            details.pdf
-          </span>
-        </div>
       )}
     </div>
   );

@@ -296,7 +296,7 @@ return (
 } />
 
 {/* Coach Check-In - Quick student attendance check-in for coaches */}
-<Route path="/checkIn" element={
+<Route path="/checkin" element={
   <ProtectedRoute>
     <CheckIn />
   </ProtectedRoute>

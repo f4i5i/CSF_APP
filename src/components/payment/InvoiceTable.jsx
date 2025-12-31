@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, FileText, Filter, ChevronDown } from 'lucide-react';
+import { Download, FileText, Filter, ChevronDown, RefreshCw } from 'lucide-react';
 import invoicesService from '../../api/services/invoices.service';
 import { formatDate, formatCurrency } from '../../utils/format';
 
@@ -9,6 +9,8 @@ const InvoiceTable = () => {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all'); // all, paid, sent, overdue
   const [showFilters, setShowFilters] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState(null);
 
   useEffect(() => {
     loadInvoices();
@@ -47,6 +49,30 @@ const InvoiceTable = () => {
     } catch (error) {
       console.error('Failed to download invoice:', error);
       alert('Failed to download invoice. Please try again.');
+    }
+  };
+
+  const handleSyncFromStripe = async () => {
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      const result = await invoicesService.syncFromStripe();
+      setSyncMessage({
+        type: 'success',
+        text: `Synced ${result.summary.created} new, ${result.summary.updated} updated invoices from Stripe`
+      });
+      // Reload invoices after sync
+      await loadInvoices();
+    } catch (error) {
+      console.error('Failed to sync invoices:', error);
+      setSyncMessage({
+        type: 'error',
+        text: error.response?.data?.detail || 'Failed to sync invoices from Stripe'
+      });
+    } finally {
+      setSyncing(false);
+      // Clear message after 5 seconds
+      setTimeout(() => setSyncMessage(null), 5000);
     }
   };
 
@@ -103,18 +129,30 @@ const InvoiceTable = () => {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex gap-3 items-center">
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <Filter className="w-4 h-4" />
-          Filter
-          <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-        </button>
+      {/* Sync Message */}
+      {syncMessage && (
+        <div className={`p-3 rounded-lg text-sm ${
+          syncMessage.type === 'success'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50 text-red-700 border border-red-200'
+        }`}>
+          {syncMessage.text}
+        </div>
+      )}
 
-        {showFilters && (
+      {/* Filters and Sync */}
+      <div className="flex gap-3 items-center justify-between flex-wrap">
+        <div className="flex gap-3 items-center">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Filter className="w-4 h-4" />
+            Filter
+            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+          </button>
+
+          {showFilters && (
           <div className="flex gap-2">
             <button
               onClick={() => setFilter('all')}
@@ -158,6 +196,17 @@ const InvoiceTable = () => {
             </button>
           </div>
         )}
+        </div>
+
+        {/* Sync Button */}
+        <button
+          onClick={handleSyncFromStripe}
+          disabled={syncing}
+          className="flex items-center gap-2 px-4 py-2 text-sm bg-btn-gold text-heading-dark rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+          {syncing ? 'Syncing...' : 'Sync from Stripe'}
+        </button>
       </div>
 
       {/* Table */}

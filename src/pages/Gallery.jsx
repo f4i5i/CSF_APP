@@ -1,54 +1,132 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import img1 from "../assets/image (1).png"
-import img2 from "../assets/image (2).png"
-import img3 from "../assets/image (3).png"
-import img4 from "../assets/image (4).png"
-import img5 from "../assets/image (5).png"
-import img6 from "../assets/image (6).png"
-import img7 from "../assets/image7.jpg"
-import img8 from "../assets/image8.jpg"
-import img9 from "../assets/image9.jpg"
-import img10 from "../assets/image10.jpg"
+
+// Hooks
+import { useChildren, useApi } from '../hooks';
+
+// Services
+import { photosService, enrollmentsService } from '../api/services';
+import { getFileUrl } from '../api/config';
 
 const Gallery = () => {
+  // Get selected child from context
+  const { selectedChild } = useChildren();
+
+  // Get first active enrollment for the selected child
+  const { data: enrollmentsData, error: enrollmentsError } = useApi(
+    () => enrollmentsService.getMy({
+      child_id: selectedChild?.id,
+      status: 'active',
+    }),
+    {
+      initialData: [],
+      dependencies: [selectedChild?.id],
+      autoFetch: !!selectedChild?.id,
+      onError: (err) => console.error('Failed to load enrollments:', err),
+    }
+  );
+
+  // Derive class ID from enrollment
+  const derivedClassId = useMemo(() => {
+    if (!enrollmentsData || enrollmentsData.length === 0) return null;
+    const enrollment = enrollmentsData.find(e => e.child_id === selectedChild?.id) || enrollmentsData[0];
+    return enrollment?.class?.id || enrollment?.class_id || null;
+  }, [enrollmentsData, selectedChild?.id]);
+
+  // Fetch photos for the class
+  const { data: photosData, loading: loadingPhotos, error: photosError } = useApi(
+    () => photosService.getByClass(derivedClassId, { limit: 20 }),
+    {
+      initialData: [],
+      dependencies: [derivedClassId],
+      autoFetch: !!derivedClassId,
+      onError: (err) => console.error('Failed to load photos:', err),
+    }
+  );
+
+  // Combined error state
+  const hasError = enrollmentsError || photosError;
+
+  // Get photos array from API response - no demo fallback
+  const photos = useMemo(() => {
+    if (!photosData) return [];
+    // Handle both array and paginated response
+    const photoArray = Array.isArray(photosData) ? photosData : (photosData.items || []);
+    return photoArray
+      .map(photo => {
+        const rawUrl = photo.url || photo.image_url || photo.thumbnail_url;
+        return rawUrl ? getFileUrl(rawUrl) : null;
+      })
+      .filter(Boolean);
+  }, [photosData]);
+
+  // Split photos into 3 columns for masonry layout
+  const columns = useMemo(() => {
+    const col1 = [];
+    const col2 = [];
+    const col3 = [];
+    photos.forEach((photo, index) => {
+      if (index % 3 === 0) col1.push(photo);
+      else if (index % 3 === 1) col2.push(photo);
+      else col3.push(photo);
+    });
+    return [col1, col2, col3];
+  }, [photos]);
+
   return (
-  <div className=" min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
-
+    <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
- <main className="mx-6 py-8 max-sm:py-2 max-sm:mx-3">
- <h1 className="text-[32px] max-lg:text-[28px] font-manrope font-bold text-[#173151] mb-6">
-                    Photo Gallery
-                  </h1>
-  <div className="grid grid-cols-3 max-sm:grid-cols-1 gap-4">
+      <main className="mx-6 py-8 max-sm:py-2 max-sm:mx-3">
+        <h1 className="text-[32px] max-lg:text-[28px] font-manrope font-bold text-[#173151] mb-6">
+          Photo Gallery
+        </h1>
 
-    {/* Column 1 */}
-    <div className="flex flex-col gap-4">
-      <img src={img1} className="w-full object-cover rounded-xl" />
-      <img src={img4} className="w-full object-cover rounded-xl" />
-      <img src={img9} className="w-full object-cover rounded-xl" />
-    </div>
+        {/* Error Alert */}
+        {hasError && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 font-manrope">
+            <p className="font-medium">Unable to load photos</p>
+            <p className="text-sm mt-1">Please try refreshing the page or check back later.</p>
+          </div>
+        )}
 
-    {/* Column 2 */}
-    <div className="flex flex-col gap-4">
-      <img src={img2} className="w-full object-cover rounded-xl" />
-      <img src={img5} className="w-full object-cover rounded-xl" />
-      <img src={img8} className="w-full object-cover rounded-xl" />
-    </div>
-
-    {/* Column 3 */}
-    <div className="flex flex-col gap-4">
-      <img src={img3} className="w-full object-cover rounded-xl" />
-      <img src={img6} className="w-full object-cover rounded-xl" />
-      <img src={img7} className="w-full object-cover rounded-xl" />
-      {/* <img src={img10} className="w-full object-cover rounded-xl" /> */}
-    </div>
-
-  </div>
-
-</main>
-    <Footer isFixed={false} />
+        {loadingPhotos ? (
+          // Loading skeleton
+          <div className="grid grid-cols-3 max-sm:grid-cols-1 gap-4">
+            {[0, 1, 2].map((col) => (
+              <div key={col} className="flex flex-col gap-4">
+                {[0, 1, 2].map((item) => (
+                  <div
+                    key={item}
+                    className="w-full h-48 bg-gray-200 rounded-xl animate-pulse"
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : photos.length > 0 ? (
+          <div className="grid grid-cols-3 max-sm:grid-cols-1 gap-4">
+            {columns.map((column, colIndex) => (
+              <div key={colIndex} className="flex flex-col gap-4">
+                {column.map((src, imgIndex) => (
+                  <img
+                    key={imgIndex}
+                    src={src}
+                    alt={`Gallery photo ${colIndex * 3 + imgIndex + 1}`}
+                    className="w-full object-cover rounded-xl"
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 text-gray-500">
+            <p className="text-lg">No photos available yet</p>
+            <p className="text-sm mt-2">Photos from your child's activities will appear here</p>
+          </div>
+        )}
+      </main>
+      <Footer isFixed={false} />
     </div>
   )
 }

@@ -68,6 +68,30 @@ const invoicesService = {
     });
     return data;
   },
+
+  /**
+   * Sync invoices from Stripe for current user
+   * Fetches all invoices from Stripe and stores them in the database
+   * @returns {Promise<Object>} Sync summary with counts
+   */
+  async syncFromStripe() {
+    const { data } = await apiClient.post(API_ENDPOINTS.INVOICES.SYNC);
+    return data;
+  },
+
+  /**
+   * Sync ALL invoices from Stripe (admin only)
+   * Fetches all invoices from Stripe for all customers
+   * @param {Object} filters - Optional filters
+   * @param {string} [filters.status] - Stripe status filter (draft, open, paid, etc.)
+   * @returns {Promise<Object>} Sync summary with counts
+   */
+  async syncAllFromStripe(filters = {}) {
+    const { data } = await apiClient.post(API_ENDPOINTS.INVOICES.SYNC_ALL, null, {
+      params: filters,
+    });
+    return data;
+  },
 };
 
 export default invoicesService;

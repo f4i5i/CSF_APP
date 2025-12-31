@@ -8,19 +8,18 @@ import { API_ENDPOINTS } from '../../constants/api.constants';
 
 const attendanceService = {
   /**
-   * Get attendance records with filters
+   * Get attendance history for an enrollment
+   * @param {string} enrollmentId - Enrollment ID
    * @param {Object} filters - Filter parameters
-   * @param {string} [filters.child_id] - Filter by child ID
-   * @param {string} [filters.class_id] - Filter by class ID
-   * @param {string} [filters.date] - Filter by specific date (YYYY-MM-DD)
-   * @param {string} [filters.start_date] - Filter by start date range
-   * @param {string} [filters.end_date] - Filter by end date range
-   * @returns {Promise<Array>} List of attendance records
+   * @param {number} [filters.skip] - Number of records to skip
+   * @param {number} [filters.limit] - Max records to return
+   * @returns {Promise<Object>} Attendance list response {items, total, skip, limit}
    */
-  async getAll(filters = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ATTENDANCE.LIST, {
-      params: filters,
-    });
+  async getByEnrollment(enrollmentId, filters = {}) {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ATTENDANCE.HISTORY(enrollmentId),
+      { params: filters }
+    );
     return data;
   },
 
@@ -79,13 +78,15 @@ const attendanceService = {
   },
 
   /**
-   * Get attendance for a specific child
+   * Get attendance statistics for a specific child
    * @param {string} childId - Child ID
-   * @param {Object} filters - Additional filters
-   * @returns {Promise<Array>} Child's attendance records
+   * @returns {Promise<Object>} Child's attendance stats with by_enrollment breakdown
    */
-  async getByChild(childId, filters = {}) {
-    return this.getAll({ ...filters, child_id: childId });
+  async getStatsByChild(childId) {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ATTENDANCE.STATS(childId)
+    );
+    return data;
   },
 
   /**

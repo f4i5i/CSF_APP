@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, UserPlus } from 'lucide-react';
 import Header from '../components/Header';
@@ -64,6 +64,9 @@ export default function Dashboard() {
     }
   );
 
+  // State for selected enrollment (class)
+  const [selectedEnrollment, setSelectedEnrollment] = useState(null);
+
   // Filter enrollments by selected child (client-side filtering as backup)
   const activeEnrollments = useMemo(() => {
     if (!enrollmentsData || !selectedChild) return [];
@@ -76,16 +79,59 @@ export default function Dashboard() {
     return filtered;
   }, [enrollmentsData, selectedChild]);
 
-  // Get first active enrollment for enrollment-based data
-  const firstEnrollment = useMemo(() => {
-    return activeEnrollments?.[0] || null;
-  }, [activeEnrollments]);
+  // Auto-select first enrollment when child changes or enrollments load
+  useEffect(() => {
+    if (activeEnrollments.length > 0) {
+      // Check if current selection is still valid for this child
+      const currentStillValid = selectedEnrollment &&
+        activeEnrollments.some(e => e.id === selectedEnrollment.id);
 
-  // Resolve class ID from enrollment or fallback to child's first enrollment
+      if (!currentStillValid) {
+        setSelectedEnrollment(activeEnrollments[0]);
+      }
+    } else {
+      setSelectedEnrollment(null);
+    }
+  }, [activeEnrollments, selectedChild?.id]);
+
+  // Handle enrollment (class) selection
+  const handleEnrollmentChange = (e) => {
+    const enrollmentId = e.target.value;
+    const enrollment = activeEnrollments.find((en) => en.id === enrollmentId);
+    if (enrollment) {
+      setSelectedEnrollment(enrollment);
+    }
+  };
+
+  // Get class name for display
+  const getClassName = (enrollment) => {
+    if (!enrollment) return '';
+    return enrollment.class?.name || enrollment.class_name || 'Class';
+  };
+
+  // Get school name for enrollment
+  const getEnrollmentSchool = (enrollment) => {
+    if (!enrollment) return '';
+    return enrollment.school_name || enrollment.class?.school?.name || '';
+  };
+
+  // Get class days for enrollment
+  const getEnrollmentDays = (enrollment) => {
+    if (!enrollment?.weekdays || enrollment.weekdays.length === 0) return '';
+    return enrollment.weekdays.map(day =>
+      day.charAt(0).toUpperCase() + day.slice(1)
+    ).join(', ');
+  };
+
+  // Use selected enrollment for data fetching
+  const currentEnrollment = selectedEnrollment || activeEnrollments?.[0] || null;
+
+  // Resolve class ID from selected enrollment
   const derivedClassId = useMemo(() => {
-    if (firstEnrollment?.class?.id) return firstEnrollment.class.id;
-    if (firstEnrollment?.class_id) return firstEnrollment.class_id;
+    if (currentEnrollment?.class?.id) return currentEnrollment.class.id;
+    if (currentEnrollment?.class_id) return currentEnrollment.class_id;
 
+    // Fallback to child's first enrollment if no selected enrollment
     const childEnrollment = selectedChild?.enrollments?.find(
       (enrollment) => enrollment.status === 'active'
     ) || selectedChild?.enrollments?.[0];
@@ -95,7 +141,7 @@ export default function Dashboard() {
       childEnrollment?.class_id ||
       null
     );
-  }, [firstEnrollment, selectedChild]);
+  }, [currentEnrollment, selectedChild]);
 
   // 3. Announcements - Fetch for derived class
   const { data: announcements = [], loading: loadingAnnouncements } = useApi(
@@ -119,20 +165,20 @@ export default function Dashboard() {
 
   // 8. Badges (only if enrollment exists)
   const { data: badges, loading: loadingBadges } = useApi(
-    () => badgesService.getByEnrollment(firstEnrollment?.id),
+    () => badgesService.getByEnrollment(currentEnrollment?.id),
     {
       initialData: [],
-      dependencies: [firstEnrollment?.id],
-      autoFetch: !!firstEnrollment?.id,
+      dependencies: [currentEnrollment?.id],
+      autoFetch: !!currentEnrollment?.id,
     }
   );
 
   // 9. Attendance stats (only if enrollment exists)
   const { data: attendanceStats } = useApi(
-    () => attendanceService.getStreak(firstEnrollment?.id),
+    () => attendanceService.getStreak(currentEnrollment?.id),
     {
-      dependencies: [firstEnrollment?.id],
-      autoFetch: !!firstEnrollment?.id,
+      dependencies: [currentEnrollment?.id],
+      autoFetch: !!currentEnrollment?.id,
     }
   );
 
@@ -315,34 +361,59 @@ export default function Dashboard() {
                 <span>Add Your First Child</span>
               </button>
             ) : (
-              // Child Selector Dropdown - shown when children exist
+              // Single dropdown showing Child + Class combinations
               <div className="relative py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#1B1B1B] max-sm:self-end max-sm:mr-2 flex items-center gap-2">
                 <select
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  value={selectedChild?.id || ''}
-                  onChange={handleChildChange}
+                  value={currentEnrollment ? `${selectedChild?.id}|${currentEnrollment.id}` : ''}
+                  onChange={(e) => {
+                    const [childId, enrollmentId] = e.target.value.split('|');
+                    const child = children.find((c) => c.id === childId);
+                    if (child) {
+                      selectChild(child);
+                      // Find enrollment in the child's enrollments or in enrollmentsData
+                      const enrollment = enrollmentsData?.find((en) => en.id === enrollmentId);
+                      if (enrollment) {
+                        setSelectedEnrollment(enrollment);
+                      }
+                    }
+                  }}
                 >
-                  {children.map((child) => {
-                    const school = getSchoolName(child);
-                    const childName = `${child.first_name || ''} ${child.last_name || ''}`.trim();
-                    const childClassDays = getClassDays(child);
-                    return (
-                      <option key={child.id} value={child.id}>
-                        {childName || 'Student'}
-                        {school ? ` • ${school}` : ''}
-                        {child.grade ? ` • Grade ${child.grade}` : ''}
-                        {childClassDays ? ` • ${childClassDays}` : ''}
+                  {children.flatMap((child) => {
+                    const childName = `${child.first_name || ''} ${child.last_name || ''}`.trim() || 'Student';
+                    // Get enrollments for this child
+                    const childEnrollments = child.enrollments?.filter(e =>
+                      e.status === 'active' || e.status === 'ACTIVE'
+                    ) || [];
+
+                    if (childEnrollments.length === 0) {
+                      // Show child without class if no enrollments
+                      return (
+                        <option key={child.id} value={`${child.id}|`}>
+                          {childName}
+                          {child.grade ? ` • Grade ${child.grade}` : ''}
+                        </option>
+                      );
+                    }
+
+                    // Show each child+class combination
+                    return childEnrollments.map((enrollment) => (
+                      <option
+                        key={`${child.id}|${enrollment.enrollment_id || enrollment.id}`}
+                        value={`${child.id}|${enrollment.enrollment_id || enrollment.id}`}
+                      >
+                        {childName} • {enrollment.class_name || 'Class'}
+                        {enrollment.school_name ? ` • ${enrollment.school_name}` : ''}
                       </option>
-                    );
+                    ));
                   })}
                 </select>
                 <span className="font-manrope font-medium text-base text-[#1B1B1B] pointer-events-none">
                   {selectedChild ? (
                     <>
                       {`${selectedChild.first_name || ''} ${selectedChild.last_name || ''}`.trim() || 'Student'}
-                      {getSchoolName(selectedChild) ? ` • ${getSchoolName(selectedChild)}` : ''}
-                      {selectedChild.grade ? ` • Grade ${selectedChild.grade}` : ''}
-                      {getClassDays(selectedChild) ? ` • ${getClassDays(selectedChild)}` : ''}
+                      {currentEnrollment ? ` • ${getClassName(currentEnrollment)}` : ''}
+                      {getEnrollmentSchool(currentEnrollment) ? ` • ${getEnrollmentSchool(currentEnrollment)}` : ''}
                     </>
                   ) : null}
                 </span>
@@ -368,12 +439,21 @@ export default function Dashboard() {
 
 
                     <div className="flex flex-col lg:flex-row items-start justify-center gap-3 w-full">
-            {/* <div className="w-full lg:max-w-[50%]  "> */}
-              <AnnouncementsSection />
-            {/* </div> */}
-            {/* <div className="w-full lg:max-w-[50%] "> */}
-              <DashboardWidgets />
-            {/* </div> */}
+              <AnnouncementsSection
+                announcements={announcements}
+                nextEvent={nextEvent}
+                loading={loadingAnnouncements}
+                loadingEvent={nextEventLoading}
+              />
+              <DashboardWidgets
+                calendarEvents={calendarEvents}
+                nextEvent={nextEvent}
+                badges={recentBadges}
+                photo={recentPhotos?.[0]}
+                loadingEvents={nextEventLoading}
+                loadingBadges={loadingBadges}
+                loadingPhoto={loadingPhotos}
+              />
           </div>
           {/* Left Column - Announcements */}
           {/* <div className="w-full lg:w-[48%] max-sm:hidden">

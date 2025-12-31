@@ -20,7 +20,17 @@ const photosService = {
    * @returns {Promise<Array>} List of photos
    */
   async getAll(filters = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.PHOTOS.LIST, {
+    // If class_id is provided, use the class-specific endpoint
+    if (filters.class_id) {
+      const classId = filters.class_id;
+      delete filters.class_id;
+      const { data } = await apiClient.get(API_ENDPOINTS.PHOTOS.BY_CLASS(classId), {
+        params: filters,
+      });
+      return data;
+    }
+    // Otherwise fetch from all photos endpoint
+    const { data } = await apiClient.get('/photos', {
       params: filters,
     });
     return data;
@@ -130,16 +140,16 @@ const photosService = {
   },
 
   /**
-   * Get all albums
-   * @returns {Promise<Array>} List of photo albums
+   * Get all albums/categories
+   * @returns {Promise<Array>} List of photo albums/categories
    */
   async getAlbums() {
-    const { data } = await apiClient.get(API_ENDPOINTS.PHOTOS.ALBUMS);
+    const { data } = await apiClient.get(API_ENDPOINTS.PHOTOS.CATEGORIES);
     return data;
   },
 
   /**
-   * Create new album (admin only)
+   * Create new album/category (admin only)
    * @param {Object} albumData - Album information
    * @param {string} albumData.name - Album name
    * @param {string} [albumData.description] - Album description
@@ -150,43 +160,43 @@ const photosService = {
    */
   async createAlbum(albumData) {
     const { data } = await apiClient.post(
-      API_ENDPOINTS.PHOTOS.CREATE_ALBUM,
+      API_ENDPOINTS.PHOTOS.CATEGORIES,
       albumData
     );
     return data;
   },
 
   /**
-   * Get album by ID
+   * Get album/category by ID
    * @param {string} id - Album ID
    * @returns {Promise<Object>} Album with photos
    */
   async getAlbumById(id) {
-    const { data } = await apiClient.get(API_ENDPOINTS.PHOTOS.ALBUM_BY_ID(id));
+    const { data } = await apiClient.get(`/photos/categories/${id}`);
     return data;
   },
 
   /**
-   * Update album (admin only)
+   * Update album/category (admin only)
    * @param {string} id - Album ID
    * @param {Object} albumData - Updated album data
    * @returns {Promise<Object>} Updated album
    */
   async updateAlbum(id, albumData) {
     const { data } = await apiClient.put(
-      API_ENDPOINTS.PHOTOS.ALBUM_BY_ID(id),
+      `/photos/categories/${id}`,
       albumData
     );
     return data;
   },
 
   /**
-   * Delete album (admin only)
+   * Delete album/category (admin only)
    * @param {string} id - Album ID
    * @returns {Promise<Object>} Deletion confirmation
    */
   async deleteAlbum(id) {
-    const { data } = await apiClient.delete(API_ENDPOINTS.PHOTOS.ALBUM_BY_ID(id));
+    const { data } = await apiClient.delete(`/photos/categories/${id}`);
     return data;
   },
 

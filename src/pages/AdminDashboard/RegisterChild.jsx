@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Camera, X } from "lucide-react";
 import { useClasses } from "../../api/hooks/classes/useClasses";
 import childrenService from "../../api/services/children.service";
 import waiversService from "../../api/services/waivers.service";
@@ -29,6 +30,11 @@ export default function RegisterChild() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [calculatedAge, setCalculatedAge] = useState(null);
+
+  // Profile image state
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Waiver modal state
   const [showWaiverModal, setShowWaiverModal] = useState(false);
@@ -87,6 +93,64 @@ export default function RegisterChild() {
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
+  // Trigger file input click
+  const handleChoosePhoto = () => {
+    console.log('Choose Photo clicked');
+    console.log('fileInputRef:', fileInputRef.current);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    } else {
+      console.error('fileInputRef is null');
+      toast.error('Unable to open file picker');
+    }
+  };
+
+  // Handle profile image selection
+  const handleImageSelect = (e) => {
+    console.log('handleImageSelect called', e.target.files);
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      // Validate file size (1MB max)
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error('Image must be less than 1MB');
+        return;
+      }
+
+      // Validate image dimensions (max 400x400)
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        if (img.width > 400 || img.height > 400) {
+          toast.error(`Image must be max 400x400 pixels. Your image is ${img.width}x${img.height}`);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+          return;
+        }
+        setProfileImage(file);
+        setProfileImagePreview(URL.createObjectURL(file));
+      };
+      img.onerror = () => {
+        toast.error('Failed to load image');
+      };
+      img.src = URL.createObjectURL(file);
+    }
+  };
+
+  // Remove selected profile image
+  const handleRemoveImage = () => {
+    setProfileImage(null);
+    setProfileImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validate()) return;
 
@@ -120,6 +184,16 @@ export default function RegisterChild() {
       // Create child via API
       const response = await childrenService.create(childData);
       const childId = response.id;
+
+      // Upload profile image if selected
+      if (profileImage && childId) {
+        try {
+          await childrenService.uploadProfileImage(childId, profileImage);
+        } catch (imgError) {
+          console.error('Failed to upload profile image:', imgError);
+          toast.error('Child created but profile image upload failed');
+        }
+      }
 
       toast.success("Child registered successfully!");
 
@@ -213,7 +287,7 @@ export default function RegisterChild() {
     <div className="h-full w-full flex flex-col items-center relative">
 
       {/* Dotted Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70 pointer-events-none"></div>
 
       {/* CSF School Academy - Top Center */}
       <div className="w-full text-center mt-6 sm:mt-8 px-4 z-10">
@@ -238,6 +312,41 @@ export default function RegisterChild() {
             <p className="text-red-800 text-sm">{submitError}</p>
           </div>
         )}
+
+        {/* Profile Image Upload */}
+        <div className="flex flex-col items-center mb-6">
+          <span className="font-medium text-gray-700 mb-2">Profile Photo (Optional)</span>
+
+          {profileImagePreview ? (
+            <div className="relative">
+              <img
+                src={profileImagePreview}
+                alt="Profile preview"
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-[#173151]"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <label className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-[#173151] transition-colors">
+              <Camera size={24} className="text-gray-400 mb-1" />
+              <span className="text-xs text-gray-500">Add Photo</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                onChange={handleImageSelect}
+                className="sr-only"
+              />
+            </label>
+          )}
+          <p className="text-xs text-gray-500 mt-2">Max 400x400 pixels, max 1MB</p>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 

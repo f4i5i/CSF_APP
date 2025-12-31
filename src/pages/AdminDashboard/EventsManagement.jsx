@@ -1,132 +1,195 @@
 /**
  * Events Management Page
  * Admin page for creating and managing events
+ * Structure matches Classes.jsx for consistency
  */
 
-import React, { useState, useEffect } from 'react';
-import { Calendar, List, Plus, Edit, Trash2, MapPin, Clock, Users, CalendarDays } from 'lucide-react';
-import DataTable from '../../components/admin/DataTable';
-import FilterBar from '../../components/admin/FilterBar';
-import Header from '../../components/Header';
-import eventsService from '../../api/services/events.service';
-import classesService from '../../api/services/classes.service';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Calendar, Clock, MapPin, Users, Eye, X } from "lucide-react";
+import DataTable from "../../components/admin/DataTable";
+import FilterBar from "../../components/admin/FilterBar";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import eventsService from "../../api/services/events.service";
+import classesService from "../../api/services/classes.service";
+import toast from "react-hot-toast";
+import Header from "../../components/Header";
 
 const EVENT_TYPES = [
-  { value: 'tournament', label: 'Tournament' },
-  { value: 'practice', label: 'Practice' },
-  { value: 'social', label: 'Social' },
-  { value: 'showcase', label: 'Showcase' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'other', label: 'Other' },
+  { value: "tournament", label: "Tournament" },
+  { value: "practice", label: "Practice" },
+  { value: "social", label: "Social" },
+  { value: "showcase", label: "Showcase" },
+  { value: "meeting", label: "Meeting" },
+  { value: "other", label: "Other" },
 ];
 
 export default function EventsManagement() {
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
   const [events, setEvents] = useState([]);
-  const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [classFilter, setClassFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [classFilter, setClassFilter] = useState("");
+
+  // Filter options from API
+  const [classes, setClasses] = useState([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
-  // Modal states
-  const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("create"); // 'create' | 'edit'
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'practice',
-    start_datetime: '',
-    end_datetime: '',
-    location: '',
-    class_id: '',
-    max_attendees: '',
-    requires_rsvp: true,
-  });
   const [saving, setSaving] = useState(false);
 
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    type: "practice",
+    start_datetime: "",
+    end_datetime: "",
+    location: "",
+    class_id: "",
+    max_attendees: "",
+    requires_rsvp: true,
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    action: null,
+  });
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewEvent, setViewEvent] = useState(null);
+
+  // Fetch filter options on mount
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
+
+  // Fetch events when filters change
   useEffect(() => {
     fetchEvents();
-    fetchClasses();
-  }, [currentPage, typeFilter, classFilter]);
+  }, [currentPage, typeFilter, classFilter, searchQuery]);
+
+  const fetchFilterOptions = async () => {
+    setFiltersLoading(true);
+    try {
+      const response = await classesService.getAll({ limit: 100 });
+      const classesList = Array.isArray(response)
+        ? response
+        : response.items || response.data || [];
+      setClasses(classesList);
+    } catch (error) {
+      console.error("Failed to fetch filter options:", error);
+      setClasses([]);
+    } finally {
+      setFiltersLoading(false);
+    }
+  };
 
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const filters = {
-        skip: (currentPage - 1) * itemsPerPage,
+      const skip = (currentPage - 1) * itemsPerPage;
+      const params = {
+        skip,
         limit: itemsPerPage,
       };
-      if (typeFilter) filters.type = typeFilter;
-      if (classFilter) filters.class_id = classFilter;
 
-      const response = await eventsService.getAll(filters);
-      setEvents(response.items || response || []);
-      setTotalItems(response.total || response?.length || 0);
+      if (typeFilter) params.type = typeFilter;
+      if (classFilter) params.class_id = classFilter;
+      if (searchQuery) params.search = searchQuery;
+
+      const response = await eventsService.getAll(params);
+      const eventsData = response.items || response || [];
+      const total = response.total || eventsData.length || 0;
+
+      setEvents(eventsData);
+      setTotalItems(total);
     } catch (error) {
-      console.error('Failed to fetch events:', error);
-      toast.error('Failed to load events');
+      console.error("Failed to fetch events:", error);
+      toast.error("Failed to load events");
+      setEvents([]);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchClasses = async () => {
+  const handleCreateEvent = () => {
+    setModalMode("create");
+    setSelectedEvent(null);
+    setFormData({
+      title: "",
+      description: "",
+      type: "practice",
+      start_datetime: "",
+      end_datetime: "",
+      location: "",
+      class_id: "",
+      max_attendees: "",
+      requires_rsvp: true,
+    });
+    setModalOpen(true);
+  };
+
+  const handleEditEvent = (eventData) => {
+    setModalMode("edit");
+    setSelectedEvent(eventData);
+    setFormData({
+      title: eventData.title || "",
+      description: eventData.description || "",
+      type: eventData.type || "practice",
+      start_datetime: eventData.start_datetime
+        ? eventData.start_datetime.slice(0, 16)
+        : "",
+      end_datetime: eventData.end_datetime
+        ? eventData.end_datetime.slice(0, 16)
+        : "",
+      location: eventData.location || "",
+      class_id: eventData.class_id || "",
+      max_attendees: eventData.max_attendees || "",
+      requires_rsvp: eventData.requires_rsvp ?? true,
+    });
+    setModalOpen(true);
+  };
+
+  const handleDeleteEvent = async (eventId) => {
     try {
-      const response = await classesService.getAll({ limit: 100 });
-      setClasses(response.items || response || []);
+      await eventsService.delete(eventId);
+      toast.success("Event deleted successfully");
+      fetchEvents();
+      setConfirmDialog({ isOpen: false });
     } catch (error) {
-      console.error('Failed to fetch classes:', error);
+      console.error("Failed to delete event:", error);
+      toast.error("Failed to delete event");
     }
   };
 
-  const handleCreate = () => {
+  const handleViewEvent = (eventData) => {
+    setViewEvent(eventData);
+    setViewModalOpen(true);
+  };
+
+  const truncateText = (text, maxLength = 300) => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
     setSelectedEvent(null);
-    setFormData({
-      title: '',
-      description: '',
-      type: 'practice',
-      start_datetime: '',
-      end_datetime: '',
-      location: '',
-      class_id: '',
-      max_attendees: '',
-      requires_rsvp: true,
-    });
-    setShowModal(true);
-  };
-
-  const handleEdit = (event) => {
-    setSelectedEvent(event);
-    setFormData({
-      title: event.title || '',
-      description: event.description || '',
-      type: event.type || 'practice',
-      start_datetime: event.start_datetime ? event.start_datetime.slice(0, 16) : '',
-      end_datetime: event.end_datetime ? event.end_datetime.slice(0, 16) : '',
-      location: event.location || '',
-      class_id: event.class_id || '',
-      max_attendees: event.max_attendees || '',
-      requires_rsvp: event.requires_rsvp ?? true,
-    });
-    setShowModal(true);
-  };
-
-  const handleDelete = (event) => {
-    setSelectedEvent(event);
-    setShowDeleteModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.start_datetime) {
-      toast.error('Please fill in required fields');
+      toast.error("Please fill in required fields");
       return;
     }
 
@@ -134,134 +197,132 @@ export default function EventsManagement() {
     try {
       const payload = {
         ...formData,
-        max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
+        max_attendees: formData.max_attendees
+          ? parseInt(formData.max_attendees)
+          : null,
         class_id: formData.class_id || null,
       };
 
       if (selectedEvent) {
         await eventsService.update(selectedEvent.id, payload);
-        toast.success('Event updated successfully');
+        toast.success("Event updated successfully");
       } else {
         await eventsService.create(payload);
-        toast.success('Event created successfully');
+        toast.success("Event created successfully");
       }
-      setShowModal(false);
+      setModalOpen(false);
       fetchEvents();
     } catch (error) {
-      console.error('Failed to save event:', error);
-      toast.error(error.response?.data?.detail || 'Failed to save event');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedEvent) return;
-    setSaving(true);
-    try {
-      await eventsService.delete(selectedEvent.id);
-      toast.success('Event deleted successfully');
-      setShowDeleteModal(false);
-      setSelectedEvent(null);
-      fetchEvents();
-    } catch (error) {
-      console.error('Failed to delete event:', error);
-      toast.error(error.response?.data?.detail || 'Failed to delete event');
+      console.error("Failed to save event:", error);
+      toast.error(error.response?.data?.detail || "Failed to save event");
     } finally {
       setSaving(false);
     }
   };
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true,
     });
   };
 
   const columns = [
     {
-      key: 'title',
-      label: 'Event',
-      render: (value, row) => (
-        <div>
-          <p className="font-semibold text-[#173151]">{value}</p>
-          <p className="text-xs text-gray-500 line-clamp-1">{row.description}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'type',
-      label: 'Type',
+      key: "title",
+      label: "Event",
+      sortable: true,
       render: (value) => (
-        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 capitalize">
-          {value || 'N/A'}
+        <span className="font-semibold font-manrope text-text-primary text-sm">
+          {truncateText(value, 40)}
         </span>
       ),
     },
     {
-      key: 'start_datetime',
-      label: 'Start',
+      key: "type",
+      label: "Type",
       render: (value) => (
-        <div className="flex items-center gap-1 text-sm">
-          <Clock className="w-3 h-3 text-gray-400" />
+        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+          {value || "N/A"}
+        </span>
+      ),
+    },
+    {
+      key: "start_datetime",
+      label: "Date/Time",
+      render: (value) => (
+        <span className="text-xs font-manrope text-text-muted">
           {formatDateTime(value)}
-        </div>
-      ),
-    },
-    {
-      key: 'location',
-      label: 'Location',
-      render: (value) => (
-        <div className="flex items-center gap-1 text-sm">
-          <MapPin className="w-3 h-3 text-gray-400" />
-          {value || 'TBD'}
-        </div>
-      ),
-    },
-    {
-      key: 'max_attendees',
-      label: 'Capacity',
-      render: (value, row) => (
-        <div className="flex items-center gap-1 text-sm">
-          <Users className="w-3 h-3 text-gray-400" />
-          {row.rsvp_count || 0} / {value || '∞'}
-        </div>
-      ),
-    },
-    {
-      key: 'requires_rsvp',
-      label: 'RSVP',
-      render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-          value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-        }`}>
-          {value ? 'Required' : 'Open'}
         </span>
       ),
     },
     {
-      key: 'actions',
-      label: 'Actions',
-      type: 'actions',
-      align: 'right',
+      key: "location",
+      label: "Location",
+      render: (value) => (
+        <span className="text-xs font-manrope text-text-muted">
+          {truncateText(value || "TBD", 20)}
+        </span>
+      ),
+    },
+    {
+      key: "max_attendees",
+      label: "Capacity",
+      render: (value, row) => (
+        <span className="text-xs font-manrope text-text-primary">
+          {row.rsvp_count || 0}/{value || "∞"}
+        </span>
+      ),
+    },
+    {
+      key: "requires_rsvp",
+      label: "RSVP",
+      render: (value) => (
+        <span
+          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+            value
+              ? "bg-[#DFF5E8] text-status-success"
+              : "bg-neutral-lightest text-neutral-dark"
+          }`}
+        >
+          {value ? "Yes" : "No"}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      type: "actions",
+      align: "right",
       actions: (row) => [
         {
-          label: 'Edit',
-          icon: Edit,
-          onClick: () => handleEdit(row),
+          label: "View",
+          icon: Eye,
+          onClick: () => handleViewEvent(row),
         },
         {
-          label: 'Delete',
+          label: "Edit",
+          icon: Edit,
+          onClick: () => handleEditEvent(row),
+        },
+        {
+          label: "Delete",
           icon: Trash2,
-          onClick: () => handleDelete(row),
-          className: 'text-red-600 hover:text-red-700',
+          variant: "destructive",
+          onClick: () => {
+            setConfirmDialog({
+              isOpen: true,
+              title: "Delete Event",
+              message: `Are you sure you want to delete "${row.title}"? This action cannot be undone.`,
+              action: () => handleDeleteEvent(row.id),
+            });
+          },
         },
       ],
     },
@@ -269,373 +330,404 @@ export default function EventsManagement() {
 
   const filters = [
     {
-      type: 'select',
-      placeholder: 'All Types',
+      type: "select",
+      placeholder: "All Types",
       value: typeFilter,
       onChange: setTypeFilter,
-      options: EVENT_TYPES,
+      options: [
+        { value: "", label: "All Types" },
+        ...EVENT_TYPES,
+      ],
     },
     {
-      type: 'select',
-      placeholder: 'All Classes',
+      type: "select",
+      placeholder: "All Classes",
       value: classFilter,
       onChange: setClassFilter,
-      options: classes.map((c) => ({ value: c.id, label: c.name })),
+      options: [
+        { value: "", label: "All Classes" },
+        ...classes.map((cls) => ({
+          value: cls.id,
+          label: cls.name,
+        })),
+      ],
+      disabled: filtersLoading,
     },
   ];
 
-  const hasActiveFilters = searchQuery || typeFilter || classFilter;
+  const hasActiveFilters = typeFilter || classFilter || searchQuery;
   const clearFilters = () => {
-    setSearchQuery('');
-    setTypeFilter('');
-    setClassFilter('');
+    setSearchQuery("");
+    setTypeFilter("");
+    setClassFilter("");
     setCurrentPage(1);
   };
 
-  // Filter events by search query
-  const filteredEvents = events.filter((e) =>
-    `${e.title} ${e.description} ${e.location}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-
-  // Calendar view - group events by date
-  const getCalendarData = () => {
-    const grouped = {};
-    filteredEvents.forEach((event) => {
-      const date = new Date(event.start_datetime).toDateString();
-      if (!grouped[date]) grouped[date] = [];
-      grouped[date].push(event);
-    });
-    return grouped;
-  };
-
   return (
-    <div className="h-full max-sm:pb-20">
+    <div className="h-full">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-[#173151] font-manrope">
-                Events Management
-              </h1>
-              <p className="text-gray-600 font-manrope mt-1">
-                Create and manage events for your programs
-              </p>
-            </div>
 
-            <div className="flex items-center gap-3">
-              {/* View Toggle */}
-              <div className="flex bg-white rounded-lg border border-gray-200 p-1">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-[#173151] text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                  List
-                </button>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
-                    viewMode === 'calendar'
-                      ? 'bg-[#173151] text-white'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <CalendarDays className="w-4 h-4" />
-                  Calendar
-                </button>
-              </div>
-
-              <button
-                onClick={handleCreate}
-                className="flex items-center gap-2 px-4 py-2 bg-[#F3BC48] text-[#173151] rounded-lg font-semibold hover:bg-[#e5ae3a] transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                New Event
-              </button>
-            </div>
+      <div className="max-w-9xl mx-auto sm:px-4 px-0">
+        <div className="mb-4 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-2 justify-between">
+          <div>
+            <h1 className="lg:text-[36px] text-[20px] md:text-[28px] font-bold text-text-primary font-kollektif">
+              Events Management
+            </h1>
+            <p className="text-neutral-main font-manrope text-sm">
+              Create and manage events for your programs
+            </p>
           </div>
+
+          <button
+            onClick={handleCreateEvent}
+            className="flex items-center gap-2 font-manrope bg-btn-gold text-text-body px-6 py-3 rounded-lg font-semibold transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Create Event
+          </button>
         </div>
 
         <FilterBar
           searchValue={searchQuery}
-          searchPlaceholder="Search events..."
+          searchPlaceholder="Search by event name or description..."
           onSearch={setSearchQuery}
           filters={filters}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearFilters}
         />
 
-        {viewMode === 'list' ? (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <DataTable
-              columns={columns}
-              data={filteredEvents}
-              loading={loading}
-              emptyMessage="No events found"
-              pagination={true}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              totalItems={totalItems}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="grid grid-cols-7 gap-4">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="text-center text-sm font-semibold text-gray-500 pb-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-2 min-h-[400px]">
-              {Array.from({ length: 35 }).map((_, i) => {
-                const today = new Date();
-                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-                const startDay = firstDay.getDay();
-                const date = new Date(today.getFullYear(), today.getMonth(), i - startDay + 1);
-                const dateStr = date.toDateString();
-                const calendarData = getCalendarData();
-                const dayEvents = calendarData[dateStr] || [];
-                const isCurrentMonth = date.getMonth() === today.getMonth();
-                const isToday = date.toDateString() === today.toDateString();
+        <DataTable
+          columns={columns}
+          data={events}
+          loading={loading}
+          emptyMessage="No events found"
+          pagination={true}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          totalItems={totalItems}
+          onPageChange={setCurrentPage}
+        />
+      </div>
 
-                return (
-                  <div
-                    key={i}
-                    className={`min-h-[80px] p-1 border rounded-lg ${
-                      isCurrentMonth ? 'bg-white' : 'bg-gray-50'
-                    } ${isToday ? 'border-[#F3BC48] border-2' : 'border-gray-200'}`}
-                  >
-                    <div className={`text-xs font-medium mb-1 ${
-                      isCurrentMonth ? 'text-gray-800' : 'text-gray-400'
-                    }`}>
-                      {date.getDate()}
-                    </div>
-                    <div className="space-y-1">
-                      {dayEvents.slice(0, 2).map((event) => (
-                        <div
-                          key={event.id}
-                          onClick={() => handleEdit(event)}
-                          className="text-xs p-1 bg-blue-100 text-blue-800 rounded truncate cursor-pointer hover:bg-blue-200"
-                        >
-                          {event.title}
-                        </div>
-                      ))}
-                      {dayEvents.length > 2 && (
-                        <div className="text-xs text-gray-500">+{dayEvents.length - 2} more</div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+      {/* Event Form Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto py-8">
+          <div className="bg-white rounded-xl p-6 w-full max-w-lg mx-4 my-auto">
+            <h2 className="text-xl font-semibold text-text-primary mb-4 font-manrope">
+              {modalMode === "edit" ? "Edit Event" : "Create New Event"}
+            </h2>
 
-        {/* Create/Edit Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto py-8">
-            <div className="bg-white rounded-xl p-6 w-full max-w-lg mx-4 my-auto">
-              <h2 className="text-xl font-semibold text-[#173151] mb-4">
-                {selectedEvent ? 'Edit Event' : 'Create New Event'}
-              </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    placeholder="Event title"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48] resize-none"
-                    placeholder="Event description"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Type
-                    </label>
-                    <select
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    >
-                      {EVENT_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Class (optional)
-                    </label>
-                    <select
-                      value={formData.class_id}
-                      onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    >
-                      <option value="">No specific class</option>
-                      {classes.map((cls) => (
-                        <option key={cls.id} value={cls.id}>
-                          {cls.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Start Date/Time <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.start_datetime}
-                      onChange={(e) => setFormData({ ...formData, start_datetime: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      End Date/Time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.end_datetime}
-                      onChange={(e) => setFormData({ ...formData, end_datetime: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    placeholder="Event location"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Max Attendees
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.max_attendees}
-                      onChange={(e) => setFormData({ ...formData, max_attendees: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                      placeholder="Unlimited"
-                      min="1"
-                    />
-                  </div>
-
-                  <div className="flex items-center pt-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.requires_rsvp}
-                        onChange={(e) => setFormData({ ...formData, requires_rsvp: e.target.checked })}
-                        className="w-4 h-4 text-[#F3BC48] border-gray-300 rounded focus:ring-[#F3BC48]"
-                      />
-                      <span className="text-sm text-gray-700">Require RSVP</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    disabled={saving}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="flex-1 px-4 py-2 bg-[#F3BC48] text-[#173151] rounded-lg font-semibold hover:bg-[#e5ae3a] disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : selectedEvent ? 'Update Event' : 'Create Event'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteModal && selectedEvent && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                  <Trash2 className="w-5 h-5 text-red-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-[#173151]">Delete Event</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                  Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                  placeholder="Event title"
+                />
               </div>
 
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to delete <strong>{selectedEvent.title}</strong>? This action cannot be undone.
-              </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold resize-none font-manrope"
+                  placeholder="Event description"
+                />
+              </div>
 
-              <div className="flex gap-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                    Type
+                  </label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, type: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                  >
+                    {EVENT_TYPES.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                    Class (optional)
+                  </label>
+                  <select
+                    value={formData.class_id}
+                    onChange={(e) =>
+                      setFormData({ ...formData, class_id: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                  >
+                    <option value="">No specific class</option>
+                    {classes.map((cls) => (
+                      <option key={cls.id} value={cls.id}>
+                        {cls.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                    Start Date/Time <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.start_datetime}
+                    onChange={(e) =>
+                      setFormData({ ...formData, start_datetime: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                    End Date/Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.end_datetime}
+                    onChange={(e) =>
+                      setFormData({ ...formData, end_datetime: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                  placeholder="Event location"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
+                    Max Attendees
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.max_attendees}
+                    onChange={(e) =>
+                      setFormData({ ...formData, max_attendees: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
+                    placeholder="Unlimited"
+                    min="1"
+                  />
+                </div>
+
+                <div className="flex items-center pt-6">
+                  <label className="flex items-center gap-2 cursor-pointer font-manrope">
+                    <input
+                      type="checkbox"
+                      checked={formData.requires_rsvp}
+                      onChange={(e) =>
+                        setFormData({ ...formData, requires_rsvp: e.target.checked })
+                      }
+                      className="w-4 h-4 text-btn-gold border-gray-300 rounded focus:ring-btn-gold"
+                    />
+                    <span className="text-sm text-gray-700">Require RSVP</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
                 <button
-                  onClick={() => setShowDeleteModal(false)}
+                  type="button"
+                  onClick={handleModalClose}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 font-manrope"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={confirmDelete}
+                  type="submit"
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-btn-gold text-text-body rounded-lg font-semibold hover:bg-btn-gold/90 disabled:opacity-50 font-manrope"
                 >
-                  {saving ? 'Deleting...' : 'Delete Event'}
+                  {saving
+                    ? "Saving..."
+                    : modalMode === "edit"
+                    ? "Update Event"
+                    : "Create Event"}
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        onConfirm={confirmDialog.action}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        variant="danger"
+      />
+
+      {/* View Event Modal */}
+      {viewModalOpen && viewEvent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto py-8">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 my-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-text-primary font-manrope">
+                Event Details
+              </h2>
+              <button
+                onClick={() => setViewModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Title */}
+              <div>
+                <h3 className="text-2xl font-bold text-text-primary font-manrope">
+                  {viewEvent.title}
+                </h3>
+                <span className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 capitalize">
+                  {viewEvent.type || "Event"}
+                </span>
+              </div>
+
+              {/* Description */}
+              {viewEvent.description && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
+                    Description
+                  </label>
+                  <p className="text-text-primary font-manrope whitespace-pre-wrap">
+                    {viewEvent.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Date & Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
+                    Start Date/Time
+                  </label>
+                  <div className="flex items-center gap-2 text-text-primary font-manrope">
+                    <Clock className="w-4 h-4 text-text-muted" />
+                    {formatDateTime(viewEvent.start_datetime)}
+                  </div>
+                </div>
+                {viewEvent.end_datetime && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
+                      End Date/Time
+                    </label>
+                    <div className="flex items-center gap-2 text-text-primary font-manrope">
+                      <Clock className="w-4 h-4 text-text-muted" />
+                      {formatDateTime(viewEvent.end_datetime)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Location */}
+              {viewEvent.location && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
+                    Location
+                  </label>
+                  <div className="flex items-center gap-2 text-text-primary font-manrope">
+                    <MapPin className="w-4 h-4 text-text-muted" />
+                    {viewEvent.location}
+                  </div>
+                </div>
+              )}
+
+              {/* Capacity & RSVP */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
+                    Capacity
+                  </label>
+                  <div className="flex items-center gap-2 text-text-primary font-manrope">
+                    <Users className="w-4 h-4 text-text-muted" />
+                    <span className="font-semibold">{viewEvent.rsvp_count || 0}</span>
+                    <span className="text-text-muted">/ {viewEvent.max_attendees || "Unlimited"}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
+                    RSVP Status
+                  </label>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                      viewEvent.requires_rsvp
+                        ? "bg-[#DFF5E8] text-status-success"
+                        : "bg-neutral-lightest text-neutral-dark"
+                    }`}
+                  >
+                    {viewEvent.requires_rsvp ? "Required" : "Open Event"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-6 pt-4 border-t">
+              <button
+                onClick={() => setViewModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-manrope"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setViewModalOpen(false);
+                  handleEditEvent(viewEvent);
+                }}
+                className="flex-1 px-4 py-2 bg-btn-gold text-text-body rounded-lg font-semibold hover:bg-btn-gold/90 font-manrope flex items-center justify-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Edit Event
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

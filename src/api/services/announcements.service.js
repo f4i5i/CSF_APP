@@ -46,14 +46,9 @@ const announcementsService = {
    * Create new announcement (admin only)
    * @param {Object} announcementData - Announcement information
    * @param {string} announcementData.title - Announcement title
-   * @param {string} announcementData.content - Announcement content
-   * @param {string} announcementData.type - Announcement type
-   * @param {string} announcementData.priority - Priority level
-   * @param {string} [announcementData.program_id] - Target program ID
-   * @param {string} [announcementData.class_id] - Target class ID
-   * @param {boolean} [announcementData.send_email] - Send email notification
-   * @param {boolean} [announcementData.send_push] - Send push notification
-   * @param {string} [announcementData.expires_at] - Expiration date (ISO format)
+   * @param {string} announcementData.description - Announcement description
+   * @param {string} announcementData.type - Announcement type (general, important, urgent)
+   * @param {Array<string>} announcementData.class_ids - Target class IDs
    * @returns {Promise<Object>} Created announcement
    */
   async create(announcementData) {
@@ -74,6 +69,24 @@ const announcementsService = {
     const { data } = await apiClient.put(
       API_ENDPOINTS.ANNOUNCEMENTS.BY_ID(id),
       announcementData
+    );
+    return data;
+  },
+
+  /**
+   * Upload attachment to announcement
+   * @param {string} announcementId - Announcement ID
+   * @param {File} file - File to upload
+   * @returns {Promise<Object>} Uploaded attachment details
+   */
+  async uploadAttachment(announcementId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const { data } = await apiClient.post(
+      `${API_ENDPOINTS.ANNOUNCEMENTS.BY_ID(announcementId)}/attachments`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
     );
     return data;
   },

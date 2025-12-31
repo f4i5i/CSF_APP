@@ -39,4 +39,34 @@ export const getBaseUrl = () => {
   return `${API_CONFIG.BASE_URL}${API_CONFIG.API_PREFIX}`;
 };
 
+/**
+ * Get the uploads base URL for static files
+ * @returns {string} Uploads base URL
+ */
+export const getUploadsUrl = () => {
+  // Remove /api from BASE_URL to get the server root
+  const serverRoot = API_CONFIG.BASE_URL.replace(/\/api$/, '');
+  return `${serverRoot}/uploads`;
+};
+
+/**
+ * Get full URL for an uploaded file
+ * @param {string} filePath - Relative file path or API endpoint (e.g., 'announcements/xyz.jpg' or '/api/v1/children/123/profile-image')
+ * @returns {string} Full URL to the file
+ */
+export const getFileUrl = (filePath) => {
+  if (!filePath) return '';
+  // If already a full URL, return as-is
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    return filePath;
+  }
+  // If it's an API endpoint URL (starts with /api/), prepend the server root
+  if (filePath.startsWith('/api/')) {
+    const serverRoot = API_CONFIG.BASE_URL.replace(/\/api$/, '');
+    return `${serverRoot}${filePath}`;
+  }
+  // Legacy: filesystem-based path
+  return `${getUploadsUrl()}/${filePath}`;
+};
+
 export default API_CONFIG;

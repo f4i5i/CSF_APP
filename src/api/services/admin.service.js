@@ -184,6 +184,35 @@ const adminService = {
     const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_STATS);
     return data;
   },
+
+  // ===================
+  // INVOICE-BASED REFUNDS
+  // ===================
+
+  /**
+   * Get refunded invoices (uses Invoice table)
+   * @param {Object} params - Filter parameters
+   * @param {string} [params.start_date] - Start date filter
+   * @param {string} [params.end_date] - End date filter
+   * @param {string} [params.user_id] - User filter
+   * @param {string} [params.search] - Search by invoice number or user
+   * @param {number} [params.skip] - Pagination offset
+   * @param {number} [params.limit] - Pagination limit
+   * @returns {Promise<Object>} Refunded invoices list
+   */
+  async getRefundedInvoices(params = {}) {
+    const { data } = await apiClient.get('/admin/invoices/refunded', { params });
+    return data;
+  },
+
+  /**
+   * Get invoice statistics
+   * @returns {Promise<Object>} Invoice stats by status
+   */
+  async getInvoiceStats() {
+    const { data } = await apiClient.get('/admin/invoices/stats');
+    return data;
+  },
 };
 
 export default adminService;

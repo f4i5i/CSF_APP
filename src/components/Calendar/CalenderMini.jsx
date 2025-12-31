@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const CalenderMini = () => {
-  const [currentMonth, setCurrentMonth] = useState(9); // October
-  const [currentYear, setCurrentYear] = useState(2025);
+const CalenderMini = ({ events = [], loading = false }) => {
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-  // ⭐ ADD THIS — selected date state
+  // Selected date state
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const highlightedDates = [];
+  // Calculate highlighted dates from events
+  const highlightedDates = useMemo(() => {
+    if (!events || events.length === 0) return [];
+    return events
+      .filter((event) => {
+        const eventDate = new Date(event.start_datetime || event.start);
+        return (
+          eventDate.getMonth() === currentMonth &&
+          eventDate.getFullYear() === currentYear
+        );
+      })
+      .map((event) => new Date(event.start_datetime || event.start).getDate());
+  }, [events, currentMonth, currentYear]);
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -36,7 +49,7 @@ const CalenderMini = () => {
   };
 
   return (
-    <div className="rounded-3xl max-sm:py-1 w-full">
+    <div className={`rounded-3xl max-sm:py-1 w-full ${loading ? 'opacity-60' : ''}`}>
       <h2 className="text-[20px] font-kollektif text-[#1B1B1B] font-medium pb-8 max-xxl:pb-4 ">Calendar</h2>
 
       <div className="bg-[#FFFFFF50] rounded-3xl p-6 max-sm:p-4 shadow-sm lg:w-fit w-full">
