@@ -11,6 +11,7 @@ import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import eventsService from "../../api/services/events.service";
 import classesService from "../../api/services/classes.service";
+import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
 import Header from "../../components/Header";
 
@@ -32,6 +33,7 @@ export default function EventsManagement() {
 
   // Filter options from API
   const [classes, setClasses] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,14 +80,24 @@ export default function EventsManagement() {
   const fetchFilterOptions = async () => {
     setFiltersLoading(true);
     try {
-      const response = await classesService.getAll({ limit: 100 });
-      const classesList = Array.isArray(response)
-        ? response
-        : response.items || response.data || [];
+      const [classesResponse, areasResponse] = await Promise.all([
+        classesService.getAll({ limit: 100 }),
+        areasService.getAll({ is_active: true }),
+      ]);
+
+      const classesList = Array.isArray(classesResponse)
+        ? classesResponse
+        : classesResponse.items || classesResponse.data || [];
       setClasses(classesList);
+
+      const areasList = Array.isArray(areasResponse)
+        ? areasResponse
+        : areasResponse.items || areasResponse.data || [];
+      setAreas(areasList);
     } catch (error) {
       console.error("Failed to fetch filter options:", error);
       setClasses([]);
+      setAreas([]);
     } finally {
       setFiltersLoading(false);
     }
@@ -521,17 +533,22 @@ export default function EventsManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
-                  Location
+                  Location (Area)
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.location}
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
-                  placeholder="Event location"
-                />
+                >
+                  <option value="">Select a location</option>
+                  {areas.map((area) => (
+                    <option key={area.id} value={area.name}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

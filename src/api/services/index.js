@@ -20,3 +20,5 @@ export { default as discountsService } from './discounts.service';
 export { default as waiversService } from './waivers.service';
 export { default as programsService } from './programs.service';
 export { default as checkinService } from './checkin.service';
+export { default as areasService } from './areas.service';
+export { default as schoolsService } from './schools.service';
