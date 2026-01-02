@@ -14,7 +14,7 @@ const CustomEvent = ({ event }) => {
 
   return (
     <div
-      className={`flex flex-col gap-1 rounded-lg sm:rounded-[15px] p-1 lg:mx-2 sm:px-4 sm:py-2 shadow-sm border
+      className={`flex flex-col gap-1 rounded-lg sm:rounded-[15px] p-1 lg:mx-2 sm:px-4 sm:py-2 w-fit shadow-sm border
         ${isYellow ? 'bg-[#F3BC48] border-[#F3BC48] text-[#000]' : 'bg-[#173963] border-[#173963] text-white'}`}
       // style={{ minWidth: '120px' }}
     >
