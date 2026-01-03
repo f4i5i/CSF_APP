@@ -53,7 +53,7 @@ const ClassFilterDropdown = ({
 
       {/* Dropdown Menu */}
       {isOpen && classes.length > 0 && (
-        <div className="absolute top-full left-0 mt-2 min-w-full bg-white rounded-[16px] shadow-lg border border-gray-100 z-50 py-2 max-h-[300px] overflow-y-auto">
+        <div className="absolute top-full left-0 mt-2 min-w-full bg-card_bg rounded-[16px] shadow-lg border border-gray-100 z-50  max-h-[300px] overflow-y-auto">
           {classes.map((classItem) => (
             <button
               key={classItem.id}
@@ -61,8 +61,8 @@ const ClassFilterDropdown = ({
                 onSelectClass(classItem);
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-4 py-3 font-manrope text-[14px] hover:bg-gray-50 transition-colors ${
-                selectedClass?.id === classItem.id ? 'bg-[#F3BC48]/10 text-[#0F1D2E]' : 'text-[#1B1B1B]'
+              className={`w-full border-b border-border-light text-left px-4 py-3 font-manrope text-[14px] hover:bg-gray-50 transition-colors ${
+                selectedClass?.id === classItem.id ? 'text-white font-semibold bg-[#173151]' : 'text-[#1B1B1B]'
               }`}
             >
               {getClassDisplayText(classItem)}

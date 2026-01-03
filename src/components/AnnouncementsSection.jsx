@@ -139,7 +139,7 @@ export default function AnnouncementsSection({
     <>
       {/* MOBILE NEXT EVENT */}
       <div className="flex sm:hidden mb-3 flex-col gap-3">
-        <div className="w-full bg-white/50 p-4 rounded-4xl">
+        <div className="w-full bg-white/50 p-4 rounded-3xl">
           <h3 className="text-lg font-normal text-[#0F1D2E]">Next Event</h3>
 
           {loadingEvent ? (
@@ -187,7 +187,7 @@ export default function AnnouncementsSection({
       </div>
 
       <section className="bg-white/50 rounded-3xl md:max-h-[723px] md:overflow-auto no-scrollbar px-3 sm:px-4 py-2 font-manrope sm:py-5 w-full">
-        <h2 className="text-lg sm:text-xl font-manrope font-semibold mb-3">
+        <h2 className="text-lg sm:text-xl font-manrope font-semibold  mb-3">
           Announcements
         </h2>
 
@@ -266,6 +266,9 @@ export default function AnnouncementsSection({
               );
             })
           )}
+          <div className="w-full md:hidden text-center  " >
+          <button className=" w-32 h-12 rounded-full my-2 bg-white text-[#0D0D12] text-base font-medium font-manrope mx-auto shadow-md " >View more</button>
+          </div>
         </div>
       </section>
     </>

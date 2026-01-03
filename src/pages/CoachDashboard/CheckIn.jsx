@@ -255,7 +255,7 @@ const CheckIn = () => {
         />
       )}
 
-      <Footer isFixed={false} />
+      <Footer isFixed={true} mobileHidden={true} />
     </div>
   );
 };

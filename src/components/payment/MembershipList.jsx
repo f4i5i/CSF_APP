@@ -157,7 +157,7 @@ const MembershipList = () => {
 
   if (error) {
     return (
-      <div className="border rounded-xl p-5">
+      <div className="border rounded-xl my-3 p-5">
         <div className="flex items-center gap-2 text-red-600">
           <AlertCircle className="w-5 h-5" />
           <p>{error}</p>

@@ -159,10 +159,10 @@ const Calender = () => {
   return (
     <div className="min-h-screen max-sm:h-fit bg-page-gradient max-sm:pb-20">
       <Header />
-      <main className="px-6 py-8 max-sm:py-2 max-sm:px-3">
+      <main className="px-6 py-8 max-sm:py-2 max-sm:px-3 lg:bg-card_bg lg:mt-10 lg:m-5 lg:rounded-[30px] shadow-lg ">
         {/* Page Header with Class Selector for Coach */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-fluid-2xl text-[#173151] font-kollektif font-normal leading-[1.002] tracking-[-0.02em]">
+          <h1 className="text-fluid-2xl px-2 text-[#173151] hidden font-kollektif font-normal leading-[1.002] tracking-[-0.02em]">
             Calendar
           </h1>
 

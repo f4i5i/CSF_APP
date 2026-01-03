@@ -390,7 +390,7 @@ const Attendence = () => {
           )}
         </div>
       </main>
-      <Footer isFixed={false} />
+      <Footer isFixed={true} mobileHidden={true} />
     </div>
   );
 };

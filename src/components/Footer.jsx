@@ -1,9 +1,9 @@
 import React from 'react'
 
-const Footer = ({ isFixed = true }) => {
+const Footer = ({ isFixed = true , mobileHidden=false }) => {
   return (
-     <footer className={`${isFixed ? "fixed bottom-0 left-0 right-0" : "relative"} w-full sm:py-4 pt-4 transparent backdrop-blur-sm `}>
-        <div className="w-full flex flex-row max-sm:flex  max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-4 sm:px-10 text-gray-600 text-xs sm:text-sm">
+     <footer className={`${isFixed ? "fixed bottom-0 left-0 right-0" : "relative"} ${mobileHidden ? "max-sm:hidden":"max-sm:block"} w-full sm:py-4 pt-4 transparent bg-[#bdc7d4] backdrop-blur-sm `}>
+        <div className="w-full flex flex-row max-sm:flex  max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-6 text-gray-600 text-xs sm:text-sm">
 
           <p className="text-center sm:text-left font-['inter']  text-black text-sm mb-2 sm:mb-0">
             © 2025 Carolina Soccer Factory. All rights reserved.

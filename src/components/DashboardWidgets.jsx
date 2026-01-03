@@ -262,7 +262,7 @@ export default function DashboardWidgets({
                 </div>
                 <hr className="border-black/10 w-full" />
 
-                <p className="text-sm sm:text-base font-semibold text-grey-300 leading-5">
+                <p className="text-sm lg:text-xs xl:text-base font-medium text-[#1B1B1B] ">
                   {displayNextEvent?.description}
                 </p>
                 {displayNextEvent?.attachment_name && (
@@ -285,7 +285,7 @@ export default function DashboardWidgets({
         </div>
 
         {/* Program Photos & Badges */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-3 w-full min-h-[410px]">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-3 w-full xl:min-h-[420px]">
           {/* Program Photos */}
           <div className="w-full sm:w-1/2 relative h-[290px] sm:h-full rounded-3xl overflow-hidden">
             {loadingPhoto ? (
@@ -312,7 +312,7 @@ export default function DashboardWidgets({
                 </Link>
                 <div className="absolute left-4 sm:left-6 bottom-4 sm:bottom-6 text-white">
                   <h2 className="font-bold text-xl">Program Photos</h2>
-                  <p className="font-normal text-xl opacity-100">
+                  <p className="font-light text-white text-lg opacity-70">
                     {formatPhotoDate(photo?.created_at)}
                   </p>
                 </div>
@@ -321,7 +321,7 @@ export default function DashboardWidgets({
           </div>
 
           {/* Earned Badges */}
-          <div className="bg-white/50 rounded-3xl sm:rounded-4xl p-5 sm:p-6 shadow-sm w-full sm:w-1/2 flex flex-col justify-between items-center gap-3 sm:gap-5 min-h-96 sm:min-h-[410px]">
+          <div className="bg-white/50 rounded-3xl sm:rounded-4xl p-5 sm:p-6 shadow-sm w-full sm:w-1/2 flex flex-col justify-between items-center gap-3 sm:gap-5 min-h-96 sm:min-h-[420px]">
             <div className="flex w-full items-start justify-start">
               <h3 className="text-lg sm:text-xl font-semibold text-[#0F1D2E]">
                 Earned Badges
@@ -346,7 +346,7 @@ export default function DashboardWidgets({
                     />
                   </div>
                   <div className="flex-1 flex items-center flex-col text-center">
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">
+                    <h4 className="text-base sm:text-lg font-semibold text-[#1B1B1B">
                       {displayBadges[badgeIndex]?.title}
                     </h4>
                     <p className="text-xs sm:text-sm font-medium text-[#0F1D2E]">
@@ -367,31 +367,31 @@ export default function DashboardWidgets({
             )}
             {displayBadges.length > 1 && (
               <div className="flex items-center justify-center w-full">
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-5">
                   <button
                     onClick={handlePrevBadge}
-                    className="size-10 sm:size-[50px] flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200"
+                    className="size-12 sm:size-[50px] flex items-center justify-center bg-white rounded-full hover:bg-gray-200"
                   >
                     <img
                       src={LeftArrowSrc}
                       alt="Prev"
-                      width={20}
-                      height={20}
+                      width={24}
+                      height={24}
                       className="size-4 sm:size-[30px]"
                     />
                   </button>
-                  <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                  <span className="text-xs sm:text-sm font-medium text-[#1B1B1B] whitespace-nowrap">
                     {badgeIndex + 1}/{displayBadges.length}
                   </span>
                   <button
                     onClick={handleNextBadge}
-                    className="size-10 sm:size-[50px] flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200"
+                    className="size-12 sm:size-[54px] flex items-center justify-center bg-white rounded-full hover:bg-gray-200"
                   >
                     <img
                       src={RightArrowSrc}
                       alt="Next"
-                      width={20}
-                      height={20}
+                      width={24}
+                      height={24}
                       className="size-4 sm:size-[30px]"
                     />
                   </button>

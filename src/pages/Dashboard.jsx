@@ -332,10 +332,11 @@ export default function Dashboard() {
   }, [badges]);
 
   return (
-    <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    // <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
+    <div className="min-h-screen max-sm:h-fit overflow-x-hidden bg-page-gradient max-sm:pb-20">
       <Header />
 
-      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 mt-8">
+      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 my-8 mb-12 ">
         <div className="w-full">
         {/* Subheader Section */}
         <div className="flex flex-row lg:flex-row items-start lg:items-start justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
@@ -423,7 +424,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-[42px] max-sm:hidden pr-20">
+          <div className="flex items-center gap-[42px] max-sm:hidden ">
             <StatCard value={attendanceStreak} label="Attendance Streak" />
             <StatCard value={badgeCount} label="Badges Earned" />
           </div>
@@ -506,7 +507,7 @@ export default function Dashboard() {
         </div>
         </div>
       </main>
-      <Footer isFixed={false} />
+      <Footer mobileHidden={true} />
     </div>
   );
 }

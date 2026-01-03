@@ -270,7 +270,7 @@ const PaymentCard = () => {
       </div>
 
       {paymentMethods.length === 0 ? (
-        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+        <div className="text-center py-8 border-2 border-dashed border-border-light rounded-lg">
           <CreditCard className="w-12 h-12 mx-auto mb-2 text-gray-400" />
           <p className="text-gray-500 font-manrope">No saved payment methods</p>
           <button

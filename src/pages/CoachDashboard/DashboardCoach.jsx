@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Plus, Loader2, X, FileText, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getFileUrl } from '../../api/config';
-
+import { CircleCheckBig } from 'lucide-react';
 // Layout Components
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -221,7 +221,7 @@ export default function DashboardCoach() {
       <Header />
 
       {/* Main Content */}
-      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3">
+      <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 mb-[5%] max-sm:px-3">
         {/* ================================================================ */}
         {/* TOP SECTION: Welcome + Stats */}
         {/* ================================================================ */}
@@ -243,7 +243,7 @@ export default function DashboardCoach() {
           </div>
 
           {/* Stats Container */}
-          <div className="flex items-center gap-[42px] max-sm:hidden pr-20">
+          <div className="flex items-center gap-[42px] max-sm:hidden pr-4">
             <CoachStatsCard
               value={checkedInToday}
               label="Checked In Today"
@@ -258,11 +258,11 @@ export default function DashboardCoach() {
         {/* ================================================================ */}
         {/* MAIN CONTENT GRID */}
         {/* ================================================================ */}
-        <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
+        <div className="flex flex-col  justify-between lg:flex-row gap-4 max-sm:gap-6">
           {/* ============================================================ */}
           {/* LEFT COLUMN: Announcements */}
           {/* ============================================================ */}
-          <div className="w-full lg:w-[48%] max-sm:order-2">
+          <div className="w-full lg:w-[49%] max-sm:order-2">
             <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm min-h-[650px]">
               {/* Announcements Header */}
               <div className="flex items-center justify-between mb-4">
@@ -341,7 +341,10 @@ export default function DashboardCoach() {
           {/* ============================================================ */}
           {/* RIGHT COLUMN: Calendar + Event + Photos */}
           {/* ============================================================ */}
-          <div className="w-full lg:w-[48%] flex flex-col gap-4 max-sm:order-1">
+          <button className='md:hidden flex my-1 items-center justify-center gap-3 bg-[#7E97B5] rounded-xl shadow-md w-ful h-12 text-white text-base font-medium font-manrope ' >
+              <CircleCheckBig color="#fff" />  
+                  Check-In</button>
+          <div className="w-full lg:w-[49%] flex flex-col gap-4 max-sm:order-1">
             {/* Calendar + Next Event Card */}
             <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm flex flex-col lg:flex-row gap-6">
               {/* Calendar Widget */}
@@ -381,7 +384,7 @@ export default function DashboardCoach() {
       </main>
 
       {/* Footer */}
-      <Footer isFixed={false} />
+      <Footer isFixed={true} mobileHidden={true} />
 
       {/* Create/Edit Post Modal */}
       {openModal && (

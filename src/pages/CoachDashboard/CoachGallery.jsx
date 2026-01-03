@@ -196,7 +196,7 @@ const CoachGallery = () => {
         />
       )}
 
-      <Footer isFixed={false} />
+      <Footer isFixed={true} />
     </div>
   );
 };
