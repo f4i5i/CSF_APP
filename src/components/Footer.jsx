@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Footer = ({ isFixed = true , mobileHidden=true }) => {
+const Footer = ({ isFixed = true , mobileHidden=false }) => {
   return (
      <footer className={`${isFixed ? "fixed bottom-0 left-0 right-0" : "relative"} ${mobileHidden ? "max-sm:hidden":"max-sm:block"} w-full sm:py-4 pt-4 transparent bg-[#bdc7d4] backdrop-blur-sm `}>
         <div className="w-full flex flex-row max-sm:flex  max-sm:flex-col-reverse max-sm:gap-2 items-center justify-between px-6 text-gray-600 text-xs sm:text-sm">

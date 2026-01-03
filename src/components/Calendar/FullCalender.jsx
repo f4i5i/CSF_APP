@@ -94,7 +94,7 @@ export default function EventCalendar({ events: propEvents = [], loading = false
           toolbar: (props) => <CustomToolbar {...props} />, // ✅ custom toolbar
           event: CustomEvent, // ✅ SHOWS TIME WITH EVENT TITLE
         }}
-        style={{ width: "100%", height: "80vh" }}
+        style={{ width: "100%", height: "85vh" }}
       />
     </div>
   );

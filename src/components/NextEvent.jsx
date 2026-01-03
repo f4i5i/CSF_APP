@@ -49,7 +49,7 @@ export default function NextEvent({ event = null, loading = false }) {
 
   return (
     <div className="lg:max-w-[360px]  w-full">
-      <div className="bg-white/20 border border-white/20 min-h-[220px] rounded-fluid-md p-fluid-4 flex flex-col gap-fluid-3 min-h-fluid-event-card">
+      <div className="bg-white/20 border border-white min-h-[220px] rounded-fluid-md p-fluid-4 flex flex-col gap-fluid-3 min-h-fluid-event-card">
         {/* Header with time and event info */}
         <div className="flex items-center justify-between border-b border-black/10 pb-4">
           <div className="flex items-center gap-fluid-3">

@@ -126,7 +126,7 @@ const Gallery = () => {
           </div>
         )}
       </main>
-      <Footer />
+      <Footer isFixed={true} />
     </div>
   )
 }

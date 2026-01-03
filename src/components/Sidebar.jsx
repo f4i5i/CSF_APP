@@ -27,12 +27,18 @@ const Sidebar = () => {
     }
   };
 
-  // ✅ find which route is active
- const currentItem =
-  items.find(
-    (item) =>
-      item.label !== "Log out" && location.pathname.includes(item.path)
-  ) || items[0];
+  const currentItem =
+    items.find(
+      (item) =>
+        item.label !== "Log out" &&
+        (
+          location.pathname === item.path ||
+          (
+            item.path !== "/settings" &&
+            location.pathname.startsWith(item.path)
+          )
+        )
+    ) || items[0];
 
   return (
     <>
@@ -53,11 +59,15 @@ const Sidebar = () => {
             {items.map((item, i) => (
               <button
                 key={i}
-               className={`w-full text-left px-4 py-3 text-sm
+                className={`w-full text-left px-4 py-3 text-sm
   ${
     item.label === "Log out"
-      ? "text-red-500" // 🔴 always red
-      : location.pathname.includes(item.path)
+      ? "text-red-500"
+      : location.pathname === item.path ||
+        (
+          item.path !== "/settings" &&
+          location.pathname.startsWith(item.path)
+        )
       ? "bg-[#F6F8FA] font-medium border-[1px] border-[#DFE1E7]"
       : "text-gray-600"
   }`}
@@ -79,11 +89,15 @@ const Sidebar = () => {
           <button
             key={i}
             onClick={() => handleNavigate(item)}
-           className={`text-left w-full py-2 font-manrope px-3 rounded-lg text-sm
+            className={`text-left w-full py-2 font-manrope px-3 rounded-lg text-sm
   ${
     item.label === "Log out"
-      ? "text-red-500" // 🔴 always red
-      : location.pathname.includes(item.path)
+      ? "text-red-500"
+      : location.pathname === item.path ||
+        (
+          item.path !== "/settings" &&
+          location.pathname.startsWith(item.path)
+        )
       ? "bg-[#F6F8FA] font-medium border-[1px] border-[#DFE1E7]"
       : "text-[#666D80]"
   }`}
