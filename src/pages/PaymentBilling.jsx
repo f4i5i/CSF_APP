@@ -10,7 +10,8 @@ import Logo from "../components/Logo";
 import DottedOverlay from "@/components/DottedOverlay";
 const PaymentPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] flex flex-col justify-between max-sm:pb-20">
+    // <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] flex flex-col justify-between max-sm:pb-20">
+    <div className="min-h-screen bg-page-gradient flex flex-col justify-between ">
         {/* <div className="sm:h-full relative  bg-page-gradient flex flex-col  justify-between  max-sm:justify-start "> */}
                 <DottedOverlay className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0 max-sm:hidden " />
     
@@ -19,7 +20,7 @@ const PaymentPage = () => {
          <Logo/>
         </div>
        <main className="ww-full  max-sm:px-5 z-50">
-           <div className="w-[60%] max-xl:w-[75%] max-sm:mt-8 flex max-sm:flex-col max-sm:w-full justify-between items-center max-sm:justify-start max-sm:items-start mx-auto">
+           <div className="sm:w-[90%] xl:w-[80%] max-sm:mt-8 flex max-sm:flex-col max-sm:w-full justify-between items-center max-sm:justify-start max-sm:items-start mx-auto">
       <div className="text-lg max-sm:text-3xl font-manrope font-semibold  text-nuetral-200">
         Settings
       </div>
@@ -35,13 +36,13 @@ const PaymentPage = () => {
           </div>
 
       {/* MAIN WHITE CONTAINER */}
-      <div className="bg-white w-[60%] max-xl:w-[75%]  max-sm:w-full mx-auto mt-6 rounded-2xl shadow-sm flex flex-col lg:flex-row ">
+      <div className="bg-white sm:w-[90%] xl:w-[80%]  max-sm:w-full mx-auto mt-6 rounded-2xl shadow-sm flex flex-col lg:flex-row ">
 
         {/* LEFT SIDEBAR */}
         <Sidebar />
 
         {/* RIGHT CONTENT */}
-        <div className="flex max-sm:flex-col gap-6 p-6 max-sm:p-1 flex-1">
+        <div className="flex max-lg:flex-col gap-6 p-6 max-sm:p-1 flex-1">
             <div className="flex flex-col gap-6 w-[40%] max-sm:px-5 max-sm:pt-5 max-sm:w-full">
           <div className="">
             <h2 className="font-semibold text-[#000000] text-lg">Payment</h2>
@@ -50,21 +51,21 @@ const PaymentPage = () => {
             </p>
           </div>
 
-          <div className="max-sm:hidden">
+          <div className="max-lg:hidden">
             <h2 className="font-semibold text-[#000000] text-lg">Billing</h2>
             <p className="text-sm text-[#666D80] mt-1">
               Review and update your billing information.
             </p>
           </div>
 
-          <div className="max-sm:hidden">
+          <div className="max-lg:hidden">
             <h2 className="font-semibold text-[#000000] text-lg">Memberships</h2>
             <p className="text-sm text-[#666D80] mt-1">
               View all your children's class enrollments and membership details.
             </p>
           </div>
 
-          <div className="max-sm:hidden">
+          <div className="max-lg:hidden">
             <h2 className="font-semibold text-[#000000] text-lg">Invoices</h2>
             <p className="text-sm text-[#666D80] mt-1">
               Download and view your payment history and invoices.
@@ -75,7 +76,7 @@ const PaymentPage = () => {
           <div className="max-sm:border-b border-border-light max-sm:border-gray-200 max-sm:pb-6 max-sm:px-6">
   <PaymentCard />
 </div>
- <div className="sm:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
+ <div className="lg:hidden max-sm:px-5 my-2 max-sm:pt-5 max-sm:w-full">
             <h2 className="font-semibold text-[#000] text-lg">Billing</h2>
             <p className="text-sm text-[#666D80] mt-1">
               Review and update your billing information.
@@ -85,7 +86,7 @@ const PaymentPage = () => {
   <BillingInfo />
 </div>
 
- <div className="sm:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
+ <div className="lg:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
             <h2 className="font-semibold text-[#000] text-lg">Memberships</h2>
             <p className="text-sm text-[#666D80] mt-1">
               View all your children's class enrollments and membership details.
@@ -95,7 +96,7 @@ const PaymentPage = () => {
   <MembershipList />
 </div>
 
- <div className="sm:hidden max-sm:px-5 max-sm:pt-5 max-sm:w-full">
+ <div className="lg:hidden max-sm:px-5 max-sm:pt-5 my-3 max-sm:w-full">
             <h2 className="font-semibold text-[#000] text-lg">Invoices</h2>
             <p className="text-sm text-[#666D80] mt-1">
               Download and view your payment history and invoices.

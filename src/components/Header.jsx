@@ -300,7 +300,7 @@ const Header = () => {
               </li>
             </ul>
           </nav>
-        )} 
+         )} 
 
         {/* ================================================================ */}
         {/* COACH NAVIGATION BAR (desktop only) */}
@@ -504,7 +504,7 @@ const Header = () => {
       {/* Sticky bottom navigation bar displayed on mobile for all roles */}
       {/* Shows navigation icons based on user role (parent/coach/admin) */}
       {/* ==================================================================== */}
-      <div className="fixed bottom-0  w-full left-0 right-0 bg-[#0D1B2A] py-3 px-6 flex justify-between items-center sm:hidden z-10">
+      <div className="fixed bottom-0  w-full left-0 right-0 bg-[#0D1B2A] py-5 px-6 flex justify-between items-center sm:hidden z-10">
         {itemsToShow.map((item) => {
           const Icon = item.icon;
           const hideLabel = role === "admin";
@@ -524,7 +524,7 @@ const Header = () => {
                   <Icon
                     size={24}
                     className={`${
-                      isActive ? "text-[#F3BC48]" : "text-gray-300"
+                      isActive ? "text-[#F3BC48]" : "text-white"
                     }`}
                   />
 
@@ -533,7 +533,7 @@ const Header = () => {
                       className={`text-xs ${
                         isActive
                           ? "text-[#F3BC48] font-medium"
-                          : "text-gray-300"
+                          : "text-white"
                       }`}
                     >
                       {item.name}

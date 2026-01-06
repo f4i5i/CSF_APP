@@ -128,7 +128,7 @@ const Badges = () => {
         {locked.map((item, index) => (
           <div
             key={index}
-            className="w-48 h-48 max-sm:w-full max-sm:h-48 relative bg-white/40 rounded-[20px]"
+            className="w-48 h-48 max-sm:w-full max-sm:h-48 relative p-3 bg-white/40 rounded-[20px]"
           >
             {/* Lock Icon Container */}
             <div className="w-14 h-14 px-3 pt-3 left-1/2 -translate-x-1/2 top-[25px] absolute bg-white rounded-full shadow-[0px_4px_6px_-4px_rgba(0,0,0,0.10)] inline-flex flex-col justify-start items-start">
@@ -150,7 +150,7 @@ const Badges = () => {
             </div>
 
             {/* Description */}
-            <div className="w-44 left-1/2 -translate-x-1/2 top-[137px] absolute">
+            <div className="w-32 left-1/2 -translate-x-1/2 top-[137px] absolute">
               <p className="text-center text-slate-900 text-xs font-medium font-manrope leading-4">
                 {item.desc}
               </p>
@@ -161,7 +161,7 @@ const Badges = () => {
     
 
       </main>
-      <Footer isFixed={false} />
+      <Footer isFixed={false} mobileHidden={true} />
 </div>
   )
 }

@@ -62,7 +62,7 @@ const BillingInfo = () => {
   const hasBalance = billingSummary?.current_balance > 0;
 
   return (
-    <div className="border rounded-xl p-5">
+    <div className="border rounded-xl my-3 p-5">
       <h2 className="font-semibold text-lg mb-2">Billing Period</h2>
 
       {billingSummary?.billing_period_start && billingSummary?.billing_period_end && (
@@ -76,7 +76,7 @@ const BillingInfo = () => {
       <div className="space-y-4">
         {/* Current Balance */}
         <div className="border rounded-xl">
-          <div className="border-b border-gray-100 p-4">
+          <div className=" p-4">
             <p className="text-sm font-medium text-gray-600">Current Balance</p>
             <p className={`text-2xl font-semibold mt-1 ${hasBalance ? 'text-red-600' : 'text-green-600'}`}>
               {formatCurrency(billingSummary?.current_balance || 0)}

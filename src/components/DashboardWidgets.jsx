@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { X } from "lucide-react";
 import ProgramPhotoSrc from "../assets/program.png";
 import EarnedBadgeSrc from "../assets/Earned_Badges.png";
 import LeftArrowSrc from "../assets/left_errow.png";
@@ -23,6 +24,7 @@ export default function DashboardWidgets({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [monthOffset, setMonthOffset] = useState(0);
   const [badgeIndex, setBadgeIndex] = useState(0);
+  const [viewMoreEvent, setViewMoreEvent] = useState(null);
 
   const viewDate = useMemo(() => {
     const d = new Date();
@@ -56,6 +58,51 @@ export default function DashboardWidgets({
       .map((event) => new Date(event.start_datetime).getDate());
   }, [calendarEvents, month, year]);
 
+  const renderTextWithLinks = (text) => {
+    if (!text) return null;
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlPattern);
+    return parts.map((part, index) => {
+      if (part.match(urlPattern)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline break-all"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  const renderEventDescriptionWithViewMore = (description) => {
+    if (!description) return null;
+    
+    const maxLength = 300;
+    const shouldShowViewMore = description.length > maxLength;
+    
+    return (
+      <div>
+        <p className="text-sm lg:text-xs xl:text-base font-medium text-[#1B1B1B]">
+          {shouldShowViewMore ? `${description.substring(0, maxLength)}...` : description}
+        </p>
+        {shouldShowViewMore && (
+          <button
+            onClick={() => setViewMoreEvent(true)}
+            className="text-blue-600 hover:text-blue-800 font-medium text-sm mt-1"
+          >
+            View More
+          </button>
+        )}
+      </div>
+    );
+  };
+
   // Demo badges for fallback
   const demoBadges = [
     {
@@ -78,12 +125,12 @@ export default function DashboardWidgets({
     },
   ];
 
-  // Demo next event
+  // Demo next event with long description for testing
   const demoNextEvent = {
     title: "Tournament Day",
-    description: "Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up.",
+    description: "Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up. This is a very important event for our team. We've been preparing for months and this is our chance to showcase our skills. Make sure to bring your complete gear including cleats, shin guards, and water bottles. We'll have a team meeting 15 minutes before the match to discuss strategy. Parents are welcome to attend and cheer for the team. After the tournament, we'll have a small celebration at the clubhouse. Please let the coach know if you have any dietary restrictions. This tournament is part of the regional championship series, and winning could qualify us for the state finals. We need everyone's best effort and team spirit. Remember, it's not just about winning, but about playing with honor and sportsmanship. Good luck to all players! May the best team win. Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up. This is a very important event for our team. We've been preparing for months and this is our chance to showcase our skills. Make sure to bring your complete gear including cleats, shin guards, and water bottles.",
     start_datetime: "2025-10-29T14:00:00",
-    attachment_name: "details.pdf",
+    attachment_name: "tournament_details.pdf",
   };
 
   // Use real data or demo data
@@ -262,11 +309,15 @@ export default function DashboardWidgets({
                 </div>
                 <hr className="border-black/10 w-full" />
 
-                <p className="text-sm sm:text-base font-semibold text-grey-300 leading-5">
-                  {displayNextEvent?.description}
-                </p>
+                {renderEventDescriptionWithViewMore(displayNextEvent?.description)}
+                
                 {displayNextEvent?.attachment_name && (
-                  <button className="flex items-center gap-2 bg-white/50 px-2 sm:px-3.5 mt-2 py-2 rounded-[60px] text-xs text-gray-700 cursor-pointer">
+                  <a
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-white/50 px-2 sm:px-3.5 mt-2 py-2 rounded-[60px] text-xs text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors w-fit"
+                  >
                     <img
                       src={pdfLinkIcon}
                       alt="linkicon"
@@ -277,7 +328,7 @@ export default function DashboardWidgets({
                     <span className="text-xs sm:text-sm text-[#1B1B1B] font-semibold">
                       {displayNextEvent.attachment_name}
                     </span>
-                  </button>
+                  </a>
                 )}
               </div>
             )}
@@ -285,7 +336,7 @@ export default function DashboardWidgets({
         </div>
 
         {/* Program Photos & Badges */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-3 w-full min-h-[410px]">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-3 w-full xl:min-h-[420px]">
           {/* Program Photos */}
           <div className="w-full sm:w-1/2 relative h-[290px] sm:h-full rounded-3xl overflow-hidden">
             {loadingPhoto ? (
@@ -312,7 +363,7 @@ export default function DashboardWidgets({
                 </Link>
                 <div className="absolute left-4 sm:left-6 bottom-4 sm:bottom-6 text-white">
                   <h2 className="font-bold text-xl">Program Photos</h2>
-                  <p className="font-normal text-xl opacity-100">
+                  <p className="font-light text-white text-lg opacity-70">
                     {formatPhotoDate(photo?.created_at)}
                   </p>
                 </div>
@@ -321,7 +372,7 @@ export default function DashboardWidgets({
           </div>
 
           {/* Earned Badges */}
-          <div className="bg-white/50 rounded-3xl sm:rounded-4xl p-5 sm:p-6 shadow-sm w-full sm:w-1/2 flex flex-col justify-between items-center gap-3 sm:gap-5 min-h-96 sm:min-h-[410px]">
+          <div className="bg-white/50 rounded-3xl sm:rounded-4xl p-5 sm:p-6 shadow-sm w-full sm:w-1/2 flex flex-col justify-between items-center gap-3 sm:gap-5 min-h-96 sm:min-h-[420px]">
             <div className="flex w-full items-start justify-start">
               <h3 className="text-lg sm:text-xl font-semibold text-[#0F1D2E]">
                 Earned Badges
@@ -346,7 +397,7 @@ export default function DashboardWidgets({
                     />
                   </div>
                   <div className="flex-1 flex items-center flex-col text-center">
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">
+                    <h4 className="text-base sm:text-lg font-semibold text-[#1B1B1B">
                       {displayBadges[badgeIndex]?.title}
                     </h4>
                     <p className="text-xs sm:text-sm font-medium text-[#0F1D2E]">
@@ -367,31 +418,31 @@ export default function DashboardWidgets({
             )}
             {displayBadges.length > 1 && (
               <div className="flex items-center justify-center w-full">
-                <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-5">
                   <button
                     onClick={handlePrevBadge}
-                    className="size-10 sm:size-[50px] flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200"
+                    className="size-12 sm:size-[50px] flex items-center justify-center bg-white rounded-full hover:bg-gray-200"
                   >
                     <img
                       src={LeftArrowSrc}
                       alt="Prev"
-                      width={20}
-                      height={20}
+                      width={24}
+                      height={24}
                       className="size-4 sm:size-[30px]"
                     />
                   </button>
-                  <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                  <span className="text-xs sm:text-sm font-medium text-[#1B1B1B] whitespace-nowrap">
                     {badgeIndex + 1}/{displayBadges.length}
                   </span>
                   <button
                     onClick={handleNextBadge}
-                    className="size-10 sm:size-[50px] flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200"
+                    className="size-12 sm:size-[54px] flex items-center justify-center bg-white rounded-full hover:bg-gray-200"
                   >
                     <img
                       src={RightArrowSrc}
                       alt="Next"
-                      width={20}
-                      height={20}
+                      width={24}
+                      height={24}
                       className="size-4 sm:size-[30px]"
                     />
                   </button>
@@ -401,6 +452,86 @@ export default function DashboardWidgets({
           </div>
         </div>
       </div>
+
+      {/* View More Modal for Event Description */}
+      {viewMoreEvent && displayNextEvent && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-lg overflow-hidden animate-fadeIn max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border-light px-6 py-4 flex-shrink-0">
+              <h2 className="text-xl font-manrope font-semibold text-[#0F1D2E]">
+                Event Details
+              </h2>
+              <button
+                onClick={() => setViewMoreEvent(false)}
+                className="w-10 h-10 rounded-full border border-border-light flex items-center justify-center hover:bg-gray-50 transition"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full flex flex-col">
+                <div className="px-6 py-4 border-b border-border-light flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="text-xl font-manrope font-semibold text-[#0F1D2E]">
+                        {formatTime(displayNextEvent?.start_datetime)}
+                      </div>
+                      <div className="w-1 bg-[#F3BC48] h-7 rounded"></div>
+                      <div>
+                        <p className="text-sm text-gray-500 font-manrope">
+                          {formatEventDate(displayNextEvent?.start_datetime)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/*  title */}
+                <div className="px-6 py-4 border-b border-border-light flex-shrink-0">
+                  <h3 className="text-2xl font-manrope font-semibold text-[#0F1D2E]">
+                    {displayNextEvent?.title}
+                  </h3>
+                </div>
+
+                {/* description */}
+                <div className="flex-1 overflow-y-auto max-h-80 px-6 py-4">
+                  <div className="text-[#1b1b1b] opacity-80 font-manrope leading-relaxed whitespace-pre-wrap">
+                    {renderTextWithLinks(displayNextEvent?.description || '')}
+                  </div>
+                </div>
+
+                {/*  attachment section */}
+                {displayNextEvent?.attachment_name && (
+                  <div className="px-6 py-4 border-t border-border-light bg-gray-50 flex-shrink-0">
+                    <p className="text-sm font-manrope font-semibold text-gray-600 mb-3">
+                      Attachment
+                    </p>
+                      <img
+                        src={pdfLinkIcon}
+                        alt="PDF"
+                        className="w-8 h-8 rounded object-cover"
+                      />
+                      <span className="font-manrope text-sm text-gray-700">
+                        {displayNextEvent.attachment_name}
+                      </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 border-t border-border-light px-6 py-4 bg-gray-50 flex-shrink-0">
+              <button
+                onClick={() => setViewMoreEvent(false)}
+                className="px-6 py-2 font-manrope rounded-full border border-gray-300 font-semibold text-[#0F1D2E] hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
