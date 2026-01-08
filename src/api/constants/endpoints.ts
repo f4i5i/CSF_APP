@@ -91,6 +91,8 @@ export const ENDPOINTS = {
     CANCEL: (id: string) => `/enrollments/${id}/cancel`,
     TRANSFER: (id: string) => `/enrollments/${id}/transfer`,
     ACTIVATE: (id: string) => `/enrollments/${id}/activate`,
+    PAUSE: (id: string) => `/enrollments/${id}/pause`,
+    RESUME: (id: string) => `/enrollments/${id}/resume`,
     CANCELLATION_PREVIEW: (id: string) => `/enrollments/${id}/cancellation-preview`,
     // Waitlist
     WAITLIST_JOIN: '/enrollments/waitlist/join',

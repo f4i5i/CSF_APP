@@ -29,6 +29,7 @@ export enum EnrollmentStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
   WAITLIST = 'WAITLIST',
+  PAUSED = 'PAUSED',
 }
 
 // ============================================================================
@@ -52,6 +53,9 @@ export interface Enrollment extends Timestamped {
   end_date?: string;
   notes?: string;
   payment_completed: boolean;
+  // Pause-related fields
+  paused_at?: string;
+  paused_reason?: string;
   // Related entities
   child?: Child;
   class?: Class;
@@ -86,6 +90,13 @@ export interface UpdateEnrollmentRequest {
 export interface CancelEnrollmentRequest {
   reason?: string;
   refund_requested?: boolean;
+}
+
+/**
+ * Pause enrollment request
+ */
+export interface PauseEnrollmentRequest {
+  reason?: string;
 }
 
 /**
