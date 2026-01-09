@@ -59,7 +59,7 @@ const Waivers = () => {
   };
 
   const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
+    const { name, value } = e.target;
 
     if (name === "signature") {
       setFormData(prev => ({ ...prev, signature: value }));

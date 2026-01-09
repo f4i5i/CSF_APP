@@ -137,7 +137,7 @@ const Gallery = () => {
                   <img
                     key={imgIndex}
                     src={src}
-                    alt={`Gallery photo ${colIndex * 3 + imgIndex + 1}`}
+                    alt={`Gallery ${colIndex * 3 + imgIndex + 1}`}
                     className="w-full object-cover rounded-xl"
                   />
                 ))}

@@ -91,7 +91,7 @@ export default function Enrollments() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, classFilter, searchQuery]);
+  }, [currentPage, statusFilter, classFilter]);
 
   useEffect(() => {
     fetchEnrollments();

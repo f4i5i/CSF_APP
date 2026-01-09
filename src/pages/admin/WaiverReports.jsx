@@ -3,7 +3,7 @@
  * Shows who has signed which waivers, with filters and export
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Download,
   FileText,
@@ -11,7 +11,6 @@ import {
   Filter,
   Users,
   BarChart3,
-  Calendar,
   Globe,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -26,7 +25,6 @@ const WaiverReports = () => {
   // Fetch all waiver templates
   const {
     data: templatesData = [],
-    loading: loadingTemplates,
   } = useApi(
     () => waiversService.getTemplates({ include_inactive: true }),
     {
@@ -42,8 +40,6 @@ const WaiverReports = () => {
   const {
     data: acceptancesData,
     loading: loadingAcceptances,
-    error: acceptancesError,
-    refetch,
   } = useApi(
     () => {
       return waiversService.getAcceptances({
@@ -60,6 +56,7 @@ const WaiverReports = () => {
     }
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const acceptances = acceptancesData?.items || [];
   const total = acceptancesData?.total || 0;
 

@@ -68,13 +68,13 @@ export default function ProgramOverview() {
   });
 
   // Ensure classesData is always an array
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const classesData = Array.isArray(classesQuery.data) ? classesQuery.data : [];
   const classesLoading = classesQuery.isLoading;
   const classesError = classesQuery.error;
 
   const weekdayOptions = ['all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const timeOfDayOptions = ['all', 'morning', 'afternoon', 'evening'];
-  const ageRangeOptions = ['all', 'under8', '8to12', '13plus'];
   const capacityOptions = ['all', 'available', 'full'];
   const programTypeOptions = [
     { value: 'all', label: 'Membership + Short-term' },

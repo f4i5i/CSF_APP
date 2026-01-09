@@ -55,26 +55,6 @@ import toast from "react-hot-toast";
 // ============================================================================
 
 /**
- * Clock Icon Component
- * Used to display time information in the schedule section
- */
-const IconClock = ({ className = "w-4 h-4 text-gray-400" }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 6v6l4 2M12 3a9 9 0 110 18 9 9 0 010-18z"
-    />
-  </svg>
-);
-
-/**
  * Calendar Icon Component
  * Used to display date information in the schedule section
  */
@@ -112,7 +92,7 @@ export default function ClassDetail() {
   const classId = searchParams.get('id');
 
   // Get area ID from location state (passed from ClassList)
-  const areaId = location.state?.areaId;
+  const _areaId = location.state?.areaId;
 
   // Back button always goes to class list (with area if available)
   const backToClassListUrl = '/class-list';

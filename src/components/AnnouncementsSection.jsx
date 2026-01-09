@@ -197,11 +197,13 @@ export default function AnnouncementsSection({
   const displayAnnouncements = useMemo(() => {
     if (announcements && announcements.length > 0) return announcements;
     return demoAnnouncements;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [announcements]);
 
   const displayNextEvent = useMemo(() => {
     if (nextEvent) return nextEvent;
     return demoNextEvent;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextEvent]);
 
   // Find announcement by ID for view more modal

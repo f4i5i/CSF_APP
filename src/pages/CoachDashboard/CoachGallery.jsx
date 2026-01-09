@@ -22,7 +22,7 @@ const CoachGallery = () => {
   // ============================================================================
 
   // Fetch coach's assigned classes
-  const { data: classesData, loading: loadingClasses } = useApi(
+  const { data: classesData } = useApi(
     () => classesService.getAll({ coach_id: user?.id }),
     {
       initialData: { items: [] },

@@ -8,6 +8,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { childrenService } from '../api/services';
 import { useApi } from '../hooks/useApi';
 import { useMutation } from '../hooks/useMutation';
+import { useAuth } from './auth';
 import toast from 'react-hot-toast';
 
 const ChildrenContext = createContext(null);
@@ -16,7 +17,11 @@ const ChildrenContext = createContext(null);
 const SELECTED_CHILD_KEY = 'csf_selected_child_id';
 
 export const ChildrenProvider = ({ children: childrenProp }) => {
+  const { user } = useAuth();
   const [selectedChild, setSelectedChild] = useState(null);
+
+  // Only fetch children when user is authenticated (parent role)
+  const shouldFetch = !!user && user.role === 'parent';
 
   // Fetch children
   const {
@@ -25,7 +30,8 @@ export const ChildrenProvider = ({ children: childrenProp }) => {
     error,
     refetch,
   } = useApi(childrenService.getMy, {
-    autoFetch: true,
+    autoFetch: shouldFetch,
+    dependencies: [shouldFetch],
     initialData: [],
     onSuccess: (data) => {
       if (data && data.length > 0) {
@@ -46,6 +52,13 @@ export const ChildrenProvider = ({ children: childrenProp }) => {
       }
     },
   });
+
+  // Clear selected child when user logs out
+  useEffect(() => {
+    if (!user) {
+      setSelectedChild(null);
+    }
+  }, [user]);
 
   // Create child mutation
   const {

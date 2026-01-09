@@ -5,7 +5,6 @@ import BillingInfo from "../components/payment/BillingInfo";
 import MembershipList from "../components/payment/MembershipList";
 import InvoiceTable from "../components/payment/InvoiceTable";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import Logo from "../components/Logo";
 import DottedOverlay from "@/components/DottedOverlay";
 const PaymentPage = () => {

@@ -29,10 +29,10 @@ const Attendence = () => {
   // PARENT-SPECIFIC DATA FETCHING
   // ============================================================================
   // Get selected child from context (only for parent role)
-  const { selectedChild, loading: loadingChildren } = useChildren();
+  const { selectedChild } = useChildren();
 
   // Get first active enrollment for the selected child (parent only)
-  const { data: enrollmentsData, loading: loadingEnrollments, error: enrollmentsError } = useApi(
+  const { data: enrollmentsData, error: enrollmentsError } = useApi(
     () => enrollmentsService.getMy({
       child_id: selectedChild?.id,
       status: 'active',
@@ -93,7 +93,7 @@ const Attendence = () => {
   );
 
   // Mark attendance mutation for coach
-  const { mutate: markAttendance, loading: markingAttendance } = useMutation(
+  useMutation(
     attendanceService.create,
     {
       onSuccess: () => {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Sidebar from "../components/Sidebar";
 import Logo from "../components/Logo";
@@ -156,15 +155,6 @@ export default function Settings() {
       setLoading(false);
     }
   };
-
-  const menuItems = [
-    { key: "account", label: "My Account" },
-    { key: "payment", label: "Payment & Billing" },
-    { key: "password", label: "Password" },
-    { key: "badges", label: "Badges" },
-    { key: "contact", label: "Contact" },
-    { key: "logout", label: "Log out", isDanger: true },
-  ];
 
   return (
     // <div className="min-h-screen  bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] flex flex-col  justify-between  max-sm:justify-start max-sm:pb-20">

@@ -145,11 +145,13 @@ export default function DashboardWidgets({
       }));
     }
     return demoBadges;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [badges]);
 
   const displayNextEvent = useMemo(() => {
     if (nextEvent) return nextEvent;
     return demoNextEvent;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextEvent]);
 
   // Format time for event display

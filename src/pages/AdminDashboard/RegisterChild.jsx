@@ -92,18 +92,6 @@ export default function RegisterChild() {
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  // Trigger file input click
-  const handleChoosePhoto = () => {
-    console.log('Choose Photo clicked');
-    console.log('fileInputRef:', fileInputRef.current);
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    } else {
-      console.error('fileInputRef is null');
-      toast.error('Unable to open file picker');
-    }
-  };
-
   // Handle profile image selection
   const handleImageSelect = (e) => {
     console.log('handleImageSelect called', e.target.files);

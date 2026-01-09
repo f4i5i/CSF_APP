@@ -52,8 +52,6 @@ export default function CheckOut() {
     selectInstallmentPlan,
     applyDiscount,
     removeDiscount,
-    handlePaymentSuccess,
-    handlePaymentError,
     joinWaitlist,
     downloadReceipt,
     retry,

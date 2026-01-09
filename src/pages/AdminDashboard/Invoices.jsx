@@ -51,7 +51,7 @@ export default function Invoices() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, searchQuery, dateFrom, dateTo]);
+  }, [currentPage, statusFilter]);
 
   useEffect(() => {
     fetchInvoices();
