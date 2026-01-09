@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -9,6 +9,35 @@ import { useChildren, useApi } from '../hooks';
 // Services
 import { photosService, enrollmentsService } from '../api/services';
 import { getFileUrl } from '../api/config';
+
+// Optimized image component with lazy loading and placeholder
+const LazyImage = ({ src, alt, className }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <div className={`relative bg-gray-200 rounded-xl overflow-hidden ${className}`}>
+      {!loaded && !error && (
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
+      )}
+      {error ? (
+        <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+          <span className="text-sm">Failed to load</span>
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => setError(true)}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )}
+    </div>
+  );
+};
 
 const Gallery = () => {
   // Get selected child from context
@@ -49,17 +78,23 @@ const Gallery = () => {
   // Combined error state
   const hasError = enrollmentsError || photosError;
 
-  // Get photos array from API response - no demo fallback
+  // Get photos array from API response - prioritize thumbnails for faster loading
   const photos = useMemo(() => {
     if (!photosData) return [];
     // Handle both array and paginated response
     const photoArray = Array.isArray(photosData) ? photosData : (photosData.items || []);
     return photoArray
       .map(photo => {
-        const rawUrl = photo.url || photo.image_url || photo.thumbnail_url;
-        return rawUrl ? getFileUrl(rawUrl) : null;
+        // Prefer thumbnail for gallery grid (faster loading), fallback to full image
+        const thumbnailUrl = photo.thumbnail_url || photo.url || photo.image_url;
+        const fullUrl = photo.image_url || photo.url || photo.thumbnail_url;
+        return {
+          thumbnail: thumbnailUrl ? getFileUrl(thumbnailUrl) : null,
+          full: fullUrl ? getFileUrl(fullUrl) : null,
+          id: photo.id,
+        };
       })
-      .filter(Boolean);
+      .filter(p => p.thumbnail || p.full);
   }, [photosData]);
 
   // Split photos into 3 columns for masonry layout
@@ -133,12 +168,12 @@ const Gallery = () => {
           <div className="grid grid-cols-3 max-sm:grid-cols-1 gap-4">
             {columns.map((column, colIndex) => (
               <div key={colIndex} className="flex flex-col gap-4">
-                {column.map((src, imgIndex) => (
-                  <img
-                    key={imgIndex}
-                    src={src}
-                    alt={`Gallery ${colIndex * 3 + imgIndex + 1}`}
-                    className="w-full object-cover rounded-xl"
+                {column.map((photo, imgIndex) => (
+                  <LazyImage
+                    key={photo.id || imgIndex}
+                    src={photo.thumbnail || photo.full}
+                    alt={`Gallery photo ${colIndex * 3 + imgIndex + 1}`}
+                    className="w-full min-h-[150px]"
                   />
                 ))}
               </div>

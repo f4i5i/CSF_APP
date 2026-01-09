@@ -344,8 +344,10 @@ export default function DashboardWidgets({
             ) : (
               <>
                 <img
-                  src={photo?.image_url ? getFileUrl(photo.image_url) : (photo?.url || ProgramPhotoSrc)}
+                  src={photo?.thumbnail_url ? getFileUrl(photo.thumbnail_url) : (photo?.image_url ? getFileUrl(photo.image_url) : (photo?.url || ProgramPhotoSrc))}
                   alt="Program Photos"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
 

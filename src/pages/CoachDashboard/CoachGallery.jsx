@@ -12,6 +12,42 @@ import { useApi } from '../../hooks';
 import { classesService, photosService } from '../../api/services';
 import { getFileUrl } from '../../api/config';
 
+// Optimized image component with lazy loading and placeholder
+const LazyImage = ({ src, alt, className, caption }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  return (
+    <div className={`relative group ${className}`}>
+      <div className="relative bg-gray-200 rounded-xl overflow-hidden">
+        {!loaded && !error && (
+          <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 min-h-[150px]" />
+        )}
+        {error ? (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 min-h-[150px]">
+            <span className="text-sm">Failed to load</span>
+          </div>
+        ) : (
+          <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLoaded(true)}
+            onError={() => setError(true)}
+            className={`w-full object-cover cursor-pointer hover:opacity-90 transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          />
+        )}
+      </div>
+      {caption && loaded && (
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
+          <p className="text-white text-sm">{caption}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CoachGallery = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -167,19 +203,13 @@ const CoachGallery = () => {
             {columnPhotos.map((column, colIndex) => (
               <div key={colIndex} className="flex flex-col gap-4">
                 {column.map((photo) => (
-                  <div key={photo.id} className="relative group">
-                    <img
-                      src={getFileUrl(photo.image_url || photo.thumbnail_url || photo.url)}
-                      alt={photo.caption || 'Class photo'}
-                      className="w-full object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
-                      loading="lazy"
-                    />
-                    {photo.caption && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-white text-sm">{photo.caption}</p>
-                      </div>
-                    )}
-                  </div>
+                  <LazyImage
+                    key={photo.id}
+                    src={getFileUrl(photo.thumbnail_url || photo.image_url || photo.url)}
+                    alt={photo.caption || 'Class photo'}
+                    caption={photo.caption}
+                    className="w-full"
+                  />
                 ))}
               </div>
             ))}

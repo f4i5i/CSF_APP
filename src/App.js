@@ -217,7 +217,7 @@ return (
 
 {/* Parent Dashboard - Main dashboard showing enrollments, events, attendance */}
 <Route path="/dashboard" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <Dashboard />
    </ProtectedRoute>
 } />
@@ -287,14 +287,14 @@ return (
 
 {/* Payment & Billing - View invoices, payment methods, payment history */}
 <Route path="/paymentbilling" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <PaymentBilling initialSection="payment" />
   </ProtectedRoute>
 } />
 
 {/* Badges - View earned badges and achievement progress */}
 <Route path="/badges" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <Badges />
   </ProtectedRoute>
 } />
@@ -318,14 +318,14 @@ return (
 
 {/* Add Child - Add new child profile */}
 <Route path="/addchild" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <AddStudent />
   </ProtectedRoute>
 } />
 
 {/* Waivers - Sign required waivers, view waiver history */}
 <Route path="/waivers" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <Waivers />
  </ProtectedRoute>
 }
@@ -336,7 +336,7 @@ return (
   Wrapped in Stripe Elements provider for payment form integration
 */}
 <Route path="/checkout" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <Elements stripe={stripePromise}>
       <Checkout />
     </Elements>
@@ -344,12 +344,20 @@ return (
 } />
 
 {/* Payment Result Pages - Show success/cancel messages after Stripe checkout */}
-<Route path="/payment/success" element={<PaymentSuccess />} />
-<Route path="/payment/cancel" element={<PaymentCancel />} />
+<Route path="/payment/success" element={
+  <ProtectedRoute requiredRole="parent">
+    <PaymentSuccess />
+  </ProtectedRoute>
+} />
+<Route path="/payment/cancel" element={
+  <ProtectedRoute requiredRole="parent">
+    <PaymentCancel />
+  </ProtectedRoute>
+} />
 
-{/* Register Child - Register new child (likely admin or parent) */}
+{/* Register Child - Register new child (parent only) */}
 <Route path="/registerchild" element={
-  <ProtectedRoute>
+  <ProtectedRoute requiredRole="parent">
     <RegisterChild />
  </ProtectedRoute>
 }
