@@ -54,8 +54,8 @@ export default function ClassList() {
   // Get area from URL params
   const areaId = searchParams.get('area');
 
-  // Get the previous location from state, or use landing page as default
-  const previousPath = location.state?.from || '/';
+  // Back button always goes to registration/landing page
+  const backPath = '/';
 
   // Fetch programs and classes on mount
   useEffect(() => {
@@ -178,7 +178,7 @@ export default function ClassList() {
       <div className="w-full flex-grow flex items-center justify-center">
       <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 md:mt-8 shadow-lg z-50">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate(previousPath)}>
+          <button onClick={() => navigate(backPath)}>
             <ArrowLeft  className="text-[#00000099] size-[16px]" />
           </button>
           <div>

@@ -114,8 +114,8 @@ export default function ClassDetail() {
   // Get area ID from location state (passed from ClassList)
   const areaId = location.state?.areaId;
 
-  // Build back URL with area parameter if available
-  const backToClassListUrl = areaId ? `/class-list?area=${areaId}` : '/class-list';
+  // Back button always goes to class list (with area if available)
+  const backToClassListUrl = '/class-list';
 
   // Component state
   const [classData, setClassData] = useState(null); // Stores fetched class details
