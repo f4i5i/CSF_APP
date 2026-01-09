@@ -74,6 +74,7 @@ export default function Login() {
       redirectForRole(user);
     } catch (error) {
       console.error("Login error:", error);
+      toast.error("Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -85,11 +86,13 @@ export default function Login() {
       redirectForRole(user);
     } catch (error) {
       console.error("Google login error:", error);
+      toast.error("Google login failed. Please try again.");
     }
   };
 
   const handleGoogleError = (message) => {
     console.error("Google login error:", message);
+    toast.error("Google login failed. Please try again.");
   };
 
   return (
