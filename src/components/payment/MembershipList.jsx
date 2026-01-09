@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, User, Calendar, DollarSign, BookOpen, ChevronDown, ChevronUp, X, AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertCircle, User, Calendar, DollarSign, BookOpen, ChevronDown, ChevronUp, X, AlertTriangle, Loader2, Pause, Play } from 'lucide-react';
 import { enrollmentService } from '../../api/services/enrollment.service';
 import { formatCurrency, formatDate } from '../../utils/format';
 
@@ -17,6 +17,16 @@ const MembershipList = () => {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelError, setCancelError] = useState(null);
+
+  // Pause modal state
+  const [showPauseModal, setShowPauseModal] = useState(false);
+  const [pauseEnrollment, setPauseEnrollment] = useState(null);
+  const [pauseLoading, setPauseLoading] = useState(false);
+  const [pauseReason, setPauseReason] = useState('');
+  const [pauseError, setPauseError] = useState(null);
+
+  // Resume state
+  const [resumeLoading, setResumeLoading] = useState(null); // holds enrollment id being resumed
 
   useEffect(() => {
     loadEnrollments();
@@ -100,6 +110,59 @@ const MembershipList = () => {
     setCancelError(null);
   };
 
+  // Pause handlers
+  const handlePauseClick = (enrollment) => {
+    setPauseEnrollment(enrollment);
+    setShowPauseModal(true);
+    setPauseReason('');
+    setPauseError(null);
+  };
+
+  const handleConfirmPause = async () => {
+    if (!pauseEnrollment) return;
+
+    setPauseLoading(true);
+    setPauseError(null);
+    try {
+      await enrollmentService.pause(pauseEnrollment.id, {
+        reason: pauseReason || undefined
+      });
+
+      // Refresh enrollments list
+      await loadEnrollments();
+      setShowPauseModal(false);
+      setPauseEnrollment(null);
+    } catch (err) {
+      console.error('Failed to pause enrollment:', err);
+      setPauseError(err.response?.data?.detail || 'Failed to pause membership. Please try again.');
+    } finally {
+      setPauseLoading(false);
+    }
+  };
+
+  const closePauseModal = () => {
+    setShowPauseModal(false);
+    setPauseEnrollment(null);
+    setPauseReason('');
+    setPauseError(null);
+  };
+
+  // Resume handler
+  const handleResume = async (enrollment) => {
+    setResumeLoading(enrollment.id);
+    try {
+      await enrollmentService.resume(enrollment.id);
+      // Refresh enrollments list
+      await loadEnrollments();
+    } catch (err) {
+      console.error('Failed to resume enrollment:', err);
+      // Show error - could use a toast here
+      alert(err.response?.data?.detail || 'Failed to resume membership. Please try again.');
+    } finally {
+      setResumeLoading(null);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const styles = {
       ACTIVE: 'bg-green-100 text-green-800 border-green-200',
@@ -107,6 +170,7 @@ const MembershipList = () => {
       COMPLETED: 'bg-blue-100 text-blue-800 border-blue-200',
       CANCELLED: 'bg-gray-100 text-gray-500 border-gray-200',
       WAITLIST: 'bg-purple-100 text-purple-800 border-purple-200',
+      PAUSED: 'bg-amber-100 text-amber-800 border-amber-200',
     };
 
     const labels = {
@@ -115,6 +179,7 @@ const MembershipList = () => {
       COMPLETED: 'Completed',
       CANCELLED: 'Cancelled',
       WAITLIST: 'Waitlist',
+      PAUSED: 'Paused',
     };
 
     return (
@@ -125,7 +190,15 @@ const MembershipList = () => {
   };
 
   const canCancel = (status) => {
-    return ['ACTIVE', 'PENDING', 'WAITLIST'].includes(status);
+    return ['ACTIVE', 'PENDING', 'WAITLIST', 'PAUSED'].includes(status);
+  };
+
+  const canPause = (status) => {
+    return status === 'ACTIVE';
+  };
+
+  const canResume = (status) => {
+    return status === 'PAUSED';
   };
 
   // Group enrollments by child
@@ -282,15 +355,50 @@ const MembershipList = () => {
                             )}
                           </div>
 
-                          {/* Cancel Button */}
-                          {canCancel(enrollment.status) && (
-                            <button
-                              onClick={() => handleCancelClick(enrollment)}
-                              className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-colors"
-                            >
-                              Cancel
-                            </button>
-                          )}
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-2">
+                            {/* Pause Button - only for ACTIVE */}
+                            {canPause(enrollment.status) && (
+                              <button
+                                onClick={() => handlePauseClick(enrollment)}
+                                className="px-3 py-1.5 text-sm text-amber-600 hover:text-amber-700 hover:bg-amber-50 border border-amber-200 rounded-lg transition-colors flex items-center gap-1"
+                              >
+                                <Pause className="w-3.5 h-3.5" />
+                                Pause
+                              </button>
+                            )}
+
+                            {/* Resume Button - only for PAUSED */}
+                            {canResume(enrollment.status) && (
+                              <button
+                                onClick={() => handleResume(enrollment)}
+                                disabled={resumeLoading === enrollment.id}
+                                className="px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                              >
+                                {resumeLoading === enrollment.id ? (
+                                  <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    Resuming...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Play className="w-3.5 h-3.5" />
+                                    Resume
+                                  </>
+                                )}
+                              </button>
+                            )}
+
+                            {/* Cancel Button */}
+                            {canCancel(enrollment.status) && (
+                              <button
+                                onClick={() => handleCancelClick(enrollment)}
+                                className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -439,6 +547,105 @@ const MembershipList = () => {
                   </>
                 ) : (
                   'Confirm Cancellation'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pause Confirmation Modal */}
+      {showPauseModal && pauseEnrollment && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-semibold text-lg text-heading-dark flex items-center gap-2">
+                <Pause className="w-5 h-5 text-amber-600" />
+                Pause Membership
+              </h3>
+              <button
+                onClick={closePauseModal}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 space-y-4">
+              {/* Info */}
+              <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <Pause className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">Pause this membership?</p>
+                  <p className="text-xs text-amber-700 mt-1">
+                    Your current billing cycle will complete. No future charges until you resume.
+                  </p>
+                </div>
+              </div>
+
+              {/* Enrollment Details */}
+              <div className="border rounded-lg p-3">
+                <p className="text-sm text-gray-500">Pausing membership for:</p>
+                <p className="font-semibold text-heading-dark mt-1">
+                  {pauseEnrollment.child?.first_name} {pauseEnrollment.child?.last_name}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {pauseEnrollment.class?.name || 'Class'}
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Price: {formatCurrency(pauseEnrollment.final_price)}/month
+                </p>
+              </div>
+
+              {/* Reason Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason for pausing (optional)
+                </label>
+                <textarea
+                  value={pauseReason}
+                  onChange={(e) => setPauseReason(e.target.value)}
+                  placeholder="e.g., Family vacation, temporary schedule conflict..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold resize-none"
+                  rows={3}
+                />
+              </div>
+
+              {/* Error Message */}
+              {pauseError && (
+                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                  <p className="text-sm text-red-700">{pauseError}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3 p-4 border-t bg-gray-50">
+              <button
+                onClick={closePauseModal}
+                disabled={pauseLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Keep Active
+              </button>
+              <button
+                onClick={handleConfirmPause}
+                disabled={pauseLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {pauseLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Pausing...
+                  </>
+                ) : (
+                  <>
+                    <Pause className="w-4 h-4" />
+                    Pause Membership
+                  </>
                 )}
               </button>
             </div>

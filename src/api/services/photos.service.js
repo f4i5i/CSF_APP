@@ -48,11 +48,13 @@ const photosService = {
 
   /**
    * Upload new photo (admin only)
+   * Supports multi-class upload via class_ids array
    * @param {Object} photoData - Photo information
    * @param {File} photoData.file - Photo file
    * @param {string} [photoData.album_id] - Album ID
    * @param {string} [photoData.event_id] - Event ID
-   * @param {string} [photoData.class_id] - Class ID
+   * @param {string} [photoData.class_id] - Single Class ID (legacy)
+   * @param {Array<string>} [photoData.class_ids] - Array of Class IDs (multi-class)
    * @param {string} [photoData.caption] - Photo caption
    * @param {Array<string>} [photoData.child_ids] - Array of child IDs to tag
    * @returns {Promise<Object>} Uploaded photo
@@ -63,7 +65,14 @@ const photosService = {
     formData.append('file', photoData.file);
     if (photoData.album_id) formData.append('album_id', photoData.album_id);
     if (photoData.event_id) formData.append('event_id', photoData.event_id);
-    if (photoData.class_id) formData.append('class_id', photoData.class_id);
+
+    // Support both single class_id and multi-class class_ids
+    if (photoData.class_ids && photoData.class_ids.length > 0) {
+      formData.append('class_ids', JSON.stringify(photoData.class_ids));
+    } else if (photoData.class_id) {
+      formData.append('class_id', photoData.class_id);
+    }
+
     if (photoData.caption) formData.append('caption', photoData.caption);
     if (photoData.child_ids) {
       formData.append('child_ids', JSON.stringify(photoData.child_ids));

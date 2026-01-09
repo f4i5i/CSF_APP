@@ -1,11 +1,13 @@
 /**
  * Photos Management Page
  * Admin page for managing photo galleries and uploads
+ * Supports multi-class photo uploads
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Image, Upload, Trash2, FolderPlus, Check, X, Search, Filter } from 'lucide-react';
 import Header from '../../components/Header';
+import MultiClassSelector from '../../components/admin/MultiClassSelector';
 import photosService from '../../api/services/photos.service';
 import classesService from '../../api/services/classes.service';
 import toast from 'react-hot-toast';
@@ -26,7 +28,7 @@ export default function PhotosManagement() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [uploadData, setUploadData] = useState({
     files: [],
-    class_id: '',
+    class_ids: [],  // Multi-class support
     caption: '',
   });
   const [categoryData, setCategoryData] = useState({
@@ -93,20 +95,25 @@ export default function PhotosManagement() {
       return;
     }
 
+    if (uploadData.class_ids.length === 0) {
+      toast.error('Please select at least one class');
+      return;
+    }
+
     setUploading(true);
     try {
       const uploadPromises = uploadData.files.map((file) =>
         photosService.upload({
           file,
-          class_id: uploadData.class_id || undefined,
+          class_ids: uploadData.class_ids,  // Multi-class support
           caption: uploadData.caption || undefined,
         })
       );
 
       await Promise.all(uploadPromises);
-      toast.success(`${uploadData.files.length} photo(s) uploaded successfully`);
+      toast.success(`${uploadData.files.length} photo(s) uploaded to ${uploadData.class_ids.length} class(es)`);
       setShowUploadModal(false);
-      setUploadData({ files: [], class_id: '', caption: '' });
+      setUploadData({ files: [], class_ids: [], caption: '' });
       fetchPhotos();
     } catch (error) {
       console.error('Failed to upload photos:', error);
@@ -385,23 +392,14 @@ export default function PhotosManagement() {
                   </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class (optional)
-                  </label>
-                  <select
-                    value={uploadData.class_id}
-                    onChange={(e) => setUploadData({ ...uploadData, class_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                  >
-                    <option value="">No specific class</option>
-                    {classes.map((cls) => (
-                      <option key={cls.id} value={cls.id}>
-                        {cls.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* Multi-Class Selector */}
+                <MultiClassSelector
+                  classes={classes}
+                  selectedIds={uploadData.class_ids}
+                  onChange={(ids) => setUploadData({ ...uploadData, class_ids: ids })}
+                  label="Target Classes *"
+                  maxHeight="150px"
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -421,7 +419,7 @@ export default function PhotosManagement() {
                     type="button"
                     onClick={() => {
                       setShowUploadModal(false);
-                      setUploadData({ files: [], class_id: '', caption: '' });
+                      setUploadData({ files: [], class_ids: [], caption: '' });
                     }}
                     disabled={uploading}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"

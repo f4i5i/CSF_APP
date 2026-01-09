@@ -116,6 +116,7 @@ import type {
   TransferEnrollmentRequest,
   WaitlistJoinRequest,
   WaitlistEntry,
+  PauseEnrollmentRequest,
 } from '../types/enrollment.types';
 
 /**
@@ -522,6 +523,88 @@ export const enrollmentService = {
   async activate(id: string): Promise<Enrollment> {
     const { data } = await apiClient.post<Enrollment>(
       ENDPOINTS.ENROLLMENTS.ACTIVATE(id)
+    );
+    return data;
+  },
+
+  /**
+   * Pauses an active enrollment.
+   *
+   * Changes enrollment status from ACTIVE to PAUSED. The current billing cycle
+   * will complete, but no future charges will be made until the enrollment is
+   * resumed. The child will not be able to attend classes while paused.
+   *
+   * After pausing:
+   * - Enrollment status changes to PAUSED
+   * - Current billing cycle completes normally
+   * - No future billing until resumed
+   * - Child cannot attend classes
+   * - Spot is held (not released to waitlist)
+   *
+   * @param {string} id - The enrollment ID to pause
+   * @param {PauseEnrollmentRequest} [pauseData] - Optional pause details
+   * @param {string} [pauseData.reason] - Reason for pausing (optional)
+   *
+   * @returns {Promise<Enrollment>} The paused enrollment with PAUSED status
+   *
+   * @throws {ApiError} If request fails
+   * @throws {NotFoundError} If enrollment doesn't exist
+   * @throws {ForbiddenError} If user lacks permission to pause
+   * @throws {BadRequestError} If enrollment is not in ACTIVE status
+   *
+   * @example
+   * // Pause with optional reason
+   * const paused = await enrollmentService.pause('enrollment-123', {
+   *   reason: 'Family vacation'
+   * });
+   *
+   * console.log(`Status: ${paused.status}`); // "PAUSED"
+   *
+   * @example
+   * // Simple pause without reason
+   * await enrollmentService.pause('enrollment-123');
+   */
+  async pause(
+    id: string,
+    pauseData?: PauseEnrollmentRequest
+  ): Promise<Enrollment> {
+    const { data } = await apiClient.post<Enrollment>(
+      ENDPOINTS.ENROLLMENTS.PAUSE(id),
+      pauseData
+    );
+    return data;
+  },
+
+  /**
+   * Resumes a paused enrollment.
+   *
+   * Changes enrollment status from PAUSED back to ACTIVE. Billing resumes
+   * from the next billing cycle and the child can attend classes again.
+   *
+   * After resuming:
+   * - Enrollment status changes to ACTIVE
+   * - Billing resumes from next cycle
+   * - Child can attend classes again
+   * - Attendance tracking resumes
+   *
+   * @param {string} id - The enrollment ID to resume
+   *
+   * @returns {Promise<Enrollment>} The resumed enrollment with ACTIVE status
+   *
+   * @throws {ApiError} If request fails
+   * @throws {NotFoundError} If enrollment doesn't exist
+   * @throws {ForbiddenError} If user lacks permission to resume
+   * @throws {BadRequestError} If enrollment is not in PAUSED status
+   *
+   * @example
+   * // Resume a paused enrollment
+   * const resumed = await enrollmentService.resume('enrollment-123');
+   *
+   * console.log(`Status: ${resumed.status}`); // "ACTIVE"
+   */
+  async resume(id: string): Promise<Enrollment> {
+    const { data } = await apiClient.post<Enrollment>(
+      ENDPOINTS.ENROLLMENTS.RESUME(id)
     );
     return data;
   },

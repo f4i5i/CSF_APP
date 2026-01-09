@@ -97,6 +97,7 @@ import CancellationRequests from './pages/AdminDashboard/CancellationRequests'
 import EventsManagement from './pages/AdminDashboard/EventsManagement'
 import BadgesManagement from './pages/AdminDashboard/BadgesManagement'
 import PhotosManagement from './pages/AdminDashboard/PhotosManagement'
+import AnnouncementsManagement from './pages/AdminDashboard/AnnouncementsManagement'
 import WaiversManagement from './pages/admin/WaiversManagement'
 import WaiverReports from './pages/admin/WaiverReports'
 
@@ -424,6 +425,9 @@ return (
 
   {/* Photos Management - Upload and manage photos */}
   <Route path="/admin/photos" element={<PhotosManagement />} />
+
+  {/* Announcements Management - Create and manage announcements with multi-class support */}
+  <Route path="/admin/announcements" element={<AnnouncementsManagement />} />
 </Route>
 
 </Routes>
