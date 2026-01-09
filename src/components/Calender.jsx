@@ -2,7 +2,6 @@ import React from "react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import CustomCaption from "./Calendar/CustomCaption";
-import CustomNav from "./Calendar/CustomNav";
 
 const Calendar = () => {
   const selectedDays = [new Date(2025, 9, 8), new Date(2025, 9, 10), new Date(2025, 9, 20), new Date(2025, 9, 21)];

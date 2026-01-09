@@ -3,13 +3,11 @@
  * Admin page for managing installment plans and payment schedules
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Calendar,
   CheckCircle,
   XCircle,
   Bell,
-  CreditCard,
   Eye,
   AlertCircle,
 } from 'lucide-react';
@@ -31,7 +29,6 @@ export default function Installments() {
   const itemsPerPage = 10;
 
   // Modal states
-  const [selectedPlan, setSelectedPlan] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     title: '',
@@ -40,12 +37,7 @@ export default function Installments() {
   });
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Fetch installment plans
-  useEffect(() => {
-    fetchPlans();
-  }, [currentPage, statusFilter, searchQuery, overdueOnly]);
-
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     setLoading(true);
     try {
       const response = await installmentsService.getAll({
@@ -63,7 +55,12 @@ export default function Installments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, searchQuery, overdueOnly]);
+
+  // Fetch installment plans
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
 
   // Mark payment as paid
   const handleMarkAsPaid = async (planId, paymentId) => {
@@ -210,7 +207,6 @@ export default function Installments() {
           label: 'Mark Next as Paid',
           icon: CheckCircle,
           onClick: () => {
-            setSelectedPlan(row);
             setConfirmDialog({
               isOpen: true,
               title: 'Mark Payment as Paid',
@@ -231,7 +227,6 @@ export default function Installments() {
           icon: XCircle,
           variant: 'destructive',
           onClick: () => {
-            setSelectedPlan(row);
             setConfirmDialog({
               isOpen: true,
               title: 'Cancel Installment Plan',

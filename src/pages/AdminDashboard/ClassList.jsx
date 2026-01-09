@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import React, { useMemo, useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import { useAuth } from "../../context/auth";
@@ -41,7 +41,6 @@ const IconCalendar = ({ className = "w-4 h-4 text-gray-400" }) => (
 
 export default function ClassList() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user } = useAuth(); // Get auth state
 
@@ -61,11 +60,13 @@ export default function ClassList() {
   useEffect(() => {
     loadPrograms();
     loadClasses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reload classes when filters change
   useEffect(() => {
     loadClasses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProgram, areaId]);
 
   const loadPrograms = async () => {

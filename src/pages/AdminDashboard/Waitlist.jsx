@@ -3,8 +3,8 @@
  * Admin page for managing class waitlists
  */
 
-import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, X, Bell } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { UserPlus, X, Bell } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
@@ -23,11 +23,7 @@ export default function Waitlist() {
     action: null,
   });
 
-  useEffect(() => {
-    fetchWaitlist();
-  }, [classFilter, searchQuery]);
-
-  const fetchWaitlist = async () => {
+  const fetchWaitlist = useCallback(async () => {
     setLoading(true);
     try {
       const response = await waitlistService.getAll({
@@ -40,7 +36,11 @@ export default function Waitlist() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [classFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchWaitlist();
+  }, [fetchWaitlist]);
 
   const handleMoveToEnrolled = async (waitlistId) => {
     try {

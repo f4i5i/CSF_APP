@@ -4,7 +4,7 @@
  * Structure matches EventsManagement.jsx for consistency
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Plus,
   Edit,
@@ -82,11 +82,6 @@ export default function AnnouncementsManagement() {
     fetchFilterOptions();
   }, []);
 
-  // Fetch announcements when filters change
-  useEffect(() => {
-    fetchAnnouncements();
-  }, [currentPage, typeFilter, classFilter, searchQuery]);
-
   const fetchFilterOptions = async () => {
     setFiltersLoading(true);
     try {
@@ -103,7 +98,7 @@ export default function AnnouncementsManagement() {
     }
   };
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
     try {
       const skip = (currentPage - 1) * itemsPerPage;
@@ -132,7 +127,12 @@ export default function AnnouncementsManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, typeFilter, classFilter, searchQuery]);
+
+  // Fetch announcements when filters change
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
 
   const handleCreateAnnouncement = () => {
     setModalMode("create");

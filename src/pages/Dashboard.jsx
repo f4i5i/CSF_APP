@@ -1,18 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ChevronDown, UserPlus } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Calendar from '../components/Calender';
-import NextEvent from '../components/NextEvent';
-import PhotoCard from '../components/PhotoCard';
-import BadgeCard from '../components/BadgeCard';
-import AnnouncementCard from '../components/announcements/AnnouncementCard';
-import EnrollmentCard from '../components/EnrollmentCard';
-import PaymentStatusCard from '../components/PaymentStatusCard';
 import WaiversAlert from '../components/WaiversAlert';
 import StatCard from '../components/dashboard/StatCard';
-import ProgramPhotoCard from '../components/dashboard/ProgramPhotoCard';
 import DashboardWidgets from '@/components/DashboardWidgets';
 import AnnouncementsSection from '@/components/AnnouncementsSection';
 // Hooks
@@ -27,10 +19,8 @@ import {
   badgesService,
   attendanceService,
   enrollmentsService,
-  installmentsService,
   waiversService,
 } from '../api/services';
-import Calender1 from '../components/Calender1';
 
 export default function Dashboard() {
   // 1. User from auth context
@@ -43,7 +33,6 @@ export default function Dashboard() {
     selectedChild,
     selectChild,
     loading: loadingChildren,
-    error: childrenError,
   } = useChildren();
 
   // We'll fetch announcements once we derive an accurate class_id below
@@ -51,7 +40,7 @@ export default function Dashboard() {
   // (Moved below after enrollment is fetched)
 
   // 6. Active enrollments (only if child selected) - MUST BE BEFORE enrollment-dependent calls
-  const { data: enrollmentsData, loading: loadingEnrollments } = useApi(
+  const { data: enrollmentsData } = useApi(
     () =>
       enrollmentsService.getMy({
         child_id: selectedChild?.id,
@@ -92,16 +81,8 @@ export default function Dashboard() {
     } else {
       setSelectedEnrollment(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEnrollments, selectedChild?.id]);
-
-  // Handle enrollment (class) selection
-  const handleEnrollmentChange = (e) => {
-    const enrollmentId = e.target.value;
-    const enrollment = activeEnrollments.find((en) => en.id === enrollmentId);
-    if (enrollment) {
-      setSelectedEnrollment(enrollment);
-    }
-  };
 
   // Get class name for display
   const getClassName = (enrollment) => {
@@ -113,14 +94,6 @@ export default function Dashboard() {
   const getEnrollmentSchool = (enrollment) => {
     if (!enrollment) return '';
     return enrollment.school_name || enrollment.class?.school?.name || '';
-  };
-
-  // Get class days for enrollment
-  const getEnrollmentDays = (enrollment) => {
-    if (!enrollment?.weekdays || enrollment.weekdays.length === 0) return '';
-    return enrollment.weekdays.map(day =>
-      day.charAt(0).toUpperCase() + day.slice(1)
-    ).join(', ');
   };
 
   // Use selected enrollment for data fetching
@@ -265,14 +238,6 @@ export default function Dashboard() {
     });
   }, [sourceEvents]);
 
-  // 11. Payment summary
-  const { data: paymentSummary, loading: loadingPayments } = useApi(
-    () => installmentsService.getSummary(),
-    {
-      initialData: null,
-    }
-  );
-
   // 11. Pending waivers
   const { data: pendingWaivers, loading: loadingWaivers } = useApi(
     () => waiversService.getPending(),
@@ -281,47 +246,11 @@ export default function Dashboard() {
     }
   );
 
-  // Handle child selection
-  const handleChildChange = (e) => {
-    const childId = e.target.value;
-    const child = children.find((c) => c.id === childId);
-    if (child) {
-      selectChild(child);
-    }
-  };
-
-  // Get school name from child's nested enrollment
-  const getSchoolName = (child) => {
-    // Get school from nested enrollments (new API structure)
-    if (child?.enrollments && child.enrollments.length > 0) {
-      return child.enrollments[0].school_name || '';
-    }
-    // Fallback to child's school field if it exists
-    return child?.school || '';
-  };
-
-  // Get class days from child's nested enrollment weekdays
-  const getClassDays = (child) => {
-    // Get weekdays from nested enrollments (new API structure)
-    if (child?.enrollments && child.enrollments.length > 0) {
-      const weekdays = child.enrollments[0].weekdays;
-      if (!weekdays || weekdays.length === 0) return '';
-
-      // Capitalize first letter of each day
-      return weekdays.map(day =>
-        day.charAt(0).toUpperCase() + day.slice(1)
-      ).join(', ');
-    }
-    return '';
-  };
-
   // Computed values
   const attendanceStreak = attendanceStats?.current_streak || 0;
   const badgeCount = badges?.length || 0;
   const nextEvent = upcomingEvents?.[0] || null;
   const nextEventLoading = derivedClassId ? loadingEvents : loadingFallbackEvents;
-  const schoolName = getSchoolName(selectedChild);
-  const classDays = getClassDays(selectedChild);
 
   // Recent badges (sorted by earned_at)
   const recentBadges = useMemo(() => {

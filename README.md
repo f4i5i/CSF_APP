@@ -575,7 +575,7 @@ npm install
 Copy `.env.example` to `.env` and configure:
 
 ```env
-REACT_APP_API_BASE_URL=http://localhost:8000
+REACT_APP_API_BASE_URL=http://localhost:8000/api
 REACT_APP_ENV=development
 REACT_APP_ENABLE_MOCK_DATA=false
 REACT_APP_GOOGLE_CLIENT_ID=<your-google-client-id>
@@ -1350,7 +1350,7 @@ const { data: users, isLoading } = useUsers();
 
 ```env
 # API Configuration
-REACT_APP_API_BASE_URL=http://localhost:8000
+REACT_APP_API_BASE_URL=http://localhost:8000/api
 REACT_APP_ENV=development
 REACT_APP_ENABLE_MOCK_DATA=false
 

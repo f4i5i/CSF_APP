@@ -3,7 +3,7 @@
  * Admin page for managing classes with Stripe payment configuration
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, Calendar, Copy } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -14,7 +14,6 @@ import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import toast from "react-hot-toast";
 import Header from "../../components/Header";
-import GenericButton from "../../components/GenericButton";
 
 export default function Classes() {
   const [classes, setClasses] = useState([]);
@@ -49,11 +48,6 @@ export default function Classes() {
     fetchFilterOptions();
   }, []);
 
-  // Fetch classes when filters change
-  useEffect(() => {
-    fetchClasses();
-  }, [currentPage, programFilter, areaFilter, statusFilter, searchQuery]);
-
   const fetchFilterOptions = async () => {
     setFiltersLoading(true);
     try {
@@ -83,8 +77,7 @@ export default function Classes() {
     }
   };
 
-
-  const fetchClasses = async () => {
+  const fetchClasses = useCallback(async () => {
     setLoading(true);
     try {
       // Calculate skip for pagination (backend uses skip/limit, not page)
@@ -122,8 +115,12 @@ export default function Classes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, programFilter, areaFilter, statusFilter, searchQuery]);
 
+  // Fetch classes when filters change
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
 
   const handleCreateClass = () => {
     setModalMode("create");

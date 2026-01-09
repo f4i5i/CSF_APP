@@ -3,8 +3,8 @@
  * Admin page for managing client accounts (parents)
  */
 
-import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Mail, Phone, Users, Eye } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Trash2, Mail, Phone, Users, Eye } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -29,11 +29,7 @@ export default function Clients() {
     action: null,
   });
 
-  useEffect(() => {
-    fetchClients();
-  }, [currentPage, statusFilter, searchQuery]);
-
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     setLoading(true);
     try {
       const skip = (currentPage - 1) * itemsPerPage;
@@ -82,7 +78,11 @@ export default function Clients() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
 
   const handleViewClient = (clientData) => {
     // TODO: Navigate to client detail page or open modal

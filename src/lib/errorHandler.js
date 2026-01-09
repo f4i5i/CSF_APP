@@ -162,7 +162,7 @@ export const logError = (error, context = '') => {
   }
 };
 
-export default {
+const errorHandler = {
   handleApiError,
   getErrorMessage,
   isErrorType,
@@ -171,3 +171,5 @@ export default {
   logError,
   ERROR_CODES,
 };
+
+export default errorHandler;

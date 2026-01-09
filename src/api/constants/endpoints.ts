@@ -46,36 +46,36 @@ export const ENDPOINTS = {
   // Programs
   // ============================================================================
   PROGRAMS: {
-    LIST: '/programs',
-    BY_ID: (id: string) => `/programs/${id}`,
-    CREATE: '/programs',
-    UPDATE: (id: string) => `/programs/${id}`,
-    DELETE: (id: string) => `/programs/${id}`,
+    LIST: '/programs/',
+    BY_ID: (id: string) => `/programs/${id}/`,
+    CREATE: '/programs/',
+    UPDATE: (id: string) => `/programs/${id}/`,
+    DELETE: (id: string) => `/programs/${id}/`,
   },
 
   // ============================================================================
   // Areas
   // ============================================================================
   AREAS: {
-    LIST: '/areas',
-    BY_ID: (id: string) => `/areas/${id}`,
-    CREATE: '/areas',
-    UPDATE: (id: string) => `/areas/${id}`,
-    DELETE: (id: string) => `/areas/${id}`,
+    LIST: '/areas/',
+    BY_ID: (id: string) => `/areas/${id}/`,
+    CREATE: '/areas/',
+    UPDATE: (id: string) => `/areas/${id}/`,
+    DELETE: (id: string) => `/areas/${id}/`,
   },
 
   // ============================================================================
   // Classes
   // ============================================================================
   CLASSES: {
-    LIST: '/classes',
-    BY_ID: (id: string) => `/classes/${id}`,
-    CREATE: '/classes',
-    UPDATE: (id: string) => `/classes/${id}`,
-    DELETE: (id: string) => `/classes/${id}`,
-    CAPACITY: (id: string) => `/classes/${id}/capacity`,
-    SCHEDULE: (id: string) => `/classes/${id}/schedule`,
-    ENROLLMENTS: (id: string) => `/classes/${id}/enrollments`,
+    LIST: '/classes/',
+    BY_ID: (id: string) => `/classes/${id}/`,
+    CREATE: '/classes/',
+    UPDATE: (id: string) => `/classes/${id}/`,
+    DELETE: (id: string) => `/classes/${id}/`,
+    CAPACITY: (id: string) => `/classes/${id}/capacity/`,
+    SCHEDULE: (id: string) => `/classes/${id}/schedule/`,
+    ENROLLMENTS: (id: string) => `/classes/${id}/enrollments/`,
   },
 
   // ============================================================================
@@ -189,7 +189,7 @@ export const ENDPOINTS = {
     STATS: (childId: string) => `/attendance/child/${childId}/stats`,
     STREAK: (enrollmentId: string) => `/attendance/enrollment/${enrollmentId}/streak`,
     BULK_CREATE: '/attendance/bulk',
-    SUMMARY: '/attendance/summary',
+    SUMMARY: '/attendance/summary/',
     ENROLLMENT_HISTORY: (enrollmentId: string) => `/attendance/enrollment/${enrollmentId}/history`,
     ENROLLMENT_STATS: (enrollmentId: string) => `/attendance/enrollment/${enrollmentId}/stats`,
     ENROLLMENT_STREAK: (enrollmentId: string) => `/attendance/enrollment/${enrollmentId}/streak`,

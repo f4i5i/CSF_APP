@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import AnnouncementItem from "./AnnouncementItem";
 
 export default function AnnouncementCard({ announcements = [], loading = false }) {

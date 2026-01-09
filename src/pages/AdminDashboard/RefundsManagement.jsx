@@ -4,8 +4,8 @@
  * Uses Invoice table as source of truth for billing records
  */
 
-import React, { useState, useEffect } from 'react';
-import { DollarSign, FileText, Search, Calendar, Download, Eye, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FileText, Eye, RefreshCw } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
 import Header from '../../components/Header';
@@ -30,12 +30,7 @@ export default function RefundsManagement() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState(null);
 
-  useEffect(() => {
-    fetchRefunds();
-    fetchStats();
-  }, [currentPage, searchQuery, dateFrom, dateTo]);
-
-  const fetchRefunds = async () => {
+  const fetchRefunds = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
@@ -56,7 +51,12 @@ export default function RefundsManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchQuery, dateFrom, dateTo]);
+
+  useEffect(() => {
+    fetchRefunds();
+    fetchStats();
+  }, [fetchRefunds]);
 
   const fetchStats = async () => {
     try {

@@ -2,19 +2,15 @@
  * WaiverVersionModal - Shows version info and acceptance stats for a waiver template
  */
 
-import React, { useState, useEffect } from 'react';
-import { X, Info, Users, Calendar, BarChart3 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Info, Calendar, BarChart3 } from 'lucide-react';
 import waiversService from '../../api/services/waivers.service';
 
 const WaiverVersionModal = ({ waiver, onClose }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-  }, [waiver.id]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       setLoading(true);
       const data = await waiversService.getStats(waiver.id);
@@ -24,7 +20,11 @@ const WaiverVersionModal = ({ waiver, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [waiver.id]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

@@ -10,7 +10,6 @@ import childrenService from '../api/services/children.service';
 import ordersService from '../api/services/orders.service';
 import paymentsService from '../api/services/payments.service';
 import enrollmentsService from '../api/services/enrollments.service';
-import installmentsService from '../api/services/installments.service';
 
 export const useCheckoutFlow = () => {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@
  * Includes Stripe sync functionality
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FileText, Download, Eye, RefreshCw, X } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
@@ -33,11 +33,7 @@ export default function Invoices() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
-  useEffect(() => {
-    fetchInvoices();
-  }, [currentPage, statusFilter, searchQuery, dateFrom, dateTo]);
-
-  const fetchInvoices = async () => {
+  const fetchInvoices = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
@@ -55,7 +51,11 @@ export default function Invoices() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, searchQuery, dateFrom, dateTo]);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
 
   const handleSyncFromStripe = async () => {
     setSyncing(true);

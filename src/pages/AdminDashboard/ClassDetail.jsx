@@ -37,7 +37,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 // Icons
-import { ArrowLeft, Clock, User, MapPin } from "lucide-react";
+import { ArrowLeft, Clock, User } from "lucide-react";
 
 // Services and Context
 import classesService from "../../api/services/classes.service";
@@ -133,6 +133,7 @@ export default function ClassDetail() {
       toast.error('No class ID provided');
       navigate(backToClassListUrl);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classId]);
 
   // --------------------------------------------------------------------------

@@ -33,11 +33,6 @@ const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, check
   const start = (page - 1) * perPage;
   const currentStudents = sorted.slice(start, start + perPage);
 
-  // Reset page when search changes
-  const handleSearch = () => {
-    setPage(1);
-  };
-
   return (
     <div className="bg-white/60 p-4 lg:p-7 rounded-3xl shadow-md backdrop-blur-md border">
 

@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import InputField from '../components/InputField'
-import Logo from '../components/Logo'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/auth'
 import LogoLogin from '../components/LogoLogin'

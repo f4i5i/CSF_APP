@@ -3,8 +3,8 @@
  * Admin page for managing class enrollments with full CRUD
  */
 
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, XCircle, CheckCircle, Calendar, DollarSign } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Edit, Trash2, XCircle, CheckCircle } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
@@ -59,10 +59,6 @@ export default function Enrollments() {
     fetchClasses();
   }, []);
 
-  useEffect(() => {
-    fetchEnrollments();
-  }, [currentPage, statusFilter, classFilter, searchQuery]);
-
   const fetchClasses = async () => {
     try {
       const response = await classesService.getAll({ limit: 100 });
@@ -72,7 +68,7 @@ export default function Enrollments() {
     }
   };
 
-  const fetchEnrollments = async () => {
+  const fetchEnrollments = useCallback(async () => {
     setLoading(true);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
@@ -95,7 +91,11 @@ export default function Enrollments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter, classFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchEnrollments();
+  }, [fetchEnrollments]);
 
   const handleCreateEnrollment = () => {
     setModalMode('create');

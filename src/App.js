@@ -98,6 +98,7 @@ import EventsManagement from './pages/AdminDashboard/EventsManagement'
 import BadgesManagement from './pages/AdminDashboard/BadgesManagement'
 import PhotosManagement from './pages/AdminDashboard/PhotosManagement'
 import AnnouncementsManagement from './pages/AdminDashboard/AnnouncementsManagement'
+import AdminCalendar from './pages/AdminDashboard/AdminCalendar'
 import WaiversManagement from './pages/admin/WaiversManagement'
 import WaiverReports from './pages/admin/WaiverReports'
 
@@ -428,6 +429,9 @@ return (
 
   {/* Announcements Management - Create and manage announcements with multi-class support */}
   <Route path="/admin/announcements" element={<AnnouncementsManagement />} />
+
+  {/* Calendar - View events across all classes */}
+  <Route path="/admin/calendar" element={<AdminCalendar />} />
 </Route>
 
 </Routes>

@@ -3,7 +3,7 @@
  * Admin page for managing geographic areas
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -41,11 +41,7 @@ export default function Areas() {
     action: null,
   });
 
-  useEffect(() => {
-    fetchAreas();
-  }, [statusFilter]);
-
-  const fetchAreas = async () => {
+  const fetchAreas = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
@@ -63,7 +59,11 @@ export default function Areas() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchAreas();
+  }, [fetchAreas]);
 
   const handleCreateArea = () => {
     setModalMode("create");

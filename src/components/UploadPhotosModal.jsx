@@ -1,4 +1,4 @@
-import { X, Upload, Trash2, Image as ImageIcon } from "lucide-react";
+import { X, Upload, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useMutation } from "../hooks";
 import { photosService } from "../api/services";
@@ -11,21 +11,19 @@ export default function UploadPhotosModal({ onClose, onSuccess, classes = [], se
   );
   const [previews, setPreviews] = useState([]);
 
-  // Upload mutation
+  // Upload mutation - uploads photos one by one
   const { mutate: uploadPhotos, loading: uploading } = useMutation(
     async (data) => {
-      // Upload photos one by one or in bulk
-      if (data.files.length === 1) {
-        return photosService.upload({
-          file: data.files[0],
-          class_id: data.class_ids[0],
+      // Upload photos one by one (backend doesn't have bulk upload)
+      const results = [];
+      for (const file of data.files) {
+        const result = await photosService.upload({
+          file: file,
+          class_ids: data.class_ids,
         });
-      } else {
-        return photosService.bulkUpload({
-          files: data.files,
-          class_id: data.class_ids[0],
-        });
+        results.push(result);
       }
+      return results;
     },
     {
       onSuccess: () => {

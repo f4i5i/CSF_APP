@@ -7,15 +7,12 @@
  * - Less than 15 days: Requires admin review
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   XCircle,
   CheckCircle,
   Clock,
   AlertCircle,
-  Calendar,
-  User,
-  DollarSign,
   RefreshCw
 } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
@@ -49,21 +46,16 @@ export default function CancellationRequests() {
   const [adminNotes, setAdminNotes] = useState('');
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => {
-    fetchRequests();
-    fetchStats();
-  }, [activeTab, currentPage]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const data = await adminService.getCancellationRequestStats();
       setStats(data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     }
-  };
+  }, []);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
       let data;
@@ -84,7 +76,12 @@ export default function CancellationRequests() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, currentPage, itemsPerPage]);
+
+  useEffect(() => {
+    fetchRequests();
+    fetchStats();
+  }, [fetchRequests, fetchStats]);
 
   const handleViewDetails = (request) => {
     setSelectedRequest(request);

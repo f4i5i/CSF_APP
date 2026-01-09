@@ -10,6 +10,7 @@ import { useApi } from '../../hooks';
 
 // Services
 import { classesService, photosService } from '../../api/services';
+import { getFileUrl } from '../../api/config';
 
 const CoachGallery = () => {
   const { user } = useAuth();
@@ -168,7 +169,7 @@ const CoachGallery = () => {
                 {column.map((photo) => (
                   <div key={photo.id} className="relative group">
                     <img
-                      src={photo.url || photo.image_url || photo.thumbnail_url}
+                      src={getFileUrl(photo.image_url || photo.thumbnail_url || photo.url)}
                       alt={photo.caption || 'Class photo'}
                       className="w-full object-cover rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
                       loading="lazy"

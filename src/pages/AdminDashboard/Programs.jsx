@@ -3,7 +3,7 @@
  * Admin page for managing sports programs
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -41,11 +41,7 @@ export default function Programs() {
     action: null,
   });
 
-  useEffect(() => {
-    fetchPrograms();
-  }, [statusFilter]);
-
-  const fetchPrograms = async () => {
+  const fetchPrograms = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
@@ -63,7 +59,11 @@ export default function Programs() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchPrograms();
+  }, [fetchPrograms]);
 
   const handleCreateProgram = () => {
     setModalMode("create");

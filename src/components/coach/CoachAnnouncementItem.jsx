@@ -93,7 +93,7 @@ const CoachAnnouncementItem = ({
     if (!attachment) return null;
 
     // Map backend fields to expected format and construct full URL
-    const rawPath = attachment.url || attachment.file_path;
+    const rawPath = attachment.file_url || attachment.url || attachment.file_path;
     const url = getFileUrl(rawPath);
     const name = attachment.name || attachment.file_name;
     const type = attachment.type || attachment.mime_type || attachment.file_type;

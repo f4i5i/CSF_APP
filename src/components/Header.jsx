@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import React from "react";
 
 // Routing
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // Icons - Lucide React
 import {
@@ -29,7 +29,6 @@ import {
   Wallet,
   MessageCircle,
   X,
-  Award,
 } from "lucide-react";
 
 // Icons - Material UI
@@ -44,7 +43,6 @@ import { useAuth } from "../context/auth";
 
 // Assets
 import logo from "../assets/person.png";
-import baseLogo from "../assets/logo.png";
 
 // ============================================================================
 // HEADER COMPONENT

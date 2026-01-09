@@ -42,33 +42,33 @@ export const ENDPOINTS = {
   // PROGRAMS
   // ===================
   PROGRAMS: {
-    LIST: '/programs', // List all programs (public)
-    BY_ID: (id: string) => `/programs/${id}`, // Get program by ID
-    CREATE: '/programs', // Create program (ADMIN)
-    UPDATE: (id: string) => `/programs/${id}`, // Update program (ADMIN)
-    DELETE: (id: string) => `/programs/${id}`, // Delete program (ADMIN)
+    LIST: '/programs/', // List all programs (public)
+    BY_ID: (id: string) => `/programs/${id}/`, // Get program by ID
+    CREATE: '/programs/', // Create program (ADMIN)
+    UPDATE: (id: string) => `/programs/${id}/`, // Update program (ADMIN)
+    DELETE: (id: string) => `/programs/${id}/`, // Delete program (ADMIN)
   },
 
   // ===================
   // AREAS
   // ===================
   AREAS: {
-    LIST: '/areas', // List all areas (public)
-    BY_ID: (id: string) => `/areas/${id}`, // Get area by ID
-    CREATE: '/areas', // Create area (ADMIN)
-    UPDATE: (id: string) => `/areas/${id}`, // Update area (ADMIN)
-    DELETE: (id: string) => `/areas/${id}`, // Delete area (ADMIN)
+    LIST: '/areas/', // List all areas (public)
+    BY_ID: (id: string) => `/areas/${id}/`, // Get area by ID
+    CREATE: '/areas/', // Create area (ADMIN)
+    UPDATE: (id: string) => `/areas/${id}/`, // Update area (ADMIN)
+    DELETE: (id: string) => `/areas/${id}/`, // Delete area (ADMIN)
   },
 
   // ===================
   // CLASSES
   // ===================
   CLASSES: {
-    LIST: '/classes', // List classes with filters (public)
-    BY_ID: (id: string) => `/classes/${id}`, // Get class details
-    CREATE: '/classes', // Create class (ADMIN)
-    UPDATE: (id: string) => `/classes/${id}`, // Update class (ADMIN)
-    DELETE: (id: string) => `/classes/${id}`, // Delete class (ADMIN)
+    LIST: '/classes/', // List classes with filters (public)
+    BY_ID: (id: string) => `/classes/${id}/`, // Get class details
+    CREATE: '/classes/', // Create class (ADMIN)
+    UPDATE: (id: string) => `/classes/${id}/`, // Update class (ADMIN)
+    DELETE: (id: string) => `/classes/${id}/`, // Delete class (ADMIN)
   },
 
   // ===================
@@ -192,7 +192,7 @@ export const ENDPOINTS = {
     STATS: (childId: string) => `/attendance/child/${childId}/stats`, // Get attendance stats
     CLASS: (classId: string) => `/attendance/class/${classId}`, // Get class attendance (COACH)
     BULK_CREATE: '/attendance/bulk', // Bulk record attendance
-    SUMMARY: '/attendance/summary', // Get attendance summary for date range
+    SUMMARY: '/attendance/summary/', // Get attendance summary for date range
   },
 
   // ===================

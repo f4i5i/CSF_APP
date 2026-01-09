@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Download, FileText, Filter, ChevronDown, RefreshCw } from 'lucide-react';
 import invoicesService from '../../api/services/invoices.service';
 import { formatDate, formatCurrency } from '../../utils/format';
@@ -12,11 +12,7 @@ const InvoiceTable = () => {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState(null);
 
-  useEffect(() => {
-    loadInvoices();
-  }, [filter]);
-
-  const loadInvoices = async () => {
+  const loadInvoices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,7 +29,11 @@ const InvoiceTable = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadInvoices();
+  }, [loadInvoices]);
 
   const handleDownloadInvoice = async (invoiceId, invoiceNumber) => {
     try {

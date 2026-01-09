@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { X } from "lucide-react";
+import { getFileUrl } from "../api/config";
 import ProgramPhotoSrc from "../assets/program.png";
 import EarnedBadgeSrc from "../assets/Earned_Badges.png";
 import LeftArrowSrc from "../assets/left_errow.png";
@@ -312,10 +313,7 @@ export default function DashboardWidgets({
                 {renderEventDescriptionWithViewMore(displayNextEvent?.description)}
                 
                 {displayNextEvent?.attachment_name && (
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <div
                     className="flex items-center gap-2 bg-white/50 px-2 sm:px-3.5 mt-2 py-2 rounded-[60px] text-xs text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors w-fit"
                   >
                     <img
@@ -328,7 +326,7 @@ export default function DashboardWidgets({
                     <span className="text-xs sm:text-sm text-[#1B1B1B] font-semibold">
                       {displayNextEvent.attachment_name}
                     </span>
-                  </a>
+                  </div>
                 )}
               </div>
             )}
@@ -344,7 +342,7 @@ export default function DashboardWidgets({
             ) : (
               <>
                 <img
-                  src={photo?.url || photo?.image_url || ProgramPhotoSrc}
+                  src={photo?.image_url ? getFileUrl(photo.image_url) : (photo?.url || ProgramPhotoSrc)}
                   alt="Program Photos"
                   className="w-full h-full object-cover absolute inset-0"
                 />

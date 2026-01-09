@@ -3,7 +3,7 @@
  * Admin page for managing badges and awarding them to students
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Award, Plus, Edit, Trash2, Gift, Search } from 'lucide-react';
 import Header from '../../components/Header';
 import badgesService from '../../api/services/badges.service';
@@ -45,12 +45,7 @@ export default function BadgesManagement() {
   const [studentSearch, setStudentSearch] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchBadges();
-    fetchEnrollments();
-  }, [categoryFilter]);
-
-  const fetchBadges = async () => {
+  const fetchBadges = useCallback(async () => {
     setLoading(true);
     try {
       const filters = {};
@@ -63,7 +58,12 @@ export default function BadgesManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryFilter]);
+
+  useEffect(() => {
+    fetchBadges();
+    fetchEnrollments();
+  }, [fetchBadges]);
 
   const fetchEnrollments = async () => {
     try {

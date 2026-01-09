@@ -53,7 +53,7 @@ const categorizedRoutes = [
     icon: Image,
     items: [
       { name: "Announcements", to: "/admin/announcements", icon: Bell },
-      { name: "Calendar", to: "/calendar", icon: Calendar },
+      { name: "Calendar", to: "/admin/calendar", icon: Calendar },
       { name: "Events", to: "/admin/events", icon: CalendarDays },
       { name: "Badges", to: "/admin/badges", icon: Award },
       { name: "Photos", to: "/admin/photos", icon: Image },
@@ -62,7 +62,7 @@ const categorizedRoutes = [
 ];
 
 export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [expandedCategories, setExpandedCategories] = useState({
     Setup: false,
     Classes: false,

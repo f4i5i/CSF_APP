@@ -4,8 +4,8 @@
  * Supports multi-class events via EventTarget
  */
 
-import React, { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Calendar, Clock, MapPin, Users, Eye, X } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Plus, Edit, Trash2, Clock, MapPin, Users, Eye, X } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -73,11 +73,6 @@ export default function EventsManagement() {
     fetchFilterOptions();
   }, []);
 
-  // Fetch events when filters change
-  useEffect(() => {
-    fetchEvents();
-  }, [currentPage, typeFilter, classFilter, searchQuery]);
-
   const fetchFilterOptions = async () => {
     setFiltersLoading(true);
     try {
@@ -104,7 +99,7 @@ export default function EventsManagement() {
     }
   };
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
       const skip = (currentPage - 1) * itemsPerPage;
@@ -131,7 +126,12 @@ export default function EventsManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, typeFilter, classFilter, searchQuery]);
+
+  // Fetch events when filters change
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const handleCreateEvent = () => {
     setModalMode("create");

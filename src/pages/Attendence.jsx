@@ -75,7 +75,7 @@ const Attendence = () => {
   }, [classesData, isCoach]);
 
   // Set first class as default when classes load
-  useMemo(() => {
+  useEffect(() => {
     if (isCoach && classes?.length > 0 && !selectedClass) {
       setSelectedClass(classes[0]);
     }
@@ -147,15 +147,6 @@ const Attendence = () => {
     { title: "Team Player", icon: icon5 }
   ];
 
-  const demoAttendance = [
-    { date: "Oct 24, 2024", status: "Present" },
-    { date: "Oct 21, 2024", status: "Present" },
-    { date: "Oct 17, 2024", status: "Present" },
-    { date: "Oct 14, 2024", status: "Present" },
-    { date: "Oct 13, 2024", status: "Absent" },
-    { date: "Oct 12, 2024", status: "Present" },
-  ];
-
   // Transform API badges to component format
   const badges = useMemo(() => {
     if (badgesData && badgesData.length > 0) {
@@ -169,6 +160,7 @@ const Attendence = () => {
       }));
     }
     return demoBadges;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [badgesData]);
 
   // Transform API attendance to component format

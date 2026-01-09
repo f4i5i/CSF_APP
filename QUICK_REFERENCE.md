@@ -355,7 +355,7 @@
 Add to `/.env`:
 
 ```bash
-REACT_APP_API_BASE_URL=http://localhost:8000
+REACT_APP_API_BASE_URL=http://localhost:8000/api
 REACT_APP_ENV=development
 REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
 REACT_APP_STRIPE_PUBLISHABLE_KEY=your_stripe_key

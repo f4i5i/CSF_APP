@@ -46,44 +46,44 @@ export const API_ENDPOINTS = {
   // PROGRAMS
   // ===================
   PROGRAMS: {
-    LIST: '/programs', // List all programs (public)
-    BY_ID: (id) => `/programs/${id}`, // Get program by ID
-    CREATE: '/programs', // Create program (ADMIN)
-    UPDATE: (id) => `/programs/${id}`, // Update program (ADMIN)
-    DELETE: (id) => `/programs/${id}`, // Delete program (ADMIN)
+    LIST: '/programs/', // List all programs (public)
+    BY_ID: (id) => `/programs/${id}/`, // Get program by ID
+    CREATE: '/programs/', // Create program (ADMIN)
+    UPDATE: (id) => `/programs/${id}/`, // Update program (ADMIN)
+    DELETE: (id) => `/programs/${id}/`, // Delete program (ADMIN)
   },
 
   // ===================
   // AREAS
   // ===================
   AREAS: {
-    LIST: '/areas', // List all areas (public)
-    BY_ID: (id) => `/areas/${id}`, // Get area by ID
-    CREATE: '/areas', // Create area (ADMIN)
-    UPDATE: (id) => `/areas/${id}`, // Update area (ADMIN)
-    DELETE: (id) => `/areas/${id}`, // Delete area (ADMIN)
+    LIST: '/areas/', // List all areas (public)
+    BY_ID: (id) => `/areas/${id}/`, // Get area by ID
+    CREATE: '/areas/', // Create area (ADMIN)
+    UPDATE: (id) => `/areas/${id}/`, // Update area (ADMIN)
+    DELETE: (id) => `/areas/${id}/`, // Delete area (ADMIN)
   },
 
   // ===================
   // SCHOOLS
   // ===================
   SCHOOLS: {
-    LIST: '/schools', // List all schools (public)
-    BY_ID: (id) => `/schools/${id}`, // Get school by ID
-    CREATE: '/schools', // Create school (ADMIN)
-    UPDATE: (id) => `/schools/${id}`, // Update school (ADMIN)
-    DELETE: (id) => `/schools/${id}`, // Delete school (ADMIN)
+    LIST: '/schools/', // List all schools (public)
+    BY_ID: (id) => `/schools/${id}/`, // Get school by ID
+    CREATE: '/schools/', // Create school (ADMIN)
+    UPDATE: (id) => `/schools/${id}/`, // Update school (ADMIN)
+    DELETE: (id) => `/schools/${id}/`, // Delete school (ADMIN)
   },
 
   // ===================
   // CLASSES
   // ===================
   CLASSES: {
-    LIST: '/classes', // List classes with filters (public)
-    BY_ID: (id) => `/classes/${id}`, // Get class details (includes schedule, capacity)
-    CREATE: '/classes', // Create class (ADMIN)
-    UPDATE: (id) => `/classes/${id}`, // Update class (ADMIN)
-    DELETE: (id) => `/classes/${id}`, // Delete class (ADMIN)
+    LIST: '/classes/', // List classes with filters (public)
+    BY_ID: (id) => `/classes/${id}/`, // Get class details (includes schedule, capacity)
+    CREATE: '/classes/', // Create class (ADMIN)
+    UPDATE: (id) => `/classes/${id}/`, // Update class (ADMIN)
+    DELETE: (id) => `/classes/${id}/`, // Delete class (ADMIN)
   },
 
   // ===================
@@ -219,7 +219,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/attendance/${id}`, // Get/Update/Delete attendance by ID
     MARK: '/attendance/mark', // Mark attendance (bulk) (COACH)
     BULK_CREATE: '/attendance/bulk', // Bulk create attendance
-    SUMMARY: '/attendance/summary', // Get attendance summary
+    SUMMARY: '/attendance/summary/', // Get attendance summary
     HISTORY: (enrollmentId) => `/attendance/enrollment/${enrollmentId}/history`,
     STREAK: (enrollmentId) => `/attendance/enrollment/${enrollmentId}/streak`,
     STATS: (childId) => `/attendance/child/${childId}/stats`, // Child stats
@@ -244,10 +244,13 @@ export const API_ENDPOINTS = {
   // PHOTOS
   // ===================
   PHOTOS: {
-    UPLOAD: '/photos/upload', // Upload photo (COACH)
+    UPLOAD: '/photos/upload', // Upload single photo (COACH)
+    BULK_UPLOAD: '/photos/bulk', // Bulk upload photos (COACH)
     BY_CLASS: (classId) => `/photos/class/${classId}`, // List class photos
     LIST: (classId) => `/photos/class/${classId}`, // Alias for BY_CLASS
     BY_ID: (id) => `/photos/${id}`, // Delete photo
+    TAG_CHILD: (photoId) => `/photos/${photoId}/tag`, // Tag child in photo
+    UNTAG_CHILD: (photoId, childId) => `/photos/${photoId}/tag/${childId}`, // Remove child tag
 
     // Categories
     CATEGORIES: '/photos/categories',

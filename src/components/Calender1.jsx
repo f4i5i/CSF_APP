@@ -110,8 +110,6 @@ export default function Calendar1() {
         {[...Array(totalDays)].map((_, i) => {
           const day = i + 1;
           const isEvent = highlightedDates.includes(day);
-          const dateObj = new Date(currentYear, currentMonth, day);
-          const isToday = dateObj.getTime() === today.getTime();
 
           return (
             <button

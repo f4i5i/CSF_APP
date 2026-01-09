@@ -39,7 +39,6 @@ export default function RegisterChild() {
   // Waiver modal state
   const [showWaiverModal, setShowWaiverModal] = useState(false);
   const [unsignedWaivers, setUnsignedWaivers] = useState([]);
-  const [createdChildId, setCreatedChildId] = useState(null);
 
   // Fetch classes for classroom dropdown
   const { data: classes = [], isLoading: loadingClasses } = useClasses({
@@ -215,7 +214,6 @@ export default function RegisterChild() {
 
           if (unsigned.length > 0) {
             // Show waiver modal instead of navigating
-            setCreatedChildId(childId);
             setUnsignedWaivers(unsigned);
             setShowWaiverModal(true);
             return; // Don't navigate yet
@@ -643,21 +641,21 @@ export default function RegisterChild() {
             © 2025 Carolina Soccer Factory. All rights reserved.
           </p>
           <div className="flex gap-5">
-            <a href="#" className="flex font-['inter'] font-normal text-sm text-black items-center gap-1 hover:underline">
+            <button type="button" className="flex font-['inter'] font-normal text-sm text-black items-center gap-1 hover:underline">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
               Privacy
-            </a>
-            <a href="#" className="flex font-['inter'] font-normal text-sm text-black items-center gap-1 hover:underline">
+            </button>
+            <button type="button" className="flex font-['inter'] font-normal text-sm text-black items-center gap-1 hover:underline">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="9"></circle>
                 <path d="M9.1 9a3 3 0 1 1 4.8 2.2c-.7.5-1.2 1.1-1.2 1.8v1"></path>
                 <line x1="12" y1="17" x2="12" y2="17"></line>
               </svg>
               Get help
-            </a>
+            </button>
           </div>
         </div>
       </footer>

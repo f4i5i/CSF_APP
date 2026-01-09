@@ -27,7 +27,6 @@ const PaymentStatusCard = ({ summary = null, loading = false }) => {
   }
 
   const {
-    total_plans = 0,
     active_plans = 0,
     total_remaining = 0,
     next_due = null,

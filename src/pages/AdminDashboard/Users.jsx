@@ -3,7 +3,7 @@
  * Admin page for managing users with role-based access control
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, Mail, Phone, Shield } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -53,11 +53,7 @@ export default function Users() {
     action: null,
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, [currentPage, roleFilter, statusFilter, searchQuery]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const skip = (currentPage - 1) * itemsPerPage;
@@ -83,7 +79,11 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, roleFilter, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleCreateUser = () => {
     setModalMode("create");

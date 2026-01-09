@@ -3,7 +3,7 @@
  * Admin page for managing schools/locations
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, MapPin } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -48,10 +48,6 @@ export default function Schools() {
     fetchAreas();
   }, []);
 
-  useEffect(() => {
-    fetchSchools();
-  }, [statusFilter, areaFilter]);
-
   const fetchAreas = async () => {
     try {
       const response = await areasService.getAll();
@@ -64,7 +60,7 @@ export default function Schools() {
     }
   };
 
-  const fetchSchools = async () => {
+  const fetchSchools = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
@@ -83,7 +79,11 @@ export default function Schools() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, areaFilter]);
+
+  useEffect(() => {
+    fetchSchools();
+  }, [fetchSchools]);
 
   const handleCreateSchool = () => {
     setModalMode("create");

@@ -3,9 +3,8 @@
  * Allows user to choose installment plan (2, 3, 4, or 6 months)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, DollarSign } from 'lucide-react';
-import installmentsService from '../../api/services/installments.service';
 
 export default function InstallmentPlanSelector({ orderTotal = 0, selectedPlan, onSelect }) {
   const [plans, setPlans] = useState([]);
@@ -20,14 +19,7 @@ export default function InstallmentPlanSelector({ orderTotal = 0, selectedPlan, 
     { count: 6, label: '6 Months' },
   ];
 
-  // Calculate installment preview
-  useEffect(() => {
-    if (orderTotal > 0) {
-      calculatePlans();
-    }
-  }, [orderTotal]);
-
-  const calculatePlans = async () => {
+  const calculatePlans = useCallback(async () => {
     setLoading(true);
     try {
       const calculatedPlans = installmentOptions.map((option) => {
@@ -47,7 +39,14 @@ export default function InstallmentPlanSelector({ orderTotal = 0, selectedPlan, 
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderTotal]);
+
+  useEffect(() => {
+    if (orderTotal > 0) {
+      calculatePlans();
+    }
+  }, [orderTotal, calculatePlans]);
 
   const handleSelectPlan = (plan) => {
     onSelect({ ...plan, autoPay });

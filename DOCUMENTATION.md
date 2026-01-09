@@ -162,7 +162,7 @@ module.exports = {
 
 **Variables:**
 ```bash
-REACT_APP_API_BASE_URL=http://localhost:8000
+REACT_APP_API_BASE_URL=http://localhost:8000/api
 REACT_APP_ENV=development
 REACT_APP_ENABLE_MOCK_DATA=false
 REACT_APP_GOOGLE_CLIENT_ID=[Google OAuth Client ID]
@@ -367,7 +367,7 @@ const queryClient = new QueryClient({
 **Configuration:**
 ```typescript
 export const API_CONFIG = {
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api',
   timeout: 30000, // 30 seconds
   tokenKey: 'auth_token',
   refreshTokenKey: 'refresh_token',

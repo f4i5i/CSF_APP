@@ -8,7 +8,7 @@
  */
 export const API_CONFIG = {
   // Base URL for API (from environment or default to localhost)
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api',
 
   // API version prefix
   API_PREFIX: '/api/v1',

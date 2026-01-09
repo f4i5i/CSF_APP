@@ -4,12 +4,13 @@
  * Supports multi-class photo uploads
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Image, Upload, Trash2, FolderPlus, Check, X, Search, Filter } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Image, Upload, Trash2, FolderPlus, Check, X, Search } from 'lucide-react';
 import Header from '../../components/Header';
 import MultiClassSelector from '../../components/admin/MultiClassSelector';
 import photosService from '../../api/services/photos.service';
 import classesService from '../../api/services/classes.service';
+import { getFileUrl } from '../../api/config';
 import toast from 'react-hot-toast';
 
 export default function PhotosManagement() {
@@ -38,13 +39,7 @@ export default function PhotosManagement() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchPhotos();
-    fetchClasses();
-    fetchCategories();
-  }, [classFilter]);
-
-  const fetchPhotos = async () => {
+  const fetchPhotos = useCallback(async () => {
     setLoading(true);
     try {
       let response;
@@ -61,7 +56,13 @@ export default function PhotosManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [classFilter]);
+
+  useEffect(() => {
+    fetchPhotos();
+    fetchClasses();
+    fetchCategories();
+  }, [fetchPhotos]);
 
   const fetchClasses = async () => {
     try {
@@ -333,7 +334,7 @@ export default function PhotosManagement() {
                 onClick={() => togglePhotoSelection(photo.id)}
               >
                 <img
-                  src={photo.url || photo.thumbnail_url || '/images/placeholder.jpg'}
+                  src={getFileUrl(photo.image_url || photo.thumbnail_url || photo.url) || '/images/placeholder.jpg'}
                   alt={photo.caption || 'Photo'}
                   className="w-full h-full object-cover"
                 />
