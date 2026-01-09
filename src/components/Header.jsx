@@ -52,7 +52,7 @@ const Header = () => {
   // STATE & REFS
   // ------------------------------------------------------------------------
   // Get user role from localStorage for role-based rendering
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role")?.trim()?.toLowerCase();
 
   // Navigation hook for programmatic routing
   const navigate = useNavigate();
@@ -352,22 +352,6 @@ const Header = () => {
                   }
                 >
                   Check-In
-                </NavLink>
-              </li>
-
-              <li>
-                <NavLink
-                  to="/attendance"
-                  className={({ isActive }) =>
-                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
-          ${
-            isActive
-              ? "bg-[#F3BC48] text-black"
-              : "text-black hover:bg-white/20"
-          }`
-                  }
-                >
-                  Attendance
                 </NavLink>
               </li>
 
