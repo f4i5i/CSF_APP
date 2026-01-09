@@ -186,10 +186,13 @@ const eventsService = {
   /**
    * Get events for a specific class
    * @param {string} classId - Class ID
+   * @param {Object} filters - Optional filters (year, month, upcoming, limit)
    * @returns {Promise<Array>} Class events
    */
-  async getByClass(classId) {
-    const { data } = await apiClient.get(API_ENDPOINTS.EVENTS.BY_CLASS(classId));
+  async getByClass(classId, filters = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.EVENTS.BY_CLASS(classId), {
+      params: filters,
+    });
     return data;
   },
 };

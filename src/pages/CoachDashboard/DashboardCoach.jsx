@@ -95,19 +95,26 @@ export default function DashboardCoach() {
     }
   );
 
-  // Fetch calendar events for current month
+  // Fetch calendar events for current month (filtered by selected class)
   const { data: calendarEvents, loading: loadingEvents } = useApi(
-    () => eventsService.getThisMonth(),
+    () => eventsService.getByClass(selectedClass?.id, {
+      year: currentDate.getFullYear(),
+      month: currentDate.getMonth() + 1,
+    }),
     {
       initialData: [],
+      dependencies: [selectedClass?.id],
+      autoFetch: !!selectedClass?.id,
     }
   );
 
-  // Fetch upcoming events (for next event card)
+  // Fetch upcoming events for selected class (for next event card)
   const { data: upcomingEvents } = useApi(
-    () => eventsService.getUpcoming(1),
+    () => eventsService.getByClass(selectedClass?.id, { upcoming: true, limit: 1 }),
     {
       initialData: [],
+      dependencies: [selectedClass?.id],
+      autoFetch: !!selectedClass?.id,
     }
   );
 
