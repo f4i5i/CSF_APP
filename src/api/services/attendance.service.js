@@ -20,10 +20,18 @@ const attendanceService = {
    * @returns {Promise<Object>} Attendance list response {items, total, skip, limit}
    */
   async getAll(filters = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ATTENDANCE.LIST, {
-      params: filters,
-    });
-    return data;
+    try {
+      const { data } = await apiClient.get(API_ENDPOINTS.ATTENDANCE.LIST, {
+        params: filters,
+      });
+      return data;
+    } catch (error) {
+      // Return empty array for 404 (no data found)
+      if (error.status === 404) {
+        return { items: [], total: 0, skip: 0, limit: 100 };
+      }
+      throw error;
+    }
   },
 
   /**
@@ -35,11 +43,19 @@ const attendanceService = {
    * @returns {Promise<Object>} Attendance list response {items, total, skip, limit}
    */
   async getByEnrollment(enrollmentId, filters = {}) {
-    const { data } = await apiClient.get(
-      API_ENDPOINTS.ATTENDANCE.HISTORY(enrollmentId),
-      { params: filters }
-    );
-    return data;
+    try {
+      const { data } = await apiClient.get(
+        API_ENDPOINTS.ATTENDANCE.HISTORY(enrollmentId),
+        { params: filters }
+      );
+      return data;
+    } catch (error) {
+      // Return empty array for 404 (no data found)
+      if (error.status === 404) {
+        return { items: [], total: 0, skip: 0, limit: 100 };
+      }
+      throw error;
+    }
   },
 
   /**

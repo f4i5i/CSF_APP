@@ -79,11 +79,11 @@ export const API_ENDPOINTS = {
   // CLASSES
   // ===================
   CLASSES: {
-    LIST: '/classes/', // List classes with filters (public)
-    BY_ID: (id) => `/classes/${id}/`, // Get class details (includes schedule, capacity)
-    CREATE: '/classes/', // Create class (ADMIN)
-    UPDATE: (id) => `/classes/${id}/`, // Update class (ADMIN)
-    DELETE: (id) => `/classes/${id}/`, // Delete class (ADMIN)
+    LIST: '/classes', // List classes with filters (public)
+    BY_ID: (id) => `/classes/${id}`, // Get class details (includes schedule, capacity)
+    CREATE: '/classes', // Create class (ADMIN)
+    UPDATE: (id) => `/classes/${id}`, // Update class (ADMIN)
+    DELETE: (id) => `/classes/${id}`, // Delete class (ADMIN)
   },
 
   // ===================

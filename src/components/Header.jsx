@@ -115,12 +115,10 @@ const Header = () => {
   ];
 
   // Coach role navigation items (displayed in horizontal nav bar on desktop)
-  // Updated to match Figma design: Dashboard, Calendar, Check-In, Attendance, Photos
   const navItemscoach = [
     { name: "Dashboard", icon: Home, path: "/coachdashboard" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
     { name: "Check-In", icon: CheckCircle, path: "/checkin" },
-    { name: "Attendance", icon: CheckCircle2, path: "/attendance" },
     { name: "Photos", icon: Image, path: "/Gallery" },
   ];
 

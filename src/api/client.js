@@ -79,7 +79,10 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     // Handle 401 Unauthorized - Token expired
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Skip token refresh for auth endpoints (login, register, etc.)
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       // If already refreshing, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {

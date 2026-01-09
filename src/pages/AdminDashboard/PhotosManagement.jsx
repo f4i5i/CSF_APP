@@ -78,7 +78,9 @@ export default function PhotosManagement() {
       const response = await photosService.getAlbums();
       setCategories(response.items || response || []);
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
+      // Categories endpoint may not be implemented yet - fail silently
+      console.log('Categories not available:', error.message || error);
+      setCategories([]);
     }
   };
 

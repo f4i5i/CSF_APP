@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import LogoLogin from "../components/LogoLogin";
@@ -11,9 +11,25 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { user, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Redirect logged-in users to their dashboard
+  useEffect(() => {
+    if (user) {
+      const normalizedRole = user?.role?.toUpperCase();
+      const roleRoutes = {
+        COACH: "/coachdashboard",
+        ADMIN: "/admin",
+        OWNER: "/admin",
+        PARENT: "/dashboard",
+        STUDENT: "/dashboard",
+      };
+      const targetRoute = roleRoutes[normalizedRole] || "/dashboard";
+      navigate(targetRoute, { replace: true });
+    }
+  }, [user, navigate]);
 
   const redirectForRole = (user) => {
     const normalizedRole = user?.role?.toUpperCase();
@@ -73,8 +89,8 @@ export default function Login() {
       const user = await login(email, password);
       redirectForRole(user);
     } catch (error) {
+      // Error toast is already shown by auth context
       console.error("Login error:", error);
-      toast.error("Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -85,14 +101,14 @@ export default function Login() {
       const user = await loginWithGoogle(credential);
       redirectForRole(user);
     } catch (error) {
+      // Error toast is already shown by auth context
       console.error("Google login error:", error);
-      toast.error("Google login failed. Please try again.");
     }
   };
 
   const handleGoogleError = (message) => {
+    // Error toast is already shown by auth context
     console.error("Google login error:", message);
-    toast.error("Google login failed. Please try again.");
   };
 
   return (

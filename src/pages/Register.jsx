@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/auth'
 import LogoLogin from '../components/LogoLogin'
@@ -19,9 +19,25 @@ export default function Register(){
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
-  const { register } = useAuth()
+  const { user, register } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Redirect logged-in users to their dashboard
+  useEffect(() => {
+    if (user) {
+      const normalizedRole = user?.role?.toUpperCase();
+      const roleRoutes = {
+        COACH: "/coachdashboard",
+        ADMIN: "/admin",
+        OWNER: "/admin",
+        PARENT: "/dashboard",
+        STUDENT: "/dashboard",
+      };
+      const targetRoute = roleRoutes[normalizedRole] || "/dashboard";
+      navigate(targetRoute, { replace: true });
+    }
+  }, [user, navigate]);
 
   const redirectForRole = (user) => {
     const normalizedRole = user?.role?.toUpperCase();

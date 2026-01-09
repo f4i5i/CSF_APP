@@ -64,11 +64,11 @@ export const ENDPOINTS = {
   // CLASSES
   // ===================
   CLASSES: {
-    LIST: '/classes/', // List classes with filters (public)
-    BY_ID: (id: string) => `/classes/${id}/`, // Get class details
-    CREATE: '/classes/', // Create class (ADMIN)
-    UPDATE: (id: string) => `/classes/${id}/`, // Update class (ADMIN)
-    DELETE: (id: string) => `/classes/${id}/`, // Delete class (ADMIN)
+    LIST: '/classes', // List classes with filters (public)
+    BY_ID: (id: string) => `/classes/${id}`, // Get class details
+    CREATE: '/classes', // Create class (ADMIN)
+    UPDATE: (id: string) => `/classes/${id}`, // Update class (ADMIN)
+    DELETE: (id: string) => `/classes/${id}`, // Delete class (ADMIN)
   },
 
   // ===================
