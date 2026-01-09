@@ -107,6 +107,7 @@ import WaiverReports from './pages/admin/WaiverReports'
 // ========================================
 import ProtectedRoute from './components/ProtectedRoute'
 import AddStudent from './components/AddStudent'
+import { ChildrenProvider } from './context/ChildrenContext'
 
 /**
  * App Component
@@ -172,6 +173,7 @@ return (
     2. Protected routes (parent/coach)
     3. Admin-only routes
 */}
+<ChildrenProvider>
 <Routes>
 {/* ========================================
     PUBLIC ROUTES
@@ -435,6 +437,7 @@ return (
 </Route>
 
 </Routes>
+</ChildrenProvider>
 </>
 )
 }

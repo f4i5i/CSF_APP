@@ -55,6 +55,18 @@
   box-shadow: none !important;
   padding: 0 !important;
   background: transparent !important;
+  overflow: hidden !important;
+}
+
+/* Event row container */
+.rbc-row-segment {
+  overflow: hidden !important;
+}
+
+.rbc-event-content {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 /* Yellow event variation (optional) */

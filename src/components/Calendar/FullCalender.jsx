@@ -14,14 +14,13 @@ const CustomEvent = ({ event }) => {
 
   return (
     <div
-      className={`flex flex-col gap-1 rounded-lg sm:rounded-[15px] p-1 lg:mx-2 sm:px-4 sm:py-2 w-fit shadow-sm border
+      className={`flex flex-col gap-1 rounded-lg sm:rounded-[15px] p-1 lg:mx-2 sm:px-4 sm:py-2 max-w-full shadow-sm border overflow-hidden
         ${isYellow ? 'bg-[#F3BC48] border-[#F3BC48] text-[#000]' : 'bg-[#173963] border-[#173963] text-white'}`}
-      // style={{ minWidth: '120px' }}
     >
-      <span className="text-[8px] sm:text-[12px] font-medium tracking-[0.01em] font-manrope">
+      <span className="text-[8px] sm:text-[12px] font-medium tracking-[0.01em] font-manrope truncate max-w-[120px] sm:max-w-[150px]">
         {event.title}
       </span>
-      <span className="font-manrope text-[8px] sm:text-[12px] font-medium tracking-[0.01em] opacity-90">
+      <span className="font-manrope text-[8px] sm:text-[12px] font-medium tracking-[0.01em] opacity-90 whitespace-nowrap">
         {startTime} - {endTime}
       </span>
     </div>
@@ -94,7 +93,7 @@ export default function EventCalendar({ events: propEvents = [], loading = false
           toolbar: (props) => <CustomToolbar {...props} />, // ✅ custom toolbar
           event: CustomEvent, // ✅ SHOWS TIME WITH EVENT TITLE
         }}
-        style={{ width: "100%", height: "85vh" }}
+        style={{ width: "100%", height: "calc(100vh - 280px)", minHeight: "500px" }}
       />
     </div>
   );

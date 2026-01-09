@@ -48,8 +48,8 @@ export default function NextEvent({ event = null, loading = false }) {
   const attachments = event.attachments || [];
 
   return (
-    <div className="lg:max-w-[360px]  w-full">
-      <div className="bg-white/20 border border-white min-h-[220px] rounded-fluid-md p-fluid-4 flex flex-col gap-fluid-3 min-h-fluid-event-card">
+    <div className="lg:max-w-[360px] w-full overflow-hidden">
+      <div className="bg-white/20 border border-white rounded-fluid-md p-fluid-4 flex flex-col gap-fluid-3 overflow-hidden">
         {/* Header with time and event info */}
         <div className="flex items-center justify-between border-b border-black/10 pb-4">
           <div className="flex items-center gap-fluid-3">
@@ -77,7 +77,7 @@ export default function NextEvent({ event = null, loading = false }) {
 
         {/* Description */}
         {event.description && (
-          <p className="text-[#1B1B1B] opacity-80 font-manrope font-medium text-sm leading-[150%] tracking-[-0.01em]">
+          <p className="text-[#1B1B1B] opacity-80 font-manrope font-medium text-sm leading-[150%] tracking-[-0.01em] break-words overflow-hidden line-clamp-4">
             {event.description}
           </p>
         )}

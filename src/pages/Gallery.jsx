@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { ChevronDown } from 'lucide-react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 
@@ -11,7 +12,7 @@ import { getFileUrl } from '../api/config';
 
 const Gallery = () => {
   // Get selected child from context
-  const { selectedChild } = useChildren();
+  const { children, selectedChild, selectChild, loading: loadingChildren } = useChildren();
 
   // Get first active enrollment for the selected child
   const { data: enrollmentsData, error: enrollmentsError } = useApi(
@@ -78,9 +79,33 @@ const Gallery = () => {
     <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
       <Header />
       <main className="mx-6 py-8 max-sm:py-2 max-sm:mx-3">
-        <h1 className="text-[32px] max-lg:text-[28px] font-manrope font-bold text-[#173151] mb-6">
-          Photo Gallery
-        </h1>
+        {/* Header with title and child selector */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h1 className="text-[32px] max-lg:text-[28px] font-manrope font-bold text-[#173151]">
+            Photo Gallery
+          </h1>
+
+          {/* Child Selector */}
+          {!loadingChildren && children.length > 0 && (
+            <div className="relative">
+              <select
+                value={selectedChild?.id || ''}
+                onChange={(e) => {
+                  const child = children.find(c => c.id === e.target.value);
+                  if (child) selectChild(child);
+                }}
+                className="appearance-none bg-white/70 border border-gray-200 rounded-full py-2 pl-4 pr-10 text-sm font-medium font-manrope text-[#173151] cursor-pointer focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
+              >
+                {children.map((child) => (
+                  <option key={child.id} value={child.id}>
+                    {`${child.first_name || ''} ${child.last_name || ''}`.trim() || 'Child'}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
+          )}
+        </div>
 
         {/* Error Alert */}
         {hasError && (

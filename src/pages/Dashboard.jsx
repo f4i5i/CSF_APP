@@ -127,14 +127,21 @@ export default function Dashboard() {
   );
 
   // 7. Recent photos (only if enrollment has class)
-  const { data: recentPhotos, loading: loadingPhotos } = useApi(
+  const { data: recentPhotosData, loading: loadingPhotos } = useApi(
     () => photosService.getByClass(derivedClassId, { limit: 6 }),
     {
-      initialData: [],
+      initialData: { items: [] },
       dependencies: [derivedClassId],
       autoFetch: !!derivedClassId,
     }
   );
+
+  // Extract photos array from API response
+  const recentPhotos = useMemo(() => {
+    if (!recentPhotosData) return [];
+    if (Array.isArray(recentPhotosData)) return recentPhotosData;
+    return recentPhotosData.items || [];
+  }, [recentPhotosData]);
 
   // 8. Badges (only if enrollment exists)
   const { data: badges, loading: loadingBadges } = useApi(

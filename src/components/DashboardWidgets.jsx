@@ -334,9 +334,9 @@ export default function DashboardWidgets({
         </div>
 
         {/* Program Photos & Badges */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-3 w-full xl:min-h-[420px]">
+        <div className="flex flex-col sm:flex-row items-stretch justify-center gap-5 sm:gap-3 w-full">
           {/* Program Photos */}
-          <div className="w-full sm:w-1/2 relative h-[290px] sm:h-full rounded-3xl overflow-hidden">
+          <div className="w-full sm:w-1/2 relative h-[290px] sm:h-[420px] rounded-3xl overflow-hidden">
             {loadingPhoto ? (
               <div className="w-full h-full bg-gray-200 animate-pulse"></div>
             ) : (
@@ -344,7 +344,7 @@ export default function DashboardWidgets({
                 <img
                   src={photo?.image_url ? getFileUrl(photo.image_url) : (photo?.url || ProgramPhotoSrc)}
                   alt="Program Photos"
-                  className="w-full h-full object-cover absolute inset-0"
+                  className="w-full h-full object-cover"
                 />
 
                 <Link

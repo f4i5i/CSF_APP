@@ -5,13 +5,12 @@
 
 export { useApi } from './useApi';
 export { useMutation } from './useMutation';
-export { useChildren } from './useChildren';
+export { useChildren } from '../context/ChildrenContext'; // Use context-based hook for global state
 export { useEnrollments } from './useEnrollments';
 export { useToast } from './useToast';
 
 // Re-export default exports
 export { default as useApiHook } from './useApi';
 export { default as useMutationHook } from './useMutation';
-export { default as useChildrenHook } from './useChildren';
 export { default as useEnrollmentsHook } from './useEnrollments';
 export { default as useToastHook } from './useToast';

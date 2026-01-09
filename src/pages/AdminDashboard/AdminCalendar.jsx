@@ -125,12 +125,12 @@ const AdminCalendar = () => {
   const isLoading = loadingClasses || loadingEvents;
 
   return (
-    <div className="h-full max-sm:pb-20">
+    <div className="h-full max-sm:pb-20 overflow-hidden">
       <Header />
 
-      <div className="max-w-9xl mx-auto sm:px-6 px-3 pb-8">
+      <div className="max-w-9xl mx-auto sm:px-6 px-3 pb-4">
         {/* Page Header */}
-        <div className="mb-6 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-4 justify-between">
+        <div className="mb-4 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-4 justify-between">
           <div>
             <h1 className="lg:text-[36px] text-[20px] md:text-[28px] font-bold text-text-primary font-kollektif">
               Calendar
@@ -182,16 +182,16 @@ const AdminCalendar = () => {
         )}
 
         {/* Calendar Content */}
-        <div className="bg-[#FFFFFF80] rounded-2xl p-6 shadow">
-          <div className="flex gap-6 w-full max-lg:flex-col">
+        <div className="bg-[#FFFFFF80] rounded-2xl p-4 lg:p-6 shadow">
+          <div className="flex gap-4 lg:gap-6 w-full max-lg:flex-col">
             {/* LEFT SIDE - Mini Calendar & Next Event */}
-            <div className="flex flex-col gap-4 lg:w-[320px] w-full">
+            <div className="flex flex-col gap-4 lg:w-[280px] xl:w-[320px] w-full flex-shrink-0">
               <CalenderMini events={events} loading={isLoading} />
               <NextEvent event={nextEvent} loading={isLoading} />
             </div>
 
             {/* RIGHT SIDE - Full Calendar */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <FullCalender events={events} loading={isLoading} />
             </div>
           </div>
