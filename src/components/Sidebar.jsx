@@ -3,11 +3,11 @@ import { ChevronDown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth";
 
-const items = [
+const allItems = [
   { label: "My Account", path: "/settings" },
-  { label: "Payment & Billing", path: "/paymentbilling" },
+  { label: "Payment & Billing", path: "/paymentbilling", parentOnly: true },
   { label: "Password", path: "/settings/password" },
-  { label: "Badges", path: "/badges" },
+  { label: "Badges", path: "/badges", parentOnly: true },
   { label: "Contact", path: "/contactus" },
   { label: "Log out", isLogout: true },
 ];
@@ -17,6 +17,14 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  // Get role from localStorage to filter items for coaches
+  const role = localStorage.getItem("role");
+
+  // Filter out parent-only items for coaches
+  const items = role === "coach"
+    ? allItems.filter(item => !item.parentOnly)
+    : allItems;
 
   const handleNavigate = async (item) => {
     if (item.isLogout) {

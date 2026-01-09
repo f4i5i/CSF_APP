@@ -442,7 +442,7 @@ const Header = () => {
           {/* Menu items: Profile, Payment & Billing, Contact, Add Child, Password, Log out */}
           {/* ================================================================ */}
           {open && role !== "admin" && (
-            <div className="absolute right-0 top-full mt-2 w-56 h-60 bg-white shadow-xl rounded-xl  p-2 z-50 pointer-events-auto">
+            <div className={`absolute right-0 top-full mt-2 w-56 ${role === "coach" ? "h-40" : "h-60"} bg-white shadow-xl rounded-xl  p-2 z-50 pointer-events-auto`}>
             <MenuItem
               icon={User}
               label="Profile"
@@ -451,14 +451,17 @@ const Header = () => {
                 navigate("/settings");
               }}
             />
-            <MenuItem
-              icon={CreditCard}
-              label="Payment & Billing"
-              onClick={() => {
-                setOpen(false);
-                navigate("/paymentbilling");
-              }}
-            />
+            {/* Payment & Billing - Parent only */}
+            {role !== "coach" && (
+              <MenuItem
+                icon={CreditCard}
+                label="Payment & Billing"
+                onClick={() => {
+                  setOpen(false);
+                  navigate("/paymentbilling");
+                }}
+              />
+            )}
             <MenuItem
               icon={Phone}
               label="Contact"
@@ -467,14 +470,17 @@ const Header = () => {
                 navigate("/contactus");
               }}
             />
-            <MenuItem
-              icon={UserPlus}
-              label="Add Child"
-              onClick={() => {
-                setOpen(false);
-                navigate("/registerchild");
-              }}
-            />
+            {/* Add Child - Parent only */}
+            {role !== "coach" && (
+              <MenuItem
+                icon={UserPlus}
+                label="Add Child"
+                onClick={() => {
+                  setOpen(false);
+                  navigate("/registerchild");
+                }}
+              />
+            )}
             <MenuItem
               icon={Lock}
               label="Password"
