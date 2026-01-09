@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Loader2, X, FileText, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getFileUrl } from '../../api/config';
@@ -42,6 +43,7 @@ export default function DashboardCoach() {
   // STATE & CONTEXT
   // ============================================================================
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
@@ -341,9 +343,13 @@ export default function DashboardCoach() {
           {/* ============================================================ */}
           {/* RIGHT COLUMN: Calendar + Event + Photos */}
           {/* ============================================================ */}
-          <button className='md:hidden flex my-1 items-center justify-center gap-3 bg-[#7E97B5] rounded-xl shadow-md w-ful h-12 text-white text-base font-medium font-manrope ' >
-              <CircleCheckBig color="#fff" />  
-                  Check-In</button>
+          <button
+            onClick={() => navigate('/coach/check-in')}
+            className='md:hidden flex my-1 items-center justify-center gap-3 bg-[#7E97B5] rounded-xl shadow-md w-full h-12 text-white text-base font-medium font-manrope hover:bg-[#6B859E] transition-colors'
+          >
+            <CircleCheckBig color="#fff" />
+            Check-In
+          </button>
           <div className="w-full lg:w-[49%] flex flex-col gap-4 max-sm:order-1">
             {/* Calendar + Next Event Card */}
             <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm flex flex-col lg:flex-row gap-6">

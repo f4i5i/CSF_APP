@@ -8,6 +8,25 @@ import { API_ENDPOINTS } from '../../constants/api.constants';
 
 const attendanceService = {
   /**
+   * Get all attendance records with optional filters
+   * @param {Object} filters - Filter parameters
+   * @param {string} [filters.class_id] - Filter by class ID
+   * @param {string} [filters.child_id] - Filter by child ID
+   * @param {string} [filters.date] - Filter by date (YYYY-MM-DD)
+   * @param {string} [filters.start_date] - Filter by start date
+   * @param {string} [filters.end_date] - Filter by end date
+   * @param {number} [filters.skip] - Number of records to skip
+   * @param {number} [filters.limit] - Max records to return
+   * @returns {Promise<Object>} Attendance list response {items, total, skip, limit}
+   */
+  async getAll(filters = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ATTENDANCE.LIST, {
+      params: filters,
+    });
+    return data;
+  },
+
+  /**
    * Get attendance history for an enrollment
    * @param {string} enrollmentId - Enrollment ID
    * @param {Object} filters - Filter parameters

@@ -1,7 +1,7 @@
 /**
  * Events Management Page
  * Admin page for creating and managing events
- * Structure matches Classes.jsx for consistency
+ * Supports multi-class events via EventTarget
  */
 
 import React, { useState, useEffect } from "react";
@@ -9,6 +9,7 @@ import { Plus, Edit, Trash2, Calendar, Clock, MapPin, Users, Eye, X } from "luci
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import MultiClassSelector from "../../components/admin/MultiClassSelector";
 import eventsService from "../../api/services/events.service";
 import classesService from "../../api/services/classes.service";
 import toast from "react-hot-toast";
@@ -50,7 +51,7 @@ export default function EventsManagement() {
     start_datetime: "",
     end_datetime: "",
     location: "",
-    class_id: "",
+    class_ids: [],  // Multi-class support
     max_attendees: "",
     requires_rsvp: true,
   });
@@ -130,7 +131,7 @@ export default function EventsManagement() {
       start_datetime: "",
       end_datetime: "",
       location: "",
-      class_id: "",
+      class_ids: [],  // Multi-class support
       max_attendees: "",
       requires_rsvp: true,
     });
@@ -140,6 +141,12 @@ export default function EventsManagement() {
   const handleEditEvent = (eventData) => {
     setModalMode("edit");
     setSelectedEvent(eventData);
+
+    // Extract class IDs from targets or legacy class_id
+    const classIds =
+      eventData.targets?.map((t) => t.class_id) ||
+      (eventData.class_id ? [eventData.class_id] : []);
+
     setFormData({
       title: eventData.title || "",
       description: eventData.description || "",
@@ -151,7 +158,7 @@ export default function EventsManagement() {
         ? eventData.end_datetime.slice(0, 16)
         : "",
       location: eventData.location || "",
-      class_id: eventData.class_id || "",
+      class_ids: classIds,  // Multi-class support
       max_attendees: eventData.max_attendees || "",
       requires_rsvp: eventData.requires_rsvp ?? true,
     });
@@ -193,14 +200,25 @@ export default function EventsManagement() {
       return;
     }
 
+    if (formData.class_ids.length === 0) {
+      toast.error("Please select at least one class");
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        type: formData.type,
+        start_datetime: formData.start_datetime,
+        end_datetime: formData.end_datetime || null,
+        location: formData.location,
+        class_ids: formData.class_ids,  // Multi-class support
         max_attendees: formData.max_attendees
           ? parseInt(formData.max_attendees)
           : null,
-        class_id: formData.class_id || null,
+        requires_rsvp: formData.requires_rsvp,
       };
 
       if (selectedEvent) {
@@ -468,25 +486,15 @@ export default function EventsManagement() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 font-manrope">
-                    Class (optional)
-                  </label>
-                  <select
-                    value={formData.class_id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class_id: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
-                  >
-                    <option value="">No specific class</option>
-                    {classes.map((cls) => (
-                      <option key={cls.id} value={cls.id}>
-                        {cls.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* Multi-Class Selector */}
+                <MultiClassSelector
+                  classes={classes}
+                  selectedIds={formData.class_ids}
+                  onChange={(ids) => setFormData({ ...formData, class_ids: ids })}
+                  label="Target Classes *"
+                  maxHeight="120px"
+                  disabled={filtersLoading}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">

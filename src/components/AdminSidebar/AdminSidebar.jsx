@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings } from "lucide-react";
+import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings, Bell } from "lucide-react";
 import { useAuth } from "../../context/auth";
 
 // Categorized navigation structure
@@ -52,6 +52,7 @@ const categorizedRoutes = [
     category: "Media",
     icon: Image,
     items: [
+      { name: "Announcements", to: "/admin/announcements", icon: Bell },
       { name: "Calendar", to: "/calendar", icon: Calendar },
       { name: "Events", to: "/admin/events", icon: CalendarDays },
       { name: "Badges", to: "/admin/badges", icon: Award },
