@@ -1,51 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings, Bell } from "lucide-react";
+import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings, Bell, Shield } from "lucide-react";
 import { useAuth } from "../../context/auth";
+import { usePermissions } from "../../hooks/usePermissions";
 
-// Categorized navigation structure
+// Categorized navigation structure with permissions
 const categorizedRoutes = [
   { name: "Home", to: "/admin", icon: Home, end: true },
   {
     category: "Setup",
     icon: Settings,
     items: [
-      { name: "Programs", to: "/admin/programs", icon: Layers },
-      { name: "Areas", to: "/admin/areas", icon: MapPin },
-      { name: "Schools", to: "/admin/schools", icon: School },
+      { name: "Programs", to: "/admin/programs", icon: Layers, permission: "canManagePrograms" },
+      { name: "Areas", to: "/admin/areas", icon: MapPin, permission: "canManageAreas" },
+      { name: "Sites", to: "/admin/schools", icon: School, permission: "canManageSchools" },
     ]
   },
   {
     category: "Classes",
     icon: BookOpen,
     items: [
-      { name: "Classes", to: "/admin/classes", icon: BookOpen },
-      { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList },
+      { name: "Classes", to: "/admin/classes", icon: BookOpen, permission: "canManageClasses" },
+      { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList, permission: "canManageClasses" },
     ]
   },
   {
     category: "People",
     icon: Users,
     items: [
-      { name: "Users", to: "/admin/users", icon: UserCog },
-      { name: "Clients", to: "/clients", icon: Users },
+      { name: "Users", to: "/admin/users", icon: UserCog, permission: "canManageUsers" },
+      { name: "Clients", to: "/clients", icon: Users, permission: "canViewAllClients" },
     ]
   },
   {
     category: "Documents",
     icon: FileText,
     items: [
-      { name: "Waivers", to: "/admin/waivers", icon: FileText },
-      { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3 },
+      { name: "Waivers", to: "/admin/waivers", icon: FileText, permission: "canManageWaivers" },
+      { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3, permission: "canViewReports" },
     ]
   },
   {
     category: "Finance",
     icon: DollarSign,
     items: [
-      { name: "Financials", to: "/financials", icon: DollarSign },
-      { name: "Refunds", to: "/admin/refunds", icon: RotateCcw },
-      { name: "Cancellations", to: "/admin/cancellations", icon: XCircle },
+      { name: "Financials", to: "/financials", icon: DollarSign, permission: "canViewFinancials" },
+      { name: "Refunds", to: "/admin/refunds", icon: RotateCcw, permission: "canProcessRefunds" },
+      { name: "Cancellations", to: "/admin/cancellations", icon: XCircle, permission: "canManageFinancials" },
     ]
   },
   {
@@ -55,14 +56,23 @@ const categorizedRoutes = [
       { name: "Announcements", to: "/admin/announcements", icon: Bell },
       { name: "Calendar", to: "/admin/calendar", icon: Calendar },
       { name: "Events", to: "/admin/events", icon: CalendarDays },
-      { name: "Badges", to: "/admin/badges", icon: Award },
+      { name: "Badges", to: "/admin/badges", icon: Award, permission: "canManageBadges" },
       { name: "Photos", to: "/admin/photos", icon: Image },
+    ]
+  },
+  {
+    category: "System",
+    icon: Shield,
+    minRole: "OWNER", // Only visible to Owner
+    items: [
+      { name: "Settings", to: "/admin/settings", icon: Settings, permission: "canManageSystemSettings" },
     ]
   },
 ];
 
 export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
   const { logout } = useAuth();
+  const { can, isAtLeast, roleLabel, isOwner } = usePermissions();
   const [expandedCategories, setExpandedCategories] = useState({
     Setup: false,
     Classes: false,
@@ -70,6 +80,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
     Documents: false,
     Finance: false,
     Media: false,
+    System: false,
   });
 
   const navigate = useNavigate();
@@ -80,6 +91,36 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
       [category]: !prev[category]
     }));
   };
+
+  // Filter routes based on permissions
+  const filteredRoutes = useMemo(() => {
+    return categorizedRoutes
+      .filter(item => {
+        // Check if category has a minimum role requirement
+        if (item.minRole && !isAtLeast(item.minRole)) {
+          return false;
+        }
+        return true;
+      })
+      .map(item => {
+        // If it's a category with items, filter the items
+        if (item.items) {
+          const filteredItems = item.items.filter(subItem => {
+            // If no permission required, show item
+            if (!subItem.permission) return true;
+            // Check if user has the required permission
+            return can(subItem.permission);
+          });
+
+          // Only return category if it has visible items
+          if (filteredItems.length === 0) return null;
+
+          return { ...item, items: filteredItems };
+        }
+        return item;
+      })
+      .filter(Boolean); // Remove null entries
+  }, [can, isAtLeast]);
   return (
     <div
       className={`flex flex-col h-full  border border-border-light  bg-gradient-to-b from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8] shadow transition-all ${
@@ -119,10 +160,25 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
           )}
         </button>
       </div>
+
+      {/* Role Badge */}
+      {!collapsed && (
+        <div className="px-4 py-2">
+          <div className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${
+            isOwner
+              ? 'bg-purple-100 text-purple-800 border border-purple-200'
+              : 'bg-blue-100 text-blue-800 border border-blue-200'
+          }`}>
+            <Shield size={12} />
+            <span>{roleLabel}</span>
+          </div>
+        </div>
+      )}
+
       <hr className="w-full border border-border-light" />
       {/* Links */}
       <nav className=" px-1 py-3 overflow-auto bg-[#ffffff80] rounded-xl mx-3 mt-[2rem]">
-        {categorizedRoutes.map((item, index) => {
+        {filteredRoutes.map((item, index) => {
           // Standalone route (like Home)
           if (item.to) {
             const Icon = item.icon;

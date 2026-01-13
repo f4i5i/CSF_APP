@@ -58,7 +58,7 @@ const initialFormData = {
   program_id: '',
   area_id: '',
   school_id: '',
-  school_code: '',            // NEW - Ledges code
+  school_code: '',            // NEW - Ledger code
   capacity: '',
   min_age: '',
   max_age: '',
@@ -91,31 +91,37 @@ const initialFormData = {
       type: 'full_payment',
       enabled: true,
       price: 0,
+      custom_name: 'Pay in Full',
     },
     {
       type: 'monthly_subscription',
       enabled: false,
       price: 0,
+      custom_name: 'Monthly Subscription',
     },
     {
       type: 'installment_2',
       enabled: false,
       price: 0,
+      custom_name: '2 Month Installment',
     },
     {
       type: 'installment_3',
       enabled: false,
       price: 0,
+      custom_name: '3 Month Installment',
     },
     {
       type: 'installment_4',
       enabled: false,
       price: 0,
+      custom_name: '4 Month Installment',
     },
     {
       type: 'installment_6',
       enabled: false,
       price: 0,
+      custom_name: '6 Month Installment',
     },
   ],
 };
@@ -141,6 +147,16 @@ export default function useClassForm(initialData = null, mode = 'create') {
       '6 Installments': 'installment_6',
     };
 
+    // Default custom names
+    const defaultNames = {
+      'full_payment': 'Pay in Full',
+      'monthly_subscription': 'Monthly Subscription',
+      'installment_2': '2 Month Installment',
+      'installment_3': '3 Month Installment',
+      'installment_4': '4 Month Installment',
+      'installment_6': '6 Month Installment',
+    };
+
     // Start with default structure (all disabled)
     const frontendOptions = [...initialFormData.payment_options];
 
@@ -154,6 +170,7 @@ export default function useClassForm(initialData = null, mode = 'create') {
           type: frontendOptions[index].type,
           enabled: true,
           price: backendOpt.amount || backendOpt.price || 0,
+          custom_name: backendOpt.custom_name || backendOpt.display_name || defaultNames[frontendType] || backendOpt.name,
         };
       }
     });
@@ -254,14 +271,35 @@ export default function useClassForm(initialData = null, mode = 'create') {
     }
   };
 
+  // Helper function to add 1 hour to a time string (HH:mm format)
+  const addOneHour = (timeStr) => {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const newHours = (hours + 1) % 24; // Wrap around at midnight
+    return `${newHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   // Update schedule entry
   const updateSchedule = (index, field, value) => {
     setFormData(prev => {
       const newSchedule = [...prev.schedule];
-      newSchedule[index] = {
-        ...newSchedule[index],
-        [field]: value,
-      };
+      const currentEntry = newSchedule[index];
+
+      // If start_time is being changed, auto-update end_time to start_time + 1 hour
+      if (field === 'start_time' && value) {
+        const newEndTime = addOneHour(value);
+        newSchedule[index] = {
+          ...currentEntry,
+          start_time: value,
+          end_time: newEndTime,
+        };
+      } else {
+        newSchedule[index] = {
+          ...currentEntry,
+          [field]: value,
+        };
+      }
+
       return {
         ...prev,
         schedule: newSchedule,
@@ -475,13 +513,14 @@ export default function useClassForm(initialData = null, mode = 'create') {
         class_type: formData.class_type,
         website_link: formData.website_link,
 
-        // Only send enabled payment options with prices
+        // Only send enabled payment options with prices and custom names
         payment_options: formData.payment_options
           .filter(opt => opt.enabled)
           .map(opt => ({
             type: opt.type,
             enabled: true,
             price: parseFloat(opt.price),
+            custom_name: opt.custom_name || '',
           })),
       };
 

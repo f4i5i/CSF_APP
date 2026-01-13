@@ -64,6 +64,7 @@
 // ========================================
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/auth';
+import { isRoleAtLeast, canAccessAdmin } from '../utils/permissions';
 
 // ========================================
 // PROTECTED ROUTE COMPONENT
@@ -198,12 +199,30 @@ export default function ProtectedRoute({ children, requiredRole }) {
    * - Admin accesses /admin → Allowed (role matches)
    */
   if (requiredRole) {
-    // Normalize roles to lowercase for comparison
-    const userRole = user.role?.toLowerCase();
-    const requiredRoleLower = requiredRole.toLowerCase();
+    // Normalize roles for comparison
+    const userRole = user.role?.toUpperCase();
+    const requiredRoleUpper = requiredRole.toUpperCase();
 
-    // Check if user's role matches required role
-    if (userRole !== requiredRoleLower) {
+    /**
+     * Role-based access check using hierarchy
+     *
+     * Special handling for 'admin' required role:
+     * - Both ADMIN and OWNER roles can access admin routes
+     * - This uses isRoleAtLeast to check hierarchy
+     *
+     * For other required roles, check exact match or hierarchy
+     */
+    let hasAccess = false;
+
+    if (requiredRoleUpper === 'ADMIN') {
+      // Admin routes: Allow ADMIN and OWNER
+      hasAccess = canAccessAdmin(userRole);
+    } else {
+      // Other routes: Check if user's role is at or above required role
+      hasAccess = isRoleAtLeast(userRole, requiredRoleUpper);
+    }
+
+    if (!hasAccess) {
       /**
        * User doesn't have required role - redirect to appropriate dashboard
        *
@@ -211,9 +230,10 @@ export default function ProtectedRoute({ children, requiredRole }) {
        * the dashboard appropriate for their role for better UX
        */
       const roleRedirects = {
-        'admin': '/admin',
-        'coach': '/coachdashboard',
-        'parent': '/dashboard',
+        'OWNER': '/admin',
+        'ADMIN': '/admin',
+        'COACH': '/coachdashboard',
+        'PARENT': '/dashboard',
       };
 
       // Get redirect path for user's role, default to parent dashboard

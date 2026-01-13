@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, UserPlus } from 'lucide-react';
+import { ChevronDown, UserPlus, Compass } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import WaiversAlert from '../components/WaiversAlert';
@@ -302,14 +302,19 @@ export default function Dashboard() {
               <div className="relative py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#1B1B1B] max-sm:self-end max-sm:mr-2 flex items-center gap-2">
                 <select
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  value={currentEnrollment ? `${selectedChild?.id}|${currentEnrollment.id}` : ''}
+                  value={currentEnrollment ? `${selectedChild?.id}|${currentEnrollment.enrollment_id || currentEnrollment.id}` : ''}
                   onChange={(e) => {
                     const [childId, enrollmentId] = e.target.value.split('|');
                     const child = children.find((c) => c.id === childId);
                     if (child) {
                       selectChild(child);
-                      // Find enrollment in the child's enrollments or in enrollmentsData
-                      const enrollment = enrollmentsData?.find((en) => en.id === enrollmentId);
+                      // Find enrollment in enrollmentsData or child's enrollments
+                      // Check both id and enrollment_id properties for match
+                      const enrollment = enrollmentsData?.find(
+                        (en) => en.id === enrollmentId || en.enrollment_id === enrollmentId
+                      ) || child.enrollments?.find(
+                        (en) => en.id === enrollmentId || en.enrollment_id === enrollmentId
+                      );
                       if (enrollment) {
                         setSelectedEnrollment(enrollment);
                       }
@@ -334,15 +339,18 @@ export default function Dashboard() {
                     }
 
                     // Show each child+class combination
-                    return childEnrollments.map((enrollment) => (
-                      <option
-                        key={`${child.id}|${enrollment.enrollment_id || enrollment.id}`}
-                        value={`${child.id}|${enrollment.enrollment_id || enrollment.id}`}
-                      >
-                        {childName} • {enrollment.class_name || 'Class'}
-                        {enrollment.school_name ? ` • ${enrollment.school_name}` : ''}
-                      </option>
-                    ));
+                    return childEnrollments.map((enrollment) => {
+                      const enrollId = enrollment.enrollment_id || enrollment.id;
+                      return (
+                        <option
+                          key={`${child.id}|${enrollId}`}
+                          value={`${child.id}|${enrollId}`}
+                        >
+                          {childName} • {enrollment.class_name || 'Class'}
+                          {enrollment.school_name ? ` • ${enrollment.school_name}` : ''}
+                        </option>
+                      );
+                    });
                   })}
                 </select>
                 <span className="font-manrope font-medium text-base text-[#1B1B1B] pointer-events-none">
@@ -359,11 +367,31 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center gap-[42px] max-sm:hidden ">
-            <StatCard value={attendanceStreak} label="Attendance Streak" />
-            <StatCard value={badgeCount} label="Badges Earned" />
+          {/* Stats and Explore Button */}
+          <div className="flex items-center gap-6 max-sm:hidden">
+            <button
+              onClick={() => navigate('/class')}
+              className="flex items-center gap-2 py-2.5 px-5 bg-[#F3BC48] hover:bg-[#e5a920] text-[#173151] font-semibold font-manrope rounded-full transition-colors shadow-sm"
+            >
+              <Compass size={20} />
+              <span>Explore Classes</span>
+            </button>
+            <div className="flex items-center gap-[42px]">
+              <StatCard value={attendanceStreak} label="Attendance Streak" />
+              <StatCard value={badgeCount} label="Badges Earned" />
+            </div>
           </div>
+        </div>
+
+        {/* Mobile Explore Button */}
+        <div className="hidden max-sm:flex justify-center mb-4">
+          <button
+            onClick={() => navigate('/class')}
+            className="flex items-center gap-2 py-2.5 px-5 bg-[#F3BC48] hover:bg-[#e5a920] text-[#173151] font-semibold font-manrope rounded-full transition-colors shadow-sm"
+          >
+            <Compass size={20} />
+            <span>Explore Classes</span>
+          </button>
         </div>
 
         {/* Waivers Alert */}

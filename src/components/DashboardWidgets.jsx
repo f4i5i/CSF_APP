@@ -89,7 +89,7 @@ export default function DashboardWidgets({
     
     return (
       <div>
-        <p className="text-sm lg:text-xs xl:text-base font-medium text-[#1B1B1B]">
+        <p className="text-sm lg:text-xs xl:text-base font-medium text-[#1B1B1B] break-words overflow-hidden">
           {shouldShowViewMore ? `${description.substring(0, maxLength)}...` : description}
         </p>
         {shouldShowViewMore && (
@@ -283,7 +283,7 @@ export default function DashboardWidgets({
           </div>
 
           {/* Next Event - Desktop */}
-          <div className="w-[60%]">
+          <div className="w-[60%] overflow-hidden">
             <h3 className="text-lg sm:text-xl font-medium text-heading-dark">
               Next Event
             </h3>
@@ -294,18 +294,18 @@ export default function DashboardWidgets({
                 <div className="h-4 bg-gray-200 rounded w-full"></div>
               </div>
             ) : (
-              <div className="flex items-start flex-col gap-2 bg-white/50 shadow-sm rounded-[10px] px-2 sm:px-3 py-2 mt-2 sm:mt-3 w-full min-h-52">
+              <div className="flex items-start flex-col gap-2 bg-white/50 shadow-sm rounded-[10px] px-2 sm:px-3 py-2 mt-2 sm:mt-3 w-full min-h-52 overflow-hidden">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
                   <div className="text-base sm:text-lg font-medium text-heading-dark">
                     {formatTime(displayNextEvent?.start_datetime)}
                   </div>
 
                   <div className="w-1 bg-[#F3BC48] h-7 sm:h-9 rounded" />
-                  <div className="text-left">
+                  <div className="text-left min-w-0 flex-1">
                     <p className="text-xs sm:text-sm font-light text-gray-500">
                       {formatEventDate(displayNextEvent?.start_datetime)}
                     </p>
-                    <p className="text-xs sm:text-sm font-medium text-heading-dark">
+                    <p className="text-xs sm:text-sm font-medium text-heading-dark truncate max-w-[200px] lg:max-w-[280px]" title={displayNextEvent?.title}>
                       {displayNextEvent?.title}
                     </p>
                   </div>

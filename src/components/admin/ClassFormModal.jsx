@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, ChevronDown } from "lucide-react";
+import { X, ChevronDown, Plus, Link, Copy, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import useClassForm from "../../hooks/useClassForm";
 import programsService from "../../api/services/programs.service";
@@ -137,6 +137,73 @@ export default function ClassFormModal({
   const [areas, setAreas] = useState([]);
   const [schools, setSchools] = useState([]);
   const [dropdownsLoading, setDropdownsLoading] = useState(true);
+
+  // Inline Site Creation state
+  const [showInlineSiteForm, setShowInlineSiteForm] = useState(false);
+  const [newSiteName, setNewSiteName] = useState("");
+  const [newSiteCode, setNewSiteCode] = useState("");
+  const [newSiteAddress, setNewSiteAddress] = useState("");
+  const [creatingSite, setCreatingSite] = useState(false);
+
+  // Registration link state
+  const [registrationLinkCopied, setRegistrationLinkCopied] = useState(false);
+
+  // Generate registration link preview
+  const getRegistrationLink = () => {
+    if (initialData?.id) {
+      return `${window.location.origin}/checkout?classId=${initialData.id}`;
+    }
+    return null;
+  };
+
+  const copyRegistrationLink = async () => {
+    const link = getRegistrationLink();
+    if (link) {
+      try {
+        await navigator.clipboard.writeText(link);
+        setRegistrationLinkCopied(true);
+        toast.success("Registration link copied!");
+        setTimeout(() => setRegistrationLinkCopied(false), 3000);
+      } catch (error) {
+        toast.error("Failed to copy link");
+      }
+    }
+  };
+
+  // Handle inline site creation
+  const handleCreateSite = async () => {
+    if (!newSiteName.trim()) {
+      toast.error("Site name is required");
+      return;
+    }
+
+    setCreatingSite(true);
+    try {
+      const newSite = await schoolsService.create({
+        name: newSiteName.trim(),
+        code: newSiteCode.trim() || undefined,
+        address: newSiteAddress.trim() || undefined,
+      });
+
+      // Add to schools list and select it
+      setSchools(prev => [...prev, newSite]);
+      updateField("school_id", newSite.id);
+      updateField("school_code", newSite.code || "");
+
+      // Reset form
+      setNewSiteName("");
+      setNewSiteCode("");
+      setNewSiteAddress("");
+      setShowInlineSiteForm(false);
+
+      toast.success("Site created successfully!");
+    } catch (error) {
+      console.error("Failed to create site:", error);
+      toast.error(error.response?.data?.detail || "Failed to create site");
+    } finally {
+      setCreatingSite(false);
+    }
+  };
 
   // Fetch programs, areas, and schools on mount
   useEffect(() => {
@@ -354,28 +421,41 @@ export default function ClassFormModal({
                   )}
                 </div>
 
-                {/* School with Code */}
+                {/* School/Site with Code */}
                 <div>
                   <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                   Ledges Code <span className="text-btn-gold">*</span>
+                   Site / Ledger Code <span className="text-btn-gold">*</span>
                   </label>
-                  <CustomDropdown
-                    value={formData.school_id}
-                    onChange={(value) => {
-                      const school = schools.find(s => s.id === value);
-                      updateField("school_id", value);
-                      updateField("school_code", school?.code || "");
-                    }}
-                    options={schools}
-                    placeholder="Select School"
-                    error={errors.school_id}
-                    renderOption={(option) => (
-                      <div>
-                        <div className="font-semibold">{option.name}</div>
-                        <div className="text-xs text-gray-500">{option.code}</div>
-                      </div>
-                    )}
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <CustomDropdown
+                        value={formData.school_id}
+                        onChange={(value) => {
+                          const school = schools.find(s => s.id === value);
+                          updateField("school_id", value);
+                          updateField("school_code", school?.code || "");
+                        }}
+                        options={schools}
+                        placeholder="Select Site"
+                        error={errors.school_id}
+                        renderOption={(option) => (
+                          <div>
+                            <div className="font-semibold">{option.name}</div>
+                            <div className="text-xs text-gray-500">{option.code}</div>
+                          </div>
+                        )}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowInlineSiteForm(!showInlineSiteForm)}
+                      className="px-3 py-2 border border-border-light rounded-[12px] hover:bg-gray-50 transition-colors flex items-center gap-1 text-sm font-medium text-heading-dark"
+                      title="Add new site"
+                    >
+                      <Plus size={16} />
+                      <span className="hidden sm:inline">New</span>
+                    </button>
+                  </div>
                   {formData.school_code && (
                     <p className="text-xs text-gray-600 mt-1">Code: {formData.school_code}</p>
                   )}
@@ -383,6 +463,69 @@ export default function ClassFormModal({
                     <p className="text-error-darker font-manrope text-xs mt-1">
                       {errors.school_id}
                     </p>
+                  )}
+
+                  {/* Inline Site Creation Form */}
+                  {showInlineSiteForm && (
+                    <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm text-heading-dark">Add New Site</h4>
+                        <button
+                          type="button"
+                          onClick={() => setShowInlineSiteForm(false)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={newSiteName}
+                            onChange={(e) => setNewSiteName(e.target.value)}
+                            placeholder="Site Name *"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            value={newSiteCode}
+                            onChange={(e) => setNewSiteCode(e.target.value)}
+                            placeholder="Ledger Code"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            value={newSiteAddress}
+                            onChange={(e) => setNewSiteAddress(e.target.value)}
+                            placeholder="Address"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCreateSite}
+                        disabled={creatingSite || !newSiteName.trim()}
+                        className="w-full px-4 py-2 bg-btn-gold hover:bg-[#e5ad35] text-heading-dark font-semibold rounded-lg text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {creatingSite ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <Plus size={16} />
+                            Create Site
+                          </>
+                        )}
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -695,14 +838,14 @@ export default function ClassFormModal({
               )}
 
               <p className="text-sm text-gray-600">
-                Select ONE payment option for this class
+                Select ONE payment option for this class. You can customize the display name shown to parents.
               </p>
 
               <div className="space-y-3">
                 {/* Pay in Full */}
                 <div className="border border-border-light rounded-lg p-4">
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center space-x-2 w-48">
+                  <div className="flex items-start gap-4">
+                    <label className="flex items-center space-x-2 w-36 pt-2">
                       <input
                         type="radio"
                         name="payment_option"
@@ -717,24 +860,40 @@ export default function ClassFormModal({
                         }}
                         className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
                       />
-                      <span className="font-semibold text-heading-dark font-manrope">
-                        Pay in Full (One-time)
+                      <span className="font-semibold text-heading-dark font-manrope text-sm">
+                        One-time
                       </span>
                     </label>
                     {formData.payment_options[0].enabled && (
-                      <div className="flex-1">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={formData.payment_options[0].price}
-                          onChange={(e) =>
-                            updatePaymentOption(0, "price", e.target.value)
-                          }
-                          className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                          style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
-                          placeholder="299.00"
-                        />
+                      <div className="flex-1 space-y-2">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Display Name</label>
+                            <input
+                              type="text"
+                              value={formData.payment_options[0].custom_name}
+                              onChange={(e) =>
+                                updatePaymentOption(0, "custom_name", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                              placeholder="Pay in Full"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Price ($)</label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.payment_options[0].price}
+                              onChange={(e) =>
+                                updatePaymentOption(0, "price", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                              placeholder="299.00"
+                            />
+                          </div>
+                        </div>
                         {errors.payment_full_payment && (
                           <p className="text-error-darkest text-xs mt-1">
                             {errors.payment_full_payment}
@@ -747,8 +906,8 @@ export default function ClassFormModal({
 
                 {/* Monthly Subscription */}
                 <div className="border border-border-light rounded-lg p-4">
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center space-x-2 w-48">
+                  <div className="flex items-start gap-4">
+                    <label className="flex items-center space-x-2 w-36 pt-2">
                       <input
                         type="radio"
                         name="payment_option"
@@ -763,24 +922,40 @@ export default function ClassFormModal({
                         }}
                         className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
                       />
-                      <span className="font-semibold text-heading-dark font-manrope">
-                        Monthly Subscription
+                      <span className="font-semibold text-heading-dark font-manrope text-sm">
+                        Subscription
                       </span>
                     </label>
                     {formData.payment_options[1].enabled && (
-                      <div className="flex-1">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={formData.payment_options[1].price}
-                          onChange={(e) =>
-                            updatePaymentOption(1, "price", e.target.value)
-                          }
-                          className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                          style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
-                          placeholder="69.00"
-                        />
+                      <div className="flex-1 space-y-2">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Display Name</label>
+                            <input
+                              type="text"
+                              value={formData.payment_options[1].custom_name}
+                              onChange={(e) =>
+                                updatePaymentOption(1, "custom_name", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                              placeholder="Monthly Subscription"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Monthly Price ($)</label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={formData.payment_options[1].price}
+                              onChange={(e) =>
+                                updatePaymentOption(1, "price", e.target.value)
+                              }
+                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                              placeholder="69.00"
+                            />
+                          </div>
+                        </div>
                         {errors.payment_monthly_subscription && (
                           <p className="text-error-darkest text-xs mt-1">
                             {errors.payment_monthly_subscription}
@@ -796,15 +971,15 @@ export default function ClassFormModal({
                   <h4 className="font-semibold text-heading-dark font-manrope mb-3">
                     Installment Plans
                   </h4>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {[
-                      { index: 2, label: "2 Months", type: "installment_2" },
-                      { index: 3, label: "3 Months", type: "installment_3" },
-                      { index: 4, label: "4 Months", type: "installment_4" },
-                      { index: 5, label: "6 Months", type: "installment_6" },
-                    ].map(({ index, label, type }) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <label className="flex items-center space-x-2 w-48">
+                      { index: 2, label: "2 Months", type: "installment_2", defaultName: "2 Month Installment" },
+                      { index: 3, label: "3 Months", type: "installment_3", defaultName: "3 Month Installment" },
+                      { index: 4, label: "4 Months", type: "installment_4", defaultName: "4 Month Installment" },
+                      { index: 5, label: "6 Months", type: "installment_6", defaultName: "6 Month Installment" },
+                    ].map(({ index, label, type, defaultName }) => (
+                      <div key={index} className="flex items-start gap-4">
+                        <label className="flex items-center space-x-2 w-36 pt-2">
                           <input
                             type="radio"
                             name="payment_option"
@@ -826,23 +1001,39 @@ export default function ClassFormModal({
                           </span>
                         </label>
                         {formData.payment_options[index].enabled && (
-                          <div className="flex-1">
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={formData.payment_options[index].price}
-                              onChange={(e) =>
-                                updatePaymentOption(
-                                  index,
-                                  "price",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                              style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
-                              placeholder="Monthly payment"
-                            />
+                          <div className="flex-1 space-y-2">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">Display Name</label>
+                                <input
+                                  type="text"
+                                  value={formData.payment_options[index].custom_name}
+                                  onChange={(e) =>
+                                    updatePaymentOption(index, "custom_name", e.target.value)
+                                  }
+                                  className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                                  placeholder={defaultName}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">Monthly Payment ($)</label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={formData.payment_options[index].price}
+                                  onChange={(e) =>
+                                    updatePaymentOption(
+                                      index,
+                                      "price",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                                  placeholder="Monthly payment"
+                                />
+                              </div>
+                            </div>
                             {errors[`payment_${type}`] && (
                               <p className="text-error-darkest text-xs mt-1">
                                 {errors[`payment_${type}`]}
@@ -944,29 +1135,112 @@ export default function ClassFormModal({
                 )}
               </div>
             </div>
+
+            {/* Registration Link Section - Only in Edit Mode */}
+            {mode === "edit" && initialData?.id && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                  Registration Link
+                </h3>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Link className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-green-800 text-sm">
+                      Share this link for parents to register
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={getRegistrationLink() || ""}
+                      className="flex-1 px-3 py-2 bg-white border border-green-300 rounded-lg text-sm text-gray-700 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={copyRegistrationLink}
+                      className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${
+                        registrationLinkCopied
+                          ? "bg-green-600 text-white"
+                          : "bg-green-100 text-green-700 hover:bg-green-200"
+                      }`}
+                    >
+                      {registrationLinkCopied ? (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-green-700 mt-2">
+                    This link will take parents directly to the checkout page for this class.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-border-light bg-gray-50">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-text-primary font-manrope font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-btn-gold hover:bg-[#e5ad35] text-text-primary font-manrope rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting
-                ? "Saving..."
-                : mode === "create"
-                ? "Create Class"
-                : "Update Class"}
-            </button>
+          <div className="flex items-center justify-between p-6 border-t border-border-light bg-gray-50">
+            <div>
+              {mode === "create" && (
+                <button
+                  type="button"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    // Temporarily set is_active to false for draft save
+                    const wasActive = formData.is_active;
+                    updateField("is_active", false);
+                    await handleSubmit(() => {
+                      toast.success("Class saved as draft!");
+                      if (onSuccess) onSuccess();
+                      onClose();
+                    });
+                    // Restore if submission failed
+                    if (wasActive) updateField("is_active", wasActive);
+                  }}
+                  disabled={isSubmitting}
+                  className="px-6 py-2 border border-gray-400 rounded-lg text-gray-600 font-manrope font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save as Draft"
+                  )}
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-text-primary font-manrope font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-btn-gold hover:bg-[#e5ad35] text-text-primary font-manrope rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting
+                  ? "Saving..."
+                  : mode === "create"
+                  ? "Create Class"
+                  : "Update Class"}
+              </button>
+            </div>
           </div>
         </form>
       </div>

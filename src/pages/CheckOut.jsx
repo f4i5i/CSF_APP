@@ -33,6 +33,7 @@ export default function CheckOut() {
     classData,
     children,
     selectedChildId,
+    selectedChildIds, // NEW: Multi-select support
     paymentMethod,
     selectedInstallmentPlan,
     appliedDiscount,
@@ -44,10 +45,12 @@ export default function CheckOut() {
     orderData,
     enrollmentData,
     paymentSucceeded,
+    siblingDiscountPreview, // NEW: Sibling discount line items
 
     // Methods
     initializeCheckout,
     selectChild,
+    toggleChildSelection, // NEW: Multi-select toggle
     selectPaymentMethod,
     selectInstallmentPlan,
     applyDiscount,
@@ -189,6 +192,9 @@ export default function CheckOut() {
   const registrationFee = 25; // Default registration fee
   const processingFeePercent = 2.9; // Default processing fee
 
+  // Check if at least one child is selected (support both single and multi-select)
+  const hasChildSelected = (selectedChildIds?.length > 0) || selectedChildId;
+
   // Main checkout flow
   return (
     <div className="min-h-screen w-full bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] py-8">
@@ -229,16 +235,19 @@ export default function CheckOut() {
             {/* Class Details */}
             <ClassDetailsSummary classData={classData} hasCapacity={hasCapacity} />
 
-            {/* Child Selection */}
+            {/* Child Selection - Multi-select with Sibling Discount */}
             <ChildSelector
               children={children}
               selectedId={selectedChildId}
+              selectedIds={selectedChildIds || []}
               onSelect={selectChild}
+              onToggle={toggleChildSelection}
               classData={classData}
+              multiSelect={children?.length > 1} // Enable multi-select when multiple children
             />
 
             {/* Waiver Check Notice (if checking) */}
-            {selectedChildId && checkingWaivers && (
+            {hasChildSelected && checkingWaivers && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-r-transparent"></div>
@@ -250,7 +259,7 @@ export default function CheckOut() {
             )}
 
             {/* Payment Method Selection (only show after waivers checked) */}
-            {selectedChildId && waiversChecked && (
+            {hasChildSelected && waiversChecked && (
               <PaymentMethodSelector
                 selected={paymentMethod}
                 onSelect={selectPaymentMethod}
@@ -260,7 +269,7 @@ export default function CheckOut() {
             )}
 
             {/* Installment Plan Selection (only if installments selected) */}
-            {selectedChildId && paymentMethod === 'installments' && (
+            {hasChildSelected && paymentMethod === 'installments' && (
               <InstallmentPlanSelector
                 orderTotal={orderTotal}
                 selectedPlan={selectedInstallmentPlan}
@@ -269,7 +278,7 @@ export default function CheckOut() {
             )}
 
             {/* Discount Code Input */}
-            {selectedChildId && paymentMethod && (
+            {hasChildSelected && paymentMethod && (
               <DiscountCodeInput
                 onApply={handleApplyDiscount}
                 onRemove={removeDiscount}
@@ -279,7 +288,7 @@ export default function CheckOut() {
             )}
 
             {/* Proceed to Stripe Checkout Button */}
-            {selectedChildId &&
+            {hasChildSelected &&
               paymentMethod &&
               (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
               clientSecret && (
@@ -346,6 +355,14 @@ export default function CheckOut() {
                 discount={appliedDiscount}
                 paymentMethod={paymentMethod}
                 installmentPlan={selectedInstallmentPlan}
+                childCount={selectedChildIds?.length || (selectedChildId ? 1 : 0)}
+                children={selectedChildIds?.length > 0
+                  ? selectedChildIds.map(id => children.find(c => c.id === id)).filter(Boolean)
+                  : selectedChildId
+                    ? [children.find(c => c.id === selectedChildId)].filter(Boolean)
+                    : []
+                }
+                lineItems={siblingDiscountPreview}
               />
 
               {/* Help Text */}

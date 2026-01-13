@@ -1,13 +1,36 @@
 /**
  * ChildSelector Component
- * Allows parent to select which child to enroll in the class
+ * Allows parent to select which child(ren) to enroll in the class
+ * Supports both single-select and multi-select modes with sibling discount display
  */
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { User, UserPlus } from 'lucide-react';
+import { User, UserPlus, Check, Users } from 'lucide-react';
 
-export default function ChildSelector({ children, selectedId, onSelect, classData }) {
+// Sibling discount tiers (matching backend)
+const SIBLING_DISCOUNTS = {
+  1: 0,      // First child: no discount
+  2: 0.25,   // 2nd child: 25% off
+  3: 0.35,   // 3rd child: 35% off
+  4: 0.45,   // 4th+ child: 45% off
+};
+
+const getSiblingDiscount = (position) => {
+  if (position <= 0) return 0;
+  if (position >= 4) return SIBLING_DISCOUNTS[4];
+  return SIBLING_DISCOUNTS[position] || 0;
+};
+
+export default function ChildSelector({
+  children,
+  selectedId,
+  selectedIds = [], // NEW: Support multiple selection
+  onSelect,
+  onToggle, // NEW: Toggle selection for multi-select
+  classData,
+  multiSelect = true, // NEW: Enable multi-select by default
+}) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -115,55 +138,116 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
     return { eligible: true, message: null, alreadyEnrolled: false, hasActiveClass: false };
   };
 
+  // Handle click based on mode
+  const handleChildClick = (childId) => {
+    if (multiSelect && onToggle) {
+      onToggle(childId);
+    } else if (onSelect) {
+      onSelect(childId);
+    }
+  };
+
+  // Check if child is selected (support both modes)
+  const isChildSelected = (childId) => {
+    if (multiSelect) {
+      return selectedIds.includes(childId);
+    }
+    return selectedId === childId;
+  };
+
+  // Get sibling position for discount display
+  const getChildPosition = (childId) => {
+    const index = selectedIds.indexOf(childId);
+    return index >= 0 ? index + 1 : 0;
+  };
+
+  // Calculate total savings preview
+  const calculateSavingsPreview = () => {
+    if (!classData || selectedIds.length <= 1) return null;
+
+    const price = classData.base_price || classData.price || 0;
+    let totalSavings = 0;
+
+    selectedIds.forEach((_, index) => {
+      const position = index + 1;
+      const discount = getSiblingDiscount(position);
+      totalSavings += price * discount;
+    });
+
+    return totalSavings;
+  };
+
+  const totalSavings = calculateSavingsPreview();
+
   return (
     <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
-      <h2 className="text-fluid-lg font-semibold font-manrope text-[#173151] leading-[1.5] tracking-[-0.2px] mb-4">
-        Select Child
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-fluid-lg font-semibold font-manrope text-[#173151] leading-[1.5] tracking-[-0.2px]">
+          {multiSelect ? 'Select Children' : 'Select Child'}
+        </h2>
+        {multiSelect && selectedIds.length > 0 && (
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-[#F3BC48]/20 text-[#173151] rounded-full text-sm font-medium">
+            <Users size={16} />
+            {selectedIds.length} selected
+          </span>
+        )}
+      </div>
+
+      {/* Multi-select hint */}
+      {multiSelect && children.length > 1 && (
+        <p className="text-sm font-manrope text-[#666D80] mb-3">
+          Select multiple children to enroll them together and get sibling discounts!
+        </p>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {children.map((child) => {
           const eligibility = checkEligibility(child);
-          const isSelected = selectedId === child.id;
+          const isSelected = isChildSelected(child.id);
           const age = calculateAge(child.date_of_birth);
+          const position = getChildPosition(child.id);
+          const discountPercent = position > 0 ? getSiblingDiscount(position) * 100 : 0;
 
           return (
             <button
               key={child.id}
-              onClick={() => onSelect(child.id)}
+              onClick={() => eligibility.eligible && handleChildClick(child.id)}
               disabled={!eligibility.eligible}
               className={`
                 relative p-4 rounded-lg border-2 transition-all text-left
                 ${
                   isSelected
-                    ? 'border-[#F3BC48] bg-[#F3BC48]/10'
+                    ? 'border-[#F3BC48] bg-[#F3BC48]/10 shadow-md'
                     : eligibility.eligible
                     ? 'border-gray-200 bg-white hover:border-[#F3BC48]/50 hover:shadow-md'
                     : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                 }
               `}
             >
-              {/* Selection Indicator */}
-              {isSelected && (
-                <div className="absolute top-2 right-2 w-5 h-5 bg-[#F3BC48] rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M5 13l4 4L19 7"></path>
-                  </svg>
+              {/* Selection Indicator / Checkbox */}
+              <div className={`absolute top-2 right-2 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${
+                isSelected
+                  ? 'bg-[#F3BC48] border-[#F3BC48]'
+                  : 'bg-white border-gray-300'
+              }`}>
+                {isSelected && <Check className="w-4 h-4 text-white" />}
+              </div>
+
+              {/* Sibling Discount Badge */}
+              {isSelected && discountPercent > 0 && (
+                <div className="absolute top-2 left-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-500 text-white">
+                    {discountPercent}% OFF
+                  </span>
                 </div>
               )}
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 mt-1">
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-[#173151]/10 flex items-center justify-center flex-shrink-0">
-                  <User className="w-6 h-6 text-[#173151]" />
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  isSelected ? 'bg-[#F3BC48]/30' : 'bg-[#173151]/10'
+                }`}>
+                  <User className={`w-6 h-6 ${isSelected ? 'text-[#173151]' : 'text-[#173151]'}`} />
                 </div>
 
                 {/* Child Info */}
@@ -185,6 +269,16 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
                     )}
                   </div>
 
+                  {/* Sibling Position Label */}
+                  {isSelected && position > 0 && (
+                    <div className="mt-2 text-xs font-manrope text-[#173151]">
+                      {position === 1 && 'First child (no discount)'}
+                      {position === 2 && '2nd child - 25% sibling discount'}
+                      {position === 3 && '3rd child - 35% sibling discount'}
+                      {position >= 4 && `${position}th child - 45% sibling discount`}
+                    </div>
+                  )}
+
                   {/* Eligibility Warning */}
                   {!eligibility.eligible && eligibility.message && (
                     <div className={`mt-2 text-xs font-manrope px-2 py-1 rounded ${
@@ -204,10 +298,34 @@ export default function ChildSelector({ children, selectedId, onSelect, classDat
         })}
       </div>
 
-      {/* Selected Child Note */}
-      {selectedId && (
+      {/* Sibling Discount Summary */}
+      {multiSelect && selectedIds.length > 1 && totalSavings > 0 && (
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold font-manrope text-green-800">
+                Sibling Discount Applied!
+              </p>
+              <p className="text-xs font-manrope text-green-700 mt-1">
+                Enrolling {selectedIds.length} children together saves you money
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold font-manrope text-green-700">
+                -${totalSavings.toFixed(2)}
+              </p>
+              <p className="text-xs font-manrope text-green-600">savings</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected Children Note */}
+      {selectedIds.length > 0 && (
         <p className="mt-3 text-sm font-manrope text-[#666D80]">
-          Selected child will be enrolled in this class
+          {selectedIds.length === 1
+            ? 'Selected child will be enrolled in this class'
+            : `${selectedIds.length} children will be enrolled together`}
         </p>
       )}
     </div>

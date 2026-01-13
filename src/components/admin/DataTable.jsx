@@ -24,9 +24,27 @@ export default function DataTable({
   currentPage = 1,
   totalItems = 0,
   onPageChange,
+  expandable = false,
+  renderExpanded,
+  onExpand,
 }) {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [expandedRows, setExpandedRows] = useState({});
+
+  const toggleExpand = async (rowId, row) => {
+    const isExpanding = !expandedRows[rowId];
+
+    // If expanding and onExpand callback provided, call it to load data
+    if (isExpanding && onExpand) {
+      await onExpand(row);
+    }
+
+    setExpandedRows(prev => ({
+      ...prev,
+      [rowId]: !prev[rowId]
+    }));
+  };
 
   const handleSort = (column) => {
     if (!column.sortable) return;
@@ -219,6 +237,8 @@ export default function DataTable({
         <table className="w-full">
           <thead className="bg-white border-b border-border-light">
             <tr>
+              {/* Empty header for expand column */}
+              {expandable && <th className="w-10"></th>}
               {columns.map((column, index) => (
                 <th
                   key={index}
@@ -252,27 +272,61 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border-light bg-white ">
-            {displayedData?.map((row, rowIndex) => (
-              <tr
-                key={row.id || rowIndex}
-                onClick={() => onRowClick && onRowClick(row)}
-                className={` hover:bg-gray-50 transition-colors duration-300 ease-in-out
-                  ${onRowClick ? "cursor-pointer hover:bg-gray-50" : ""}
-                  transition
-                `}
-              >
-                {columns.map((column, colIndex) => (
-                  <td
-                    key={colIndex}
-                    className={`px-6 py-4 whitespace-nowrap font-manrope text-sm text-text-primary ${
-                      column.align === "right" ? "text-right" : ""
-                    } ${column.align === "center" ? "text-center" : ""}`}
+            {displayedData?.map((row, rowIndex) => {
+              const rowId = row.id || rowIndex;
+              const isExpanded = expandedRows[rowId];
+
+              return (
+                <React.Fragment key={rowId}>
+                  <tr
+                    onClick={() => onRowClick && onRowClick(row)}
+                    className={` hover:bg-gray-50 transition-colors duration-300 ease-in-out
+                      ${onRowClick ? "cursor-pointer hover:bg-gray-50" : ""}
+                      ${isExpanded ? "bg-gray-50" : ""}
+                      transition
+                    `}
                   >
-                    {renderCell(row, column)}
-                  </td>
-                ))}
-              </tr>
-            ))}
+                    {/* Expand button column */}
+                    {expandable && (
+                      <td className="px-3 py-4 w-10">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExpand(rowId, row);
+                          }}
+                          className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                          type="button"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-4 h-4 text-gray-600" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                          )}
+                        </button>
+                      </td>
+                    )}
+                    {columns.map((column, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className={`px-6 py-4 whitespace-nowrap font-manrope text-sm text-text-primary ${
+                          column.align === "right" ? "text-right" : ""
+                        } ${column.align === "center" ? "text-center" : ""}`}
+                      >
+                        {renderCell(row, column)}
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Expanded content row */}
+                  {expandable && isExpanded && renderExpanded && (
+                    <tr className="bg-gray-50/50">
+                      <td colSpan={columns.length + 1} className="px-6 py-4">
+                        {renderExpanded(row)}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>

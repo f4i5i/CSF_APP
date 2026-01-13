@@ -30,7 +30,11 @@ export const useCheckoutFlow = () => {
     // Data
     classData: null,
     children: [],
-    selectedChildId: null,
+    selectedChildId: null, // Keep for backward compatibility
+    selectedChildIds: [], // NEW: Support multiple children selection
+
+    // Sibling discount preview
+    siblingDiscountPreview: null, // NEW: Store calculated sibling discounts
 
     // Payment
     paymentMethod: 'full', // 'full' | 'subscribe' | 'installments'
@@ -90,10 +94,44 @@ export const useCheckoutFlow = () => {
   }, []);
 
   /**
-   * Select a child for enrollment
+   * Select a child for enrollment (single selection - backward compatible)
    */
   const selectChild = useCallback((childId) => {
-    setState((prev) => ({ ...prev, selectedChildId: childId }));
+    setState((prev) => ({
+      ...prev,
+      selectedChildId: childId,
+      selectedChildIds: [childId], // Also update the array for consistency
+    }));
+  }, []);
+
+  /**
+   * Toggle child selection (multi-select mode)
+   */
+  const toggleChildSelection = useCallback((childId) => {
+    setState((prev) => {
+      const currentIds = prev.selectedChildIds || [];
+      const isSelected = currentIds.includes(childId);
+
+      let newSelectedIds;
+      if (isSelected) {
+        // Remove child from selection
+        newSelectedIds = currentIds.filter(id => id !== childId);
+      } else {
+        // Add child to selection
+        newSelectedIds = [...currentIds, childId];
+      }
+
+      return {
+        ...prev,
+        selectedChildIds: newSelectedIds,
+        // Update single selection for backward compatibility (use first selected)
+        selectedChildId: newSelectedIds.length > 0 ? newSelectedIds[0] : null,
+        // Reset order when selection changes
+        orderId: null,
+        clientSecret: null,
+        siblingDiscountPreview: null,
+      };
+    });
   }, []);
 
   /**
@@ -171,15 +209,18 @@ export const useCheckoutFlow = () => {
   }, [state.orderId]);
 
   /**
-   * Create order
+   * Create order - supports multiple children with sibling discount
    */
   const createOrder = useCallback(async () => {
-    const { classData, selectedChildId, paymentMethod, installmentPlan, discountCode } = state;
+    const { classData, selectedChildId, selectedChildIds, paymentMethod, installmentPlan, discountCode } = state;
 
-    if (!classData || !selectedChildId) {
+    // Use selectedChildIds if available, otherwise fall back to single selectedChildId
+    const childIdsToEnroll = selectedChildIds?.length > 0 ? selectedChildIds : (selectedChildId ? [selectedChildId] : []);
+
+    if (!classData || childIdsToEnroll.length === 0) {
       setState((prev) => ({
         ...prev,
-        error: 'Please select a child to enroll',
+        error: 'Please select at least one child to enroll',
       }));
       return null;
     }
@@ -187,14 +228,15 @@ export const useCheckoutFlow = () => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
+      // Build items array for all selected children
+      const items = childIdsToEnroll.map(childId => ({
+        class_id: classData.id,
+        child_id: childId,
+        amount: classData.base_price || classData.price,
+      }));
+
       const orderData = {
-        items: [
-          {
-            class_id: classData.id,
-            child_id: selectedChildId,
-            amount: classData.base_price || classData.price,
-          },
-        ],
+        items,
         payment_plan: paymentMethod,
       };
 
@@ -213,6 +255,8 @@ export const useCheckoutFlow = () => {
         orderId: order.id,
         orderTotal: order.total,
         appliedDiscount: order.discount,
+        // Store line items for sibling discount display
+        siblingDiscountPreview: order.line_items || null,
         isLoading: false,
       }));
 
@@ -363,6 +407,8 @@ export const useCheckoutFlow = () => {
       classData: null,
       children: [],
       selectedChildId: null,
+      selectedChildIds: [], // NEW: Reset multi-select array
+      siblingDiscountPreview: null, // NEW: Reset sibling discount preview
       paymentMethod: 'full',
       installmentPlan: null,
       orderId: null,
@@ -414,9 +460,12 @@ export const useCheckoutFlow = () => {
 
   // Auto-create order when all required selections are made
   useEffect(() => {
+    // Check if at least one child is selected (support both single and multi-select)
+    const hasChildSelected = (state.selectedChildIds?.length > 0) || state.selectedChildId;
+
     const shouldCreateOrder =
       state.classData &&
-      state.selectedChildId &&
+      hasChildSelected &&
       state.paymentMethod &&
       (state.paymentMethod !== 'installments' || state.installmentPlan) &&
       !state.orderId &&
@@ -434,6 +483,7 @@ export const useCheckoutFlow = () => {
   }, [
     state.classData,
     state.selectedChildId,
+    state.selectedChildIds,
     state.paymentMethod,
     state.installmentPlan,
     state.orderId,
@@ -469,6 +519,7 @@ export const useCheckoutFlow = () => {
     // Methods
     initializeCheckout,
     selectChild,
+    toggleChildSelection, // NEW: Multi-select support
     selectPaymentMethod,
     selectInstallmentPlan,
     applyDiscount,

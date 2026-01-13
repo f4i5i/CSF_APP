@@ -19,11 +19,12 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
     },
     {
       id: 'subscribe',
-      name: 'Subscribe',
+      name: 'Monthly Membership',
       icon: RefreshCw,
-      description: 'Recurring monthly membership',
-      badge: 'Auto-renew',
+      description: 'Billed monthly, cancel anytime',
+      badge: 'Recurring',
       price: classData?.membership_price || classPrice,
+      priceLabel: '/month',
       enabled: classData?.membership_price != null, // Only if membership_price is set
     },
     {
@@ -116,12 +117,13 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
                 {method.price > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-xs font-manrope text-[#666D80] mb-1">
-                      {method.id === 'full' && 'Total'}
-                      {method.id === 'subscribe' && 'Monthly'}
-                      {method.id === 'installments' && 'Total'}
+                      {method.id === 'full' && 'One-time payment'}
+                      {method.id === 'subscribe' && 'Recurring payment'}
+                      {method.id === 'installments' && 'Total amount'}
                     </p>
                     <p className="text-lg font-bold font-manrope text-[#173151]">
                       ${parseFloat(method.price).toFixed(2)}
+                      {method.priceLabel && <span className="text-sm font-normal text-[#666D80]">{method.priceLabel}</span>}
                     </p>
                   </div>
                 )}

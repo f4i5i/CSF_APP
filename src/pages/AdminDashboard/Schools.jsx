@@ -227,8 +227,8 @@ export default function Schools() {
           onClick: () => {
             setConfirmDialog({
               isOpen: true,
-              title: "Delete School",
-              message: `Are you sure you want to delete "${row.name}"? This will fail if the school has associated classes.`,
+              title: "Delete Site",
+              message: `Are you sure you want to delete "${row.name}"? This will fail if the site has associated classes.`,
               action: () => handleDeleteSchool(row.id),
             });
           },
@@ -272,10 +272,10 @@ export default function Schools() {
         <div className="mb-8 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-4 justify-between">
           <div>
             <h1 className="lg:text-[46px] text-[20px] md:text-[30px] font-bold text-text-primary font-kollektif">
-              Schools Management
+              Sites Management
             </h1>
             <p className="text-neutral-main font-manrope mt-1">
-              Create and manage school locations
+              Create and manage site locations
             </p>
           </div>
 
@@ -284,13 +284,13 @@ export default function Schools() {
             className="flex items-center gap-2 font-manrope bg-btn-gold text-text-body px-6 py-3 rounded-lg font-semibold transition-colors"
           >
             <Plus className="w-5 h-5" />
-            Create School
+            Create Site
           </button>
         </div>
 
         <FilterBar
           searchValue={searchQuery}
-          searchPlaceholder="Search schools..."
+          searchPlaceholder="Search sites..."
           onSearch={setSearchQuery}
           filters={filters}
           hasActiveFilters={hasActiveFilters}

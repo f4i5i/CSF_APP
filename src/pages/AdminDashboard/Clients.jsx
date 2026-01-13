@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Trash2, Mail, Phone, Users, Eye } from "lucide-react";
+import { Trash2, Mail, Phone, Users, Eye, User, BookOpen, Calendar, DollarSign, Loader2 } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -28,6 +28,10 @@ export default function Clients() {
     message: "",
     action: null,
   });
+
+  // State for expanded client details (children)
+  const [expandedClientDetails, setExpandedClientDetails] = useState({});
+  const [loadingClientDetails, setLoadingClientDetails] = useState({});
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -109,6 +113,148 @@ export default function Clients() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  // Handle row expansion - fetch client details including children
+  const handleExpandClient = async (client) => {
+    // Skip if already loaded
+    if (expandedClientDetails[client.id]) return;
+
+    setLoadingClientDetails(prev => ({ ...prev, [client.id]: true }));
+
+    try {
+      const details = await adminService.getClientById(client.id);
+      setExpandedClientDetails(prev => ({
+        ...prev,
+        [client.id]: details
+      }));
+    } catch (error) {
+      console.error("Failed to fetch client details:", error);
+      toast.error("Failed to load client details");
+    } finally {
+      setLoadingClientDetails(prev => ({ ...prev, [client.id]: false }));
+    }
+  };
+
+  // Render expanded row content - show children details
+  const renderExpandedContent = (client) => {
+    const isLoading = loadingClientDetails[client.id];
+    const details = expandedClientDetails[client.id];
+
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-6">
+          <Loader2 className="w-6 h-6 animate-spin text-btn-gold mr-2" />
+          <span className="text-sm text-text-muted font-manrope">Loading children details...</span>
+        </div>
+      );
+    }
+
+    if (!details) {
+      return (
+        <div className="text-center py-6 text-text-muted font-manrope">
+          No details available
+        </div>
+      );
+    }
+
+    const children = details.children || [];
+
+    if (children.length === 0) {
+      return (
+        <div className="text-center py-6 text-text-muted font-manrope">
+          <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+          <p>No children registered</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        <h4 className="font-semibold text-sm text-text-primary font-manrope flex items-center gap-2">
+          <Users className="w-4 h-4" />
+          Registered Children ({children.length})
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {children.map((child) => {
+            const age = child.date_of_birth ? calculateAge(child.date_of_birth) : null;
+            const enrollments = child.enrollments || [];
+            const activeEnrollments = enrollments.filter(e => e.status === 'ACTIVE' || e.status === 'active');
+
+            return (
+              <div
+                key={child.id}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-btn-gold" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-semibold text-text-primary font-manrope text-sm truncate">
+                      {child.first_name} {child.last_name}
+                    </h5>
+                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-text-muted font-manrope">
+                      {age && <span>Age: {age}</span>}
+                      {child.grade && <span>• Grade {child.grade}</span>}
+                    </div>
+
+                    {/* Enrollments */}
+                    {enrollments.length > 0 ? (
+                      <div className="mt-3 space-y-1.5">
+                        <p className="text-xs font-medium text-text-muted flex items-center gap-1">
+                          <BookOpen className="w-3 h-3" />
+                          Enrollments ({activeEnrollments.length} active)
+                        </p>
+                        <div className="space-y-1">
+                          {enrollments.slice(0, 3).map((enrollment, idx) => (
+                            <div
+                              key={idx}
+                              className={`text-xs px-2 py-1 rounded flex items-center justify-between ${
+                                enrollment.status === 'ACTIVE' || enrollment.status === 'active'
+                                  ? 'bg-green-50 text-green-700'
+                                  : 'bg-gray-50 text-gray-600'
+                              }`}
+                            >
+                              <span className="truncate flex-1 mr-2">
+                                {enrollment.class?.name || enrollment.class_name || 'Class'}
+                              </span>
+                              <span className="text-[10px] font-medium uppercase">
+                                {enrollment.status}
+                              </span>
+                            </div>
+                          ))}
+                          {enrollments.length > 3 && (
+                            <p className="text-xs text-text-muted italic pl-2">
+                              +{enrollments.length - 3} more
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-xs text-text-muted italic">No enrollments</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Helper to calculate age
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return null;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const columns = [
@@ -279,6 +425,9 @@ export default function Clients() {
           currentPage={currentPage}
           totalItems={totalItems}
           onPageChange={setCurrentPage}
+          expandable={true}
+          onExpand={handleExpandClient}
+          renderExpanded={renderExpandedContent}
         />
       </div>
 

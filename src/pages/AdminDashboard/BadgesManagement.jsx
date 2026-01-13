@@ -3,8 +3,8 @@
  * Admin page for managing badges and awarding them to students
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Award, Plus, Edit, Trash2, Gift, Search } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Award, Plus, Edit, Trash2, Gift, Search, Upload, X, Palette } from 'lucide-react';
 import Header from '../../components/Header';
 import badgesService from '../../api/services/badges.service';
 import enrollmentsService from '../../api/services/enrollments.service';
@@ -17,6 +17,17 @@ const BADGE_CATEGORIES = [
   { value: 'attendance', label: 'Attendance' },
   { value: 'sportsmanship', label: 'Sportsmanship' },
   { value: 'special', label: 'Special' },
+];
+
+const BADGE_COLORS = [
+  { value: 'gold', label: 'Gold', gradient: 'from-[#F3BC48] to-[#e5ae3a]', bg: 'bg-yellow-100', text: 'text-yellow-800' },
+  { value: 'blue', label: 'Blue', gradient: 'from-blue-500 to-blue-600', bg: 'bg-blue-100', text: 'text-blue-800' },
+  { value: 'green', label: 'Green', gradient: 'from-green-500 to-green-600', bg: 'bg-green-100', text: 'text-green-800' },
+  { value: 'purple', label: 'Purple', gradient: 'from-purple-500 to-purple-600', bg: 'bg-purple-100', text: 'text-purple-800' },
+  { value: 'red', label: 'Red', gradient: 'from-red-500 to-red-600', bg: 'bg-red-100', text: 'text-red-800' },
+  { value: 'pink', label: 'Pink', gradient: 'from-pink-500 to-pink-600', bg: 'bg-pink-100', text: 'text-pink-800' },
+  { value: 'orange', label: 'Orange', gradient: 'from-orange-500 to-orange-600', bg: 'bg-orange-100', text: 'text-orange-800' },
+  { value: 'teal', label: 'Teal', gradient: 'from-teal-500 to-teal-600', bg: 'bg-teal-100', text: 'text-teal-800' },
 ];
 
 export default function BadgesManagement() {
@@ -36,7 +47,10 @@ export default function BadgesManagement() {
     description: '',
     category: 'achievement',
     icon_url: '',
+    icon_file: null,
+    badge_color: 'gold',
   });
+  const fileInputRef = useRef(null);
   const [awardData, setAwardData] = useState({
     badge_id: '',
     enrollment_id: '',
@@ -81,6 +95,8 @@ export default function BadgesManagement() {
       description: '',
       category: 'achievement',
       icon_url: '',
+      icon_file: null,
+      badge_color: 'gold',
     });
     setShowBadgeModal(true);
   };
@@ -92,8 +108,49 @@ export default function BadgesManagement() {
       description: badge.description || '',
       category: badge.category || 'achievement',
       icon_url: badge.icon_url || '',
+      icon_file: null,
+      badge_color: badge.badge_color || 'gold',
     });
     setShowBadgeModal(true);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image must be less than 2MB');
+        return;
+      }
+      setFormData(prev => ({ ...prev, icon_file: file, icon_url: '' }));
+    }
+  };
+
+  const removeIconFile = () => {
+    setFormData(prev => ({ ...prev, icon_file: null }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const getIconPreviewUrl = () => {
+    if (formData.icon_file) {
+      return URL.createObjectURL(formData.icon_file);
+    }
+    if (formData.icon_url) {
+      return formData.icon_url;
+    }
+    return null;
+  };
+
+  const getBadgeColorGradient = (colorValue) => {
+    const color = BADGE_COLORS.find(c => c.value === colorValue);
+    return color ? color.gradient : 'from-[#F3BC48] to-[#e5ae3a]';
   };
 
   const handleDeleteBadge = (badge) => {
@@ -120,11 +177,28 @@ export default function BadgesManagement() {
 
     setSaving(true);
     try {
+      // Prepare badge data
+      const badgeData = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        badge_color: formData.badge_color,
+      };
+
+      // Handle icon - prefer file upload over URL
+      if (formData.icon_file) {
+        // TODO: Upload file to storage and get URL
+        // For now, we'll create an object URL (in production, upload to S3/Cloud Storage)
+        badgeData.icon_url = URL.createObjectURL(formData.icon_file);
+      } else if (formData.icon_url) {
+        badgeData.icon_url = formData.icon_url;
+      }
+
       if (selectedBadge) {
-        await badgesService.update(selectedBadge.id, formData);
+        await badgesService.update(selectedBadge.id, badgeData);
         toast.success('Badge updated successfully');
       } else {
-        await badgesService.create(formData);
+        await badgesService.create(badgeData);
         toast.success('Badge created successfully');
       }
       setShowBadgeModal(false);
@@ -294,9 +368,9 @@ export default function BadgesManagement() {
                 className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#F3BC48] to-[#e5ae3a] flex items-center justify-center">
+                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${getBadgeColorGradient(badge.badge_color)} flex items-center justify-center shadow-md`}>
                     {badge.icon_url ? (
-                      <img src={badge.icon_url} alt={badge.name} className="w-8 h-8" />
+                      <img src={badge.icon_url} alt={badge.name} className="w-8 h-8 object-contain" />
                     ) : (
                       <Award className="w-7 h-7 text-white" />
                     )}
@@ -344,11 +418,30 @@ export default function BadgesManagement() {
 
         {/* Create/Edit Badge Modal */}
         {showBadgeModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-              <h2 className="text-xl font-semibold text-[#173151] mb-4">
-                {selectedBadge ? 'Edit Badge' : 'Create New Badge'}
-              </h2>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-[#173151]">
+                  {selectedBadge ? 'Edit Badge' : 'Create New Badge'}
+                </h2>
+                <button
+                  onClick={() => setShowBadgeModal(false)}
+                  className="p-1 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Badge Preview */}
+              <div className="flex justify-center mb-6">
+                <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${getBadgeColorGradient(formData.badge_color)} flex items-center justify-center shadow-lg`}>
+                  {getIconPreviewUrl() ? (
+                    <img src={getIconPreviewUrl()} alt="Badge preview" className="w-12 h-12 object-contain" />
+                  ) : (
+                    <Award className="w-10 h-10 text-white" />
+                  )}
+                </div>
+              </div>
 
               <form onSubmit={handleSubmitBadge} className="space-y-4">
                 <div>
@@ -377,37 +470,128 @@ export default function BadgesManagement() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                  >
-                    {BADGE_CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
+                    >
+                      {BADGE_CATEGORIES.map((cat) => (
+                        <option key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Palette className="w-4 h-4 inline mr-1" />
+                      Badge Color
+                    </label>
+                    <select
+                      value={formData.badge_color}
+                      onChange={(e) => setFormData({ ...formData, badge_color: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
+                    >
+                      {BADGE_COLORS.map((color) => (
+                        <option key={color.value} value={color.value}>
+                          {color.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Icon URL (optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.icon_url}
-                    onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48]"
-                    placeholder="https://example.com/icon.png"
-                  />
+                {/* Color Preview Chips */}
+                <div className="flex flex-wrap gap-2">
+                  {BADGE_COLORS.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, badge_color: color.value })}
+                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${color.gradient} border-2 transition-all ${
+                        formData.badge_color === color.value
+                          ? 'border-gray-800 scale-110 shadow-md'
+                          : 'border-transparent hover:border-gray-300'
+                      }`}
+                      title={color.label}
+                    />
+                  ))}
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                {/* Icon Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Badge Icon
+                  </label>
+
+                  {/* File Upload */}
+                  <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#F3BC48] transition-colors">
+                    {formData.icon_file ? (
+                      <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={URL.createObjectURL(formData.icon_file)}
+                            alt="Preview"
+                            className="w-10 h-10 object-contain rounded"
+                          />
+                          <span className="text-sm text-gray-600 truncate max-w-[150px]">
+                            {formData.icon_file.name}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={removeIconFile}
+                          className="p-1 text-gray-400 hover:text-red-500"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          PNG, JPG, SVG up to 2MB
+                        </p>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                      </>
+                    )}
+                  </div>
+
+                  {/* Or URL Input */}
+                  {!formData.icon_file && (
+                    <div className="mt-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex-1 h-px bg-gray-200" />
+                        <span className="text-xs text-gray-500">or enter URL</span>
+                        <div className="flex-1 h-px bg-gray-200" />
+                      </div>
+                      <input
+                        type="url"
+                        value={formData.icon_url}
+                        onChange={(e) => setFormData({ ...formData, icon_url: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F3BC48] focus:border-[#F3BC48] text-sm"
+                        placeholder="https://example.com/icon.png"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
                   <button
                     type="button"
                     onClick={() => setShowBadgeModal(false)}
@@ -418,10 +602,10 @@ export default function BadgesManagement() {
                   </button>
                   <button
                     type="submit"
-                    disabled={saving}
+                    disabled={saving || !formData.name.trim()}
                     className="flex-1 px-4 py-2 bg-[#F3BC48] text-[#173151] rounded-lg font-semibold hover:bg-[#e5ae3a] disabled:opacity-50"
                   >
-                    {saving ? 'Saving...' : selectedBadge ? 'Update' : 'Create'}
+                    {saving ? 'Saving...' : selectedBadge ? 'Update Badge' : 'Create Badge'}
                   </button>
                 </div>
               </form>

@@ -163,7 +163,7 @@ export default function SchoolFormModal({
     const newErrors = {};
 
     if (!formData.name?.trim()) {
-      newErrors.name = "School name is required";
+      newErrors.name = "Site name is required";
     }
     if (!formData.address?.trim()) {
       newErrors.address = "Address is required";
@@ -209,19 +209,19 @@ export default function SchoolFormModal({
 
       if (mode === "create") {
         await schoolsService.create(submitData);
-        toast.success("School created successfully");
+        toast.success("Site created successfully");
       } else {
         await schoolsService.update(initialData.id, submitData);
-        toast.success("School updated successfully");
+        toast.success("Site updated successfully");
       }
 
       onSuccess?.();
     } catch (error) {
-      console.error("Failed to save school:", error);
+      console.error("Failed to save site:", error);
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.detail ||
-        `Failed to ${mode === "create" ? "create" : "update"} school`;
+        `Failed to ${mode === "create" ? "create" : "update"} site`;
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -243,7 +243,7 @@ export default function SchoolFormModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold font-kollektif text-text-primary">
-            {mode === "create" ? "Create School" : "Edit School"}
+            {mode === "create" ? "Create Site" : "Edit Site"}
           </h2>
           <button
             onClick={onClose}
@@ -259,7 +259,7 @@ export default function SchoolFormModal({
             {/* Name */}
             <div>
               <label className="block text-sm font-semibold font-manrope text-text-primary mb-1">
-                School Name <span className="text-red-500">*</span>
+                Site Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -268,7 +268,7 @@ export default function SchoolFormModal({
                 className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold ${
                   errors.name ? "border-red-500" : "border-border-light"
                 }`}
-                placeholder="e.g., Lincoln Elementary School"
+                placeholder="e.g., Lincoln Elementary Site"
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
