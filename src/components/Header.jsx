@@ -13,6 +13,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home,
   Calendar,
+  CalendarCheck,
   CheckCircle,
   CheckCircle2,
   Image,
@@ -29,6 +30,7 @@ import {
   Wallet,
   MessageCircle,
   X,
+  Compass,
 } from "lucide-react";
 
 // Icons - Material UI
@@ -108,10 +110,11 @@ const Header = () => {
   // Parent role navigation items (displayed in horizontal nav bar on desktop)
   const navItems = [
     { name: "Home", icon: Home, path: "/dashboard" },
+    { name: "Explore", icon: Compass, path: "/class" },
+    { name: "Events", icon: CalendarCheck, path: "/events" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
     { name: "Attendance", icon: CheckCircle2, path: "/attendance" },
     { name: "Photos", icon: Image, path: "/photos" },
-    { name: "Account", icon: User, path: "/account" },
   ];
 
   // Coach role navigation items (displayed in horizontal nav bar on desktop)
@@ -228,6 +231,38 @@ const Header = () => {
                   }
                 >
                   Dashboard
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/class"
+                  className={({ isActive }) =>
+                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${
+            isActive
+              ? "bg-[#F3BC48] text-black"
+              : "text-black hover:bg-white/20"
+          }`
+                  }
+                >
+                  Explore
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/events"
+                  className={({ isActive }) =>
+                    `flex items-center justify-center px-fluid-6 py-fluid-3 rounded-fluid-3xl font-medium
+          ${
+            isActive
+              ? "bg-[#F3BC48] text-black"
+              : "text-black hover:bg-white/20"
+          }`
+                  }
+                >
+                  Events
                 </NavLink>
               </li>
 

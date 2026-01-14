@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { AlertCircle, Calendar, CreditCard, Users } from "lucide-react";
+import { AlertCircle, Calendar, Users } from "lucide-react";
 import invoicesService from "../../api/services/invoices.service";
 import { formatCurrency, formatDate } from "../../utils/format";
 
@@ -59,7 +59,6 @@ const BillingInfo = () => {
   }
 
   const hasUpcomingPayment = billingSummary?.next_due_date && billingSummary?.next_payment_amount;
-  const hasBalance = billingSummary?.current_balance > 0;
 
   return (
     <div className="border rounded-xl my-3 p-5">
@@ -74,55 +73,30 @@ const BillingInfo = () => {
       )}
 
       <div className="space-y-4">
-        {/* Current Balance */}
-        <div className="border rounded-xl">
-          <div className=" p-4">
-            <p className="text-sm font-medium text-gray-600">Current Balance</p>
-            <p className={`text-2xl font-semibold mt-1 ${hasBalance ? 'text-red-600' : 'text-green-600'}`}>
-              {formatCurrency(billingSummary?.current_balance || 0)}
-            </p>
-            {!hasBalance && (
-              <p className="text-xs text-green-600 mt-1">All paid up!</p>
-            )}
-          </div>
-
-          {/* Upcoming Payment */}
-          {hasUpcomingPayment && (
-            <div className="p-4 bg-yellow-50">
-              <p className="text-sm font-medium text-gray-700">Next Payment Due</p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-xl font-semibold text-heading-dark">
-                  {formatCurrency(billingSummary.next_payment_amount)}
-                </span>
-                <span className="text-sm text-gray-500">
-                  on {formatDate(billingSummary.next_due_date)}
-                </span>
-              </div>
+        {/* Upcoming Payment */}
+        {hasUpcomingPayment && (
+          <div className="border rounded-xl p-4 bg-yellow-50">
+            <p className="text-sm font-medium text-gray-700">Next Payment Due</p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-xl font-semibold text-heading-dark">
+                {formatCurrency(billingSummary.next_payment_amount)}
+              </span>
+              <span className="text-sm text-gray-500">
+                on {formatDate(billingSummary.next_due_date)}
+              </span>
             </div>
-          )}
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="border rounded-lg p-3">
-            <div className="flex items-center gap-2 text-gray-500 mb-1">
-              <Users className="w-4 h-4" />
-              <span className="text-xs">Active Enrollments</span>
-            </div>
-            <p className="text-lg font-semibold text-heading-dark">
-              {billingSummary?.active_enrollments_count || 0}
-            </p>
           </div>
+        )}
 
-          <div className="border rounded-lg p-3">
-            <div className="flex items-center gap-2 text-gray-500 mb-1">
-              <CreditCard className="w-4 h-4" />
-              <span className="text-xs">Paid This Month</span>
-            </div>
-            <p className="text-lg font-semibold text-green-600">
-              {formatCurrency(billingSummary?.total_paid_this_period || 0)}
-            </p>
+        {/* Active Enrollments */}
+        <div className="border rounded-lg p-3">
+          <div className="flex items-center gap-2 text-gray-500 mb-1">
+            <Users className="w-4 h-4" />
+            <span className="text-xs">Active Enrollments</span>
           </div>
+          <p className="text-lg font-semibold text-heading-dark">
+            {billingSummary?.active_enrollments_count || 0}
+          </p>
         </div>
 
         {/* Pending Payments Alert */}

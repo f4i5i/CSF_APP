@@ -55,6 +55,25 @@ const adminService = {
   },
 
   /**
+   * Delete a client
+   * @param {string} clientId - Client ID
+   * @returns {Promise<Object>} Deletion confirmation
+   */
+  async deleteClient(clientId) {
+    const { data } = await apiClient.delete(API_ENDPOINTS.ADMIN.CLIENT_BY_ID(clientId));
+    return data;
+  },
+
+  /**
+   * Get all coaches for class assignment
+   * @returns {Promise<Object>} List of coaches with assigned class count
+   */
+  async getCoaches() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.COACHES);
+    return data;
+  },
+
+  /**
    * Get class roster
    * @param {string} classId - Class ID
    * @returns {Promise<Object>} Class roster with enrolled students

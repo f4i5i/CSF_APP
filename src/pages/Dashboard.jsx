@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, UserPlus, Compass } from 'lucide-react';
+import { ChevronDown, UserPlus } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import WaiversAlert from '../components/WaiversAlert';
@@ -367,31 +367,11 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Stats and Explore Button */}
-          <div className="flex items-center gap-6 max-sm:hidden">
-            <button
-              onClick={() => navigate('/class')}
-              className="flex items-center gap-2 py-2.5 px-5 bg-[#F3BC48] hover:bg-[#e5a920] text-[#173151] font-semibold font-manrope rounded-full transition-colors shadow-sm"
-            >
-              <Compass size={20} />
-              <span>Explore Classes</span>
-            </button>
-            <div className="flex items-center gap-[42px]">
-              <StatCard value={attendanceStreak} label="Attendance Streak" />
-              <StatCard value={badgeCount} label="Badges Earned" />
-            </div>
+          {/* Stats */}
+          <div className="flex items-center gap-[42px] max-sm:hidden">
+            <StatCard value={attendanceStreak} label="Attendance Streak" />
+            <StatCard value={badgeCount} label="Badges Earned" />
           </div>
-        </div>
-
-        {/* Mobile Explore Button */}
-        <div className="hidden max-sm:flex justify-center mb-4">
-          <button
-            onClick={() => navigate('/class')}
-            className="flex items-center gap-2 py-2.5 px-5 bg-[#F3BC48] hover:bg-[#e5a920] text-[#173151] font-semibold font-manrope rounded-full transition-colors shadow-sm"
-          >
-            <Compass size={20} />
-            <span>Explore Classes</span>
-          </button>
         </div>
 
         {/* Waivers Alert */}

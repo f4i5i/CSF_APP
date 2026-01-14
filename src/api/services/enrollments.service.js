@@ -121,6 +121,16 @@ const enrollmentsService = {
   },
 
   /**
+   * Get enrollments for a specific class (admin)
+   * @param {string} classId - Class ID
+   * @param {Object} filters - Additional filters
+   * @returns {Promise<Array>} Class enrollments
+   */
+  async getByClass(classId, filters = {}) {
+    return this.getAll({ class_id: classId, ...filters });
+  },
+
+  /**
    * Get active enrollments
    * @returns {Promise<Array>} Active enrollments
    */

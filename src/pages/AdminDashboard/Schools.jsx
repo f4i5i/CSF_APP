@@ -74,7 +74,7 @@ export default function Schools() {
       setSchools(schoolsList);
     } catch (error) {
       console.error("Failed to fetch schools:", error);
-      toast.error("Failed to load schools");
+      toast.error("Failed to load sites");
       setSchools([]);
     } finally {
       setLoading(false);
@@ -100,12 +100,12 @@ export default function Schools() {
   const handleDeleteSchool = async (schoolId) => {
     try {
       await schoolsService.delete(schoolId);
-      toast.success("School deleted successfully");
+      toast.success("Site deleted successfully");
       fetchSchools();
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete school:", error);
-      toast.error(error.response?.data?.message || "Failed to delete school. It may have associated classes.");
+      toast.error(error.response?.data?.message || "Failed to delete site. It may have associated classes.");
     }
   };
 
@@ -149,7 +149,7 @@ export default function Schools() {
   const columns = [
     {
       key: "name",
-      label: "School",
+      label: "Site",
       sortable: true,
       render: (value, row) => (
         <div>
@@ -301,7 +301,7 @@ export default function Schools() {
           columns={columns}
           data={filteredSchools}
           loading={loading}
-          emptyMessage="No schools found"
+          emptyMessage="No sites found"
         />
       </div>
 

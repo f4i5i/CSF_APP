@@ -276,7 +276,7 @@ export default function SchoolFormModal({
             {/* Code */}
             <div>
               <label className="block text-sm font-semibold font-manrope text-text-primary mb-1">
-                School Code
+                Site Code
               </label>
               <input
                 type="text"
@@ -400,8 +400,8 @@ export default function SchoolFormModal({
               {isSubmitting
                 ? "Saving..."
                 : mode === "create"
-                ? "Create School"
-                : "Update School"}
+                ? "Create Site"
+                : "Update Site"}
             </button>
           </div>
         </form>

@@ -104,37 +104,7 @@ export default function DashboardWidgets({
     );
   };
 
-  // Demo badges for fallback
-  const demoBadges = [
-    {
-      id: 1,
-      title: "Perfect Attendance",
-      subtitle: "Never missed a practice session",
-      img: EarnedBadgeSrc,
-    },
-    {
-      id: 2,
-      title: "Team Player",
-      subtitle: "Great cooperation with team",
-      img: EarnedBadgeSrc,
-    },
-    {
-      id: 3,
-      title: "Top Scorer",
-      subtitle: "Most goals this season",
-      img: EarnedBadgeSrc,
-    },
-  ];
-
-  // Demo next event with long description for testing
-  const demoNextEvent = {
-    title: "Tournament Day",
-    description: "Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up. This is a very important event for our team. We've been preparing for months and this is our chance to showcase our skills. Make sure to bring your complete gear including cleats, shin guards, and water bottles. We'll have a team meeting 15 minutes before the match to discuss strategy. Parents are welcome to attend and cheer for the team. After the tournament, we'll have a small celebration at the clubhouse. Please let the coach know if you have any dietary restrictions. This tournament is part of the regional championship series, and winning could qualify us for the state finals. We need everyone's best effort and team spirit. Remember, it's not just about winning, but about playing with honor and sportsmanship. Good luck to all players! May the best team win. Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up. This is a very important event for our team. We've been preparing for months and this is our chance to showcase our skills. Make sure to bring your complete gear including cleats, shin guards, and water bottles.",
-    start_datetime: "2025-10-29T14:00:00",
-    attachment_name: "tournament_details.pdf",
-  };
-
-  // Use real data or demo data
+  // Use real data only - show empty state if no data
   const displayBadges = useMemo(() => {
     if (badges && badges.length > 0) {
       return badges.map((badge) => ({
@@ -144,14 +114,12 @@ export default function DashboardWidgets({
         img: badge.icon_url || badge.image_url || EarnedBadgeSrc,
       }));
     }
-    return demoBadges;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return [];
   }, [badges]);
 
+  // Return null if no event - will show empty state
   const displayNextEvent = useMemo(() => {
-    if (nextEvent) return nextEvent;
-    return demoNextEvent;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return nextEvent || null;
   }, [nextEvent]);
 
   // Format time for event display
@@ -178,7 +146,7 @@ export default function DashboardWidgets({
 
   // Format photo date
   const formatPhotoDate = (dateString) => {
-    if (!dateString) return "Oct 24, 2024";
+    if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       month: "short",
@@ -293,7 +261,7 @@ export default function DashboardWidgets({
                 <div className="h-3 bg-gray-200 rounded w-32 mb-2"></div>
                 <div className="h-4 bg-gray-200 rounded w-full"></div>
               </div>
-            ) : (
+            ) : displayNextEvent ? (
               <div className="flex items-start flex-col gap-2 bg-white/50 shadow-sm rounded-[10px] px-2 sm:px-3 py-2 mt-2 sm:mt-3 w-full min-h-52 overflow-hidden">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
                   <div className="text-base sm:text-lg font-medium text-heading-dark">
@@ -313,7 +281,7 @@ export default function DashboardWidgets({
                 <hr className="border-black/10 w-full" />
 
                 {renderEventDescriptionWithViewMore(displayNextEvent?.description)}
-                
+
                 {displayNextEvent?.attachment_name && (
                   <div
                     className="flex items-center gap-2 bg-white/50 px-2 sm:px-3.5 mt-2 py-2 rounded-[60px] text-xs text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors w-fit"
@@ -331,6 +299,15 @@ export default function DashboardWidgets({
                   </div>
                 )}
               </div>
+            ) : (
+              <div className="flex items-center justify-center flex-col gap-3 bg-white/50 shadow-sm rounded-[10px] px-2 sm:px-3 py-6 mt-2 sm:mt-3 w-full min-h-52">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 text-center">No upcoming events</p>
+              </div>
             )}
           </div>
         </div>
@@ -341,10 +318,10 @@ export default function DashboardWidgets({
           <div className="w-full sm:w-1/2 relative h-[290px] sm:h-[420px] rounded-3xl overflow-hidden">
             {loadingPhoto ? (
               <div className="w-full h-full bg-gray-200 animate-pulse"></div>
-            ) : (
+            ) : photo ? (
               <>
                 <img
-                  src={photo?.thumbnail_url ? getFileUrl(photo.thumbnail_url) : (photo?.image_url ? getFileUrl(photo.image_url) : (photo?.url || ProgramPhotoSrc))}
+                  src={photo?.thumbnail_url ? getFileUrl(photo.thumbnail_url) : (photo?.image_url ? getFileUrl(photo.image_url) : photo?.url)}
                   alt="Program Photos"
                   loading="lazy"
                   decoding="async"
@@ -370,6 +347,28 @@ export default function DashboardWidgets({
                   </p>
                 </div>
               </>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-white/50 flex items-center justify-center mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h2 className="font-bold text-xl text-gray-600">Program Photos</h2>
+                <p className="font-light text-gray-500 text-sm mt-1">No photos available yet</p>
+                <Link
+                  to="/photos"
+                  className="absolute right-2 sm:right-4 top-2 sm:top-4 bg-[#dde3e8] rounded-full size-12 sm:size-[60px] flex items-center justify-center z-10 hover:bg-[#c5ccd3] transition-colors"
+                >
+                  <img
+                    src={arrowRightUpLine}
+                    alt="arrow-right-up-line"
+                    width={120}
+                    height={120}
+                    className="object-contain size-5 sm:size-[25px] text-white"
+                  />
+                </Link>
+              </div>
             )}
           </div>
 

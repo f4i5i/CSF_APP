@@ -89,12 +89,17 @@ export default function DataTable({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   // Render cell content based on column type
-  const renderCell = (row, column) => {
+  const renderCell = (row, column, rowId) => {
     const value = row[column.key];
+    const isExpanded = expandedRows[rowId];
 
-    // Custom render function
+    // Custom render function - pass expand controls as third parameter
     if (column.render) {
-      return column.render(value, row);
+      return column.render(value, row, {
+        isExpanded,
+        toggleExpand: () => toggleExpand(rowId, row),
+        expandable,
+      });
     }
 
     // Status badge
@@ -312,7 +317,7 @@ export default function DataTable({
                           column.align === "right" ? "text-right" : ""
                         } ${column.align === "center" ? "text-center" : ""}`}
                       >
-                        {renderCell(row, column)}
+                        {renderCell(row, column, rowId)}
                       </td>
                     ))}
                   </tr>

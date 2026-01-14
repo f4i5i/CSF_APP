@@ -63,6 +63,7 @@ import Classes from './pages/Classes'
 import ClassDetail from './pages/AdminDashboard/ClassDetail'
 import Waivers from './pages/Waivers'
 import ProgramOverview from './pages/ProgramOverview'
+import Events from './pages/Events'
 import Checkout from './pages/CheckOut'
 import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentCancel from './pages/PaymentCancel'
@@ -233,6 +234,13 @@ return (
 <Route path="/calendar" element={
   <ProtectedRoute>
     <Calender />
+  </ProtectedRoute>
+} />
+
+{/* Events - View and RSVP to events for enrolled classes */}
+<Route path="/events" element={
+  <ProtectedRoute>
+    <Events />
   </ProtectedRoute>
 } />
 

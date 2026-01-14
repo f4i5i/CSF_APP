@@ -3,29 +3,71 @@
  * Allows user to choose between Pay in Full, Subscribe, or Installments
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CreditCard, RefreshCw, Calendar } from 'lucide-react';
 
 export default function PaymentMethodSelector({ selected, onSelect, classPrice = 0, classData }) {
+  // Calculate months for subscription billing
+  // Billing starts from class start_date (or today if already started)
+  const getSubscriptionMonths = () => {
+    if (!classData?.end_date) return null;
+
+    const endDate = new Date(classData.end_date);
+    const today = new Date();
+
+    // Use class start_date if available, otherwise today
+    let billingStart = today;
+    if (classData?.start_date) {
+      const startDate = new Date(classData.start_date);
+      // Use the later of today or class start date
+      billingStart = startDate > today ? startDate : today;
+    }
+
+    // Calculate months between billingStart and endDate (inclusive)
+    const startYear = billingStart.getFullYear();
+    const startMonth = billingStart.getMonth();
+    const endYear = endDate.getFullYear();
+    const endMonth = endDate.getMonth();
+
+    const months = (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
+    return months > 0 ? months : null;
+  };
+
+  const monthsRemaining = getSubscriptionMonths();
+  const classEndDate = classData?.end_date
+    ? new Date(classData.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
+
+  // Check if this is a subscription/membership class
+  const isSubscriptionClass = classData?.class_type === 'membership' ||
+                              classData?.billing_model === 'monthly' ||
+                              classData?.membership_price != null;
+
+  // Monthly price for subscription
+  const monthlyPrice = classData?.membership_price || classPrice;
+
   const allPaymentMethods = [
     {
       id: 'full',
       name: 'Pay in Full',
       icon: CreditCard,
-      description: 'Pay the full amount now',
+      description: 'Pay the full amount now (one-time)',
       badge: null,
       price: classPrice,
-      enabled: true, // Always available
+      enabled: !isSubscriptionClass, // Disable for subscription classes
     },
     {
       id: 'subscribe',
-      name: 'Monthly Membership',
+      name: 'Monthly Subscription',
       icon: RefreshCw,
-      description: 'Billed monthly, cancel anytime',
-      badge: 'Recurring',
-      price: classData?.membership_price || classPrice,
+      description: classEndDate
+        ? `Recurring monthly until ${classEndDate}`
+        : 'Recurring monthly until class ends',
+      badge: 'RECURRING',
+      price: monthlyPrice,
       priceLabel: '/month',
-      enabled: classData?.membership_price != null, // Only if membership_price is set
+      monthsRemaining: monthsRemaining,
+      enabled: isSubscriptionClass, // Enable for subscription classes
     },
     {
       id: 'installments',
@@ -34,12 +76,21 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
       description: 'Split payment over time',
       badge: 'Flexible',
       price: classPrice,
-      enabled: classData?.installments_enabled === true, // Only if explicitly enabled
+      enabled: classData?.installments_enabled === true && !isSubscriptionClass, // Only if explicitly enabled and not subscription
     },
   ];
 
   // Filter to only show enabled payment methods
   const paymentMethods = allPaymentMethods.filter(method => method.enabled);
+
+  // Auto-select subscribe for subscription classes
+  useEffect(() => {
+    if (isSubscriptionClass && !selected) {
+      onSelect('subscribe');
+    } else if (!isSubscriptionClass && !selected) {
+      onSelect('full');
+    }
+  }, [isSubscriptionClass, selected, onSelect]);
 
   return (
     <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
@@ -118,13 +169,19 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-xs font-manrope text-[#666D80] mb-1">
                       {method.id === 'full' && 'One-time payment'}
-                      {method.id === 'subscribe' && 'Recurring payment'}
+                      {method.id === 'subscribe' && 'Monthly recurring fee'}
                       {method.id === 'installments' && 'Total amount'}
                     </p>
                     <p className="text-lg font-bold font-manrope text-[#173151]">
                       ${parseFloat(method.price).toFixed(2)}
                       {method.priceLabel && <span className="text-sm font-normal text-[#666D80]">{method.priceLabel}</span>}
                     </p>
+                    {/* Show subscription duration info */}
+                    {method.id === 'subscribe' && method.monthsRemaining && (
+                      <p className="text-xs font-manrope text-purple-600 mt-1">
+                        ~{method.monthsRemaining} months • Est. total: ${(parseFloat(method.price) * method.monthsRemaining).toFixed(2)}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -134,11 +191,15 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
       </div>
 
       {/* Help Text */}
-      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-        <p className="text-sm font-manrope text-blue-800">
-          {selected === 'full' && '💳 Pay the full amount securely with your credit card'}
-          {selected === 'subscribe' &&
-            '🔄 Automatic monthly payments - cancel anytime'}
+      <div className={`mt-4 p-3 rounded-lg ${selected === 'subscribe' ? 'bg-purple-50 border border-purple-200' : 'bg-blue-50'}`}>
+        <p className={`text-sm font-manrope ${selected === 'subscribe' ? 'text-purple-800' : 'text-blue-800'}`}>
+          {selected === 'full' && '💳 Pay the full amount securely with your credit card (one-time payment)'}
+          {selected === 'subscribe' && (
+            <>
+              🔄 <strong>This is a RECURRING monthly subscription.</strong> Your card will be charged <strong>${parseFloat(monthlyPrice).toFixed(2)}/month</strong> automatically until class ends
+              {classEndDate && ` (${classEndDate})`}. You can cancel anytime from your account settings.
+            </>
+          )}
           {selected === 'installments' &&
             '📅 Choose your payment schedule in the next step'}
         </p>

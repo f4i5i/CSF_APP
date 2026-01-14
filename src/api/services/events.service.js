@@ -141,6 +141,18 @@ const eventsService = {
   },
 
   /**
+   * Get event attendee summary (admin only)
+   * @param {string} eventId - Event ID
+   * @returns {Promise<Object>} Attendee summary with counts and list
+   */
+  async getAttendeeSummary(eventId) {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.EVENTS.ATTENDEE_SUMMARY(eventId)
+    );
+    return data;
+  },
+
+  /**
    * Get upcoming events
    * @param {number} limit - Maximum number of events to return
    * @returns {Promise<Array>} Upcoming events

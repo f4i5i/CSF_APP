@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Trash2, Mail, Phone, Users, Eye, User, BookOpen, Calendar, DollarSign, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Trash2, Mail, Phone, Users, Eye, User, BookOpen, Plus, Loader2 } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -13,6 +14,7 @@ import adminService from "../../api/services/admin.service";
 import toast from "react-hot-toast";
 
 export default function Clients() {
+  const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,17 +61,18 @@ export default function Clients() {
           last_name: lastName,
           email: client.email || "",
           phone: client.phone || "",
-          is_active: client.active_enrollments > 0,
           active_enrollments: client.active_enrollments || 0,
           children_count: client.children_count || 0,
           created_at: client.created_at,
         };
       });
 
-      // Filter by status on frontend if needed
+      // Filter by enrollment status on frontend if needed
       if (statusFilter !== "") {
-        const isActive = statusFilter === "true";
-        clientsData = clientsData.filter((c) => c.is_active === isActive);
+        const hasEnrollments = statusFilter === "true";
+        clientsData = clientsData.filter((c) =>
+          hasEnrollments ? c.active_enrollments > 0 : c.active_enrollments === 0
+        );
       }
 
       setClients(clientsData);
@@ -234,6 +237,15 @@ export default function Clients() {
                     ) : (
                       <p className="mt-3 text-xs text-text-muted italic">No enrollments</p>
                     )}
+
+                    {/* Add Class Button */}
+                    <button
+                      onClick={() => navigate(`/class?child_id=${child.id}`)}
+                      className="mt-3 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-btn-gold hover:bg-[#e5ad35] text-text-primary text-xs font-semibold rounded-lg transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Class
+                    </button>
                   </div>
                 </div>
               </div>
@@ -298,36 +310,40 @@ export default function Clients() {
     {
       key: "children_count",
       label: "Children",
-      render: (value) => (
-        <div className="flex items-center gap-1 text-sm font-manrope text-text-muted">
+      render: (value, row, { toggleExpand, isExpanded, expandable } = {}) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (expandable && toggleExpand) toggleExpand();
+          }}
+          className={`flex items-center gap-1.5 text-sm font-manrope px-2 py-1 rounded-lg transition-colors ${
+            isExpanded
+              ? "bg-btn-gold/20 text-btn-gold"
+              : "text-text-muted hover:bg-gray-100 hover:text-text-primary"
+          } ${expandable ? "cursor-pointer" : ""}`}
+          type="button"
+        >
           <Users className="w-4 h-4" />
-          <span>{value || 0}</span>
-        </div>
+          <span className="font-medium">{value || 0}</span>
+          {value > 0 && expandable && (
+            <span className="text-xs opacity-60">{isExpanded ? "▲" : "▼"}</span>
+          )}
+        </button>
       ),
     },
     {
       key: "active_enrollments",
       label: "Enrollments",
-      render: (value) => (
-        <span className="text-sm font-manrope text-text-primary font-semibold">
-          {value || 0}
-        </span>
-      ),
-    },
-    {
-      key: "is_active",
-      label: "Status",
-      type: "status",
       sortable: true,
       render: (value) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            value
+            value > 0
               ? "bg-[#DFF5E8] text-status-success"
               : "bg-neutral-lightest text-neutral-dark"
           }`}
         >
-          {value ? "Active" : "Inactive"}
+          {value || 0} {value === 1 ? "Class" : "Classes"}
         </span>
       ),
     },
@@ -372,13 +388,13 @@ export default function Clients() {
   const filters = [
     {
       type: "select",
-      placeholder: "All Statuses",
+      placeholder: "All Clients",
       value: statusFilter,
       onChange: setStatusFilter,
       options: [
-        { value: "", label: "All Statuses" },
-        { value: "true", label: "Active" },
-        { value: "false", label: "Inactive" },
+        { value: "", label: "All Clients" },
+        { value: "true", label: "With Enrollments" },
+        { value: "false", label: "No Enrollments" },
       ],
     },
   ];

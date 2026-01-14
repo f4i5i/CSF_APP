@@ -238,6 +238,11 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/events/${id}`, // Delete event
     BY_CLASS: (classId) => `/events/class/${classId}`, // List class events
     CALENDAR: '/events/calendar', // Calendar view requires class_id/year/month
+    RSVP: (id) => `/events/${id}/rsvp`, // RSVP to event
+    RSVPS: (id) => `/events/${id}/rsvps`, // Get event RSVPs (admin)
+    RSVP_BY_ID: (eventId, rsvpId) => `/events/${eventId}/rsvps/${rsvpId}`, // Get/Update/Delete RSVP
+    MY_RSVP: (eventId) => `/events/${eventId}/my-rsvp`, // Get user's RSVP for event
+    ATTENDEE_SUMMARY: (eventId) => `/events/${eventId}/attendee-summary`, // Get attendee summary (admin)
   },
 
   // ===================
@@ -287,6 +292,7 @@ export const API_ENDPOINTS = {
     REVENUE: '/admin/finance/revenue', // Revenue report
     CLIENTS: '/admin/clients', // List clients with filters
     CLIENT_BY_ID: (id) => `/admin/clients/${id}`, // Client details
+    COACHES: '/admin/coaches', // List coaches for class assignment
     ROSTER: (classId) => `/admin/classes/${classId}/roster`, // Class roster
 
     // Refunds

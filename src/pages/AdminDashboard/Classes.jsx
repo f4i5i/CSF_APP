@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Edit, Trash2, Calendar, Copy, Users, X, Link, Loader2, User, Mail, Phone, CheckCircle, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Copy, Users, X, Link, Loader2, User, Mail, Phone, CheckCircle, ExternalLink, AlertTriangle, ArrowRight } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -13,6 +13,7 @@ import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import adminService from "../../api/services/admin.service";
+import enrollmentsService from "../../api/services/enrollments.service";
 import toast from "react-hot-toast";
 import Header from "../../components/Header";
 
@@ -52,6 +53,17 @@ export default function Classes() {
     loading: false,
     shareLink: "",
     linkCopied: false,
+  });
+
+  // Delete with enrollments modal state
+  const [deleteEnrollmentsModal, setDeleteEnrollmentsModal] = useState({
+    isOpen: false,
+    classToDelete: null,
+    activeEnrollments: [],
+    loading: false,
+    processing: false,
+    selectedAction: null, // 'move' | 'cancel'
+    targetClassId: '',
   });
 
   // Fetch filter options on mount
@@ -98,6 +110,7 @@ export default function Classes() {
       const params = {
         skip,
         limit: itemsPerPage,
+        include_inactive: true,  // Admin needs to see draft/inactive classes
       };
 
       if (programFilter) params.program_id = programFilter;
@@ -161,7 +174,53 @@ export default function Classes() {
     setModalOpen(true);
   };
 
-  const handleDeleteClass = async (classId) => {
+  // Check for active enrollments before deleting
+  const handleDeleteClick = async (classData) => {
+    setDeleteEnrollmentsModal({
+      isOpen: true,
+      classToDelete: classData,
+      activeEnrollments: [],
+      loading: true,
+      processing: false,
+      selectedAction: null,
+      targetClassId: '',
+    });
+
+    try {
+      // Fetch active enrollments for this class
+      const response = await enrollmentsService.getByClass(classData.id, { status: 'active' });
+      const enrollments = Array.isArray(response) ? response : (response?.items || response?.enrollments || []);
+
+      if (enrollments.length === 0) {
+        // No active enrollments, proceed with simple delete confirmation
+        setDeleteEnrollmentsModal(prev => ({ ...prev, isOpen: false }));
+        setConfirmDialog({
+          isOpen: true,
+          title: "Delete Class",
+          message: `Are you sure you want to delete "${classData.name}"? This action cannot be undone.`,
+          action: () => executeDeleteClass(classData.id),
+        });
+      } else {
+        // Has active enrollments, show options modal
+        setDeleteEnrollmentsModal(prev => ({
+          ...prev,
+          activeEnrollments: enrollments,
+          loading: false,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to check enrollments:", error);
+      // If we can't check, show the modal anyway with a warning
+      setDeleteEnrollmentsModal(prev => ({
+        ...prev,
+        loading: false,
+        activeEnrollments: [],
+      }));
+    }
+  };
+
+  // Execute the actual class deletion
+  const executeDeleteClass = async (classId) => {
     try {
       await classesService.delete(classId);
       toast.success("Class deleted successfully");
@@ -171,6 +230,86 @@ export default function Classes() {
       console.error("Failed to delete class:", error);
       toast.error("Failed to delete class");
     }
+  };
+
+  // Handle moving enrollments to another class
+  const handleMoveEnrollments = async () => {
+    const { classToDelete, activeEnrollments, targetClassId } = deleteEnrollmentsModal;
+
+    if (!targetClassId) {
+      toast.error("Please select a target class");
+      return;
+    }
+
+    setDeleteEnrollmentsModal(prev => ({ ...prev, processing: true }));
+
+    try {
+      // Move each enrollment to the target class
+      for (const enrollment of activeEnrollments) {
+        await enrollmentsService.transfer(enrollment.id, targetClassId);
+      }
+
+      toast.success(`${activeEnrollments.length} enrollment(s) moved successfully`);
+
+      // Now delete the class
+      await classesService.delete(classToDelete.id);
+      toast.success("Class deleted successfully");
+
+      closeDeleteEnrollmentsModal();
+      fetchClasses();
+    } catch (error) {
+      console.error("Failed to move enrollments:", error);
+      toast.error("Failed to move enrollments. Please try again.");
+      setDeleteEnrollmentsModal(prev => ({ ...prev, processing: false }));
+    }
+  };
+
+  // Handle canceling all enrollments
+  const handleCancelEnrollments = async () => {
+    const { classToDelete, activeEnrollments } = deleteEnrollmentsModal;
+
+    setDeleteEnrollmentsModal(prev => ({ ...prev, processing: true }));
+
+    try {
+      // Cancel each enrollment
+      for (const enrollment of activeEnrollments) {
+        await enrollmentsService.cancel(enrollment.id);
+      }
+
+      toast.success(`${activeEnrollments.length} enrollment(s) cancelled`);
+
+      // Now delete the class
+      await classesService.delete(classToDelete.id);
+      toast.success("Class deleted successfully");
+
+      closeDeleteEnrollmentsModal();
+      fetchClasses();
+    } catch (error) {
+      console.error("Failed to cancel enrollments:", error);
+      toast.error("Failed to cancel enrollments. Please try again.");
+      setDeleteEnrollmentsModal(prev => ({ ...prev, processing: false }));
+    }
+  };
+
+  // Close delete enrollments modal
+  const closeDeleteEnrollmentsModal = () => {
+    setDeleteEnrollmentsModal({
+      isOpen: false,
+      classToDelete: null,
+      activeEnrollments: [],
+      loading: false,
+      processing: false,
+      selectedAction: null,
+      targetClassId: '',
+    });
+  };
+
+  // Get available target classes (exclude the one being deleted)
+  const getAvailableTargetClasses = () => {
+    return classes.filter(c =>
+      c.id !== deleteEnrollmentsModal.classToDelete?.id &&
+      c.is_active
+    );
   };
 
   const handleModalClose = () => {
@@ -368,10 +507,10 @@ export default function Classes() {
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
             value
               ? "bg-[#DFF5E8] text-status-success"
-              : "bg-neutral-lightest text-neutral-dark"
+              : "bg-amber-100 text-amber-700"
           }`}
         >
-          {value ? "Active" : "Inactive"}
+          {value ? "Active" : "Draft"}
         </span>
       ),
     },
@@ -400,14 +539,7 @@ export default function Classes() {
           label: "Delete",
           icon: Trash2,
           variant: "destructive",
-          onClick: () => {
-            setConfirmDialog({
-              isOpen: true,
-              title: "Delete Class",
-              message: `Are you sure you want to delete "${row.name}"? This action cannot be undone.`,
-              action: () => handleDeleteClass(row.id),
-            });
-          },
+          onClick: () => handleDeleteClick(row),
         },
       ],
     },
@@ -450,7 +582,7 @@ export default function Classes() {
       options: [
         { value: "", label: "All Statuses" },
         { value: "true", label: "Active" },
-        { value: "false", label: "Inactive" },
+        { value: "false", label: "Draft" },
       ],
     },
   ];
@@ -525,6 +657,213 @@ export default function Classes() {
         message={confirmDialog.message}
         variant="danger"
       />
+
+      {/* Delete with Enrollments Modal */}
+      {deleteEnrollmentsModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full shadow-xl">
+            {/* Modal Header */}
+            <div className="flex items-center gap-3 p-4 border-b bg-red-50">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-heading-dark font-manrope">
+                  Delete Class
+                </h3>
+                <p className="text-sm text-text-muted font-manrope">
+                  {deleteEnrollmentsModal.classToDelete?.name}
+                </p>
+              </div>
+              <button
+                onClick={closeDeleteEnrollmentsModal}
+                disabled={deleteEnrollmentsModal.processing}
+                className="ml-auto p-2 hover:bg-red-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4">
+              {deleteEnrollmentsModal.loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-btn-gold mr-2" />
+                  <span className="text-text-muted font-manrope">Checking enrollments...</span>
+                </div>
+              ) : deleteEnrollmentsModal.activeEnrollments.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Warning Message */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800 font-manrope">
+                      <strong>Warning:</strong> This class has{" "}
+                      <span className="font-bold">{deleteEnrollmentsModal.activeEnrollments.length}</span>{" "}
+                      active enrollment{deleteEnrollmentsModal.activeEnrollments.length !== 1 ? 's' : ''}.
+                      Please choose how to handle them before deleting.
+                    </p>
+                  </div>
+
+                  {/* Enrolled Students List */}
+                  <div className="max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-gray-500 mb-2">Active Enrollments:</p>
+                    <div className="space-y-1">
+                      {deleteEnrollmentsModal.activeEnrollments.slice(0, 5).map((enrollment, idx) => {
+                        const child = enrollment.child || enrollment;
+                        return (
+                          <div key={enrollment.id || idx} className="flex items-center gap-2 text-sm">
+                            <User className="w-3 h-3 text-gray-400" />
+                            <span className="text-gray-700">
+                              {child.first_name} {child.last_name}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      {deleteEnrollmentsModal.activeEnrollments.length > 5 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          +{deleteEnrollmentsModal.activeEnrollments.length - 5} more
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Options */}
+                  <div className="space-y-3">
+                    {/* Option 1: Move to another class */}
+                    <div
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        deleteEnrollmentsModal.selectedAction === 'move'
+                          ? 'border-btn-gold bg-yellow-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setDeleteEnrollmentsModal(prev => ({ ...prev, selectedAction: 'move' }))}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          checked={deleteEnrollmentsModal.selectedAction === 'move'}
+                          onChange={() => {}}
+                          className="w-4 h-4 text-btn-gold"
+                        />
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm text-heading-dark font-manrope flex items-center gap-2">
+                            <ArrowRight className="w-4 h-4" />
+                            Move to Another Class
+                          </p>
+                          <p className="text-xs text-text-muted mt-1">
+                            Transfer all enrollments to a different class
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Target Class Selector */}
+                      {deleteEnrollmentsModal.selectedAction === 'move' && (
+                        <div className="mt-3 pl-7">
+                          <select
+                            value={deleteEnrollmentsModal.targetClassId}
+                            onChange={(e) => setDeleteEnrollmentsModal(prev => ({
+                              ...prev,
+                              targetClassId: e.target.value
+                            }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-manrope focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                          >
+                            <option value="">Select target class...</option>
+                            {getAvailableTargetClasses().map(c => (
+                              <option key={c.id} value={c.id}>
+                                {c.name} ({c.current_enrollment || 0}/{c.capacity} enrolled)
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Option 2: Cancel all enrollments */}
+                    <div
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        deleteEnrollmentsModal.selectedAction === 'cancel'
+                          ? 'border-red-400 bg-red-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setDeleteEnrollmentsModal(prev => ({ ...prev, selectedAction: 'cancel' }))}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          checked={deleteEnrollmentsModal.selectedAction === 'cancel'}
+                          onChange={() => {}}
+                          className="w-4 h-4 text-red-600"
+                        />
+                        <div>
+                          <p className="font-semibold text-sm text-heading-dark font-manrope flex items-center gap-2">
+                            <X className="w-4 h-4 text-red-500" />
+                            Cancel All Enrollments
+                          </p>
+                          <p className="text-xs text-text-muted mt-1">
+                            Cancel all active enrollments and delete the class
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-text-muted font-manrope">
+                    No active enrollments found. You can safely delete this class.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-3 p-4 border-t bg-gray-50">
+              <button
+                onClick={closeDeleteEnrollmentsModal}
+                disabled={deleteEnrollmentsModal.processing}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              {deleteEnrollmentsModal.activeEnrollments.length > 0 ? (
+                <button
+                  onClick={deleteEnrollmentsModal.selectedAction === 'move' ? handleMoveEnrollments : handleCancelEnrollments}
+                  disabled={
+                    deleteEnrollmentsModal.processing ||
+                    !deleteEnrollmentsModal.selectedAction ||
+                    (deleteEnrollmentsModal.selectedAction === 'move' && !deleteEnrollmentsModal.targetClassId)
+                  }
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors font-manrope disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleteEnrollmentsModal.processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      {deleteEnrollmentsModal.selectedAction === 'move' ? 'Move & Delete' : 'Cancel & Delete'}
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    closeDeleteEnrollmentsModal();
+                    executeDeleteClass(deleteEnrollmentsModal.classToDelete.id);
+                  }}
+                  disabled={deleteEnrollmentsModal.processing}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors font-manrope"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Class
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Roster Modal */}
       {rosterModal.isOpen && (

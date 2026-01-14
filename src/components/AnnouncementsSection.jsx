@@ -159,51 +159,13 @@ export default function AnnouncementsSection({
     );
   };
 
-  // Demo announcements for fallback
-  const demoAnnouncements = [
-    {
-      id: 1,
-      author: { first_name: "Martinez" },
-      created_at: "2025-10-27T10:30:00",
-      title: "Tournament This Saturday",
-      content: "Great practice today! Remember, we have a tournament this Saturday at 9 AM. Please arrive 30 minutes early",
-      attachments: [{ name: "teamList.pdf", type: "application/pdf" }],
-    },
-    {
-      id: 2,
-      author: { first_name: "Martinez" },
-      created_at: "2025-10-27T10:30:00",
-      title: "New Team Jerseys",
-      content: "New team jerseys have arrived! You can pick them up from the front desk. We have sizes ranging from small to extra large. Please try them on for fit before taking them home. The jerseys are made of moisture-wicking material and feature our new team logo. If you need a different size, please let me know by Friday. Also, remember to wash them in cold water and hang dry to preserve the colors and logo. We'll be wearing these for the upcoming tournament, so make sure you have yours ready! Additional information about jersey care and maintenance will be provided in a separate document. This is a very long description to test the view more button functionality. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      attachments: [{ name: "image-2.jpg", type: "image/jpeg" }],
-    },
-    {
-      id: 3,
-      author: { first_name: "Martinez" },
-      created_at: "2025-10-27T10:30:00",
-      title: "Registration Deadline",
-      content: "Reminder: Registration for next month closes this Friday. Make sure your account is up to date! lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Reminder: Registration for next month closes this Friday. Make sure your account is up to date! lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Reminder: Registration for next month closes this Friday. Make sure your account is up to date! lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Reminder: Registration for next month closes this Friday. Make sure your account is up to date! lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    },
-  ];
-
-  const demoNextEvent = {
-    title: "Tournament Day",
-    description: "Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up. This is a very important event for our team. We've been preparing for months and this is our chance to showcase our skills. Make sure to bring your complete gear including cleats, shin guards, and water bottles. We'll have a team meeting 15 minutes before the match to discuss strategy. Parents are welcome to attend and cheer for the team. After the tournament, we'll have a small celebration at the clubhouse. Please let the coach know if you have any dietary restrictions. This tournament is part of the regional championship series, and winning could qualify us for the state finals. We need everyone's best effort and team spirit. Remember, it's not just about winning, but about playing with honor and sportsmanship. Good luck to all players! May the best team win. Annual soccer tournament. All teams will compete. Please arrive 30 minutes early for warm-up. This is a very important event for our team. We've been preparing for months and this is our chance to showcase our skills. Make sure to bring your complete gear including cleats, shin guards, and water bottles.",
-    start_datetime: "2025-10-29T14:00:00",
-    attachment_name: "details.pdf",
-  };
-
-  // Use demo data if no real data provided
+  // Use real data only - show empty state if no data
   const displayAnnouncements = useMemo(() => {
-    if (announcements && announcements.length > 0) return announcements;
-    return demoAnnouncements;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return announcements || [];
   }, [announcements]);
 
   const displayNextEvent = useMemo(() => {
-    if (nextEvent) return nextEvent;
-    return demoNextEvent;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return nextEvent || null;
   }, [nextEvent]);
 
   // Find announcement by ID for view more modal
@@ -240,7 +202,7 @@ export default function AnnouncementsSection({
               <div className="h-3 bg-gray-200 rounded w-32 mb-2"></div>
               <div className="h-4 bg-gray-200 rounded w-full"></div>
             </div>
-          ) : (
+          ) : displayNextEvent ? (
             <div className="flex flex-col gap-2 bg-white/50 shadow-sm rounded-[10px] px-2 py-2 mt-2">
               <div className="flex items-center gap-3 mb-2">
                 <div className="text-lg font-normal text-[#0F1D2E]">
@@ -272,6 +234,15 @@ export default function AnnouncementsSection({
                 </button>
               )}
             </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 bg-white/50 shadow-sm rounded-[10px] px-2 py-6 mt-2">
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-500">No upcoming events</p>
+            </div>
           )}
         </div>
       </div>
@@ -297,6 +268,17 @@ export default function AnnouncementsSection({
                 <div className="h-4 bg-gray-200 rounded w-full"></div>
               </div>
             ))
+          ) : displayAnnouncements.length === 0 ? (
+            // Empty state
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-center">No announcements yet</p>
+              <p className="text-sm text-gray-400 text-center mt-1">Check back later for updates from your coach</p>
+            </div>
           ) : (
             displayAnnouncements.map((announcement) => {
               const attachmentInfo = getAttachmentInfo(announcement);

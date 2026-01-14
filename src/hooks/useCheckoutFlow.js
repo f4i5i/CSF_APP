@@ -108,6 +108,12 @@ export const useCheckoutFlow = () => {
    * Toggle child selection (multi-select mode)
    */
   const toggleChildSelection = useCallback((childId) => {
+    // Reset creation flags to allow new order creation
+    isCreatingOrder.current = false;
+    isCreatingPayment.current = false;
+    orderCreationFailed.current = false;
+    paymentCreationFailed.current = false;
+
     setState((prev) => {
       const currentIds = prev.selectedChildIds || [];
       const isSelected = currentIds.includes(childId);
@@ -126,10 +132,11 @@ export const useCheckoutFlow = () => {
         selectedChildIds: newSelectedIds,
         // Update single selection for backward compatibility (use first selected)
         selectedChildId: newSelectedIds.length > 0 ? newSelectedIds[0] : null,
-        // Reset order when selection changes
+        // Reset order when selection changes - forces new order with all children
         orderId: null,
         clientSecret: null,
         siblingDiscountPreview: null,
+        isLoading: false,
       };
     });
   }, []);
@@ -217,6 +224,10 @@ export const useCheckoutFlow = () => {
     // Use selectedChildIds if available, otherwise fall back to single selectedChildId
     const childIdsToEnroll = selectedChildIds?.length > 0 ? selectedChildIds : (selectedChildId ? [selectedChildId] : []);
 
+    console.log('[DEBUG] createOrder called');
+    console.log('[DEBUG] selectedChildIds:', selectedChildIds);
+    console.log('[DEBUG] childIdsToEnroll:', childIdsToEnroll);
+
     if (!classData || childIdsToEnroll.length === 0) {
       setState((prev) => ({
         ...prev,
@@ -235,6 +246,9 @@ export const useCheckoutFlow = () => {
         amount: classData.base_price || classData.price,
       }));
 
+      console.log('[DEBUG] Creating order with items:', items);
+      console.log('[DEBUG] Items count:', items.length);
+
       const orderData = {
         items,
         payment_plan: paymentMethod,
@@ -249,6 +263,10 @@ export const useCheckoutFlow = () => {
       }
 
       const order = await ordersService.create(orderData);
+
+      console.log('[DEBUG] Order created:', order.id);
+      console.log('[DEBUG] Order line_items count:', order.line_items?.length || 0);
+      console.log('[DEBUG] Order line_items:', order.line_items);
 
       setState((prev) => ({
         ...prev,
@@ -279,6 +297,8 @@ export const useCheckoutFlow = () => {
   const initiatePayment = useCallback(async () => {
     const { orderId, orderTotal, paymentMethod, installmentPlan } = state;
 
+    console.log('[DEBUG] initiatePayment called with orderId:', orderId);
+
     if (!orderId) {
       setState((prev) => ({ ...prev, error: 'Order not created' }));
       return null;
@@ -300,24 +320,40 @@ export const useCheckoutFlow = () => {
         payment_method: 'card',
       });
 
+      console.log('[DEBUG] Payment created for orderId:', orderId);
+
       // Store the checkout URL in clientSecret
-      // The user will click a button to redirect manually
-      setState((prev) => ({
-        ...prev,
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.payment_intent_id,
-        isLoading: false,
-      }));
+      // IMPORTANT: Only set clientSecret if the orderId hasn't changed during the request
+      // This prevents stale payment responses from overwriting newer orders
+      setState((prev) => {
+        if (prev.orderId !== orderId) {
+          console.log('[DEBUG] Order changed during payment creation, ignoring response. Current:', prev.orderId, 'Response for:', orderId);
+          return prev; // Don't update state, order has changed
+        }
+        return {
+          ...prev,
+          clientSecret: paymentIntent.client_secret,
+          paymentIntentId: paymentIntent.payment_intent_id,
+          isLoading: false,
+        };
+      });
 
       return paymentIntent;
     } catch (error) {
       console.error('Failed to initiate payment:', error);
-      paymentCreationFailed.current = true; // Mark as failed to prevent retry bombardment
-      setState((prev) => ({
-        ...prev,
-        error: error.message || 'Failed to initiate payment',
-        isLoading: false,
-      }));
+      // Only mark as failed if this is still the current order
+      setState((prev) => {
+        if (prev.orderId !== orderId) {
+          console.log('[DEBUG] Order changed during payment error, ignoring. Current:', prev.orderId, 'Error for:', orderId);
+          return prev; // Don't update state, order has changed
+        }
+        paymentCreationFailed.current = true; // Mark as failed to prevent retry bombardment
+        return {
+          ...prev,
+          error: error.message || 'Failed to initiate payment',
+          isLoading: false,
+        };
+      });
       return null;
     }
   }, [state]);
@@ -458,37 +494,9 @@ export const useCheckoutFlow = () => {
     setState((prev) => ({ ...prev, error: null }));
   }, []);
 
-  // Auto-create order when all required selections are made
-  useEffect(() => {
-    // Check if at least one child is selected (support both single and multi-select)
-    const hasChildSelected = (state.selectedChildIds?.length > 0) || state.selectedChildId;
-
-    const shouldCreateOrder =
-      state.classData &&
-      hasChildSelected &&
-      state.paymentMethod &&
-      (state.paymentMethod !== 'installments' || state.installmentPlan) &&
-      !state.orderId &&
-      !state.isLoading &&
-      !isCreatingOrder.current &&
-      !orderCreationFailed.current; // Don't retry if order creation failed
-
-    if (shouldCreateOrder) {
-      isCreatingOrder.current = true;
-      createOrder().finally(() => {
-        isCreatingOrder.current = false;
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    state.classData,
-    state.selectedChildId,
-    state.selectedChildIds,
-    state.paymentMethod,
-    state.installmentPlan,
-    state.orderId,
-    state.isLoading,
-  ]);
+  // REMOVED: Auto-create order on child selection
+  // Order is now created manually when user clicks "Review Order" button
+  // This gives users time to select all children before order creation
 
   // Auto-create payment intent when order is created
   useEffect(() => {
@@ -499,17 +507,27 @@ export const useCheckoutFlow = () => {
       !isCreatingPayment.current &&
       !paymentCreationFailed.current; // Don't retry if payment creation failed
 
+    console.log('[DEBUG] Payment effect check:', {
+      orderId: state.orderId,
+      clientSecret: !!state.clientSecret,
+      isLoading: state.isLoading,
+      isCreatingPayment: isCreatingPayment.current,
+      paymentCreationFailed: paymentCreationFailed.current,
+      shouldCreate: shouldCreatePaymentIntent,
+    });
+
     if (shouldCreatePaymentIntent) {
+      console.log('[DEBUG] Starting payment creation for order:', state.orderId);
       isCreatingPayment.current = true;
       initiatePayment().finally(() => {
         isCreatingPayment.current = false;
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     state.orderId,
     state.clientSecret,
     state.isLoading,
+    initiatePayment, // Add initiatePayment to ensure we use the latest version
   ]);
 
   return {

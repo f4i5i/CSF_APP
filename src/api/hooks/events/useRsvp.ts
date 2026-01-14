@@ -147,8 +147,20 @@ export function useRsvp(
     mutationFn: ({ eventId, data }: { eventId: string; data: CreateRsvpRequest }) =>
       eventService.rsvp(eventId, data),
 
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(variables.eventId) });
+    onSuccess: (newRsvp, variables) => {
+      const eventId = String(variables.eventId);
+      // Immediately update the myRsvp cache with the new data
+      queryClient.setQueryData(
+        [...queryKeys.events.detail(eventId), 'myRsvp'],
+        newRsvp
+      );
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({
+        queryKey: [...queryKeys.events.detail(eventId), 'myRsvp'],
+        exact: true
+      });
+      // Also invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(eventId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.events.lists() });
       toast.success('RSVP submitted successfully!');
     },
@@ -234,8 +246,21 @@ export function useUpdateRsvp(
       data: UpdateRsvpRequest;
     }) => eventService.updateRsvp(eventId, rsvpId, data),
 
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(variables.eventId) });
+    onSuccess: (updatedRsvp, variables) => {
+      const eventId = String(variables.eventId);
+      // Immediately update the myRsvp cache with the updated data
+      queryClient.setQueryData(
+        [...queryKeys.events.detail(eventId), 'myRsvp'],
+        updatedRsvp
+      );
+      // Force refetch to ensure fresh data
+      queryClient.refetchQueries({
+        queryKey: [...queryKeys.events.detail(eventId), 'myRsvp'],
+        exact: true
+      });
+      // Also invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(eventId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.events.lists() });
       toast.success('RSVP updated successfully!');
     },
 
@@ -311,5 +336,47 @@ export function useCancelRsvp(
     },
 
     ...options,
+  });
+}
+
+/**
+ * Hook to fetch attendee summary for an event (admin only).
+ *
+ * @description Retrieves a complete summary of all RSVPs for an event, including
+ * counts by status (attending, not attending, maybe) and the full list of attendees.
+ * This is typically used by admins/coaches to view who has RSVP'd to an event.
+ *
+ * @param {Object} params - Hook parameters
+ * @param {string} params.eventId - The unique identifier of the event
+ * @param {Object} [params.queryOptions] - Additional React Query options
+ *
+ * @returns {UseQueryResult<EventAttendeeSummary, ApiErrorResponse>} Query result with attendee summary
+ *
+ * @example
+ * // Get RSVP summary for an event
+ * const { data: summary, isLoading } = useAttendeeSummary({ eventId: '123' });
+ *
+ * return (
+ *   <div>
+ *     <p>Attending: {summary?.attending_count}</p>
+ *     <p>Not attending: {summary?.not_attending_count}</p>
+ *     <p>Maybe: {summary?.maybe_count}</p>
+ *   </div>
+ * );
+ */
+export function useAttendeeSummary({
+  eventId,
+  queryOptions,
+}: {
+  eventId: string;
+  queryOptions?: Omit<UseQueryOptions<any, ApiErrorResponse>, 'queryKey' | 'queryFn'>;
+}) {
+  return useQuery({
+    queryKey: [...queryKeys.events.detail(eventId), 'attendeeSummary'],
+    queryFn: () => eventService.getAttendeeSummary(eventId),
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 3 * 60 * 1000,
+    enabled: !!eventId,
+    ...queryOptions,
   });
 }

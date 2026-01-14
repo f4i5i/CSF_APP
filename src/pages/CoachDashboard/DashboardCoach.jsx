@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Loader2, X, FileText, Download } from 'lucide-react';
+import { Plus, Loader2, X, FileText, Download, Calendar, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getFileUrl } from '../../api/config';
 import { CircleCheckBig } from 'lucide-react';
@@ -250,15 +250,29 @@ export default function DashboardCoach() {
           </div>
 
           {/* Stats Container */}
-          <div className="flex items-center gap-[42px] max-sm:hidden pr-4">
-            <CoachStatsCard
-              value={checkedInToday}
-              label="Checked In Today"
-            />
-            <CoachStatsCard
-              value={announcementCount}
-              label="Announcements"
-            />
+          <div className="flex items-center gap-6 max-sm:hidden pr-4">
+            {/* EVOLIA Button */}
+            <a
+              href="https://app.evolia.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-[#1D3557] hover:bg-[#152942] text-white px-5 py-2.5 rounded-full font-manrope font-semibold transition-colors shadow-md"
+            >
+              <Calendar size={18} />
+              <span>EVOLIA</span>
+              <ExternalLink size={14} className="opacity-70" />
+            </a>
+
+            <div className="flex items-center gap-[42px]">
+              <CoachStatsCard
+                value={checkedInToday}
+                label="Checked In Today"
+              />
+              <CoachStatsCard
+                value={announcementCount}
+                label="Announcements"
+              />
+            </div>
           </div>
         </div>
 
@@ -348,13 +362,26 @@ export default function DashboardCoach() {
           {/* ============================================================ */}
           {/* RIGHT COLUMN: Calendar + Event + Photos */}
           {/* ============================================================ */}
-          <button
-            onClick={() => navigate('/coach/check-in')}
-            className='md:hidden flex my-1 items-center justify-center gap-3 bg-[#7E97B5] rounded-xl shadow-md w-full h-12 text-white text-base font-medium font-manrope hover:bg-[#6B859E] transition-colors'
-          >
-            <CircleCheckBig color="#fff" />
-            Check-In
-          </button>
+          {/* Mobile Action Buttons */}
+          <div className="md:hidden flex gap-2 my-1">
+            <button
+              onClick={() => navigate('/coach/check-in')}
+              className='flex flex-1 items-center justify-center gap-2 bg-[#7E97B5] rounded-xl shadow-md h-12 text-white text-base font-medium font-manrope hover:bg-[#6B859E] transition-colors'
+            >
+              <CircleCheckBig color="#fff" size={20} />
+              Check-In
+            </button>
+            <a
+              href="https://app.evolia.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className='flex flex-1 items-center justify-center gap-2 bg-[#1D3557] rounded-xl shadow-md h-12 text-white text-base font-medium font-manrope hover:bg-[#152942] transition-colors'
+            >
+              <Calendar size={20} />
+              EVOLIA
+              <ExternalLink size={14} className="opacity-70" />
+            </a>
+          </div>
           <div className="w-full lg:w-[49%] flex flex-col gap-4 max-sm:order-1">
             {/* Calendar + Next Event Card */}
             <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm flex flex-col lg:flex-row gap-6">

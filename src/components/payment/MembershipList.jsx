@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, User, Calendar, DollarSign, BookOpen, ChevronDown, ChevronUp, X, AlertTriangle, Loader2, Pause, Play, Plus } from 'lucide-react';
+import { AlertCircle, User, Calendar, DollarSign, BookOpen, ChevronDown, ChevronUp, X, AlertTriangle, Loader2, Pause, Play } from 'lucide-react';
 import { enrollmentService } from '../../api/services/enrollment.service';
 import { formatCurrency, formatDate } from '../../utils/format';
 
@@ -39,10 +39,12 @@ const MembershipList = () => {
     setError(null);
     try {
       const data = await enrollmentService.getMy();
-      setEnrollments(data || []);
+      // Handle both array and {items: []} response formats
+      const enrollmentsList = Array.isArray(data) ? data : (data?.items || []);
+      setEnrollments(enrollmentsList);
 
       // Auto-expand all children by default
-      const childIds = [...new Set(data?.map(e => e.child_id) || [])];
+      const childIds = [...new Set(enrollmentsList.map(e => e.child_id))];
       const expanded = {};
       childIds.forEach(id => { expanded[id] = true; });
       setExpandedChildren(expanded);
@@ -166,12 +168,14 @@ const MembershipList = () => {
   };
 
   const getStatusBadge = (status) => {
+    const normalizedStatus = status?.toUpperCase();
     const styles = {
       ACTIVE: 'bg-green-100 text-green-800 border-green-200',
       PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       COMPLETED: 'bg-blue-100 text-blue-800 border-blue-200',
       CANCELLED: 'bg-gray-100 text-gray-500 border-gray-200',
       WAITLIST: 'bg-purple-100 text-purple-800 border-purple-200',
+      WAITLISTED: 'bg-purple-100 text-purple-800 border-purple-200',
       PAUSED: 'bg-amber-100 text-amber-800 border-amber-200',
     };
 
@@ -181,34 +185,41 @@ const MembershipList = () => {
       COMPLETED: 'Completed',
       CANCELLED: 'Cancelled',
       WAITLIST: 'Waitlist',
+      WAITLISTED: 'Waitlist',
       PAUSED: 'Paused',
     };
 
     return (
-      <span className={`px-2 py-1 text-xs rounded-full border font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
-        {labels[status] || status}
+      <span className={`px-2 py-1 text-xs rounded-full border font-medium ${styles[normalizedStatus] || 'bg-gray-100 text-gray-800'}`}>
+        {labels[normalizedStatus] || status}
       </span>
     );
   };
 
   const canCancel = (status) => {
-    return ['ACTIVE', 'PENDING', 'WAITLIST', 'PAUSED'].includes(status);
+    const normalizedStatus = status?.toUpperCase();
+    return ['ACTIVE', 'PENDING', 'WAITLIST', 'PAUSED', 'WAITLISTED'].includes(normalizedStatus);
   };
 
   const canPause = (status) => {
-    return status === 'ACTIVE';
+    return status?.toUpperCase() === 'ACTIVE';
   };
 
   const canResume = (status) => {
-    return status === 'PAUSED';
+    return status?.toUpperCase() === 'PAUSED';
   };
 
   // Group enrollments by child
   const groupedByChild = enrollments.reduce((acc, enrollment) => {
     const childId = enrollment.child_id;
     if (!acc[childId]) {
+      // Use child_name from API response (flat string) or fallback
+      const childName = enrollment.child_name || enrollment.child?.first_name
+        ? (enrollment.child_name || `${enrollment.child?.first_name || ''} ${enrollment.child?.last_name || ''}`.trim())
+        : 'Unknown Child';
+
       acc[childId] = {
-        child: enrollment.child || { first_name: 'Unknown', last_name: 'Child' },
+        childName: childName,
         enrollments: []
       };
     }
@@ -266,7 +277,7 @@ const MembershipList = () => {
         <h2 className="font-semibold text-lg mb-4">Active Memberships</h2>
 
         <div className="space-y-4">
-          {Object.entries(groupedByChild).map(([childId, { child, enrollments: childEnrollments }]) => (
+          {Object.entries(groupedByChild).map(([childId, { childName, enrollments: childEnrollments }]) => (
             <div key={childId} className="border rounded-lg overflow-hidden">
               {/* Child Header */}
               <div className="flex items-center justify-between p-4 bg-gray-50">
@@ -279,7 +290,7 @@ const MembershipList = () => {
                   </div>
                   <div className="text-left">
                     <h3 className="font-semibold text-heading-dark">
-                      {child?.first_name} {child?.last_name}
+                      {childName}
                     </h3>
                     <p className="text-sm text-gray-500">
                       {childEnrollments.length} enrollment{childEnrollments.length !== 1 ? 's' : ''}
@@ -290,15 +301,6 @@ const MembershipList = () => {
                   ) : (
                     <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
                   )}
-                </button>
-                {/* Add Class Button */}
-                <button
-                  onClick={() => navigate('/class')}
-                  className="ml-3 px-3 py-1.5 text-sm font-medium text-btn-gold hover:text-white bg-btn-gold/10 hover:bg-btn-gold border border-btn-gold/30 rounded-lg transition-colors flex items-center gap-1.5"
-                  title={`Enroll ${child?.first_name} in another class`}
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Add Class</span>
                 </button>
               </div>
 
@@ -312,36 +314,24 @@ const MembershipList = () => {
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <BookOpen className="w-4 h-4 text-gray-400" />
                             <span className="font-medium text-heading-dark">
-                              {enrollment.class?.name || 'Class'}
+                              {enrollment.class_name || enrollment.class?.name || 'Class'}
                             </span>
                             {getStatusBadge(enrollment.status)}
                           </div>
 
-                          {/* Schedule Info */}
-                          {enrollment.class?.schedule && enrollment.class.schedule.length > 0 && (
+                          {/* Schedule Info - use weekdays from API */}
+                          {enrollment.weekdays && enrollment.weekdays.length > 0 && (
                             <div className="text-sm text-gray-500 ml-6 mb-1">
-                              {enrollment.class.schedule.map((s, idx) => (
-                                <span key={idx}>
-                                  {s.day_of_week} {s.start_time} - {s.end_time}
-                                  {idx < enrollment.class.schedule.length - 1 ? ', ' : ''}
-                                </span>
-                              ))}
+                              {enrollment.weekdays.join(', ')}
                             </div>
                           )}
 
                           {/* Date Range */}
                           <div className="flex items-center gap-2 text-sm text-gray-500 ml-6">
                             <Calendar className="w-3.5 h-3.5" />
-                            {enrollment.start_date && enrollment.end_date ? (
-                              <span>
-                                {formatDate(enrollment.start_date, { month: 'short', day: 'numeric' })} -{' '}
-                                {formatDate(enrollment.end_date)}
-                              </span>
-                            ) : (
-                              <span>
-                                Enrolled: {formatDate(enrollment.enrollment_date)}
-                              </span>
-                            )}
+                            <span>
+                              Enrolled: {formatDate(enrollment.enrolled_at || enrollment.created_at)}
+                            </span>
                           </div>
                         </div>
 
@@ -421,20 +411,20 @@ const MembershipList = () => {
         </div>
 
         {/* Total Summary */}
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-4 pt-4 border-t space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Total Active Memberships</span>
             <span className="font-semibold text-heading-dark">
-              {enrollments.filter(e => e.status === 'ACTIVE').length} of {enrollments.length}
+              {enrollments.filter(e => e.status?.toUpperCase() === 'ACTIVE').length} of {enrollments.length}
             </span>
           </div>
-          <div className="flex justify-between items-center mt-2">
+          <div className="flex justify-between items-center">
             <span className="text-gray-600">Total Monthly Cost</span>
             <span className="font-semibold text-btn-gold text-lg">
               {formatCurrency(
                 enrollments
-                  .filter(e => e.status === 'ACTIVE')
-                  .reduce((sum, e) => sum + (e.final_price || 0), 0)
+                  .filter(e => e.status?.toUpperCase() === 'ACTIVE')
+                  .reduce((sum, e) => sum + (parseFloat(e.final_price) || 0), 0)
               )}
             </span>
           </div>
@@ -473,10 +463,10 @@ const MembershipList = () => {
               <div className="border rounded-lg p-3">
                 <p className="text-sm text-gray-500">Cancelling enrollment for:</p>
                 <p className="font-semibold text-heading-dark mt-1">
-                  {selectedEnrollment.child?.first_name} {selectedEnrollment.child?.last_name}
+                  {selectedEnrollment.child_name || `${selectedEnrollment.child?.first_name || ''} ${selectedEnrollment.child?.last_name || ''}`.trim() || 'Child'}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {selectedEnrollment.class?.name || 'Class'}
+                  {selectedEnrollment.class_name || selectedEnrollment.class?.name || 'Class'}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
                   Original Price: {formatCurrency(selectedEnrollment.final_price)}
@@ -600,10 +590,10 @@ const MembershipList = () => {
               <div className="border rounded-lg p-3">
                 <p className="text-sm text-gray-500">Pausing membership for:</p>
                 <p className="font-semibold text-heading-dark mt-1">
-                  {pauseEnrollment.child?.first_name} {pauseEnrollment.child?.last_name}
+                  {pauseEnrollment.child_name || `${pauseEnrollment.child?.first_name || ''} ${pauseEnrollment.child?.last_name || ''}`.trim() || 'Child'}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {pauseEnrollment.class?.name || 'Class'}
+                  {pauseEnrollment.class_name || pauseEnrollment.class?.name || 'Class'}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
                   Price: {formatCurrency(pauseEnrollment.final_price)}/month

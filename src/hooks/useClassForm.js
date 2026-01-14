@@ -124,6 +124,9 @@ const initialFormData = {
       custom_name: '6 Month Installment',
     },
   ],
+
+  // Custom Fees (optional, editable fees like Jersey Fee, Equipment Fee, etc.)
+  custom_fees: [],
 };
 
 export default function useClassForm(initialData = null, mode = 'create') {
@@ -157,10 +160,14 @@ export default function useClassForm(initialData = null, mode = 'create') {
       'installment_6': '6 Month Installment',
     };
 
-    // Start with default structure (all disabled)
-    const frontendOptions = [...initialFormData.payment_options];
+    // Start with ALL options DISABLED (not from initialFormData which has full_payment enabled)
+    const frontendOptions = initialFormData.payment_options.map(opt => ({
+      ...opt,
+      enabled: false,  // Disable all by default
+      price: 0,
+    }));
 
-    // Enable and set prices for options returned from backend
+    // Enable ONLY the options returned from backend (should be just one)
     backendOptions.forEach(backendOpt => {
       const frontendType = typeMapping[backendOpt.name] || backendOpt.type;
       const index = frontendOptions.findIndex(opt => opt.type === frontendType);
@@ -247,6 +254,9 @@ export default function useClassForm(initialData = null, mode = 'create') {
 
         // Transformed payment options
         payment_options: paymentOptions,
+
+        // Custom fees (optional fees like Jersey Fee)
+        custom_fees: initialData.custom_fees || [],
       };
 
       setFormData(mappedData);
@@ -347,6 +357,45 @@ export default function useClassForm(initialData = null, mode = 'create') {
         payment_options: newPaymentOptions,
       };
     });
+  };
+
+  // Add custom fee
+  const addCustomFee = () => {
+    setFormData(prev => ({
+      ...prev,
+      custom_fees: [
+        ...prev.custom_fees,
+        {
+          name: '',
+          amount: 0,
+          is_optional: true,
+          description: '',
+        },
+      ],
+    }));
+  };
+
+  // Update custom fee
+  const updateCustomFee = (index, field, value) => {
+    setFormData(prev => {
+      const newCustomFees = [...prev.custom_fees];
+      newCustomFees[index] = {
+        ...newCustomFees[index],
+        [field]: value,
+      };
+      return {
+        ...prev,
+        custom_fees: newCustomFees,
+      };
+    });
+  };
+
+  // Remove custom fee
+  const removeCustomFee = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      custom_fees: prev.custom_fees.filter((_, i) => i !== index),
+    }));
   };
 
   // Validation
@@ -487,7 +536,8 @@ export default function useClassForm(initialData = null, mode = 'create') {
   };
 
   // Submit form
-  const handleSubmit = async (onSuccess) => {
+  // overrides: optional object to override formData values (e.g., { is_active: false } for draft)
+  const handleSubmit = async (onSuccess, overrides = {}) => {
     if (!validate()) {
       toast.error('Please fix the errors in the form');
       return;
@@ -496,9 +546,12 @@ export default function useClassForm(initialData = null, mode = 'create') {
     setIsSubmitting(true);
 
     try {
+      // Merge formData with any overrides
+      const mergedData = { ...formData, ...overrides };
+
       // Prepare data for API
       const apiData = {
-        ...formData,
+        ...mergedData,
         capacity: parseInt(formData.capacity),
         min_age: parseInt(formData.min_age),
         max_age: parseInt(formData.max_age),
@@ -521,6 +574,16 @@ export default function useClassForm(initialData = null, mode = 'create') {
             enabled: true,
             price: parseFloat(opt.price),
             custom_name: opt.custom_name || '',
+          })),
+
+        // Custom fees (filter out empty ones)
+        custom_fees: formData.custom_fees
+          .filter(fee => fee.name && fee.name.trim())
+          .map(fee => ({
+            name: fee.name.trim(),
+            amount: parseFloat(fee.amount) || 0,
+            is_optional: fee.is_optional ?? true,
+            description: fee.description?.trim() || '',
           })),
       };
 
@@ -569,6 +632,9 @@ export default function useClassForm(initialData = null, mode = 'create') {
     addSchedule,
     removeSchedule,
     updatePaymentOption,
+    addCustomFee,
+    updateCustomFee,
+    removeCustomFee,
     validate,
     handleSubmit,
     resetForm,

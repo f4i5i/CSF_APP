@@ -11,7 +11,7 @@ export const API_CONFIG = {
   BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api',
 
   // API version prefix
-  API_PREFIX: '/api/v1',
+  API_PREFIX: '/v1',
 
   // Request timeout in milliseconds (30 seconds)
   TIMEOUT: 30000,

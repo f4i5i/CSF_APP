@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Edit, Trash2, Clock, MapPin, Users, Eye, X } from "lucide-react";
+import { Plus, Edit, Trash2, Clock, MapPin, Users, Eye, X, UserCheck, UserX, HelpCircle, Loader2, Mail, ClipboardList } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -67,6 +67,13 @@ export default function EventsManagement() {
 
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewEvent, setViewEvent] = useState(null);
+
+  // RSVP viewer state
+  const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
+  const [rsvpEvent, setRsvpEvent] = useState(null);
+  const [rsvpData, setRsvpData] = useState(null);
+  const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [rsvpFilter, setRsvpFilter] = useState('all'); // all, attending, not_attending, maybe
 
   // Fetch filter options on mount
   useEffect(() => {
@@ -192,6 +199,55 @@ export default function EventsManagement() {
   const handleViewEvent = (eventData) => {
     setViewEvent(eventData);
     setViewModalOpen(true);
+  };
+
+  const handleViewRsvps = async (eventData) => {
+    setRsvpEvent(eventData);
+    setRsvpModalOpen(true);
+    setRsvpLoading(true);
+    setRsvpFilter('all');
+
+    try {
+      const summary = await eventsService.getAttendeeSummary(eventData.id);
+      setRsvpData(summary);
+    } catch (error) {
+      console.error("Failed to fetch RSVPs:", error);
+      toast.error("Failed to load RSVPs");
+      setRsvpData(null);
+    } finally {
+      setRsvpLoading(false);
+    }
+  };
+
+  const getFilteredRsvps = () => {
+    if (!rsvpData?.attendees) return [];
+    if (rsvpFilter === 'all') return rsvpData.attendees;
+    return rsvpData.attendees.filter(rsvp => rsvp.status === rsvpFilter);
+  };
+
+  const getRsvpStatusBadge = (status) => {
+    switch (status) {
+      case 'attending':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+            <UserCheck className="w-3 h-3" /> Going
+          </span>
+        );
+      case 'not_attending':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+            <UserX className="w-3 h-3" /> Not Going
+          </span>
+        );
+      case 'maybe':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+            <HelpCircle className="w-3 h-3" /> Maybe
+          </span>
+        );
+      default:
+        return null;
+    }
   };
 
   const truncateText = (text, maxLength = 300) => {
@@ -335,6 +391,11 @@ export default function EventsManagement() {
           label: "View",
           icon: Eye,
           onClick: () => handleViewEvent(row),
+        },
+        {
+          label: "RSVPs",
+          icon: ClipboardList,
+          onClick: () => handleViewRsvps(row),
         },
         {
           label: "Edit",
@@ -748,6 +809,165 @@ export default function EventsManagement() {
               >
                 <Edit className="w-4 h-4" />
                 Edit Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RSVP Viewer Modal */}
+      {rsvpModalOpen && rsvpEvent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 overflow-y-auto py-8">
+          <div className="bg-white rounded-xl p-6 w-full max-w-3xl mx-4 my-auto max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4 flex-shrink-0">
+              <div>
+                <h2 className="text-xl font-semibold text-text-primary font-manrope">
+                  RSVPs for {rsvpEvent.title}
+                </h2>
+                <p className="text-sm text-gray-500 font-manrope mt-1">
+                  {formatDateTime(rsvpEvent.start_datetime)}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setRsvpModalOpen(false);
+                  setRsvpEvent(null);
+                  setRsvpData(null);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Summary Stats */}
+            {rsvpData && !rsvpLoading && (
+              <div className="grid grid-cols-4 gap-3 mb-4 flex-shrink-0">
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-text-primary font-manrope">
+                    {rsvpData.total_rsvps || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 font-manrope">Total RSVPs</p>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-green-700 font-manrope">
+                    {rsvpData.attending_count || 0}
+                  </p>
+                  <p className="text-xs text-green-600 font-manrope">Attending</p>
+                </div>
+                <div className="bg-red-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-red-700 font-manrope">
+                    {rsvpData.not_attending_count || 0}
+                  </p>
+                  <p className="text-xs text-red-600 font-manrope">Not Going</p>
+                </div>
+                <div className="bg-yellow-50 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-yellow-700 font-manrope">
+                    {rsvpData.maybe_count || 0}
+                  </p>
+                  <p className="text-xs text-yellow-600 font-manrope">Maybe</p>
+                </div>
+              </div>
+            )}
+
+            {/* Filter Tabs */}
+            <div className="flex gap-2 mb-4 flex-shrink-0">
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'attending', label: 'Going' },
+                { key: 'not_attending', label: 'Not Going' },
+                { key: 'maybe', label: 'Maybe' },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setRsvpFilter(key)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium font-manrope transition-colors ${
+                    rsvpFilter === key
+                      ? 'bg-btn-gold text-text-body'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* RSVP List */}
+            <div className="flex-1 overflow-y-auto min-h-0">
+              {rsvpLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-btn-gold" />
+                </div>
+              ) : !rsvpData || getFilteredRsvps().length === 0 ? (
+                <div className="text-center py-12 text-gray-500 font-manrope">
+                  <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No RSVPs {rsvpFilter !== 'all' ? `with status "${rsvpFilter.replace('_', ' ')}"` : 'yet'}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {getFilteredRsvps().map((rsvp) => (
+                    <div
+                      key={rsvp.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center text-btn-gold font-semibold">
+                          {(rsvp.attendee_name || 'U')[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-text-primary font-manrope">
+                            {rsvp.attendee_name || 'Unknown'}
+                          </p>
+                          {rsvp.attendee_email && (
+                            <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
+                              <Mail className="w-3 h-3" />
+                              {rsvp.attendee_email}
+                            </p>
+                          )}
+                          {rsvp.number_of_guests > 0 && (
+                            <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
+                              <Users className="w-3 h-3" />
+                              +{rsvp.number_of_guests} guest{rsvp.number_of_guests > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        {getRsvpStatusBadge(rsvp.status)}
+                        {rsvp.notes && (
+                          <p className="text-xs text-gray-400 font-manrope max-w-[200px] truncate" title={rsvp.notes}>
+                            "{rsvp.notes}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-3 mt-4 pt-4 border-t flex-shrink-0">
+              <button
+                onClick={() => {
+                  setRsvpModalOpen(false);
+                  setRsvpEvent(null);
+                  setRsvpData(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-manrope"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setRsvpModalOpen(false);
+                  handleViewRsvps(rsvpEvent);
+                }}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-manrope hover:bg-gray-200 flex items-center gap-2"
+              >
+                <Loader2 className="w-4 h-4" />
+                Refresh
               </button>
             </div>
           </div>

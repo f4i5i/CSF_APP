@@ -5,6 +5,7 @@ import useClassForm from "../../hooks/useClassForm";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import schoolsService from "../../api/services/schools.service";
+import adminService from "../../api/services/admin.service";
 import toast from "react-hot-toast";
 import TimePicker12Hour from "../ui/TimePicker12Hour";
 
@@ -129,6 +130,9 @@ export default function ClassFormModal({
     addSchedule,
     removeSchedule,
     updatePaymentOption,
+    addCustomFee,
+    updateCustomFee,
+    removeCustomFee,
     handleSubmit,
   } = useClassForm(initialData, mode);
 
@@ -136,6 +140,7 @@ export default function ClassFormModal({
   const [programs, setPrograms] = useState([]);
   const [areas, setAreas] = useState([]);
   const [schools, setSchools] = useState([]);
+  const [coaches, setCoaches] = useState([]);
   const [dropdownsLoading, setDropdownsLoading] = useState(true);
 
   // Inline Site Creation state
@@ -205,15 +210,19 @@ export default function ClassFormModal({
     }
   };
 
-  // Fetch programs, areas, and schools on mount
+  // Fetch programs, areas, schools, and coaches on mount
   useEffect(() => {
     const fetchDropdownData = async () => {
       setDropdownsLoading(true);
       try {
-        const [programsData, areasData, schoolsData] = await Promise.all([
+        const [programsData, areasData, schoolsData, coachesData] = await Promise.all([
           programsService.getAll(),
           areasService.getAll(),
           schoolsService.getAll(),
+          adminService.getCoaches().catch((err) => {
+            console.error('Failed to fetch coaches:', err);
+            return { items: [] };
+          }),
         ]);
 
         // Handle different response structures
@@ -229,15 +238,19 @@ export default function ClassFormModal({
           ? schoolsData
           : (schoolsData.items || schoolsData.data || []);
 
+        const coachesList = coachesData.items || [];
+
         setPrograms(programsList);
         setAreas(areasList);
         setSchools(schoolsList);
+        setCoaches(coachesList);
       } catch (error) {
         console.error('Failed to fetch dropdown data:', error);
         toast.error('Failed to load dropdown data');
         setPrograms([]);
         setAreas([]);
         setSchools([]);
+        setCoaches([]);
       } finally {
         setDropdownsLoading(false);
       }
@@ -526,6 +539,44 @@ export default function ClassFormModal({
                         )}
                       </button>
                     </div>
+                  )}
+                </div>
+
+                {/* Coach Assignment */}
+                <div>
+                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    Assign Coach
+                  </label>
+                  <CustomDropdown
+                    value={formData.coach_id}
+                    onChange={(value) => updateField("coach_id", value)}
+                    options={coaches.map(c => ({ id: c.id, name: c.full_name }))}
+                    placeholder={dropdownsLoading ? "Loading coaches..." : "Select Coach (Optional)"}
+                    renderOption={(option) => {
+                      const coach = coaches.find(c => c.id === option.id);
+                      return (
+                        <div>
+                          <div className="font-semibold">{option.name}</div>
+                          {coach?.assigned_classes > 0 && (
+                            <div className="text-xs text-gray-500">
+                              {coach.assigned_classes} class{coach.assigned_classes > 1 ? 'es' : ''} assigned
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Assigned coach can access this class in their portal
+                  </p>
+                  {formData.coach_id && (
+                    <button
+                      type="button"
+                      onClick={() => updateField("coach_id", null)}
+                      className="text-xs text-red-600 hover:text-red-700 mt-1"
+                    >
+                      Remove coach assignment
+                    </button>
                   )}
                 </div>
 
@@ -1048,6 +1099,97 @@ export default function ClassFormModal({
               </div>
             </div>
 
+            {/* Custom Fees Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-border-light pb-2">
+                <h3 className="text-xl font-semibold text-text-primary font-manrope">
+                  Custom Fees (Optional)
+                </h3>
+                <button
+                  type="button"
+                  onClick={addCustomFee}
+                  className="text-sm text-btn-secondary hover:text-[#e5ad35] font-semibold flex items-center gap-1"
+                >
+                  <Plus size={16} />
+                  Add Fee
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-600">
+                Add optional fees like Jersey Fee, Equipment Fee, etc. Parents can choose whether to include these during checkout.
+              </p>
+
+              {formData.custom_fees.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 border border-dashed border-gray-300 rounded-lg">
+                  <p className="text-sm font-manrope">No custom fees added</p>
+                  <button
+                    type="button"
+                    onClick={addCustomFee}
+                    className="mt-2 text-sm text-btn-secondary hover:text-[#e5ad35] font-semibold"
+                  >
+                    + Add your first custom fee
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {formData.custom_fees.map((fee, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-3 items-start p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    >
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div className="sm:col-span-2">
+                          <label className="block text-xs font-medium text-gray-500 mb-1">
+                            Fee Name <span className="text-btn-gold">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={fee.name}
+                            onChange={(e) => updateCustomFee(index, "name", e.target.value)}
+                            className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                            placeholder="e.g., Jersey Fee"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">
+                            Amount ($)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={fee.amount}
+                            onChange={(e) => updateCustomFee(index, "amount", e.target.value)}
+                            className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                            placeholder="25.00"
+                          />
+                        </div>
+                        <div className="flex items-end pb-2">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={fee.is_optional}
+                              onChange={(e) => updateCustomFee(index, "is_optional", e.target.checked)}
+                              className="w-4 h-4 text-btn-gold border-gray-300 rounded focus:ring-btn-gold"
+                            />
+                            <span className="text-sm font-manrope text-gray-700">Optional</span>
+                          </label>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeCustomFee(index)}
+                        className="text-btn-gold hover:text-red-700 mt-6"
+                        title="Remove fee"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Class Image/Logo Section */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
@@ -1195,16 +1337,12 @@ export default function ClassFormModal({
                   type="button"
                   onClick={async (e) => {
                     e.preventDefault();
-                    // Temporarily set is_active to false for draft save
-                    const wasActive = formData.is_active;
-                    updateField("is_active", false);
+                    // Pass is_active: false as override to save as draft
                     await handleSubmit(() => {
                       toast.success("Class saved as draft!");
                       if (onSuccess) onSuccess();
                       onClose();
-                    });
-                    // Restore if submission failed
-                    if (wasActive) updateField("is_active", wasActive);
+                    }, { is_active: false });
                   }}
                   disabled={isSubmitting}
                   className="px-6 py-2 border border-gray-400 rounded-lg text-gray-600 font-manrope font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center gap-2"

@@ -38,9 +38,11 @@ export default function CheckOut() {
     selectedInstallmentPlan,
     appliedDiscount,
     orderTotal,
+    orderId, // Track if order is created
     clientSecret,
     hasCapacity,
     loading,
+    isLoading, // Loading state for order creation
     error,
     orderData,
     enrollmentData,
@@ -55,6 +57,7 @@ export default function CheckOut() {
     selectInstallmentPlan,
     applyDiscount,
     removeDiscount,
+    createOrder, // NEW: Manual order creation
     joinWaitlist,
     downloadReceipt,
     retry,
@@ -287,7 +290,59 @@ export default function CheckOut() {
               />
             )}
 
-            {/* Proceed to Stripe Checkout Button */}
+            {/* Review Order Button - Shows before order is created */}
+            {hasChildSelected &&
+              paymentMethod &&
+              (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
+              !orderId &&
+              !isLoading && (
+                <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
+                  <div className="text-center">
+                    <h3 className="text-fluid-lg font-semibold font-manrope text-[#173151] mb-2">
+                      Ready to Review Your Order?
+                    </h3>
+                    <p className="text-sm font-manrope text-[#666D80] mb-6">
+                      You've selected {selectedChildIds?.length || 1} child{(selectedChildIds?.length || 1) > 1 ? 'ren' : ''} for enrollment.
+                      Click below to calculate your total with any applicable discounts.
+                    </p>
+                    <button
+                      onClick={createOrder}
+                      className="w-full py-4 bg-[#173151] hover:bg-[#0f2240] text-white font-manrope font-bold text-lg rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                        />
+                      </svg>
+                      Review Order & Calculate Total
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            {/* Loading State while creating order */}
+            {isLoading && !clientSecret && (
+              <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#F3BC48] border-r-transparent"></div>
+                    <span className="font-manrope font-medium text-[#173151]">
+                      Preparing your order...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Proceed to Stripe Checkout Button - Shows after order is created */}
             {hasChildSelected &&
               paymentMethod &&
               (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
@@ -350,8 +405,8 @@ export default function CheckOut() {
             <div className="sticky top-4">
               <OrderSummary
                 classPrice={classPrice}
-                registrationFee={registrationFee}
-                processingFeePercent={processingFeePercent}
+                registrationFee={0}
+                processingFeePercent={0}
                 discount={appliedDiscount}
                 paymentMethod={paymentMethod}
                 installmentPlan={selectedInstallmentPlan}
@@ -363,6 +418,8 @@ export default function CheckOut() {
                     : []
                 }
                 lineItems={siblingDiscountPreview}
+                classData={classData}
+                backendTotal={orderTotal}
               />
 
               {/* Help Text */}

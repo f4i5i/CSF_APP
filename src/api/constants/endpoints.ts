@@ -68,14 +68,14 @@ export const ENDPOINTS = {
   // Classes
   // ============================================================================
   CLASSES: {
-    LIST: '/classes',
-    BY_ID: (id: string) => `/classes/${id}`,
-    CREATE: '/classes',
-    UPDATE: (id: string) => `/classes/${id}`,
-    DELETE: (id: string) => `/classes/${id}`,
-    CAPACITY: (id: string) => `/classes/${id}/capacity`,
-    SCHEDULE: (id: string) => `/classes/${id}/schedule`,
-    ENROLLMENTS: (id: string) => `/classes/${id}/enrollments`,
+    LIST: '/classes/',
+    BY_ID: (id: string) => `/classes/${id}/`,
+    CREATE: '/classes/',
+    UPDATE: (id: string) => `/classes/${id}/`,
+    DELETE: (id: string) => `/classes/${id}/`,
+    CAPACITY: (id: string) => `/classes/${id}/capacity/`,
+    SCHEDULE: (id: string) => `/classes/${id}/schedule/`,
+    ENROLLMENTS: (id: string) => `/classes/${id}/enrollments/`,
   },
 
   // ============================================================================
