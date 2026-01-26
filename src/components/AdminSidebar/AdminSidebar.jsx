@@ -43,6 +43,7 @@ const categorizedRoutes = [
   {
     category: "Finance",
     icon: DollarSign,
+    minRole: "OWNER", // Only Owner can access finance section
     items: [
       { name: "Financials", to: "/financials", icon: DollarSign, permission: "canViewFinancials" },
       { name: "Refunds", to: "/admin/refunds", icon: RotateCcw, permission: "canProcessRefunds" },

@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Search, MapPin, X } from "lucide-react";
+import { Search, MapPin, X, User, Layers } from "lucide-react";
 import { useAuth } from "../context/auth";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ClassCard from "../components/ClassCard";
 import { useClasses } from "../api/hooks/classes/useClasses";
 import { useAreas } from "../api/hooks/classes/useAreas";
+import { usePrograms } from "../api/hooks/classes/usePrograms";
+import { useChildren } from "../hooks";
 import { formatDateRange, formatSchedule } from "../utils/formatters";
 import {
   getCapacityMeta,
@@ -21,14 +23,25 @@ export default function Classes() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [selectedAreaId, setSelectedAreaId] = useState("");
+  const [selectedProgramId, setSelectedProgramId] = useState("");
+  const [selectedChildId, setSelectedChildId] = useState("");
+
+  // Get children for logged-in parents
+  const { children, loading: loadingChildren } = useChildren({ autoFetch: !!user && user.role?.toUpperCase() === 'PARENT' });
+
+  // Get programs for filter
+  const { data: programs = [] } = usePrograms();
 
   // Build filters for API call
   const filters = useMemo(() => {
     const f = { is_active: true };
     if (selectedAreaId) f.area_id = selectedAreaId;
+    if (selectedProgramId) f.program_id = selectedProgramId;
     if (search) f.search = search;
+    // Exclude classes where selected child is already enrolled
+    if (selectedChildId) f.exclude_child_id = selectedChildId;
     return f;
-  }, [selectedAreaId, search]);
+  }, [selectedAreaId, selectedProgramId, search, selectedChildId]);
 
   const { data: classes = [], isLoading, isError } = useClasses({ filters });
   const { data: areas = [] } = useAreas();
@@ -75,8 +88,15 @@ export default function Classes() {
       return;
     }
 
-    navigate(`/checkout?classId=${classId}`);
+    // Include selected child in checkout URL if one is selected
+    const checkoutUrl = selectedChildId
+      ? `/checkout?classId=${classId}&childId=${selectedChildId}`
+      : `/checkout?classId=${classId}`;
+    navigate(checkoutUrl);
   };
+
+  // Check if user is a parent
+  const isParent = user?.role?.toUpperCase() === 'PARENT';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] pb-10">
@@ -84,7 +104,58 @@ export default function Classes() {
       <main className="mx-auto w-full max-w-6xl px-4 py-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl font-bold text-[#173151]">Class Overview</h1>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center flex-wrap">
+            {/* Child Selector - only show for logged-in parents */}
+            {isParent && children.length > 0 && (
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <select
+                  value={selectedChildId}
+                  onChange={(e) => setSelectedChildId(e.target.value)}
+                  className="w-full appearance-none rounded-full border border-gray-200 bg-white/80 py-2 pl-9 pr-8 text-sm text-gray-700 shadow-sm sm:w-48"
+                  disabled={loadingChildren}
+                >
+                  <option value="">All Children</option>
+                  {children.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.first_name} {child.last_name}
+                    </option>
+                  ))}
+                </select>
+                {selectedChildId && (
+                  <button
+                    onClick={() => setSelectedChildId("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100"
+                  >
+                    <X className="h-3 w-3 text-gray-400" />
+                  </button>
+                )}
+              </div>
+            )}
+            {/* Program Filter */}
+            <div className="relative">
+              <Layers className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <select
+                value={selectedProgramId}
+                onChange={(e) => setSelectedProgramId(e.target.value)}
+                className="w-full appearance-none rounded-full border border-gray-200 bg-white/80 py-2 pl-9 pr-8 text-sm text-gray-700 shadow-sm sm:w-48"
+              >
+                <option value="">All Programs</option>
+                {programs.map((program) => (
+                  <option key={program.id} value={program.id}>
+                    {program.name}
+                  </option>
+                ))}
+              </select>
+              {selectedProgramId && (
+                <button
+                  onClick={() => setSelectedProgramId("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-gray-100"
+                >
+                  <X className="h-3 w-3 text-gray-400" />
+                </button>
+              )}
+            </div>
             {/* Area Filter */}
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />

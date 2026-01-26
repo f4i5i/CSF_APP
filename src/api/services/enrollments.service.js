@@ -204,6 +204,31 @@ const enrollmentsService = {
     });
     return data;
   },
+
+  /**
+   * Admin enrollment with auto-charge to parent's default payment method
+   * @param {Object} enrollmentData - Enrollment information
+   * @param {string} enrollmentData.child_id - Child ID
+   * @param {string} enrollmentData.class_id - Class ID
+   * @param {boolean} [enrollmentData.auto_charge] - Whether to auto-charge the parent's default payment method
+   * @param {string} [enrollmentData.payment_option_type] - Payment option type (full_payment, monthly_subscription, etc.)
+   * @param {number} [enrollmentData.amount] - Amount to charge (if different from class price)
+   * @returns {Promise<Object>} Created enrollment with payment info
+   */
+  async adminEnroll(enrollmentData) {
+    const { data } = await apiClient.post('/admin/enrollments/enroll', enrollmentData);
+    return data;
+  },
+
+  /**
+   * Get parent's default payment method for a child
+   * @param {string} childId - Child ID
+   * @returns {Promise<Object>} Parent's payment method info
+   */
+  async getParentPaymentMethod(childId) {
+    const { data } = await apiClient.get(`/admin/children/${childId}/payment-method`);
+    return data;
+  },
 };
 
 export default enrollmentsService;

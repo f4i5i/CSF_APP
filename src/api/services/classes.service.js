@@ -161,6 +161,16 @@ const classesService = {
   },
 
   /**
+   * Get class details by slug (custom URL)
+   * @param {string} slug - Class slug (e.g., "u10-soccer-fall-2024")
+   * @returns {Promise<Object>} Class details
+   */
+  async getBySlug(slug) {
+    const { data } = await apiClient.get(`/classes/slug/${slug}`);
+    return data;
+  },
+
+  /**
    * Get class schedule
    * Schedule data is included in the class details (weekdays, start_time, end_time)
    * @param {string} id - Class ID

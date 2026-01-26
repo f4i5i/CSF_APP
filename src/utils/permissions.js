@@ -44,7 +44,7 @@ export const ROLE_PERMISSIONS = {
     canManageSystemSettings: true,
   },
   ADMIN: {
-    // Admin has most permissions but cannot manage other admins
+    // Admin has most permissions but cannot manage other admins or view finances
     canManageUsers: true,
     canManageAdmins: false, // Only Owner can manage admins
     canManageCoaches: true,
@@ -54,9 +54,9 @@ export const ROLE_PERMISSIONS = {
     canManageAreas: true,
     canManageWaivers: true,
     canManageBadges: true,
-    canViewFinancials: true,
-    canManageFinancials: true,
-    canProcessRefunds: true,
+    canViewFinancials: false, // Only Owner can view financials
+    canManageFinancials: false, // Only Owner can manage financials
+    canProcessRefunds: false, // Only Owner can process refunds
     canViewAllClients: true,
     canDeleteClients: false, // Only Owner can delete clients
     canViewRosters: true,

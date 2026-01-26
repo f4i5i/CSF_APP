@@ -1,11 +1,13 @@
 /**
  * EventRsvpCard Component
  * Displays an event with RSVP buttons (Yes, No, Maybe) for parents
+ * Supports selecting which children are attending with their class context
  */
 
-import React, { useState } from 'react';
-import { Calendar, MapPin, Users, Clock, Check, X, HelpCircle, Loader2, Eye, Tag, RefreshCw } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Calendar, MapPin, Users, Clock, Check, X, HelpCircle, Loader2, Eye, Tag, RefreshCw, UserCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { useMyRsvp, useRsvp, useUpdateRsvp } from '../api/hooks/events/useRsvp';
+import { useChildren, useEnrollments } from '../hooks';
 
 const formatDate = (dateString) => {
   if (!dateString) return 'TBD';
@@ -118,9 +120,69 @@ export default function EventRsvpCard({
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [isChangingResponse, setIsChangingResponse] = useState(false);
   const [isChangingInModal, setIsChangingInModal] = useState(false);
+  const [showChildSelection, setShowChildSelection] = useState(false);
+  const [selectedChildren, setSelectedChildren] = useState([]);
+  const [pendingStatus, setPendingStatus] = useState(null);
 
   // Get event ID - handle different field names and ensure string type
   const eventId = String(event?.id || event?.event_id || '');
+
+  // Get children for the parent
+  const { children = [], loading: loadingChildren } = useChildren({ autoFetch: true });
+
+  // Get enrollments for all children to map to classes
+  const { enrollments: allEnrollments = [], loading: loadingEnrollments } = useEnrollments({
+    autoFetch: true,
+    status: 'active'
+  });
+
+  // Get event target class IDs
+  const eventClassIds = useMemo(() => {
+    const classIds = [];
+    if (event.class_id) classIds.push(event.class_id);
+    if (event.targets) {
+      event.targets.forEach(t => {
+        if (t.class_id && !classIds.includes(t.class_id)) {
+          classIds.push(t.class_id);
+        }
+      });
+    }
+    return classIds;
+  }, [event]);
+
+  // Build children options - show all children with their enrolled classes
+  const childrenWithClasses = useMemo(() => {
+    if (!children.length) return [];
+
+    return children.map(child => {
+      // Get all enrollments for this child
+      const childEnrollments = allEnrollments.filter(e => e.child_id === child.id);
+
+      // If event has target classes, filter to matching enrollments
+      let relevantEnrollments = childEnrollments;
+      if (eventClassIds.length > 0) {
+        const matchingEnrollments = childEnrollments.filter(e =>
+          eventClassIds.includes(e.class_id || e.class?.id)
+        );
+        // Use matching enrollments if any, otherwise use all enrollments
+        if (matchingEnrollments.length > 0) {
+          relevantEnrollments = matchingEnrollments;
+        }
+      }
+
+      const classes = relevantEnrollments.map(e => ({
+        class_id: e.class_id || e.class?.id,
+        class_name: e.class?.name || 'Class',
+      }));
+
+      return {
+        child_id: child.id,
+        child_name: `${child.first_name} ${child.last_name}`,
+        classes,
+        hasEnrollments: childEnrollments.length > 0,
+      };
+    });
+  }, [children, allEnrollments, eventClassIds]);
 
   // Get user's current RSVP status
   const { data: myRsvp, isLoading: loadingRsvp, refetch: refetchMyRsvp } = useMyRsvp({
@@ -136,6 +198,9 @@ export default function EventRsvpCard({
       setIsSubmitting(false);
       setIsChangingResponse(false);
       setIsChangingInModal(false);
+      setShowChildSelection(false);
+      setSelectedChildren([]);
+      setPendingStatus(null);
       // Force refetch to ensure UI updates
       refetchMyRsvp();
     },
@@ -147,6 +212,9 @@ export default function EventRsvpCard({
       setIsSubmitting(false);
       setIsChangingResponse(false);
       setIsChangingInModal(false);
+      setShowChildSelection(false);
+      setSelectedChildren([]);
+      setPendingStatus(null);
       // Force refetch to ensure UI updates
       refetchMyRsvp();
     },
@@ -157,30 +225,92 @@ export default function EventRsvpCard({
 
   // Validate event ID before allowing RSVP
   const canRsvp = !!eventId;
+  const hasChildren = childrenWithClasses.length > 0;
+  const hasMultipleChildren = childrenWithClasses.length > 1;
 
-  const handleRsvp = (status) => {
+  const handleRsvpClick = (status) => {
     if (!canRsvp) {
       console.error('Cannot RSVP: Event ID is missing', event);
       return;
     }
 
+    // If attending and has children, show child selection
+    if (status === 'attending' && hasChildren) {
+      setPendingStatus(status);
+      setShowChildSelection(true);
+      // Pre-select all children if only one or if it's a single class
+      if (childrenWithClasses.length === 1) {
+        const child = childrenWithClasses[0];
+        const detail = {
+          child_id: child.child_id,
+          child_name: child.child_name,
+          class_id: child.classes[0]?.class_id,
+          class_name: child.classes[0]?.class_name,
+        };
+        setSelectedChildren([detail]);
+      }
+      return;
+    }
+
+    // For not_attending or maybe, submit directly
+    submitRsvpWithData(status, []);
+  };
+
+  const submitRsvpWithData = (status, childrenDetails) => {
     setIsSubmitting(true);
+
+    const rsvpData = {
+      status,
+      children_details: childrenDetails.length > 0 ? childrenDetails : undefined,
+      child_ids: childrenDetails.map(c => c.child_id),
+    };
 
     if (myRsvp) {
       // Update existing RSVP
       updateRsvp({
         eventId: eventId,
         rsvpId: myRsvp.id,
-        data: { status },
+        data: rsvpData,
       });
     } else {
       // Create new RSVP
       submitRsvp({
         eventId: eventId,
-        data: { status },
+        data: rsvpData,
       });
     }
   };
+
+  const handleChildToggle = (child, classInfo = null) => {
+    const childClass = classInfo || child.classes[0] || {};
+    const detail = {
+      child_id: child.child_id,
+      child_name: child.child_name,
+      class_id: childClass.class_id,
+      class_name: childClass.class_name,
+    };
+
+    setSelectedChildren(prev => {
+      const existingIndex = prev.findIndex(c =>
+        c.child_id === child.child_id && c.class_id === childClass.class_id
+      );
+
+      if (existingIndex >= 0) {
+        return prev.filter((_, i) => i !== existingIndex);
+      } else {
+        return [...prev, detail];
+      }
+    });
+  };
+
+  const confirmChildSelection = () => {
+    if (selectedChildren.length === 0 && pendingStatus === 'attending') {
+      return; // Require at least one child for attending
+    }
+    submitRsvpWithData(pendingStatus, selectedChildren);
+  };
+
+  const handleRsvp = (status) => handleRsvpClick(status);
 
   const handleViewDetails = () => {
     if (onViewDetails) {
@@ -289,17 +419,111 @@ export default function EventRsvpCard({
         <div className="pt-4 border-t border-[#173151]/10">
           {!canRsvp ? (
             <p className="text-sm text-red-500">Unable to RSVP - Event data incomplete</p>
-          ) : loadingRsvp ? (
+          ) : loadingRsvp || loadingChildren || loadingEnrollments ? (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Loader2 className="w-4 h-4 animate-spin" />
               Loading...
             </div>
+          ) : showChildSelection ? (
+            // Show child selection UI
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-[#173151] font-manrope flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-[#F3BC48]" />
+                Who's attending?
+              </p>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {childrenWithClasses.map((child) => (
+                  <div key={child.child_id} className="space-y-1">
+                    {child.classes.length === 0 ? (
+                      // No class info - simple checkbox with just name
+                      <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#173151]/5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedChildren.some(c => c.child_id === child.child_id)}
+                          onChange={() => handleChildToggle(child)}
+                          className="w-4 h-4 text-[#F3BC48] border-gray-300 rounded focus:ring-[#F3BC48]"
+                        />
+                        <span className="font-medium text-[#173151]">{child.child_name}</span>
+                      </label>
+                    ) : child.classes.length === 1 ? (
+                      // Single class - simple checkbox with class name
+                      <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#173151]/5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedChildren.some(c => c.child_id === child.child_id)}
+                          onChange={() => handleChildToggle(child)}
+                          className="w-4 h-4 text-[#F3BC48] border-gray-300 rounded focus:ring-[#F3BC48]"
+                        />
+                        <div>
+                          <span className="font-medium text-[#173151]">{child.child_name}</span>
+                          <span className="text-xs text-gray-500 ml-2">({child.classes[0].class_name})</span>
+                        </div>
+                      </label>
+                    ) : (
+                      // Multiple classes - show each class option
+                      <div className="bg-gray-50 rounded-lg p-2">
+                        <p className="font-medium text-[#173151] text-sm mb-2">{child.child_name}</p>
+                        <div className="space-y-1 pl-2">
+                          {child.classes.map((cls) => (
+                            <label key={`${child.child_id}-${cls.class_id}`} className="flex items-center gap-2 text-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={selectedChildren.some(c => c.child_id === child.child_id && c.class_id === cls.class_id)}
+                                onChange={() => handleChildToggle(child, cls)}
+                                className="w-4 h-4 text-[#F3BC48] border-gray-300 rounded focus:ring-[#F3BC48]"
+                              />
+                              <span className="text-gray-700">{cls.class_name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={confirmChildSelection}
+                  disabled={selectedChildren.length === 0 || isSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white rounded-full font-manrope font-medium text-sm transition-colors"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  Confirm ({selectedChildren.length} attending)
+                </button>
+                <button
+                  onClick={() => {
+                    setShowChildSelection(false);
+                    setSelectedChildren([]);
+                    setPendingStatus(null);
+                  }}
+                  className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-manrope"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           ) : currentStatus && !isChangingResponse ? (
             // Show confirmed status when already RSVP'd
-            <ConfirmedRsvpStatus
-              status={currentStatus}
-              onChangeClick={() => setIsChangingResponse(true)}
-            />
+            <div>
+              <ConfirmedRsvpStatus
+                status={currentStatus}
+                onChangeClick={() => setIsChangingResponse(true)}
+              />
+              {/* Show attending children if any */}
+              {myRsvp?.children_details && myRsvp.children_details.length > 0 && (
+                <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">Attending:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {myRsvp.children_details.map((child, idx) => (
+                      <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 text-xs rounded-full">
+                        {child.child_name}
+                        {child.class_name && <span className="text-gray-400">• {child.class_name}</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             // Show RSVP buttons when no status or changing response
             <>

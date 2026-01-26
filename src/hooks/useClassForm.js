@@ -64,7 +64,9 @@ const initialFormData = {
   max_age: '',
   start_date: '',
   end_date: '',
-  coach_id: null,
+  coach_id: null,             // Legacy single coach (for backwards compatibility)
+  coach_ids: [],              // Multiple coaches support
+  slug: '',                   // Custom URL slug for registration links
   is_active: true,
 
   // NEW FIELDS
@@ -223,6 +225,12 @@ export default function useClassForm(initialData = null, mode = 'create') {
         school_id: initialData.school?.id || initialData.school_id || '',
         school_code: initialData.school?.code || initialData.school_code || '',
         coach_id: initialData.coach?.id || initialData.coach_id || null,
+        // Multiple coaches support
+        coach_ids: initialData.coach_ids ||
+          (initialData.coaches?.map(c => c.id)) ||
+          (initialData.coach?.id ? [initialData.coach.id] : []),
+        // Custom URL slug
+        slug: initialData.slug || '',
 
         // Numeric fields
         capacity: initialData.capacity?.toString() || '',
@@ -565,6 +573,10 @@ export default function useClassForm(initialData = null, mode = 'create') {
         repeat_every_weeks: parseInt(formData.repeat_every_weeks),
         class_type: formData.class_type,
         website_link: formData.website_link,
+        // Multiple coaches support
+        coach_ids: formData.coach_ids || [],
+        // Custom URL slug
+        slug: formData.slug || '',
 
         // Only send enabled payment options with prices and custom names
         payment_options: formData.payment_options

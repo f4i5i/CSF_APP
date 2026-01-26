@@ -42,22 +42,32 @@ const CheckIn = () => {
     return classesData?.items || [];
   }, [classesData]);
 
-  // Set first class as default when classes load
-  useMemo(() => {
+  // Set first class as default when classes load (useEffect for side effects)
+  React.useEffect(() => {
     if (classes?.length > 0 && !selectedClass) {
       setSelectedClass(classes[0]);
     }
-  }, [classes, selectedClass]);
+  }, [classes]);
 
   // Fetch check-in status for selected class
-  const { data: checkInStatus, loading: loadingStudents, refetch: refetchStatus } = useApi(
+  const { data: checkInStatus, loading: loadingStudents, refetch: refetchStatus, error: checkInError } = useApi(
     () => checkinService.getClassStatus(selectedClass?.id),
     {
       initialData: [],
       dependencies: [selectedClass?.id],
       autoFetch: !!selectedClass?.id,
+      onError: (error) => {
+        console.error('Failed to fetch check-in status:', error);
+      }
     }
   );
+
+  // Debug log for troubleshooting roster data issues
+  React.useEffect(() => {
+    if (selectedClass?.id && !loadingStudents) {
+      console.log('Check-in status for class', selectedClass.name, ':', checkInStatus);
+    }
+  }, [selectedClass, checkInStatus, loadingStudents]);
 
   // Check-in mutation
   const { mutate: toggleCheckIn, loading: checkingIn } = useMutation(
@@ -75,22 +85,39 @@ const CheckIn = () => {
 
   // Transform check-in status to student format for StudentList
   const students = useMemo(() => {
-    if (!checkInStatus || !Array.isArray(checkInStatus)) return [];
+    // Handle different response formats
+    let statusArray = [];
+    if (Array.isArray(checkInStatus)) {
+      statusArray = checkInStatus;
+    } else if (checkInStatus?.statuses && Array.isArray(checkInStatus.statuses)) {
+      statusArray = checkInStatus.statuses;
+    } else if (checkInStatus?.items && Array.isArray(checkInStatus.items)) {
+      statusArray = checkInStatus.items;
+    }
 
-    return checkInStatus.map((item) => {
+    if (statusArray.length === 0) {
+      console.log('No students found in check-in status:', checkInStatus);
+      return [];
+    }
+
+    return statusArray.map((item) => {
       const profileImage = item.child?.profile_image || item.profile_image || null;
+      const firstName = item.child?.first_name || item.first_name || '';
+      const lastName = item.child?.last_name || item.last_name || '';
+      const childName = item.child_name || `${firstName} ${lastName}`.trim();
+
       return {
         id: item.enrollment_id || item.id,
-        enrollment_id: item.enrollment_id,
-        name: item.child_name || `${item.child?.first_name || ''} ${item.child?.last_name || ''}`.trim() || 'Unknown',
+        enrollment_id: item.enrollment_id || item.id,
+        name: childName || 'Unknown',
         grade: item.child?.grade || item.grade || '-',
-        checked: item.is_checked_in || item.checked_in || false,
-        checkInId: item.check_in_id || null,
+        checked: item.is_checked_in || item.checked_in || item.checked || false,
+        checkInId: item.check_in_id || item.checkin_id || null,
         img: profileImage ? getFileUrl(profileImage) : null,
         // Additional data for modal
         child: item.child,
         parent: item.parent,
-        medical_info: item.medical_info,
+        medical_info: item.medical_info || item.child?.medical_info,
         notes: item.notes,
       };
     });
@@ -230,6 +257,36 @@ const CheckIn = () => {
                 </div>
               ))}
             </div>
+          </div>
+        ) : !selectedClass ? (
+          <div className="bg-white/60 p-8 lg:p-12 rounded-3xl shadow-md backdrop-blur-md border text-center">
+            <div className="text-gray-400 mb-2">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-600 mb-1">No Class Selected</h3>
+            <p className="text-gray-500 text-sm">Please select a class from the dropdown above to view students.</p>
+          </div>
+        ) : students.length === 0 ? (
+          <div className="bg-white/60 p-8 lg:p-12 rounded-3xl shadow-md backdrop-blur-md border text-center">
+            <div className="text-gray-400 mb-2">
+              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-600 mb-1">No Students Enrolled</h3>
+            <p className="text-gray-500 text-sm">
+              {checkInError
+                ? "There was an error loading students. Please try refreshing the page."
+                : `No students are currently enrolled in ${selectedClass?.name || 'this class'}.`}
+            </p>
+            <button
+              onClick={() => refetchStatus()}
+              className="mt-4 px-4 py-2 bg-btn-secondary text-white rounded-lg text-sm font-medium hover:bg-btn-secondary/90 transition-colors"
+            >
+              Refresh
+            </button>
           </div>
         ) : (
           <StudentList

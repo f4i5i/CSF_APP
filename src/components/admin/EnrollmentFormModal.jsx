@@ -19,6 +19,15 @@ const STATUS_OPTIONS = [
   { id: "waitlisted", name: "Waitlisted" },
 ];
 
+const PAYMENT_OPTIONS = [
+  { id: "full_payment", name: "Pay in Full" },
+  { id: "monthly_subscription", name: "Monthly Subscription" },
+  { id: "installment_2", name: "2 Month Installment" },
+  { id: "installment_3", name: "3 Month Installment" },
+  { id: "installment_4", name: "4 Month Installment" },
+  { id: "installment_6", name: "6 Month Installment" },
+];
+
 function CustomDropdown({ value, onChange, options, placeholder, error, disabled }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -136,7 +145,11 @@ export default function EnrollmentFormModal({
     base_price: "",
     discount_amount: "0",
     final_price: "",
+    auto_charge: false,
+    payment_option: "full_payment",
   });
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -156,6 +169,8 @@ export default function EnrollmentFormModal({
           base_price: initialData.base_price?.toString() || "",
           discount_amount: initialData.discount_amount?.toString() || "0",
           final_price: initialData.final_price?.toString() || "",
+          auto_charge: false,
+          payment_option: "full_payment",
         });
       } else {
         setFormData({
@@ -165,8 +180,11 @@ export default function EnrollmentFormModal({
           base_price: "",
           discount_amount: "0",
           final_price: "",
+          auto_charge: false,
+          payment_option: "full_payment",
         });
       }
+      setPaymentMethod(null);
       setErrors({});
     }
   }, [isOpen, mode, initialData]);
@@ -209,6 +227,24 @@ export default function EnrollmentFormModal({
     }
   };
 
+  // Fetch parent's payment method when child is selected
+  const fetchPaymentMethod = async (childId) => {
+    if (!childId) {
+      setPaymentMethod(null);
+      return;
+    }
+    setLoadingPaymentMethod(true);
+    try {
+      const result = await enrollmentsService.getParentPaymentMethod(childId);
+      setPaymentMethod(result);
+    } catch (error) {
+      console.warn("Could not fetch payment method:", error);
+      setPaymentMethod(null);
+    } finally {
+      setLoadingPaymentMethod(false);
+    }
+  };
+
   const updateField = (field, value) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
@@ -228,6 +264,11 @@ export default function EnrollmentFormModal({
           const discount = parseFloat(updated.discount_amount) || 0;
           updated.final_price = Math.max(0, parseFloat(selectedClass.base_price) - discount).toFixed(2);
         }
+      }
+
+      // Fetch payment method when child is selected
+      if (field === "child_id" && value) {
+        fetchPaymentMethod(value);
       }
 
       return updated;
@@ -288,8 +329,18 @@ export default function EnrollmentFormModal({
           submitData.final_price = parseFloat(formData.final_price);
         }
 
-        await enrollmentsService.create(submitData);
-        toast.success("Enrollment created successfully");
+        // If auto-charge is enabled, use adminEnroll endpoint
+        if (formData.auto_charge && paymentMethod) {
+          submitData.auto_charge = true;
+          submitData.payment_option_type = formData.payment_option;
+          submitData.amount = parseFloat(formData.final_price) || parseFloat(formData.base_price);
+
+          await enrollmentsService.adminEnroll(submitData);
+          toast.success("Enrollment created and payment charged successfully");
+        } else {
+          await enrollmentsService.create(submitData);
+          toast.success("Enrollment created successfully");
+        }
       } else {
         // Update: only send status and pricing fields
         submitData = {
@@ -482,6 +533,92 @@ export default function EnrollmentFormModal({
                   </div>
                 </div>
               </div>
+
+              {/* Auto-Charge Section (Create mode only) */}
+              {mode === "create" && (
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="text-sm font-semibold font-manrope text-text-primary mb-3">
+                    Payment
+                  </h3>
+
+                  {/* Payment Method Display */}
+                  {loadingPaymentMethod && (
+                    <div className="text-sm text-gray-500 mb-3">
+                      Loading parent's payment method...
+                    </div>
+                  )}
+
+                  {!loadingPaymentMethod && formData.child_id && (
+                    <div className="mb-3">
+                      {paymentMethod ? (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-medium text-green-800">
+                              Default Payment Method:
+                            </span>
+                            <span className="text-sm text-green-700">
+                              {paymentMethod.brand} •••• {paymentMethod.last4}
+                              {paymentMethod.exp_month && paymentMethod.exp_year && (
+                                <span className="text-gray-500 ml-2">
+                                  (Exp: {paymentMethod.exp_month}/{paymentMethod.exp_year})
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span className="text-sm text-yellow-800">
+                              No default payment method found. Auto-charge not available.
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Auto-charge toggle */}
+                  <label className="flex items-center gap-3 mb-3">
+                    <input
+                      type="checkbox"
+                      checked={formData.auto_charge}
+                      onChange={(e) => updateField("auto_charge", e.target.checked)}
+                      disabled={!paymentMethod}
+                      className="w-4 h-4 text-btn-gold border-gray-300 rounded focus:ring-btn-gold disabled:opacity-50"
+                    />
+                    <span className={`text-sm font-medium ${!paymentMethod ? 'text-gray-400' : 'text-gray-700'}`}>
+                      Automatically charge parent's default payment method
+                    </span>
+                  </label>
+
+                  {/* Payment Option Selection (when auto-charge is enabled) */}
+                  {formData.auto_charge && (
+                    <div>
+                      <label className="block text-xs font-medium font-manrope text-gray-600 mb-1">
+                        Payment Type
+                      </label>
+                      <CustomDropdown
+                        value={formData.payment_option}
+                        onChange={(value) => updateField("payment_option", value)}
+                        options={PAYMENT_OPTIONS}
+                        placeholder="Select payment type"
+                      />
+                      {formData.final_price && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Amount to charge: <span className="font-semibold">${parseFloat(formData.final_price).toFixed(2)}</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

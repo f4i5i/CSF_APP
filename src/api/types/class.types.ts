@@ -77,6 +77,15 @@ export interface ClassSchedule {
 // ============================================================================
 
 /**
+ * Coach information
+ */
+export interface CoachInfo {
+  id: UserId;
+  first_name: string;
+  last_name: string;
+}
+
+/**
  * Sports class
  */
 export interface Class extends Timestamped {
@@ -86,7 +95,9 @@ export interface Class extends Timestamped {
   program_id: ProgramId;
   area_id?: AreaId;
   school_id?: SchoolId;
-  coach_id?: UserId;
+  coach_id?: UserId; // Legacy single coach support
+  coach_ids?: UserId[]; // Multiple coaches support
+  slug?: string; // Custom URL slug for registration links
   base_price: number;
   capacity: number;
   current_enrollment: number;
@@ -101,11 +112,8 @@ export interface Class extends Timestamped {
   program?: Program;
   area?: Area;
   school?: School;
-  coach?: {
-    id: UserId;
-    first_name: string;
-    last_name: string;
-  };
+  coach?: CoachInfo; // Legacy single coach
+  coaches?: CoachInfo[]; // Multiple coaches
 }
 
 // ============================================================================
@@ -121,7 +129,9 @@ export interface CreateClassRequest {
   program_id: ProgramId;
   area_id?: AreaId;
   school_id?: SchoolId;
-  coach_id?: UserId;
+  coach_id?: UserId; // Legacy single coach
+  coach_ids?: UserId[]; // Multiple coaches support
+  slug?: string; // Custom URL slug
   base_price: number;
   capacity: number;
   min_age?: number;
@@ -154,6 +164,7 @@ export interface ClassFilters {
   day_of_week?: DayOfWeek;
   is_active?: boolean;
   search?: string;
+  exclude_child_id?: string;
   skip?: number;
   limit?: number;
 }

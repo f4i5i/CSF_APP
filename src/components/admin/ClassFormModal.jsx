@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { X, ChevronDown, Plus, Link, Copy, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import useClassForm from "../../hooks/useClassForm";
@@ -8,6 +8,8 @@ import schoolsService from "../../api/services/schools.service";
 import adminService from "../../api/services/admin.service";
 import toast from "react-hot-toast";
 import TimePicker12Hour from "../ui/TimePicker12Hour";
+import MultiCoachSelector from "./MultiCoachSelector";
+import GooglePlacesAutocomplete from "../ui/GooglePlacesAutocomplete";
 
 const DAYS = [
   { id: "monday", name: "Monday" },
@@ -148,7 +150,31 @@ export default function ClassFormModal({
   const [newSiteName, setNewSiteName] = useState("");
   const [newSiteCode, setNewSiteCode] = useState("");
   const [newSiteAddress, setNewSiteAddress] = useState("");
+  const [newSiteCity, setNewSiteCity] = useState("");
+  const [newSiteState, setNewSiteState] = useState("");
+  const [newSiteZipCode, setNewSiteZipCode] = useState("");
   const [creatingSite, setCreatingSite] = useState(false);
+
+  // US States for dropdown
+  const US_STATES = [
+    { id: "AL", name: "Alabama" }, { id: "AK", name: "Alaska" }, { id: "AZ", name: "Arizona" },
+    { id: "AR", name: "Arkansas" }, { id: "CA", name: "California" }, { id: "CO", name: "Colorado" },
+    { id: "CT", name: "Connecticut" }, { id: "DE", name: "Delaware" }, { id: "FL", name: "Florida" },
+    { id: "GA", name: "Georgia" }, { id: "HI", name: "Hawaii" }, { id: "ID", name: "Idaho" },
+    { id: "IL", name: "Illinois" }, { id: "IN", name: "Indiana" }, { id: "IA", name: "Iowa" },
+    { id: "KS", name: "Kansas" }, { id: "KY", name: "Kentucky" }, { id: "LA", name: "Louisiana" },
+    { id: "ME", name: "Maine" }, { id: "MD", name: "Maryland" }, { id: "MA", name: "Massachusetts" },
+    { id: "MI", name: "Michigan" }, { id: "MN", name: "Minnesota" }, { id: "MS", name: "Mississippi" },
+    { id: "MO", name: "Missouri" }, { id: "MT", name: "Montana" }, { id: "NE", name: "Nebraska" },
+    { id: "NV", name: "Nevada" }, { id: "NH", name: "New Hampshire" }, { id: "NJ", name: "New Jersey" },
+    { id: "NM", name: "New Mexico" }, { id: "NY", name: "New York" }, { id: "NC", name: "North Carolina" },
+    { id: "ND", name: "North Dakota" }, { id: "OH", name: "Ohio" }, { id: "OK", name: "Oklahoma" },
+    { id: "OR", name: "Oregon" }, { id: "PA", name: "Pennsylvania" }, { id: "RI", name: "Rhode Island" },
+    { id: "SC", name: "South Carolina" }, { id: "SD", name: "South Dakota" }, { id: "TN", name: "Tennessee" },
+    { id: "TX", name: "Texas" }, { id: "UT", name: "Utah" }, { id: "VT", name: "Vermont" },
+    { id: "VA", name: "Virginia" }, { id: "WA", name: "Washington" }, { id: "WV", name: "West Virginia" },
+    { id: "WI", name: "Wisconsin" }, { id: "WY", name: "Wyoming" }, { id: "DC", name: "Washington DC" },
+  ];
 
   // Registration link state
   const [registrationLinkCopied, setRegistrationLinkCopied] = useState(false);
@@ -156,9 +182,31 @@ export default function ClassFormModal({
   // Generate registration link preview
   const getRegistrationLink = () => {
     if (initialData?.id) {
+      // Use slug if available, otherwise use class ID
+      if (initialData?.slug || formData?.slug) {
+        const slug = formData?.slug || initialData?.slug;
+        return `${window.location.origin}/register/${slug}`;
+      }
       return `${window.location.origin}/checkout?classId=${initialData.id}`;
     }
     return null;
+  };
+
+  // Generate slug from class name
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 50);
+  };
+
+  // Auto-generate slug when name changes (only if slug is empty)
+  const handleNameChange = (value) => {
+    updateField("name", value);
+    if (!formData.slug && value) {
+      updateField("slug", generateSlug(value));
+    }
   };
 
   const copyRegistrationLink = async () => {
@@ -175,10 +223,48 @@ export default function ClassFormModal({
     }
   };
 
+  // Handle Google Places selection for new site
+  const handlePlaceSelect = useCallback((placeData) => {
+    // Auto-populate the address fields from the selected place
+    if (placeData.address) {
+      setNewSiteAddress(placeData.address);
+    }
+    if (placeData.city) {
+      setNewSiteCity(placeData.city);
+    }
+    if (placeData.state) {
+      setNewSiteState(placeData.state);
+    }
+    if (placeData.zipCode) {
+      setNewSiteZipCode(placeData.zipCode);
+    }
+    // If the place has a name and it's different from the address, use it
+    if (placeData.name && placeData.name !== placeData.address) {
+      setNewSiteName(placeData.name);
+    }
+  }, []);
+
   // Handle inline site creation
   const handleCreateSite = async () => {
+    // Validate required fields
     if (!newSiteName.trim()) {
       toast.error("Site name is required");
+      return;
+    }
+    if (!newSiteCity.trim()) {
+      toast.error("City is required");
+      return;
+    }
+    if (!newSiteState) {
+      toast.error("State is required");
+      return;
+    }
+    if (!newSiteZipCode.trim()) {
+      toast.error("Zip code is required");
+      return;
+    }
+    if (!formData.area_id) {
+      toast.error("Please select an Area/Location first before creating a site");
       return;
     }
 
@@ -188,6 +274,10 @@ export default function ClassFormModal({
         name: newSiteName.trim(),
         code: newSiteCode.trim() || undefined,
         address: newSiteAddress.trim() || undefined,
+        city: newSiteCity.trim(),
+        state: newSiteState,
+        zip_code: newSiteZipCode.trim(),
+        area_id: formData.area_id,
       });
 
       // Add to schools list and select it
@@ -199,12 +289,20 @@ export default function ClassFormModal({
       setNewSiteName("");
       setNewSiteCode("");
       setNewSiteAddress("");
+      setNewSiteCity("");
+      setNewSiteState("");
+      setNewSiteZipCode("");
       setShowInlineSiteForm(false);
 
       toast.success("Site created successfully!");
     } catch (error) {
       console.error("Failed to create site:", error);
-      toast.error(error.response?.data?.detail || "Failed to create site");
+      const errorMsg = error.response?.data?.detail;
+      if (Array.isArray(errorMsg)) {
+        toast.error(errorMsg.map(e => e.msg || e.message).join(", ") || "Failed to create site");
+      } else {
+        toast.error(errorMsg || "Failed to create site");
+      }
     } finally {
       setCreatingSite(false);
     }
@@ -311,7 +409,7 @@ export default function ClassFormModal({
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => updateField("name", e.target.value)}
+                    onChange={(e) => handleNameChange(e.target.value)}
                     className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
                       errors.name ? "border-btn-gold" : "border-border-light"
                     }`}
@@ -323,6 +421,29 @@ export default function ClassFormModal({
                       {errors.name}
                     </p>
                   )}
+                </div>
+
+                {/* Custom URL Slug */}
+                <div className="col-span-2">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
+                    Custom URL Slug
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 font-mono whitespace-nowrap">
+                      {window.location.origin}/register/
+                    </span>
+                    <input
+                      type="text"
+                      value={formData.slug || ''}
+                      onChange={(e) => updateField("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      className="flex-1 px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light font-mono text-sm"
+                      style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                      placeholder="u10-soccer-fall-2024"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Short, memorable URL for sharing. Only lowercase letters, numbers, and hyphens.
+                  </p>
                 </div>
 
                 {/* Description */}
@@ -491,39 +612,97 @@ export default function ClassFormModal({
                           <X size={16} />
                         </button>
                       </div>
+
+                      {!formData.area_id && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-xs text-yellow-800">
+                          Please select an Area/Location above first to create a new site.
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-3">
+                        {/* Site Name with Google Places Autocomplete */}
                         <div className="col-span-2">
-                          <input
-                            type="text"
+                          <GooglePlacesAutocomplete
                             value={newSiteName}
-                            onChange={(e) => setNewSiteName(e.target.value)}
-                            placeholder="Site Name *"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                            onChange={setNewSiteName}
+                            onPlaceSelect={handlePlaceSelect}
+                            placeholder="Search for a school, park, or address..."
+                            label="Site Name"
+                            required
                           />
                         </div>
+
+                        {/* Ledger Code */}
                         <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Ledger Code</label>
                           <input
                             type="text"
                             value={newSiteCode}
                             onChange={(e) => setNewSiteCode(e.target.value)}
-                            placeholder="Ledger Code"
+                            placeholder="Optional"
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
                           />
                         </div>
+
+                        {/* Street Address */}
                         <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Street Address</label>
                           <input
                             type="text"
                             value={newSiteAddress}
                             onChange={(e) => setNewSiteAddress(e.target.value)}
-                            placeholder="Address"
+                            placeholder="123 Main St"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                          />
+                        </div>
+
+                        {/* City */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">City *</label>
+                          <input
+                            type="text"
+                            value={newSiteCity}
+                            onChange={(e) => setNewSiteCity(e.target.value)}
+                            placeholder="City"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                          />
+                        </div>
+
+                        {/* State Dropdown */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">State *</label>
+                          <select
+                            value={newSiteState}
+                            onChange={(e) => setNewSiteState(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold bg-white"
+                          >
+                            <option value="">Select State</option>
+                            {US_STATES.map((state) => (
+                              <option key={state.id} value={state.id}>
+                                {state.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Zip Code */}
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Zip Code *</label>
+                          <input
+                            type="text"
+                            value={newSiteZipCode}
+                            onChange={(e) => setNewSiteZipCode(e.target.value)}
+                            placeholder="12345"
+                            maxLength={10}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
                           />
                         </div>
                       </div>
+
                       <button
                         type="button"
                         onClick={handleCreateSite}
-                        disabled={creatingSite || !newSiteName.trim()}
+                        disabled={creatingSite || !newSiteName.trim() || !newSiteCity.trim() || !newSiteState || !newSiteZipCode.trim() || !formData.area_id}
                         className="w-full px-4 py-2 bg-btn-gold hover:bg-[#e5ad35] text-heading-dark font-semibold rounded-lg text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                       >
                         {creatingSite ? (
@@ -542,42 +721,20 @@ export default function ClassFormModal({
                   )}
                 </div>
 
-                {/* Coach Assignment */}
-                <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                    Assign Coach
-                  </label>
-                  <CustomDropdown
-                    value={formData.coach_id}
-                    onChange={(value) => updateField("coach_id", value)}
-                    options={coaches.map(c => ({ id: c.id, name: c.full_name }))}
-                    placeholder={dropdownsLoading ? "Loading coaches..." : "Select Coach (Optional)"}
-                    renderOption={(option) => {
-                      const coach = coaches.find(c => c.id === option.id);
-                      return (
-                        <div>
-                          <div className="font-semibold">{option.name}</div>
-                          {coach?.assigned_classes > 0 && (
-                            <div className="text-xs text-gray-500">
-                              {coach.assigned_classes} class{coach.assigned_classes > 1 ? 'es' : ''} assigned
-                            </div>
-                          )}
-                        </div>
-                      );
+                {/* Coach Assignment - Multiple Coaches */}
+                <div className="col-span-2">
+                  <MultiCoachSelector
+                    coaches={coaches}
+                    selectedIds={formData.coach_ids || (formData.coach_id ? [formData.coach_id] : [])}
+                    onChange={(ids) => {
+                      updateField("coach_ids", ids);
+                      // Also set legacy coach_id to first selected coach for backwards compatibility
+                      updateField("coach_id", ids.length > 0 ? ids[0] : null);
                     }}
+                    disabled={dropdownsLoading}
+                    label="Assign Coaches"
+                    maxHeight="150px"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Assigned coach can access this class in their portal
-                  </p>
-                  {formData.coach_id && (
-                    <button
-                      type="button"
-                      onClick={() => updateField("coach_id", null)}
-                      className="text-xs text-red-600 hover:text-red-700 mt-1"
-                    >
-                      Remove coach assignment
-                    </button>
-                  )}
                 </div>
 
                 {/* Capacity */}
@@ -1321,9 +1478,15 @@ export default function ClassFormModal({
                       )}
                     </button>
                   </div>
-                  <p className="text-xs text-green-700 mt-2">
-                    This link will take parents directly to the checkout page for this class.
-                  </p>
+                  {(formData?.slug || initialData?.slug) ? (
+                    <p className="text-xs text-green-700 mt-2">
+                      Using custom URL: <span className="font-mono font-semibold">/register/{formData?.slug || initialData?.slug}</span>
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Tip: Add a custom URL slug above for a shorter, memorable registration link.
+                    </p>
+                  )}
                 </div>
               </div>
             )}

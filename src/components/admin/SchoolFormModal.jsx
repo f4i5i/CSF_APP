@@ -4,10 +4,65 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, ChevronDown, Search } from "lucide-react";
+import { X, ChevronDown, Search, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import schoolsService from "../../api/services/schools.service";
 import toast from "react-hot-toast";
+
+// US States for dropdown
+const US_STATES = [
+  { code: 'AL', name: 'Alabama' },
+  { code: 'AK', name: 'Alaska' },
+  { code: 'AZ', name: 'Arizona' },
+  { code: 'AR', name: 'Arkansas' },
+  { code: 'CA', name: 'California' },
+  { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' },
+  { code: 'DE', name: 'Delaware' },
+  { code: 'FL', name: 'Florida' },
+  { code: 'GA', name: 'Georgia' },
+  { code: 'HI', name: 'Hawaii' },
+  { code: 'ID', name: 'Idaho' },
+  { code: 'IL', name: 'Illinois' },
+  { code: 'IN', name: 'Indiana' },
+  { code: 'IA', name: 'Iowa' },
+  { code: 'KS', name: 'Kansas' },
+  { code: 'KY', name: 'Kentucky' },
+  { code: 'LA', name: 'Louisiana' },
+  { code: 'ME', name: 'Maine' },
+  { code: 'MD', name: 'Maryland' },
+  { code: 'MA', name: 'Massachusetts' },
+  { code: 'MI', name: 'Michigan' },
+  { code: 'MN', name: 'Minnesota' },
+  { code: 'MS', name: 'Mississippi' },
+  { code: 'MO', name: 'Missouri' },
+  { code: 'MT', name: 'Montana' },
+  { code: 'NE', name: 'Nebraska' },
+  { code: 'NV', name: 'Nevada' },
+  { code: 'NH', name: 'New Hampshire' },
+  { code: 'NJ', name: 'New Jersey' },
+  { code: 'NM', name: 'New Mexico' },
+  { code: 'NY', name: 'New York' },
+  { code: 'NC', name: 'North Carolina' },
+  { code: 'ND', name: 'North Dakota' },
+  { code: 'OH', name: 'Ohio' },
+  { code: 'OK', name: 'Oklahoma' },
+  { code: 'OR', name: 'Oregon' },
+  { code: 'PA', name: 'Pennsylvania' },
+  { code: 'RI', name: 'Rhode Island' },
+  { code: 'SC', name: 'South Carolina' },
+  { code: 'SD', name: 'South Dakota' },
+  { code: 'TN', name: 'Tennessee' },
+  { code: 'TX', name: 'Texas' },
+  { code: 'UT', name: 'Utah' },
+  { code: 'VT', name: 'Vermont' },
+  { code: 'VA', name: 'Virginia' },
+  { code: 'WA', name: 'Washington' },
+  { code: 'WV', name: 'West Virginia' },
+  { code: 'WI', name: 'Wisconsin' },
+  { code: 'WY', name: 'Wyoming' },
+  { code: 'DC', name: 'District of Columbia' },
+];
 
 function CustomDropdown({ value, onChange, options, placeholder, error, disabled }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -255,6 +310,14 @@ export default function SchoolFormModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+          {/* Required Fields Notice */}
+          <div className="flex items-center gap-2 mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <p className="text-sm text-amber-800">
+              Fields marked with <span className="text-red-500 font-semibold">*</span> are required
+            </p>
+          </div>
+
           <div className="space-y-4">
             {/* Name */}
             <div>
@@ -319,50 +382,58 @@ export default function SchoolFormModal({
               {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
             </div>
 
-            {/* City, State, ZIP */}
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="block text-sm font-semibold font-manrope text-text-primary mb-1">
-                  City <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => updateField("city", e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold ${
-                    errors.city ? "border-red-500" : "border-border-light"
-                  }`}
-                  placeholder="City"
-                />
-                {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-              </div>
+            {/* City */}
+            <div>
+              <label className="block text-sm font-semibold font-manrope text-text-primary mb-1">
+                City <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) => updateField("city", e.target.value)}
+                className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold ${
+                  errors.city ? "border-red-500" : "border-border-light"
+                }`}
+                placeholder="e.g., Charlotte"
+              />
+              {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+            </div>
+
+            {/* State and ZIP */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-semibold font-manrope text-text-primary mb-1">
                   State <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.state}
                   onChange={(e) => updateField("state", e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold ${
+                  className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold bg-white ${
                     errors.state ? "border-red-500" : "border-border-light"
                   }`}
-                  placeholder="NC"
-                />
+                >
+                  <option value="">Select State</option>
+                  {US_STATES.map((state) => (
+                    <option key={state.code} value={state.code}>
+                      {state.name} ({state.code})
+                    </option>
+                  ))}
+                </select>
                 {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
               </div>
               <div>
                 <label className="block text-sm font-semibold font-manrope text-text-primary mb-1">
-                  ZIP <span className="text-red-500">*</span>
+                  ZIP Code <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.zip_code}
-                  onChange={(e) => updateField("zip_code", e.target.value)}
+                  onChange={(e) => updateField("zip_code", e.target.value.replace(/\D/g, '').slice(0, 5))}
                   className={`w-full px-3 py-2 border rounded-[12px] font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold ${
                     errors.zip_code ? "border-red-500" : "border-border-light"
                   }`}
                   placeholder="12345"
+                  maxLength={5}
                 />
                 {errors.zip_code && <p className="text-red-500 text-xs mt-1">{errors.zip_code}</p>}
               </div>
@@ -382,6 +453,18 @@ export default function SchoolFormModal({
               <span className="text-sm font-medium font-manrope text-text-primary">Active</span>
             </div>
           </div>
+
+          {/* Error Summary */}
+          {Object.keys(errors).length > 0 && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-800">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  Please fill in all required fields ({Object.keys(errors).length} missing)
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200">

@@ -65,6 +65,7 @@ import Waivers from './pages/Waivers'
 import ProgramOverview from './pages/ProgramOverview'
 import Events from './pages/Events'
 import Checkout from './pages/CheckOut'
+import ClassRegister from './pages/ClassRegister'
 import PaymentSuccess from './pages/PaymentSuccess'
 import PaymentCancel from './pages/PaymentCancel'
 import ClassList from './pages/AdminDashboard/ClassList'
@@ -323,6 +324,9 @@ return (
 
 {/* Class Detail - View detailed class information */}
 <Route path="/class/:id" element={<ClassDetail />} />
+
+{/* Custom URL Registration - Short URL for class registration */}
+<Route path="/register/:slug" element={<ClassRegister />} />
 
 {/* Add Child - Add new child profile */}
 <Route path="/addchild" element={

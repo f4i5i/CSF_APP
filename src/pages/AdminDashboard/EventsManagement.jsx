@@ -905,26 +905,32 @@ export default function EventsManagement() {
                   <p>No RSVPs {rsvpFilter !== 'all' ? `with status "${rsvpFilter.replace('_', ' ')}"` : 'yet'}</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {getFilteredRsvps().map((rsvp) => (
                     <div
                       key={rsvp.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center text-btn-gold font-semibold">
-                          {(rsvp.attendee_name || 'U')[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-text-primary font-manrope">
-                            {rsvp.attendee_name || 'Unknown'}
-                          </p>
-                          {rsvp.attendee_email && (
-                            <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
-                              <Mail className="w-3 h-3" />
-                              {rsvp.attendee_email}
+                      {/* Parent Info Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center text-btn-gold font-semibold">
+                            {(rsvp.attendee_name || 'U')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-text-primary font-manrope">
+                              {rsvp.attendee_name || 'Unknown'}
                             </p>
-                          )}
+                            {rsvp.attendee_email && (
+                              <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                {rsvp.attendee_email}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          {getRsvpStatusBadge(rsvp.status)}
                           {rsvp.number_of_guests > 0 && (
                             <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
                               <Users className="w-3 h-3" />
@@ -933,14 +939,47 @@ export default function EventsManagement() {
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        {getRsvpStatusBadge(rsvp.status)}
-                        {rsvp.notes && (
-                          <p className="text-xs text-gray-400 font-manrope max-w-[200px] truncate" title={rsvp.notes}>
-                            "{rsvp.notes}"
+
+                      {/* Children Attending Details */}
+                      {rsvp.children_details && rsvp.children_details.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs font-medium text-gray-500 mb-2 font-manrope flex items-center gap-1">
+                            <UserCheck className="w-3 h-3" />
+                            Children Attending:
                           </p>
-                        )}
-                      </div>
+                          <div className="flex flex-wrap gap-2">
+                            {rsvp.children_details.map((child, idx) => (
+                              <div
+                                key={idx}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm"
+                              >
+                                <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-semibold">
+                                  {(child.child_name || 'C')[0].toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-text-primary font-manrope">
+                                    {child.child_name}
+                                  </p>
+                                  {child.class_name && (
+                                    <p className="text-xs text-gray-500 font-manrope">
+                                      {child.class_name}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      {rsvp.notes && (
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 font-manrope">
+                            <span className="font-medium">Note:</span> "{rsvp.notes}"
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

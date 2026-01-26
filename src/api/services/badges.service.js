@@ -122,6 +122,22 @@ const badgesService = {
   },
 
   /**
+   * Award badge to all students in a class (bulk award)
+   * @param {Object} bulkAwardData - Bulk award information
+   * @param {string} bulkAwardData.badge_id - Badge ID
+   * @param {string} bulkAwardData.class_id - Class ID
+   * @param {string} [bulkAwardData.notes] - Award notes
+   * @returns {Promise<Object>} Bulk award confirmation with success/failure counts
+   */
+  async awardBadgeToClass(bulkAwardData) {
+    const { data } = await apiClient.post(
+      '/badges/award-class',
+      bulkAwardData
+    );
+    return data;
+  },
+
+  /**
    * Revoke badge from child (admin only)
    * @param {string} awardId - Award ID
    * @param {Object} revocationData - Revocation information

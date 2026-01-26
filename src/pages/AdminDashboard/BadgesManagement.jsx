@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Award, Plus, Edit, Trash2, Gift, Search, Upload, X, Palette } from 'lucide-react';
+import { Award, Plus, Edit, Trash2, Gift, Search, Upload, X, Palette, Users } from 'lucide-react';
 import Header from '../../components/Header';
 import badgesService from '../../api/services/badges.service';
 import enrollmentsService from '../../api/services/enrollments.service';
+import classesService from '../../api/services/classes.service';
 import toast from 'react-hot-toast';
 
 const BADGE_CATEGORIES = [
@@ -40,8 +41,10 @@ export default function BadgesManagement() {
   // Modal states
   const [showBadgeModal, setShowBadgeModal] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
+  const [showBulkAwardModal, setShowBulkAwardModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState(null);
+  const [classes, setClasses] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -56,7 +59,13 @@ export default function BadgesManagement() {
     enrollment_id: '',
     notes: '',
   });
+  const [bulkAwardData, setBulkAwardData] = useState({
+    badge_id: '',
+    class_id: '',
+    notes: '',
+  });
   const [studentSearch, setStudentSearch] = useState('');
+  const [classSearch, setClassSearch] = useState('');
   const [saving, setSaving] = useState(false);
 
   const fetchBadges = useCallback(async () => {
@@ -77,6 +86,7 @@ export default function BadgesManagement() {
   useEffect(() => {
     fetchBadges();
     fetchEnrollments();
+    fetchClasses();
   }, [fetchBadges]);
 
   const fetchEnrollments = async () => {
@@ -85,6 +95,15 @@ export default function BadgesManagement() {
       setEnrollments(response.items || response || []);
     } catch (error) {
       console.error('Failed to fetch enrollments:', error);
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      const response = await classesService.getAll({ limit: 100, is_active: true });
+      setClasses(response.items || response || []);
+    } catch (error) {
+      console.error('Failed to fetch classes:', error);
     }
   };
 
@@ -166,6 +185,50 @@ export default function BadgesManagement() {
     });
     setStudentSearch('');
     setShowAwardModal(true);
+  };
+
+  const handleBulkAwardBadge = (badge = null) => {
+    setBulkAwardData({
+      badge_id: badge?.id || '',
+      class_id: '',
+      notes: '',
+    });
+    setClassSearch('');
+    setShowBulkAwardModal(true);
+  };
+
+  const handleSubmitBulkAward = async (e) => {
+    e.preventDefault();
+    if (!bulkAwardData.badge_id || !bulkAwardData.class_id) {
+      toast.error('Please select both a badge and a class');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const result = await badgesService.awardBadgeToClass({
+        badge_id: bulkAwardData.badge_id,
+        class_id: bulkAwardData.class_id,
+        notes: bulkAwardData.notes || undefined,
+      });
+
+      const successCount = result.success_count || result.awarded || 0;
+      const failCount = result.fail_count || result.failed || 0;
+
+      if (failCount > 0) {
+        toast.success(`Badge awarded to ${successCount} students (${failCount} already had it)`);
+      } else {
+        toast.success(`Badge awarded to ${successCount} students!`);
+      }
+
+      setShowBulkAwardModal(false);
+      fetchBadges();
+    } catch (error) {
+      console.error('Failed to bulk award badge:', error);
+      toast.error(error.response?.data?.detail || 'Failed to award badge to class');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSubmitBadge = async (e) => {
@@ -294,7 +357,14 @@ export default function BadgesManagement() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => handleBulkAwardBadge()}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              >
+                <Users className="w-4 h-4" />
+                Award to Class
+              </button>
               <button
                 onClick={() => handleAwardBadge()}
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-[#173151] rounded-lg font-semibold hover:bg-gray-50 transition-colors"
@@ -377,21 +447,30 @@ export default function BadgesManagement() {
                   </div>
                   <div className="flex gap-1">
                     <button
+                      onClick={() => handleBulkAwardBadge(badge)}
+                      className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-gray-100 rounded"
+                      title="Award to whole class"
+                    >
+                      <Users className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => handleAwardBadge(badge)}
                       className="p-1.5 text-gray-400 hover:text-[#F3BC48] hover:bg-gray-100 rounded"
-                      title="Award this badge"
+                      title="Award to student"
                     >
                       <Gift className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleEditBadge(badge)}
                       className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded"
+                      title="Edit badge"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteBadge(badge)}
                       className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded"
+                      title="Delete badge"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -707,6 +786,134 @@ export default function BadgesManagement() {
                     className="flex-1 px-4 py-2 bg-[#F3BC48] text-[#173151] rounded-lg font-semibold hover:bg-[#e5ae3a] disabled:opacity-50"
                   >
                     {saving ? 'Awarding...' : 'Award Badge'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Bulk Award Badge to Class Modal */}
+        {showBulkAwardModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-[#173151]">Award Badge to Class</h2>
+                  <p className="text-sm text-gray-500">Award to all enrolled students at once</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmitBulkAward} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Badge <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={bulkAwardData.badge_id}
+                    onChange={(e) => setBulkAwardData({ ...bulkAwardData, badge_id: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">Choose a badge...</option>
+                    {badges.map((badge) => (
+                      <option key={badge.id} value={badge.id}>
+                        {badge.name} ({badge.category})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Class <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={classSearch}
+                    onChange={(e) => setClassSearch(e.target.value)}
+                    placeholder="Search classes..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 mb-2"
+                  />
+                  <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                    {classes.filter((c) =>
+                      c.name?.toLowerCase().includes(classSearch.toLowerCase())
+                    ).length === 0 ? (
+                      <p className="p-3 text-sm text-gray-500 text-center">No classes found</p>
+                    ) : (
+                      classes
+                        .filter((c) => c.name?.toLowerCase().includes(classSearch.toLowerCase()))
+                        .slice(0, 15)
+                        .map((cls) => (
+                          <button
+                            key={cls.id}
+                            type="button"
+                            onClick={() => setBulkAwardData({ ...bulkAwardData, class_id: cls.id })}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 border-b last:border-b-0 ${
+                              bulkAwardData.class_id === cls.id ? 'bg-green-100' : ''
+                            }`}
+                          >
+                            <span className="font-medium">{cls.name}</span>
+                            <span className="text-gray-500 ml-2">
+                              ({cls.current_enrollment || 0} students)
+                            </span>
+                          </button>
+                        ))
+                    )}
+                  </div>
+                </div>
+
+                {bulkAwardData.class_id && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-sm text-green-800">
+                      <strong>
+                        {classes.find((c) => c.id === bulkAwardData.class_id)?.current_enrollment || 0}
+                      </strong>{' '}
+                      students will receive this badge
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes (optional)
+                  </label>
+                  <textarea
+                    value={bulkAwardData.notes}
+                    onChange={(e) => setBulkAwardData({ ...bulkAwardData, notes: e.target.value })}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                    placeholder="Why is this badge being awarded to the class?"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkAwardModal(false)}
+                    disabled={saving}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving || !bulkAwardData.badge_id || !bulkAwardData.class_id}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {saving ? (
+                      <>
+                        <span className="animate-spin">&#x21bb;</span>
+                        Awarding...
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-4 h-4" />
+                        Award to All
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
