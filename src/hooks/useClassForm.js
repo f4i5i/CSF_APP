@@ -500,13 +500,6 @@ export default function useClassForm(initialData = null, mode = 'create') {
       }
     }
 
-    // Registration period should be before class start date
-    if (formData.registration_end_date && formData.start_date) {
-      if (new Date(formData.registration_end_date) > new Date(formData.start_date)) {
-        newErrors.registration_end_date = 'Registration must end before class starts';
-      }
-    }
-
     // Class type validation
     if (!formData.class_type) {
       newErrors.class_type = 'Class type is required';

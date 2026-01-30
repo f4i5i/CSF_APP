@@ -139,7 +139,7 @@ export default function DataTable({
             : column.actions;
 
         return (
-          <div className="flex items-center justify-start gap-2">
+          <div className="flex items-center justify-start gap-1 sm:gap-2 flex-wrap">
             {actions.map((action, i) => {
               const Icon = action.icon;
               const onClick = (e) => {
@@ -148,7 +148,7 @@ export default function DataTable({
               };
 
               const baseClass =
-                "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold transition";
+                "inline-flex items-center justify-center p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition";
               const variantClass = action.variant === "destructive"
                 ? "bg-error-dark text-white hover:bg-red-700"
                 : "bg-btn-gold text-text-body hover:bg-btn-gold/90";
@@ -159,9 +159,10 @@ export default function DataTable({
                   onClick={onClick}
                   className={`${baseClass} ${variantClass}`}
                   type="button"
+                  title={action.label}
                 >
-                  {Icon && <Icon className="w-4 h-4 mr-2" />}
-                  <span className="whitespace-nowrap">{action.label}</span>
+                  {Icon && <Icon className="w-4 h-4 sm:mr-1.5" />}
+                  <span className="hidden sm:inline whitespace-nowrap">{action.label}</span>
                 </button>
               );
             })}
@@ -184,7 +185,9 @@ export default function DataTable({
                 {columns.map((column, index) => (
                   <th
                     key={index}
-                    className="px-6 py-3 text-left text-xs font-manrope font-semibold text-heading-dark uppercase tracking-wider"
+                    className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-manrope font-semibold text-heading-dark uppercase tracking-wider ${
+                      column.hideOnMobile ? "hidden md:table-cell" : ""
+                    }`}
                   >
                     {column.label}
                   </th>
@@ -194,8 +197,10 @@ export default function DataTable({
             <tbody className="divide-y divide-border-light">
               {[...Array(5)].map((_, rowIndex) => (
                 <tr key={rowIndex} className="animate-pulse">
-                  {columns.map((_, colIndex) => (
-                    <td key={colIndex} className="px-6 py-4">
+                  {columns.map((column, colIndex) => (
+                    <td key={colIndex} className={`px-3 sm:px-6 py-3 sm:py-4 ${
+                      column.hideOnMobile ? "hidden md:table-cell" : ""
+                    }`}>
                       <div className="h-4 bg-border-light rounded w-3/4"></div>
                     </td>
                   ))}
@@ -219,7 +224,9 @@ export default function DataTable({
                 {columns.map((column, index) => (
                   <th
                     key={index}
-                    className="px-6 py-3 text-left text-xs font-manrope font-semibold text-heading-dark uppercase tracking-wider"
+                    className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-manrope font-semibold text-heading-dark uppercase tracking-wider ${
+                      column.hideOnMobile ? "hidden md:table-cell" : ""
+                    }`}
                   >
                     {column.label}
                   </th>
@@ -228,8 +235,8 @@ export default function DataTable({
             </thead>
           </table>
         </div>
-        <div className="py-12 text-center">
-          <p className="text-text-muted font-manrope">{emptyMessage}</p>
+        <div className="py-8 sm:py-12 text-center">
+          <p className="text-text-muted font-manrope text-sm sm:text-base">{emptyMessage}</p>
         </div>
       </div>
     );
@@ -248,13 +255,13 @@ export default function DataTable({
                 <th
                   key={index}
                   onClick={() => handleSort(column)}
-                  className={`px-6 py-3 text-left text-sm font-manrope font-semibold text-heading-dark uppercase tracking-wider ${
+                  className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-manrope font-semibold text-heading-dark uppercase tracking-wider ${
                     column.sortable
                       ? "cursor-pointer hover:bg-gray-100 select-none"
                       : ""
                   } ${column.align === "right" ? "text-right" : ""} ${
                     column.align === "center" ? "text-center" : ""
-                  }`}
+                  } ${column.hideOnMobile ? "hidden md:table-cell" : ""}`}
                 >
                   <div className="flex items-center gap-2">
                     {column.label}
@@ -313,9 +320,11 @@ export default function DataTable({
                     {columns.map((column, colIndex) => (
                       <td
                         key={colIndex}
-                        className={`px-6 py-4 whitespace-nowrap font-manrope text-sm text-text-primary ${
+                        className={`px-3 sm:px-6 py-3 sm:py-4 font-manrope text-xs sm:text-sm text-text-primary ${
                           column.align === "right" ? "text-right" : ""
-                        } ${column.align === "center" ? "text-center" : ""}`}
+                        } ${column.align === "center" ? "text-center" : ""} ${
+                          column.hideOnMobile ? "hidden md:table-cell" : ""
+                        }`}
                       >
                         {renderCell(row, column, rowId)}
                       </td>
@@ -338,27 +347,27 @@ export default function DataTable({
 
       {/* Pagination */}
       {pagination && (
-        <div className="sm:px-6 px-2 py-4 border-t border-border-light flex items-center justify-between bg-white">
+        <div className="sm:px-6 px-3 py-4 border-t border-border-light flex flex-col sm:flex-row items-center justify-between gap-3 bg-white">
           {/* Results info */}
-          <div className="text-sm text-text-muted font-semibold font-manrope">
+          <div className="text-xs sm:text-sm text-text-muted font-semibold font-manrope text-center sm:text-left">
             Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}
             <span className="font-bold text-text-primary">{endItem}</span> of{" "}
             <span className="font-bold text-text-primary">{totalItems}</span> results
           </div>
 
           {/* Pagination Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Prev Button */}
             <button
               onClick={() => onPageChange && onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg transition text-text-muted hover:bg-btn-gold/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              className="p-1.5 sm:p-2 rounded-lg transition text-text-muted hover:bg-btn-gold/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {/* Page Numbers */}
-            <div className="flex items-center gap-1 font-manrope">
+            <div className="flex items-center gap-0.5 sm:gap-1 font-manrope">
               {totalPages > 0 && [...Array(totalPages)].map((_, index) => {
                 const page = index + 1;
 
@@ -371,7 +380,7 @@ export default function DataTable({
                     <button
                       key={page}
                       onClick={() => onPageChange && onPageChange(page)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition ${
+                      className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition ${
                         page === currentPage
                           ? "bg-btn-gold text-neutral-white shadow-sm"
                           : "text-text-muted hover:bg-btn-gold/10 hover:text-heading-dark"
@@ -385,7 +394,7 @@ export default function DataTable({
                   page === currentPage + 2
                 ) {
                   return (
-                    <span key={page} className="px-2 text-text-muted">
+                    <span key={page} className="px-1 sm:px-2 text-text-muted text-xs sm:text-sm">
                       •••
                     </span>
                   );
@@ -399,9 +408,9 @@ export default function DataTable({
             <button
               onClick={() => onPageChange && onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages || totalPages === 0}
-              className="p-2 rounded-lg transition text-text-muted hover:bg-btn-gold/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              className="p-1.5 sm:p-2 rounded-lg transition text-text-muted hover:bg-btn-gold/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>

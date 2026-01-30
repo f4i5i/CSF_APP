@@ -417,12 +417,12 @@ export default function Classes() {
         const subtitle = parts.length > 0 ? parts.join(" • ") : null;
 
         return (
-          <div>
-            <p className="font-semibold font-manrope text-text-primary">
+          <div className="min-w-[120px]">
+            <p className="font-semibold font-manrope text-text-primary text-xs sm:text-sm">
               {value}
             </p>
             {subtitle && (
-              <p className="text-xs font-manrope text-text-muted">
+              <p className="text-[10px] sm:text-xs font-manrope text-text-muted">
                 {subtitle}
               </p>
             )}
@@ -433,6 +433,7 @@ export default function Classes() {
     {
       key: "school",
       label: "School/Code",
+      hideOnMobile: true,
       render: (value, row) => {
         const schoolName = row.school?.name || row.school_name;
         const schoolCode = row.school_code || row.school?.code;
@@ -450,6 +451,7 @@ export default function Classes() {
     {
       key: "schedule",
       label: "Schedule",
+      hideOnMobile: true,
       render: (value, row) => (
         <div className="text-sm font-manrope text-text-muted flex items-center">
           <Calendar className="inline w-4 h-4 mr-1 text-text-muted" />
@@ -459,7 +461,8 @@ export default function Classes() {
     },
     {
       key: "dates",
-      label: "Start - End Date",
+      label: "Dates",
+      hideOnMobile: true,
       render: (value, row) => (
         <div className="text-xs font-manrope text-text-muted">
           <p>{row.start_date ? new Date(row.start_date).toLocaleDateString() : "N/A"}</p>
@@ -471,17 +474,18 @@ export default function Classes() {
       key: "capacity",
       label: "Capacity",
       render: (value, row) => (
-        <div className="text-sm font-manrope text-text-primary flex items-center gap-2">
+        <div className="text-xs sm:text-sm font-manrope text-text-primary flex items-center gap-1 sm:gap-2">
           <span className="font-semibold text-text-primary">
             {row.current_enrollment || 0}
           </span>
-          <span className="text-text-muted"> / {value}</span>
+          <span className="text-text-muted">/ {value}</span>
         </div>
       ),
     },
     {
       key: "age_range",
-      label: "Age Range",
+      label: "Age",
+      hideOnMobile: true,
       render: (value, row) => (
         <span className="text-sm font-manrope text-text-muted">
           {row.min_age || 0} - {row.max_age || 18} yrs
@@ -491,6 +495,7 @@ export default function Classes() {
     {
       key: "class_type",
       label: "Type",
+      hideOnMobile: true,
       render: (value) => (
         <span className="text-xs font-manrope px-2 py-1 rounded-full bg-gray-100 text-gray-700">
           {value === "one-time" ? "One-time" : value === "membership" ? "Membership" : "N/A"}
@@ -504,7 +509,7 @@ export default function Classes() {
       sortable: true,
       render: (value) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${
             value
               ? "bg-[#DFF5E8] text-status-success"
               : "bg-amber-100 text-amber-700"
@@ -601,23 +606,23 @@ export default function Classes() {
     <div className="h-full">
       <Header />
 
-      <div className="max-w-9xl mx-auto sm:px-4 px-0">
-        <div className="mb-8 flex lg:flex-row flex-col  lg:items-center items-start lg:gap-0 gap-4  justify-between">
-          <div>
-            <h1 className="lg:text-[46px] text-[20px] md:text-[30px] font-bold text-text-primary font-kollektif">
+      <div className="max-w-9xl mx-auto px-3 sm:px-4">
+        <div className="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
               Classes Management
             </h1>
-            <p className="text-neutral-main font-manrope mt-1">
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
               Create and manage classes with Stripe payment options
             </p>
           </div>
 
           <button
             onClick={handleCreateClass}
-            className="flex items-center gap-2 font-manrope bg-btn-gold  text-text-body px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 font-manrope bg-btn-gold text-text-body px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base shrink-0"
           >
-            <Plus className="w-5 h-5" />
-            Create Class
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Create </span>Class
           </button>
         </div>
         <FilterBar
@@ -660,42 +665,42 @@ export default function Classes() {
 
       {/* Delete with Enrollments Modal */}
       {deleteEnrollmentsModal.isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full shadow-xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl max-w-lg w-full shadow-xl max-h-[95vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center gap-3 p-4 border-b bg-red-50">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+            <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 border-b bg-red-50">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
               </div>
-              <div>
-                <h3 className="font-semibold text-lg text-heading-dark font-manrope">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-base sm:text-lg text-heading-dark font-manrope">
                   Delete Class
                 </h3>
-                <p className="text-sm text-text-muted font-manrope">
+                <p className="text-xs sm:text-sm text-text-muted font-manrope truncate">
                   {deleteEnrollmentsModal.classToDelete?.name}
                 </p>
               </div>
               <button
                 onClick={closeDeleteEnrollmentsModal}
                 disabled={deleteEnrollmentsModal.processing}
-                className="ml-auto p-2 hover:bg-red-100 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 hover:bg-red-100 rounded-lg transition-colors shrink-0"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               {deleteEnrollmentsModal.loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-btn-gold mr-2" />
-                  <span className="text-text-muted font-manrope">Checking enrollments...</span>
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-btn-gold mr-2" />
+                  <span className="text-text-muted font-manrope text-sm sm:text-base">Checking enrollments...</span>
                 </div>
               ) : deleteEnrollmentsModal.activeEnrollments.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Warning Message */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <p className="text-sm text-yellow-800 font-manrope">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 sm:p-3">
+                    <p className="text-xs sm:text-sm text-yellow-800 font-manrope">
                       <strong>Warning:</strong> This class has{" "}
                       <span className="font-bold">{deleteEnrollmentsModal.activeEnrollments.length}</span>{" "}
                       active enrollment{deleteEnrollmentsModal.activeEnrollments.length !== 1 ? 's' : ''}.
@@ -704,22 +709,22 @@ export default function Classes() {
                   </div>
 
                   {/* Enrolled Students List */}
-                  <div className="max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-gray-500 mb-2">Active Enrollments:</p>
+                  <div className="max-h-28 sm:max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-2 sm:p-3">
+                    <p className="text-[10px] sm:text-xs font-semibold text-gray-500 mb-2">Active Enrollments:</p>
                     <div className="space-y-1">
                       {deleteEnrollmentsModal.activeEnrollments.slice(0, 5).map((enrollment, idx) => {
                         const child = enrollment.child || enrollment;
                         return (
-                          <div key={enrollment.id || idx} className="flex items-center gap-2 text-sm">
-                            <User className="w-3 h-3 text-gray-400" />
-                            <span className="text-gray-700">
+                          <div key={enrollment.id || idx} className="flex items-center gap-2 text-xs sm:text-sm">
+                            <User className="w-3 h-3 text-gray-400 shrink-0" />
+                            <span className="text-gray-700 truncate">
                               {child.first_name} {child.last_name}
                             </span>
                           </div>
                         );
                       })}
                       {deleteEnrollmentsModal.activeEnrollments.length > 5 && (
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                           +{deleteEnrollmentsModal.activeEnrollments.length - 5} more
                         </p>
                       )}
@@ -727,29 +732,29 @@ export default function Classes() {
                   </div>
 
                   {/* Action Options */}
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {/* Option 1: Move to another class */}
                     <div
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                      className={`border rounded-lg p-2 sm:p-3 cursor-pointer transition-colors ${
                         deleteEnrollmentsModal.selectedAction === 'move'
                           ? 'border-btn-gold bg-yellow-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => setDeleteEnrollmentsModal(prev => ({ ...prev, selectedAction: 'move' }))}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <input
                           type="radio"
                           checked={deleteEnrollmentsModal.selectedAction === 'move'}
                           onChange={() => {}}
-                          className="w-4 h-4 text-btn-gold"
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-btn-gold shrink-0"
                         />
-                        <div className="flex-1">
-                          <p className="font-semibold text-sm text-heading-dark font-manrope flex items-center gap-2">
-                            <ArrowRight className="w-4 h-4" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs sm:text-sm text-heading-dark font-manrope flex items-center gap-1.5 sm:gap-2">
+                            <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
                             Move to Another Class
                           </p>
-                          <p className="text-xs text-text-muted mt-1">
+                          <p className="text-[10px] sm:text-xs text-text-muted mt-0.5 sm:mt-1">
                             Transfer all enrollments to a different class
                           </p>
                         </div>
@@ -757,14 +762,14 @@ export default function Classes() {
 
                       {/* Target Class Selector */}
                       {deleteEnrollmentsModal.selectedAction === 'move' && (
-                        <div className="mt-3 pl-7">
+                        <div className="mt-2 sm:mt-3 pl-5 sm:pl-7">
                           <select
                             value={deleteEnrollmentsModal.targetClassId}
                             onChange={(e) => setDeleteEnrollmentsModal(prev => ({
                               ...prev,
                               targetClassId: e.target.value
                             }))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-manrope focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
+                            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-manrope focus:ring-2 focus:ring-btn-gold focus:border-btn-gold"
                           >
                             <option value="">Select target class...</option>
                             {getAvailableTargetClasses().map(c => (
@@ -779,26 +784,26 @@ export default function Classes() {
 
                     {/* Option 2: Cancel all enrollments */}
                     <div
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                      className={`border rounded-lg p-2 sm:p-3 cursor-pointer transition-colors ${
                         deleteEnrollmentsModal.selectedAction === 'cancel'
                           ? 'border-red-400 bg-red-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => setDeleteEnrollmentsModal(prev => ({ ...prev, selectedAction: 'cancel' }))}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <input
                           type="radio"
                           checked={deleteEnrollmentsModal.selectedAction === 'cancel'}
                           onChange={() => {}}
-                          className="w-4 h-4 text-red-600"
+                          className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600 shrink-0"
                         />
-                        <div>
-                          <p className="font-semibold text-sm text-heading-dark font-manrope flex items-center gap-2">
-                            <X className="w-4 h-4 text-red-500" />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-xs sm:text-sm text-heading-dark font-manrope flex items-center gap-1.5 sm:gap-2">
+                            <X className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 shrink-0" />
                             Cancel All Enrollments
                           </p>
-                          <p className="text-xs text-text-muted mt-1">
+                          <p className="text-[10px] sm:text-xs text-text-muted mt-0.5 sm:mt-1">
                             Cancel all active enrollments and delete the class
                           </p>
                         </div>
@@ -808,7 +813,7 @@ export default function Classes() {
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-text-muted font-manrope">
+                  <p className="text-text-muted font-manrope text-sm sm:text-base">
                     No active enrollments found. You can safely delete this class.
                   </p>
                 </div>
@@ -816,11 +821,11 @@ export default function Classes() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex justify-end gap-3 p-4 border-t bg-gray-50">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t bg-gray-50">
               <button
                 onClick={closeDeleteEnrollmentsModal}
                 disabled={deleteEnrollmentsModal.processing}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope disabled:opacity-50"
+                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -833,16 +838,16 @@ export default function Classes() {
                     !deleteEnrollmentsModal.selectedAction ||
                     (deleteEnrollmentsModal.selectedAction === 'move' && !deleteEnrollmentsModal.targetClassId)
                   }
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors font-manrope disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors font-manrope disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deleteEnrollmentsModal.processing ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
                       Processing...
                     </>
                   ) : (
                     <>
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                       {deleteEnrollmentsModal.selectedAction === 'move' ? 'Move & Delete' : 'Cancel & Delete'}
                     </>
                   )}
@@ -854,9 +859,9 @@ export default function Classes() {
                     executeDeleteClass(deleteEnrollmentsModal.classToDelete.id);
                   }}
                   disabled={deleteEnrollmentsModal.processing}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors font-manrope"
+                  className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors font-manrope"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                   Delete Class
                 </button>
               )}
@@ -867,41 +872,41 @@ export default function Classes() {
 
       {/* Roster Modal */}
       {rosterModal.isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-              <div>
-                <h3 className="font-semibold text-lg text-heading-dark font-manrope flex items-center gap-2">
-                  <Users className="w-5 h-5 text-btn-gold" />
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-gray-50">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-base sm:text-lg text-heading-dark font-manrope flex items-center gap-1.5 sm:gap-2">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-btn-gold shrink-0" />
                   Class Roster
                 </h3>
                 {rosterModal.classData && (
-                  <p className="text-sm text-text-muted font-manrope mt-1">
+                  <p className="text-xs sm:text-sm text-text-muted font-manrope mt-1 truncate">
                     {rosterModal.classData.name}
                   </p>
                 )}
               </div>
               <button
                 onClick={closeRosterModal}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition-colors shrink-0"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
               </button>
             </div>
 
             {/* Share Link Section */}
             {rosterModal.shareLink && (
-              <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 bg-blue-50 border-b border-blue-100">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 flex-1 min-w-0 w-full sm:w-auto">
                     <Link className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                    <span className="text-sm font-medium text-blue-800 font-manrope">Share Roster:</span>
-                    <span className="text-sm text-blue-600 truncate font-mono">{rosterModal.shareLink}</span>
+                    <span className="text-xs sm:text-sm font-medium text-blue-800 font-manrope">Share:</span>
+                    <span className="text-xs sm:text-sm text-blue-600 truncate font-mono">{rosterModal.shareLink}</span>
                   </div>
                   <button
                     onClick={copyShareLink}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex-shrink-0 ${
+                    className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors flex-shrink-0 w-full sm:w-auto ${
                       rosterModal.linkCopied
                         ? 'bg-green-600 text-white'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -909,12 +914,12 @@ export default function Classes() {
                   >
                     {rosterModal.linkCopied ? (
                       <>
-                        <CheckCircle className="w-4 h-4" />
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                         Copied!
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
                         Copy Link
                       </>
                     )}
@@ -924,26 +929,26 @@ export default function Classes() {
             )}
 
             {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4">
               {rosterModal.loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-btn-gold mr-3" />
-                  <span className="text-text-muted font-manrope">Loading roster...</span>
+                <div className="flex items-center justify-center py-8 sm:py-12">
+                  <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-btn-gold mr-2 sm:mr-3" />
+                  <span className="text-text-muted font-manrope text-sm sm:text-base">Loading roster...</span>
                 </div>
               ) : rosterModal.roster.length === 0 ? (
-                <div className="text-center py-12">
-                  <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-text-muted font-manrope">No students enrolled in this class</p>
+                <div className="text-center py-8 sm:py-12">
+                  <Users className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-text-muted font-manrope text-sm sm:text-base">No students enrolled in this class</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm font-semibold text-text-primary font-manrope">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <p className="text-xs sm:text-sm font-semibold text-text-primary font-manrope">
                       {rosterModal.roster.length} Student{rosterModal.roster.length !== 1 ? 's' : ''} Enrolled
                     </p>
                   </div>
 
-                  <div className="grid gap-3">
+                  <div className="grid gap-2 sm:gap-3">
                     {rosterModal.roster.map((student, idx) => {
                       // Handle different response structures
                       const child = student.child || student;
@@ -953,19 +958,19 @@ export default function Classes() {
                       return (
                         <div
                           key={child.id || idx}
-                          className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+                          className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 hover:bg-gray-100 transition-colors"
                         >
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-full bg-btn-gold/20 flex items-center justify-center flex-shrink-0">
-                              <User className="w-6 h-6 text-btn-gold" />
+                          <div className="flex items-start gap-2 sm:gap-4">
+                            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-btn-gold/20 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 sm:w-6 sm:h-6 text-btn-gold" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <h4 className="font-semibold text-text-primary font-manrope">
+                                <div className="min-w-0">
+                                  <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
                                     {child.first_name} {child.last_name}
                                   </h4>
-                                  <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-text-muted font-manrope">
+                                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-xs sm:text-sm text-text-muted font-manrope">
                                     {child.date_of_birth && (
                                       <span>Age: {new Date().getFullYear() - new Date(child.date_of_birth).getFullYear()}</span>
                                     )}
@@ -973,7 +978,7 @@ export default function Classes() {
                                   </div>
                                 </div>
                                 {enrollment.status && (
-                                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                                  <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-full font-medium shrink-0 ${
                                     enrollment.status === 'ACTIVE' || enrollment.status === 'active'
                                       ? 'bg-green-100 text-green-700'
                                       : 'bg-gray-100 text-gray-600'
@@ -985,19 +990,19 @@ export default function Classes() {
 
                               {/* Parent Info */}
                               {parent && (
-                                <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-xs font-medium text-text-muted mb-1 font-manrope">Parent/Guardian</p>
-                                  <div className="flex flex-wrap items-center gap-4 text-sm text-text-primary font-manrope">
-                                    <span>{parent.first_name || parent.full_name?.split(' ')[0]} {parent.last_name || parent.full_name?.split(' ').slice(1).join(' ')}</span>
+                                <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200">
+                                  <p className="text-[10px] sm:text-xs font-medium text-text-muted mb-1 font-manrope">Parent/Guardian</p>
+                                  <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-text-primary font-manrope">
+                                    <span className="font-medium">{parent.first_name || parent.full_name?.split(' ')[0]} {parent.last_name || parent.full_name?.split(' ').slice(1).join(' ')}</span>
                                     {parent.email && (
-                                      <span className="flex items-center gap-1 text-text-muted">
-                                        <Mail className="w-3.5 h-3.5" />
-                                        {parent.email}
+                                      <span className="flex items-center gap-1 text-text-muted truncate">
+                                        <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                                        <span className="truncate">{parent.email}</span>
                                       </span>
                                     )}
                                     {parent.phone && (
                                       <span className="flex items-center gap-1 text-text-muted">
-                                        <Phone className="w-3.5 h-3.5" />
+                                        <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
                                         {parent.phone}
                                       </span>
                                     )}
@@ -1015,10 +1020,10 @@ export default function Classes() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex justify-end gap-3 p-4 border-t bg-gray-50">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t bg-gray-50">
               <button
                 onClick={closeRosterModal}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope"
+                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope"
               >
                 Close
               </button>
@@ -1027,9 +1032,9 @@ export default function Classes() {
                   href={rosterModal.shareLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-btn-gold rounded-lg hover:bg-btn-gold/90 transition-colors font-manrope"
+                  className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-btn-gold rounded-lg hover:bg-btn-gold/90 transition-colors font-manrope"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                   Open Roster Page
                 </a>
               )}

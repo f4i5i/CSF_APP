@@ -4,6 +4,7 @@ module.exports = {
   theme: {
     screens: {
       // ✅ Standard mobile-first breakpoints
+      xs: "480px",
       sm: "640px",
       md: "768px",
       lg: "1024px",
@@ -19,6 +20,7 @@ module.exports = {
       "max-lg": { max: "1123px" },
       "max-md": { max: "967px" },
       "max-sm": { max: "639px" },
+      "max-xs": { max: "479px" },
     },
     extend: {
       fontFamily: {

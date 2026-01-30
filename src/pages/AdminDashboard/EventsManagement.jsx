@@ -362,7 +362,7 @@ export default function EventsManagement() {
       label: "Capacity",
       render: (value, row) => (
         <span className="text-xs font-manrope text-text-primary">
-          {row.rsvp_count || 0}/{value || "∞"}
+          {row.children_attending_count || row.rsvp_count || 0}/{value || "∞"}
         </span>
       ),
     },
@@ -767,13 +767,14 @@ export default function EventsManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
-                    Capacity
+                    RSVPs / Capacity
                   </label>
                   <div className="flex items-center gap-2 text-text-primary font-manrope">
                     <Users className="w-4 h-4 text-text-muted" />
-                    <span className="font-semibold">{viewEvent.rsvp_count || 0}</span>
+                    <span className="font-semibold">{viewEvent.children_attending_count || viewEvent.rsvp_count || 0}</span>
                     <span className="text-text-muted">/ {viewEvent.max_attendees || "Unlimited"}</span>
                   </div>
+                  <p className="text-xs text-gray-400 mt-1 font-manrope">View RSVPs for child breakdown</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
@@ -799,6 +800,16 @@ export default function EventsManagement() {
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-manrope"
               >
                 Close
+              </button>
+              <button
+                onClick={() => {
+                  setViewModalOpen(false);
+                  handleViewRsvps(viewEvent);
+                }}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-manrope hover:bg-gray-200 flex items-center justify-center gap-2"
+              >
+                <ClipboardList className="w-4 h-4" />
+                View RSVPs
               </button>
               <button
                 onClick={() => {
@@ -852,19 +863,28 @@ export default function EventsManagement() {
                 </div>
                 <div className="bg-green-50 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-green-700 font-manrope">
-                    {rsvpData.attending_count || 0}
+                    {/* Count children from attending RSVPs */}
+                    {rsvpData.attendees
+                      ?.filter(rsvp => rsvp.status === 'attending')
+                      .reduce((sum, rsvp) => sum + (rsvp.children_details?.length || 0), 0) || 0}
                   </p>
-                  <p className="text-xs text-green-600 font-manrope">Attending</p>
+                  <p className="text-xs text-green-600 font-manrope">Children Attending</p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-red-700 font-manrope">
-                    {rsvpData.not_attending_count || 0}
+                    {/* Count children from not_attending RSVPs */}
+                    {rsvpData.attendees
+                      ?.filter(rsvp => rsvp.status === 'not_attending')
+                      .reduce((sum, rsvp) => sum + (rsvp.children_details?.length || 0), 0) || 0}
                   </p>
                   <p className="text-xs text-red-600 font-manrope">Not Going</p>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-yellow-700 font-manrope">
-                    {rsvpData.maybe_count || 0}
+                    {/* Count children from maybe RSVPs */}
+                    {rsvpData.attendees
+                      ?.filter(rsvp => rsvp.status === 'maybe')
+                      .reduce((sum, rsvp) => sum + (rsvp.children_details?.length || 0), 0) || 0}
                   </p>
                   <p className="text-xs text-yellow-600 font-manrope">Maybe</p>
                 </div>
