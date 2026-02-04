@@ -139,7 +139,7 @@ export default function DataTable({
             : column.actions;
 
         return (
-          <div className="flex items-center justify-start gap-1 sm:gap-2 flex-wrap">
+          <div className="flex items-center justify-end gap-1 flex-wrap min-w-[100px]">
             {actions.map((action, i) => {
               const Icon = action.icon;
               const onClick = (e) => {
@@ -148,7 +148,7 @@ export default function DataTable({
               };
 
               const baseClass =
-                "inline-flex items-center justify-center p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition";
+                "inline-flex items-center justify-center p-1.5 lg:px-2.5 lg:py-1.5 rounded-md text-xs font-medium transition";
               const variantClass = action.variant === "destructive"
                 ? "bg-error-dark text-white hover:bg-red-700"
                 : "bg-btn-gold text-text-body hover:bg-btn-gold/90";
@@ -161,8 +161,8 @@ export default function DataTable({
                   type="button"
                   title={action.label}
                 >
-                  {Icon && <Icon className="w-4 h-4 sm:mr-1.5" />}
-                  <span className="hidden sm:inline whitespace-nowrap">{action.label}</span>
+                  {Icon && <Icon className="w-3.5 h-3.5 lg:mr-1" />}
+                  <span className="hidden lg:inline whitespace-nowrap">{action.label}</span>
                 </button>
               );
             })}
@@ -178,8 +178,8 @@ export default function DataTable({
   if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-white border-b border-border-light">
               <tr>
                 {columns.map((column, index) => (
@@ -217,8 +217,8 @@ export default function DataTable({
   if (!data || data.length === 0) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-white border-b border-border-light">
               <tr>
                 {columns.map((column, index) => (
@@ -246,7 +246,7 @@ export default function DataTable({
     <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden">
       {/* Table */}
       <div className="overflow-x-auto custom-scrollbar">
-        <table className="w-full">
+        <table className="w-full min-w-[800px]">
           <thead className="bg-white border-b border-border-light">
             <tr>
               {/* Empty header for expand column */}

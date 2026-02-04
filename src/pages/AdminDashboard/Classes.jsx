@@ -417,12 +417,12 @@ export default function Classes() {
         const subtitle = parts.length > 0 ? parts.join(" • ") : null;
 
         return (
-          <div className="min-w-[120px]">
-            <p className="font-semibold font-manrope text-text-primary text-xs sm:text-sm">
+          <div className="min-w-[140px] max-w-[200px]">
+            <p className="font-semibold font-manrope text-text-primary text-xs sm:text-sm truncate" title={value}>
               {value}
             </p>
             {subtitle && (
-              <p className="text-[10px] sm:text-xs font-manrope text-text-muted">
+              <p className="text-[10px] sm:text-xs font-manrope text-text-muted truncate" title={subtitle}>
                 {subtitle}
               </p>
             )}
@@ -439,8 +439,8 @@ export default function Classes() {
         const schoolCode = row.school_code || row.school?.code;
 
         return (
-          <div className="text-sm font-manrope">
-            <p className="text-text-primary">{schoolName || "—"}</p>
+          <div className="text-sm font-manrope min-w-[80px] max-w-[120px]">
+            <p className="text-text-primary truncate" title={schoolName}>{schoolName || "—"}</p>
             {schoolCode && (
               <p className="text-xs text-text-muted font-mono">{schoolCode}</p>
             )}
@@ -453,9 +453,11 @@ export default function Classes() {
       label: "Schedule",
       hideOnMobile: true,
       render: (value, row) => (
-        <div className="text-sm font-manrope text-text-muted flex items-center">
-          <Calendar className="inline w-4 h-4 mr-1 text-text-muted" />
-          <span>{formatSchedule(row)}</span>
+        <div className="text-xs font-manrope text-text-muted min-w-[120px] max-w-[180px]">
+          <div className="flex items-start gap-1">
+            <Calendar className="w-3.5 h-3.5 mt-0.5 text-text-muted flex-shrink-0" />
+            <span className="whitespace-normal break-words leading-tight">{formatSchedule(row)}</span>
+          </div>
         </div>
       ),
     },
@@ -464,7 +466,7 @@ export default function Classes() {
       label: "Dates",
       hideOnMobile: true,
       render: (value, row) => (
-        <div className="text-xs font-manrope text-text-muted">
+        <div className="text-xs font-manrope text-text-muted whitespace-nowrap">
           <p>{row.start_date ? new Date(row.start_date).toLocaleDateString() : "N/A"}</p>
           <p>{row.end_date ? new Date(row.end_date).toLocaleDateString() : "N/A"}</p>
         </div>
@@ -474,11 +476,11 @@ export default function Classes() {
       key: "capacity",
       label: "Capacity",
       render: (value, row) => (
-        <div className="text-xs sm:text-sm font-manrope text-text-primary flex items-center gap-1 sm:gap-2">
+        <div className="text-xs sm:text-sm font-manrope text-text-primary whitespace-nowrap">
           <span className="font-semibold text-text-primary">
             {row.current_enrollment || 0}
           </span>
-          <span className="text-text-muted">/ {value}</span>
+          <span className="text-text-muted"> / {value}</span>
         </div>
       ),
     },
@@ -487,7 +489,7 @@ export default function Classes() {
       label: "Age",
       hideOnMobile: true,
       render: (value, row) => (
-        <span className="text-sm font-manrope text-text-muted">
+        <span className="text-xs font-manrope text-text-muted whitespace-nowrap">
           {row.min_age || 0} - {row.max_age || 18} yrs
         </span>
       ),
@@ -497,7 +499,7 @@ export default function Classes() {
       label: "Type",
       hideOnMobile: true,
       render: (value) => (
-        <span className="text-xs font-manrope px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+        <span className="text-xs font-manrope px-2 py-1 rounded-full bg-gray-100 text-gray-700 whitespace-nowrap">
           {value === "one-time" ? "One-time" : value === "membership" ? "Membership" : "N/A"}
         </span>
       ),
@@ -509,7 +511,7 @@ export default function Classes() {
       sortable: true,
       render: (value) => (
         <span
-          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${
+          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap ${
             value
               ? "bg-[#DFF5E8] text-status-success"
               : "bg-amber-100 text-amber-700"

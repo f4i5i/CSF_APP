@@ -550,9 +550,12 @@ export default function useClassForm(initialData = null, mode = 'create') {
       // Merge formData with any overrides
       const mergedData = { ...formData, ...overrides };
 
+      // Remove slug from mergedData - we'll add it conditionally below
+      const { slug: _slug, ...mergedDataWithoutSlug } = mergedData;
+
       // Prepare data for API
       const apiData = {
-        ...mergedData,
+        ...mergedDataWithoutSlug,
         capacity: parseInt(formData.capacity),
         min_age: parseInt(formData.min_age),
         max_age: parseInt(formData.max_age),
@@ -568,8 +571,8 @@ export default function useClassForm(initialData = null, mode = 'create') {
         website_link: formData.website_link,
         // Multiple coaches support
         coach_ids: formData.coach_ids || [],
-        // Custom URL slug
-        slug: formData.slug || '',
+        // Custom URL slug - only include if it has a value (backend may reject empty strings)
+        ...(formData.slug?.trim() ? { slug: formData.slug.trim() } : {}),
 
         // Only send enabled payment options with prices and custom names
         payment_options: formData.payment_options

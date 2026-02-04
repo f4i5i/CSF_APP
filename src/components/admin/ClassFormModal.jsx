@@ -179,6 +179,20 @@ export default function ClassFormModal({
   // Registration link state
   const [registrationLinkCopied, setRegistrationLinkCopied] = useState(false);
 
+  // Track if slug has been manually edited by user (to stop auto-generation)
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
+  // Reset slug manually edited flag when modal opens with new data
+  useEffect(() => {
+    // If editing an existing class with a slug, consider it manually set
+    // If creating new or cloning, allow auto-generation
+    if (mode === 'edit' && initialData?.slug) {
+      setSlugManuallyEdited(true);
+    } else {
+      setSlugManuallyEdited(false);
+    }
+  }, [initialData, mode]);
+
   // Generate registration link preview
   const getRegistrationLink = () => {
     if (initialData?.id) {
@@ -201,11 +215,21 @@ export default function ClassFormModal({
       .slice(0, 50);
   };
 
-  // Auto-generate slug when name changes (only if slug is empty)
+  // Auto-generate slug when name changes (unless user has manually edited the slug)
   const handleNameChange = (value) => {
     updateField("name", value);
-    if (!formData.slug && value) {
+    if (!slugManuallyEdited && value) {
       updateField("slug", generateSlug(value));
+    }
+  };
+
+  // Handle manual slug input - sets the flag to stop auto-generation
+  const handleSlugChange = (value) => {
+    const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    updateField("slug", sanitizedValue);
+    // Mark as manually edited once user types in the slug field
+    if (!slugManuallyEdited) {
+      setSlugManuallyEdited(true);
     }
   };
 
@@ -435,7 +459,7 @@ export default function ClassFormModal({
                     <input
                       type="text"
                       value={formData.slug || ''}
-                      onChange={(e) => updateField("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      onChange={(e) => handleSlugChange(e.target.value)}
                       className="flex-1 px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light font-mono text-sm"
                       style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
                       placeholder="u10-soccer-fall-2024"
