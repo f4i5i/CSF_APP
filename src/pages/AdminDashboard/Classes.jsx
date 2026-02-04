@@ -605,10 +605,10 @@ export default function Classes() {
   };
 
   return (
-    <div className="h-full">
+    <div className="min-h-screen pb-8">
       <Header />
 
-      <div className="max-w-9xl mx-auto px-3 sm:px-4">
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 pb-8">
         <div className="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
