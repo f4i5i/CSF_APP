@@ -550,12 +550,17 @@ export default function useClassForm(initialData = null, mode = 'create') {
       // Merge formData with any overrides
       const mergedData = { ...formData, ...overrides };
 
-      // Remove slug from mergedData - we'll add it conditionally below
-      const { slug: _slug, ...mergedDataWithoutSlug } = mergedData;
+      // Remove fields that need special handling
+      const {
+        slug: _slug,
+        ...mergedDataWithoutExcluded
+      } = mergedData;
 
       // Prepare data for API
       const apiData = {
-        ...mergedDataWithoutSlug,
+        ...mergedDataWithoutExcluded,
+        // Include is_active - backend now supports it for both create and update
+        is_active: mergedData.is_active ?? true,
         capacity: parseInt(formData.capacity),
         min_age: parseInt(formData.min_age),
         max_age: parseInt(formData.max_age),
