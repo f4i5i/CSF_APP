@@ -17,6 +17,8 @@ export const API_ENDPOINTS = {
     GOOGLE: '/auth/google',
     LOGOUT: '/auth/logout',
     CHANGE_PASSWORD: '/auth/change-password',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
   },
 
   // ===================

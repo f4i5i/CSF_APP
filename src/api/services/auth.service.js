@@ -132,6 +132,19 @@ const authService = {
   getRefreshToken() {
     return localStorage.getItem(API_CONFIG.REFRESH_TOKEN_STORAGE_KEY);
   },
+
+  async forgotPassword(email) {
+    const { data } = await apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+    return data;
+  },
+
+  async resetPassword(token, newPassword) {
+    const { data } = await apiClient.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+      token,
+      new_password: newPassword,
+    });
+    return data;
+  },
 };
 
 export default authService;

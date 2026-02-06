@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import LogoLogin from '../components/LogoLogin'
 import toast from 'react-hot-toast'
-import { authService } from '../api/services/auth.service'
+import authService from '../api/services/auth.service'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
