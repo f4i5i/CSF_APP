@@ -232,7 +232,7 @@ export default function UserFormModal({
 
       if (mode === "create") {
         await usersService.create(submitData);
-        toast.success("User created successfully");
+        toast.success("User created successfully. A welcome email with login instructions has been sent.");
       } else {
         await usersService.updateUser(initialData.id, submitData);
         toast.success("User updated successfully");
@@ -404,6 +404,13 @@ export default function UserFormModal({
               <p className="text-xs text-gray-500 mt-1">
                 Password must be at least 8 characters with uppercase, lowercase, and a digit
               </p>
+              {mode === "create" && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-xs text-blue-700">
+                    A welcome email with a password setup link will be sent to the user automatically.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Active Status */}

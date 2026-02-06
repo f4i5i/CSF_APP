@@ -173,6 +173,11 @@ export default function ProtectedRoute({ children, requiredRole }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Force password change redirect
+  if (user.must_change_password && location.pathname !== '/force-password-change') {
+    return <Navigate to="/force-password-change" replace />;
+  }
+
   // ========================================
   // ROLE-BASED ACCESS CONTROL (RBAC)
   // ========================================

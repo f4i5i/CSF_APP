@@ -15,9 +15,13 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect logged-in users to their dashboard
+  // Redirect logged-in users to their dashboard (or force password change)
   useEffect(() => {
     if (user) {
+      if (user.must_change_password) {
+        navigate("/force-password-change", { replace: true });
+        return;
+      }
       const normalizedRole = user?.role?.toUpperCase();
       const roleRoutes = {
         COACH: "/coachdashboard",
@@ -87,6 +91,11 @@ export default function Login() {
 
     try {
       const user = await login(email, password);
+      // Check if user must change password on first login
+      if (user?.must_change_password) {
+        navigate("/force-password-change", { replace: true });
+        return;
+      }
       redirectForRole(user);
     } catch (error) {
       // Error toast is already shown by auth context
@@ -99,6 +108,10 @@ export default function Login() {
   const handleGoogleSuccess = async (credential) => {
     try {
       const user = await loginWithGoogle(credential);
+      if (user?.must_change_password) {
+        navigate("/force-password-change", { replace: true });
+        return;
+      }
       redirectForRole(user);
     } catch (error) {
       // Error toast is already shown by auth context

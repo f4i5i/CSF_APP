@@ -138,10 +138,11 @@ const authService = {
     return data;
   },
 
-  async resetPassword(token, newPassword) {
+  async resetPassword(token, newPassword, confirmPassword) {
     const { data } = await apiClient.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
       token,
       new_password: newPassword,
+      confirm_password: confirmPassword || newPassword,
     });
     return data;
   },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import LogoLogin from '../components/LogoLogin'
 import toast from 'react-hot-toast'
@@ -8,11 +8,24 @@ export default function ResetPassword() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const token = searchParams.get('token')
+  const isWelcome = searchParams.get('welcome') === 'true'
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [countdown, setCountdown] = useState(3)
+
+  // Auto-redirect to login after success
+  useEffect(() => {
+    if (!success) return
+    if (countdown <= 0) {
+      navigate('/login', { replace: true })
+      return
+    }
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [success, countdown, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -40,9 +53,9 @@ export default function ResetPassword() {
     setLoading(true)
 
     try {
-      await authService.resetPassword(token, password)
+      await authService.resetPassword(token, password, confirmPassword)
       setSuccess(true)
-      toast.success('Password reset successfully!')
+      toast.success(isWelcome ? 'Password set successfully!' : 'Password reset successfully!')
     } catch (error) {
       const message = error.response?.data?.detail || 'Failed to reset password. The link may have expired.'
       toast.error(message)
@@ -89,16 +102,21 @@ export default function ResetPassword() {
               <LogoLogin />
             </div>
             <h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
-              Password Reset Successful
+              {isWelcome ? 'Account Setup Complete!' : 'Password Reset Successful'}
             </h2>
             <p className="text-center font-manrope font-normal text-xs sm:text-sm md:text-base text-[#666D80] mt-2 mb-4 sm:mb-6">
-              Your password has been updated. You can now log in with your new password.
+              {isWelcome
+                ? 'Your password has been set. Redirecting you to login...'
+                : 'Your password has been updated. Redirecting you to login...'}
+            </p>
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Redirecting in {countdown} second{countdown !== 1 ? 's' : ''}...
             </p>
             <Link
               to="/login"
               className="block w-full text-center bg-primary font-['inter'] py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] transition hover:bg-yellow-500"
             >
-              Go to Login
+              Go to Login Now
             </Link>
           </div>
         </div>
@@ -115,10 +133,12 @@ export default function ResetPassword() {
             <LogoLogin />
           </div>
           <h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
-            Reset Your Password
+            {isWelcome ? 'Welcome! Set Your Password' : 'Reset Your Password'}
           </h2>
           <p className="text-center font-manrope font-normal text-xs sm:text-sm md:text-base text-[#666D80] mt-1 mb-3 sm:mb-4 md:mb-6">
-            Enter your new password below.
+            {isWelcome
+              ? 'Create a password to get started with your account.'
+              : 'Enter your new password below.'}
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -157,7 +177,7 @@ export default function ResetPassword() {
               className="w-full bg-primary font-['inter'] py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] transition hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? 'Resetting...' : 'Reset Password'}
+              {loading ? 'Setting Password...' : (isWelcome ? 'Set Password' : 'Reset Password')}
             </button>
           </form>
 

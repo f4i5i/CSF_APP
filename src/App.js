@@ -48,6 +48,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import ForcePasswordChange from './pages/ForcePasswordChange'
 
 // ========================================
 // IMPORTS - Parent Pages
@@ -194,6 +195,11 @@ return (
   <Route path="/register" element={<Register />} />
   <Route path="/forgot-password" element={<ForgotPassword />} />
   <Route path="/reset-password" element={<ResetPassword />} />
+  <Route path="/force-password-change" element={
+    <ProtectedRoute>
+      <ForcePasswordChange />
+    </ProtectedRoute>
+  } />
 </Route>
 
 {/* ========================================
