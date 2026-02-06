@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import LogoLogin from '../components/LogoLogin'
 import toast from 'react-hot-toast'
+import { authService } from '../api/services/auth.service'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -25,10 +26,7 @@ export default function ForgotPassword() {
     setLoading(true)
 
     try {
-      // TODO: Implement backend API call for password reset
-      // For now, just simulate success
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
+      await authService.forgotPassword(email)
       setSubmitted(true)
       toast.success('Password reset instructions sent to your email')
     } catch (error) {

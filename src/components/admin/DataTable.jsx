@@ -243,19 +243,19 @@ export default function DataTable({
   }
 
   return (
-    <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="relative bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col h-full">
       {/* Table */}
-      <div className="overflow-x-auto custom-scrollbar">
+      <div className="overflow-auto custom-scrollbar flex-1 min-h-0">
         <table className="w-full min-w-[800px]">
-          <thead className="bg-white border-b border-border-light">
+          <thead className="bg-white border-b border-border-light sticky top-0 z-10">
             <tr>
               {/* Empty header for expand column */}
-              {expandable && <th className="w-10"></th>}
+              {expandable && <th className="w-10 bg-white"></th>}
               {columns.map((column, index) => (
                 <th
                   key={index}
                   onClick={() => handleSort(column)}
-                  className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-manrope font-semibold text-heading-dark uppercase tracking-wider ${
+                  className={`px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-manrope font-semibold text-heading-dark uppercase tracking-wider bg-white ${
                     column.sortable
                       ? "cursor-pointer hover:bg-gray-100 select-none"
                       : ""
@@ -347,7 +347,7 @@ export default function DataTable({
 
       {/* Pagination */}
       {pagination && (
-        <div className="sm:px-6 px-3 py-4 border-t border-border-light flex flex-col sm:flex-row items-center justify-between gap-3 bg-white">
+        <div className="shrink-0 sm:px-6 px-3 py-4 border-t border-border-light flex flex-col sm:flex-row items-center justify-between gap-3 bg-white">
           {/* Results info */}
           <div className="text-xs sm:text-sm text-text-muted font-semibold font-manrope text-center sm:text-left">
             Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}

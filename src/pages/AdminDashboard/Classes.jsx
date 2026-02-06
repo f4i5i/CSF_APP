@@ -32,7 +32,7 @@ export default function Classes() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
+  const itemsPerPage = 8;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create"); // 'create' | 'edit'
@@ -605,11 +605,11 @@ export default function Classes() {
   };
 
   return (
-    <div className="min-h-screen pb-8">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
 
-      <div className="max-w-9xl mx-auto px-3 sm:px-4 pb-8">
-        <div className="mb-4 sm:mb-8 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
           <div className="flex-1 min-w-0">
             <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
               Classes Management
@@ -627,25 +627,29 @@ export default function Classes() {
             <span className="hidden xs:inline">Create </span>Class
           </button>
         </div>
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by class name or description..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
-        <DataTable
-          columns={columns}
-          data={classes}
-          loading={loading}
-          emptyMessage="No classes found"
-          pagination={true}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by class name or description..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
+          <DataTable
+            columns={columns}
+            data={classes}
+            loading={loading}
+            emptyMessage="No classes found"
+            pagination={true}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
 
       <ClassFormModal

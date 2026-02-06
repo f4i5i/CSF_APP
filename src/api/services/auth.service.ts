@@ -683,6 +683,22 @@ export const authService = {
     // Retrieve refresh token from localStorage
     return localStorage.getItem(API_CONFIG.REFRESH_TOKEN_STORAGE_KEY);
   },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const { data } = await apiClient.post<{ message: string }>(
+      ENDPOINTS.AUTH.FORGOT_PASSWORD,
+      { email }
+    );
+    return data;
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    const { data } = await apiClient.post<{ message: string }>(
+      ENDPOINTS.AUTH.RESET_PASSWORD,
+      { token, new_password: newPassword }
+    );
+    return data;
+  },
 };
 
 // ========================================

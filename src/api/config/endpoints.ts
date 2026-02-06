@@ -16,6 +16,8 @@ export const ENDPOINTS = {
     TOKEN: '/auth/token', // OAuth2 compatible endpoint
     GOOGLE: '/auth/google',
     LOGOUT: '/auth/logout',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
   },
 
   // ===================
