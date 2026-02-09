@@ -310,6 +310,9 @@ export const API_ENDPOINTS = {
     CANCELLATION_REQUEST_APPROVE: (id) => `/cancellation-requests/${id}/approve`, // Approve
     CANCELLATION_REQUEST_REJECT: (id) => `/cancellation-requests/${id}/reject`, // Reject
     CANCELLATION_REQUESTS_STATS: '/cancellation-requests/stats/summary', // Get stats
+
+    // Support
+    SEND_SUPPORT_LOGS: '/admin/support/send-logs', // Send server logs to developer
   },
 
   // ===================

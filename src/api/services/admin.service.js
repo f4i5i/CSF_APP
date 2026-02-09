@@ -232,6 +232,15 @@ const adminService = {
     const { data } = await apiClient.get('/admin/invoices/stats');
     return data;
   },
+
+  /**
+   * Send server logs to developer for support
+   * @returns {Promise<Object>} Success message
+   */
+  async sendSupportLogs() {
+    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.SEND_SUPPORT_LOGS);
+    return data;
+  },
 };
 
 export default adminService;

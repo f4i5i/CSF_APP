@@ -31,6 +31,7 @@ import {
   MessageCircle,
   X,
   Compass,
+  Headphones,
 } from "lucide-react";
 
 // Icons - Material UI
@@ -39,6 +40,10 @@ import { Person } from "@mui/icons-material";
 // Components
 import Logo from "./Logo";
 import AdminSidebar from "./AdminSidebar/AdminSidebar";
+
+// Services
+import toast from "react-hot-toast";
+import adminService from "../api/services/admin.service";
 
 // Context
 import { useAuth } from "../context/auth";
@@ -68,6 +73,9 @@ const Header = () => {
   // Mobile sidebar state for hamburger menu
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Support logs sending state
+  const [sendingLogs, setSendingLogs] = useState(false);
+
   // Ref for click-outside detection on dropdown
   const dropdownRef = useRef(null);
 
@@ -84,6 +92,21 @@ const Header = () => {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // ------------------------------------------------------------------------
+  // HANDLERS
+  // ------------------------------------------------------------------------
+  const handleSendSupportLogs = async () => {
+    setSendingLogs(true);
+    try {
+      await adminService.sendSupportLogs();
+      toast.success("Server logs sent to developer!");
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to send logs");
+    } finally {
+      setSendingLogs(false);
+    }
+  };
 
   // ------------------------------------------------------------------------
   // HELPER COMPONENTS
@@ -415,6 +438,18 @@ const Header = () => {
         {/* Admin: Profile image only (no dropdown menu) */}
         {/* ================================================================ */}
         <div className="hidden md:flex items-center gap-3 mr-12 relative" ref={dropdownRef}>
+          {/* Support button - Admin only */}
+          {role === "admin" && (
+            <button
+              onClick={handleSendSupportLogs}
+              disabled={sendingLogs}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium font-manrope bg-[#173151] text-white rounded-lg hover:bg-[#1f3d67] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Send server logs to developer"
+            >
+              <Headphones className="w-3.5 h-3.5" />
+              {sendingLogs ? "Sending..." : "Support"}
+            </button>
+          )}
           <div className="flex items-center gap-3">
             {/* Profile image - display only (not clickable) */}
             <img
