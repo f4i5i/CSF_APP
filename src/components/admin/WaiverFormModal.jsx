@@ -115,8 +115,8 @@ const WaiverFormModal = ({ waiver = null, onClose, onSuccess }) => {
     } catch (error) {
       console.error('Failed to save waiver:', error);
       const errorMessage =
+        error.message ||
         error.response?.data?.message ||
-        error.response?.data?.error ||
         `Failed to ${isEdit ? 'update' : 'create'} waiver template`;
       toast.error(errorMessage);
     } finally {

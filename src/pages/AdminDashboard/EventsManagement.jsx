@@ -300,7 +300,7 @@ export default function EventsManagement() {
       fetchEvents();
     } catch (error) {
       console.error("Failed to save event:", error);
-      toast.error(error.response?.data?.detail || "Failed to save event");
+      toast.error(error.message || "Failed to save event");
     } finally {
       setSaving(false);
     }

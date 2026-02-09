@@ -321,12 +321,7 @@ export default function ClassFormModal({
       toast.success("Site created successfully!");
     } catch (error) {
       console.error("Failed to create site:", error);
-      const errorMsg = error.response?.data?.detail;
-      if (Array.isArray(errorMsg)) {
-        toast.error(errorMsg.map(e => e.msg || e.message).join(", ") || "Failed to create site");
-      } else {
-        toast.error(errorMsg || "Failed to create site");
-      }
+      toast.error(error.message || "Failed to create site");
     } finally {
       setCreatingSite(false);
     }

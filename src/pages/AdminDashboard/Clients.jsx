@@ -104,7 +104,7 @@ export default function Clients() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete client:", error);
-      const errorMessage = error.response?.data?.message || "Failed to delete client";
+      const errorMessage = error.message || "Failed to delete client";
       toast.error(errorMessage);
     }
   };

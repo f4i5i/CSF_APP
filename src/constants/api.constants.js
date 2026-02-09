@@ -86,6 +86,7 @@ export const API_ENDPOINTS = {
     CREATE: '/classes', // Create class (ADMIN)
     UPDATE: (id) => `/classes/${id}`, // Update class (ADMIN)
     DELETE: (id) => `/classes/${id}`, // Delete class (ADMIN)
+    IMAGE_UPLOAD: (id) => `/classes/${id}/image`, // Upload class image (ADMIN)
   },
 
   // ===================

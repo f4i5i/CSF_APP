@@ -450,8 +450,8 @@ export default function useClassForm(initialData = null, mode = 'create') {
     }
 
     if (formData.min_age !== '' && formData.max_age !== '') {
-      if (parseInt(formData.max_age) <= parseInt(formData.min_age)) {
-        newErrors.max_age = 'Maximum age must be greater than minimum age';
+      if (parseInt(formData.max_age) < parseInt(formData.min_age)) {
+        newErrors.max_age = 'Maximum age must be greater than or equal to minimum age';
       }
     }
 
@@ -556,6 +556,9 @@ export default function useClassForm(initialData = null, mode = 'create') {
         ...mergedDataWithoutExcluded
       } = mergedData;
 
+      // Helper: convert empty strings to undefined so they're omitted from payload
+      const emptyToNull = (val) => (typeof val === 'string' && !val.trim()) ? undefined : val;
+
       // Prepare data for API
       const apiData = {
         ...mergedDataWithoutExcluded,
@@ -565,18 +568,20 @@ export default function useClassForm(initialData = null, mode = 'create') {
         min_age: parseInt(formData.min_age),
         max_age: parseInt(formData.max_age),
 
-        // NEW: Include new fields
-        school_id: formData.school_id,
-        school_code: formData.school_code,
-        registration_start_date: formData.registration_start_date,
-        registration_end_date: formData.registration_end_date,
-        recurrence_pattern: formData.recurrence_pattern,
+        // Optional string fields - send null instead of empty strings
+        description: emptyToNull(formData.description),
+        school_id: emptyToNull(formData.school_id),
+        school_code: emptyToNull(formData.school_code),
+        website_link: emptyToNull(formData.website_link),
+        area_id: emptyToNull(formData.area_id),
+        registration_start_date: emptyToNull(formData.registration_start_date),
+        registration_end_date: emptyToNull(formData.registration_end_date),
+        recurrence_pattern: emptyToNull(formData.recurrence_pattern),
         repeat_every_weeks: parseInt(formData.repeat_every_weeks),
         class_type: formData.class_type,
-        website_link: formData.website_link,
         // Multiple coaches support
         coach_ids: formData.coach_ids || [],
-        // Custom URL slug - only include if it has a value (backend may reject empty strings)
+        // Custom URL slug - only include if it has a value (backend rejects empty strings due to regex pattern)
         ...(formData.slug?.trim() ? { slug: formData.slug.trim() } : {}),
 
         // Only send enabled payment options with prices and custom names
@@ -588,26 +593,11 @@ export default function useClassForm(initialData = null, mode = 'create') {
             price: parseFloat(opt.price),
             custom_name: opt.custom_name || '',
           })),
-
-        // Custom fees (filter out empty ones)
-        custom_fees: formData.custom_fees
-          .filter(fee => fee.name && fee.name.trim())
-          .map(fee => ({
-            name: fee.name.trim(),
-            amount: parseFloat(fee.amount) || 0,
-            is_optional: fee.is_optional ?? true,
-            description: fee.description?.trim() || '',
-          })),
       };
 
-      // Handle image upload if image exists
-      if (formData.class_image instanceof File) {
-        // TODO: Upload image to storage and get URL
-        // apiData.class_image_url = await uploadImage(formData.class_image);
-      } else if (typeof formData.class_image === 'string') {
-        // If it's already a URL (edit mode)
-        apiData.class_image_url = formData.class_image;
-      }
+      // custom_fees and class_image are included via the spread of mergedDataWithoutExcluded.
+      // The classes.service.js transformClassDataToBackend() handles custom_fees transformation,
+      // and the service create/update methods handle image upload as a separate API call.
 
       if (mode === 'create') {
         await classesService.create(apiData);
@@ -621,7 +611,7 @@ export default function useClassForm(initialData = null, mode = 'create') {
         onSuccess();
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Failed to save class';
+      const errorMessage = error.message || error.response?.data?.message || 'Failed to save class';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

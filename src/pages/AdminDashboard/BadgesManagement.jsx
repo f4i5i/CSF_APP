@@ -225,7 +225,7 @@ export default function BadgesManagement() {
       fetchBadges();
     } catch (error) {
       console.error('Failed to bulk award badge:', error);
-      toast.error(error.response?.data?.detail || 'Failed to award badge to class');
+      toast.error(error.message || 'Failed to award badge to class');
     } finally {
       setSaving(false);
     }
@@ -268,7 +268,7 @@ export default function BadgesManagement() {
       fetchBadges();
     } catch (error) {
       console.error('Failed to save badge:', error);
-      toast.error(error.response?.data?.detail || 'Failed to save badge');
+      toast.error(error.message || 'Failed to save badge');
     } finally {
       setSaving(false);
     }
@@ -293,7 +293,7 @@ export default function BadgesManagement() {
       fetchBadges();
     } catch (error) {
       console.error('Failed to award badge:', error);
-      toast.error(error.response?.data?.detail || 'Failed to award badge');
+      toast.error(error.message || 'Failed to award badge');
     } finally {
       setSaving(false);
     }
@@ -310,7 +310,7 @@ export default function BadgesManagement() {
       fetchBadges();
     } catch (error) {
       console.error('Failed to delete badge:', error);
-      toast.error(error.response?.data?.detail || 'Failed to delete badge');
+      toast.error(error.message || 'Failed to delete badge');
     } finally {
       setSaving(false);
     }

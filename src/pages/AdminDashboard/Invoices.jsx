@@ -73,7 +73,7 @@ export default function Invoices() {
       console.error('Failed to sync invoices:', error);
       setSyncMessage({
         type: 'error',
-        text: error.response?.data?.detail || 'Failed to sync invoices from Stripe'
+        text: error.message || 'Failed to sync invoices from Stripe'
       });
       toast.error('Failed to sync invoices');
     } finally {

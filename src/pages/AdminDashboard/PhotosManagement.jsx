@@ -120,7 +120,7 @@ export default function PhotosManagement() {
       fetchPhotos();
     } catch (error) {
       console.error('Failed to upload photos:', error);
-      toast.error(error.response?.data?.detail || 'Failed to upload photos');
+      toast.error(error.message || 'Failed to upload photos');
     } finally {
       setUploading(false);
     }
@@ -142,7 +142,7 @@ export default function PhotosManagement() {
       fetchCategories();
     } catch (error) {
       console.error('Failed to create category:', error);
-      toast.error(error.response?.data?.detail || 'Failed to create category');
+      toast.error(error.message || 'Failed to create category');
     } finally {
       setSaving(false);
     }
@@ -176,7 +176,7 @@ export default function PhotosManagement() {
       fetchPhotos();
     } catch (error) {
       console.error('Failed to delete photos:', error);
-      toast.error(error.response?.data?.detail || 'Failed to delete photos');
+      toast.error(error.message || 'Failed to delete photos');
     } finally {
       setSaving(false);
     }

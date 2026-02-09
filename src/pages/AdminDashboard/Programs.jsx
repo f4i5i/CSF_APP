@@ -85,7 +85,7 @@ export default function Programs() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete program:", error);
-      toast.error(error.response?.data?.message || "Failed to delete program");
+      toast.error(error.message || "Failed to delete program");
     }
   };
 

@@ -85,7 +85,7 @@ export default function Areas() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete area:", error);
-      toast.error(error.response?.data?.message || "Failed to delete area. It may have associated schools.");
+      toast.error(error.message || "Failed to delete area. It may have associated schools.");
     }
   };
 

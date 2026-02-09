@@ -256,7 +256,7 @@ export default function AnnouncementsManagement() {
       fetchAnnouncements();
     } catch (error) {
       console.error("Failed to save announcement:", error);
-      toast.error(error.response?.data?.detail || "Failed to save announcement");
+      toast.error(error.message || "Failed to save announcement");
     } finally {
       setSaving(false);
     }

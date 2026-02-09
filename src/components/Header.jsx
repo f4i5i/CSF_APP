@@ -102,7 +102,7 @@ const Header = () => {
       await adminService.sendSupportLogs();
       toast.success("Server logs sent to developer!");
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Failed to send logs");
+      toast.error(error.message || "Failed to send logs");
     } finally {
       setSendingLogs(false);
     }

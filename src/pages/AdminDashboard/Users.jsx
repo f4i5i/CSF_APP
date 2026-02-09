@@ -105,7 +105,7 @@ export default function Users() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete user:", error);
-      const errorMessage = error.response?.data?.message || "Failed to delete user";
+      const errorMessage = error.message || "Failed to delete user";
       toast.error(errorMessage);
     }
   };

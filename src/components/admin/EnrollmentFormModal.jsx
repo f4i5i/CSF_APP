@@ -365,8 +365,8 @@ export default function EnrollmentFormModal({
     } catch (error) {
       console.error("Failed to save enrollment:", error);
       const errorMessage =
+        error.message ||
         error.response?.data?.message ||
-        error.response?.data?.detail ||
         `Failed to ${mode === "create" ? "create" : "update"} enrollment`;
       toast.error(errorMessage);
     } finally {

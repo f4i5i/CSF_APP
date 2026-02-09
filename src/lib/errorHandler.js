@@ -82,6 +82,19 @@ export const handleApiError = (error) => {
     };
   }
 
+  // Handle Pydantic 422 validation errors: { detail: [{ loc, msg, type }] }
+  if (status === 422 && Array.isArray(data?.detail)) {
+    const firstError = data.detail[0];
+    const fieldName = firstError?.loc?.slice(-1)[0] || 'input';
+    const errorMsg = firstError?.msg || 'Validation error';
+    return {
+      message: `${fieldName}: ${errorMsg}`,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      status,
+      details: data.detail,
+    };
+  }
+
   // FastAPI error format: { error_code, message, data }
   const errorCode = data?.error_code || `HTTP_${status}`;
   const errorMessage = data?.message || ERROR_MESSAGES[errorCode] || 'An error occurred';

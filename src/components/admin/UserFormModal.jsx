@@ -242,8 +242,8 @@ export default function UserFormModal({
     } catch (error) {
       console.error("Failed to save user:", error);
       const errorMessage =
+        error.message ||
         error.response?.data?.message ||
-        error.response?.data?.detail ||
         `Failed to ${mode === "create" ? "create" : "update"} user`;
       toast.error(errorMessage);
     } finally {

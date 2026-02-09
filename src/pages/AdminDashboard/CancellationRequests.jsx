@@ -120,7 +120,7 @@ export default function CancellationRequests() {
       fetchStats();
     } catch (error) {
       console.error('Failed to approve cancellation:', error);
-      toast.error(error.response?.data?.detail || 'Failed to approve cancellation');
+      toast.error(error.message || 'Failed to approve cancellation');
     } finally {
       setProcessing(false);
     }
@@ -145,7 +145,7 @@ export default function CancellationRequests() {
       fetchStats();
     } catch (error) {
       console.error('Failed to reject cancellation:', error);
-      toast.error(error.response?.data?.detail || 'Failed to reject cancellation');
+      toast.error(error.message || 'Failed to reject cancellation');
     } finally {
       setProcessing(false);
     }

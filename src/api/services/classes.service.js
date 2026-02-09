@@ -101,7 +101,7 @@ const transformPaymentOptionsToBackend = (paymentOptions) => {
  * Transform frontend class data to backend format
  */
 const transformClassDataToBackend = (classData) => {
-  const { schedule, payment_options, class_type, ...rest } = classData;
+  const { schedule, payment_options, class_type, custom_fees, ...rest } = classData;
 
   // Transform schedule
   const scheduleData = transformScheduleToBackend(schedule);
@@ -117,11 +117,22 @@ const transformClassDataToBackend = (classData) => {
   const firstPaymentOption = payment_options?.find(opt => opt.enabled);
   const price = firstPaymentOption ? parseFloat(firstPaymentOption.price) : 0;
 
+  // Transform custom fees (filter out empty ones)
+  const transformedCustomFees = custom_fees
+    ?.filter(fee => fee.name && fee.name.trim())
+    .map(fee => ({
+      name: fee.name.trim(),
+      amount: parseFloat(fee.amount) || 0,
+      is_optional: fee.is_optional ?? true,
+      description: fee.description?.trim() || '',
+    })) || [];
+
   return {
     ...rest,
     ...scheduleData,
     class_type: mappedClassType,
     payment_options: transformedPaymentOptions,
+    custom_fees: transformedCustomFees.length > 0 ? transformedCustomFees : undefined,
     price, // Legacy field - use first enabled payment option
     auto_create_stripe_prices: true, // Enable automatic Stripe Price creation
   };
@@ -221,17 +232,29 @@ const classesService = {
     // Transform frontend data to backend format
     const transformedData = transformClassDataToBackend(classData);
 
-    // TODO: Handle image upload if class_image is a File
-    // For now, we'll skip image upload and use image_url if provided
-    if (classData.class_image instanceof File) {
-      console.warn('Image upload not yet implemented. Skipping image.');
-      delete transformedData.class_image;
-    } else if (typeof classData.class_image === 'string') {
+    // Extract image File for separate upload after class creation
+    const imageFile = classData.class_image instanceof File ? classData.class_image : null;
+    delete transformedData.class_image;
+
+    // If it's a string URL (not a File), pass as image_url
+    if (typeof classData.class_image === 'string' && classData.class_image) {
       transformedData.image_url = classData.class_image;
-      delete transformedData.class_image;
     }
 
     const { data } = await apiClient.post(API_ENDPOINTS.CLASSES.CREATE, transformedData);
+
+    // Upload image as a separate call after class creation
+    if (imageFile && data.id) {
+      try {
+        const updatedData = await this.uploadImage(data.id, imageFile);
+        return updatedData;
+      } catch (err) {
+        console.error('Image upload failed:', err);
+        // Return class data even if image upload fails
+        return data;
+      }
+    }
+
     return data;
   },
 
@@ -245,16 +268,45 @@ const classesService = {
     // Transform frontend data to backend format
     const transformedData = transformClassDataToBackend(classData);
 
-    // TODO: Handle image upload if class_image is a File
-    if (classData.class_image instanceof File) {
-      console.warn('Image upload not yet implemented. Skipping image.');
-      delete transformedData.class_image;
-    } else if (typeof classData.class_image === 'string') {
+    // Extract image File for separate upload
+    const imageFile = classData.class_image instanceof File ? classData.class_image : null;
+    delete transformedData.class_image;
+
+    // If it's a string URL (not a File), pass as image_url
+    if (typeof classData.class_image === 'string' && classData.class_image) {
       transformedData.image_url = classData.class_image;
-      delete transformedData.class_image;
     }
 
     const { data } = await apiClient.put(API_ENDPOINTS.CLASSES.BY_ID(id), transformedData);
+
+    // Upload new image if provided
+    if (imageFile) {
+      try {
+        const updatedData = await this.uploadImage(id, imageFile);
+        return updatedData;
+      } catch (err) {
+        console.error('Image upload failed:', err);
+        return data;
+      }
+    }
+
+    return data;
+  },
+
+  /**
+   * Upload an image for a class (admin only)
+   * @param {string} classId - Class ID
+   * @param {File} file - Image file
+   * @returns {Promise<Object>} Updated class data
+   */
+  async uploadImage(classId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.CLASSES.IMAGE_UPLOAD(classId),
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
     return data;
   },
 

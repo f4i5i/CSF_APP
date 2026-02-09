@@ -51,7 +51,7 @@ export default function Waitlist() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error('Failed to move to enrolled:', error);
-      alert('Failed to move student to enrolled: ' + (error.response?.data?.message || error.message));
+      alert('Failed to move student to enrolled: ' + (error.message || 'Unknown error'));
     }
   };
 

@@ -117,7 +117,7 @@ export default function Enrollments() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error('Failed to delete enrollment:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete enrollment');
+      toast.error(error.message || 'Failed to delete enrollment');
     }
   };
 
@@ -129,7 +129,7 @@ export default function Enrollments() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error('Failed to cancel enrollment:', error);
-      toast.error(error.response?.data?.message || 'Failed to cancel enrollment');
+      toast.error(error.message || 'Failed to cancel enrollment');
     }
   };
 
@@ -140,7 +140,7 @@ export default function Enrollments() {
       fetchEnrollments();
     } catch (error) {
       console.error('Failed to activate enrollment:', error);
-      toast.error(error.response?.data?.message || 'Failed to activate enrollment');
+      toast.error(error.message || 'Failed to activate enrollment');
     }
   };
 

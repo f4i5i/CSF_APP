@@ -105,7 +105,7 @@ export default function Schools() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete school:", error);
-      toast.error(error.response?.data?.message || "Failed to delete site. It may have associated classes.");
+      toast.error(error.message || "Failed to delete site. It may have associated classes.");
     }
   };
 
