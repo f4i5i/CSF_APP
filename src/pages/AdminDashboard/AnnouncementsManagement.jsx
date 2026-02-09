@@ -419,49 +419,53 @@ export default function AnnouncementsManagement() {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
 
-      <div className="max-w-9xl mx-auto sm:px-4 px-0">
-        <div className="mb-4 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-2 justify-between">
-          <div>
-            <h1 className="lg:text-[36px] text-[20px] md:text-[28px] font-bold text-text-primary font-kollektif">
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
               Announcements Management
             </h1>
-            <p className="text-neutral-main font-manrope text-sm">
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
               Create and manage announcements for your programs
             </p>
           </div>
 
           <button
             onClick={handleCreateAnnouncement}
-            className="flex items-center gap-2 font-manrope bg-btn-gold text-text-body px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 font-manrope bg-btn-gold text-text-body px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base shrink-0"
           >
-            <Plus className="w-5 h-5" />
-            Create Announcement
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Create </span>Announcement
           </button>
         </div>
 
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by title or description..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by title or description..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
 
-        <DataTable
-          columns={columns}
-          data={announcements}
-          loading={loading}
-          emptyMessage="No announcements found"
-          pagination={true}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-        />
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
+          <DataTable
+            columns={columns}
+            data={announcements}
+            loading={loading}
+            emptyMessage="No announcements found"
+            pagination={true}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
 
       {/* Announcement Form Modal */}

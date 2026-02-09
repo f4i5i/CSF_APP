@@ -16,6 +16,7 @@ import {
 import toast from 'react-hot-toast';
 import { useApi } from '../../hooks';
 import waiversService from '../../api/services/waivers.service';
+import Header from '../../components/Header';
 
 const WaiverReports = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
@@ -164,80 +165,79 @@ const WaiverReports = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#173151]">
-                Waiver Reports
-              </h1>
-              <p className="text-gray-600 mt-2">
-                View and analyze waiver acceptances
-              </p>
-            </div>
-            <button
-              onClick={handleExportCSV}
-              disabled={filteredAcceptances.length === 0}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Download className="w-5 h-5" />
-              Export CSV
-            </button>
+    <div className="h-screen flex flex-col overflow-hidden">
+      <Header />
+
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full overflow-y-auto">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Waiver Reports
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              View and analyze waiver acceptances
+            </p>
           </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={filteredAcceptances.length === 0}
+            className="flex items-center gap-1.5 sm:gap-2 font-manrope bg-green-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base shrink-0"
+          >
+            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Export </span>CSV
+          </button>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-100 rounded-full p-3">
-                <FileText className="w-6 h-6 text-blue-600" />
+        <div className="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-blue-100 rounded-full p-2 sm:p-3 hidden sm:block">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Acceptances</p>
-                <p className="text-2xl font-bold text-[#173151]">{total}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Acceptances</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#173151]">{total}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-100 rounded-full p-3">
-                <Users className="w-6 h-6 text-green-600" />
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-green-100 rounded-full p-2 sm:p-3 hidden sm:block">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Unique Users</p>
-                <p className="text-2xl font-bold text-[#173151]">
+                <p className="text-xs sm:text-sm text-gray-600">Unique Users</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#173151]">
                   {new Set(acceptances.map((a) => a.user_id)).size}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-purple-100 rounded-full p-3">
-                <BarChart3 className="w-6 h-6 text-purple-600" />
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-purple-100 rounded-full p-2 sm:p-3 hidden sm:block">
+                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Templates</p>
-                <p className="text-2xl font-bold text-[#173151]">
+                <p className="text-xs sm:text-sm text-gray-600">Templates</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#173151]">
                   {Object.keys(stats.byTemplate).length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-orange-100 rounded-full p-3">
-                <Globe className="w-6 h-6 text-orange-600" />
+          <div className="bg-white rounded-lg shadow-sm p-3 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-orange-100 rounded-full p-2 sm:p-3 hidden sm:block">
+                <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Versions</p>
-                <p className="text-2xl font-bold text-[#173151]">
+                <p className="text-xs sm:text-sm text-gray-600">Versions</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#173151]">
                   {Object.keys(stats.byVersion).length}
                 </p>
               </div>

@@ -155,59 +155,56 @@ export default function RefundsManagement() {
   };
 
   return (
-    <div className="h-full max-sm:pb-20">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-[#173151] font-manrope">
-                Refunds
-              </h1>
-              <p className="text-gray-600 font-manrope text-sm mt-1">
-                View all refunded invoices
-              </p>
-            </div>
 
-            <button
-              onClick={() => { fetchRefunds(); fetchStats(); }}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Refunds
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              View all refunded invoices
+            </p>
           </div>
+
+          <button
+            onClick={() => { fetchRefunds(); fetchStats(); }}
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
+          >
+            <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+            Refresh
+          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 font-manrope">Total Refunded</p>
-            <p className="text-2xl font-bold text-red-600 font-manrope mt-1">
+        <div className="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-600 font-manrope">Total Refunded</p>
+            <p className="text-lg sm:text-2xl font-bold text-red-600 font-manrope mt-1">
               {formatCurrency(totalRefunded)}
             </p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 font-manrope">Refund Count</p>
-            <p className="text-2xl font-bold text-[#173151] font-manrope mt-1">
+          <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-600 font-manrope">Refund Count</p>
+            <p className="text-lg sm:text-2xl font-bold text-[#173151] font-manrope mt-1">
               {totalItems}
             </p>
           </div>
           {stats && (
             <>
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <p className="text-sm text-gray-600 font-manrope">Last 30 Days</p>
-                <p className="text-2xl font-bold text-orange-600 font-manrope mt-1">
+              <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
+                <p className="text-xs sm:text-sm text-gray-600 font-manrope">Last 30 Days</p>
+                <p className="text-lg sm:text-2xl font-bold text-orange-600 font-manrope mt-1">
                   {formatCurrency(stats.refunds_last_30_days?.amount || 0)}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                   {stats.refunds_last_30_days?.count || 0} refunds
                 </p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <p className="text-sm text-gray-600 font-manrope">Total Invoices</p>
-                <p className="text-2xl font-bold text-[#173151] font-manrope mt-1">
+              <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
+                <p className="text-xs sm:text-sm text-gray-600 font-manrope">Total Invoices</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#173151] font-manrope mt-1">
                   {stats.total_invoices || 0}
                 </p>
               </div>
@@ -215,18 +212,18 @@ export default function RefundsManagement() {
           )}
         </div>
 
-        {/* Filters */}
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by invoice # or customer..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by invoice # or customer..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
           <DataTable
             columns={columns}
             data={refunds}

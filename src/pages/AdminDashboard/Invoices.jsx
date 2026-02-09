@@ -252,44 +252,41 @@ export default function Invoices() {
     .reduce((sum, i) => sum + parseFloat(i.total || 0), 0);
 
   return (
-    <div className="h-full max-sm:pb-20">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-[#173151] font-manrope">
-                Invoices
-              </h1>
-              <p className="text-gray-600 font-manrope text-sm mt-1">
-                View and manage all invoices
+
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Invoices
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              View and manage all invoices
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-3 min-w-[80px] sm:min-w-[120px]">
+              <p className="text-[10px] sm:text-xs text-gray-600 font-manrope">Total Paid</p>
+              <p className="text-base sm:text-xl font-bold text-green-600 font-manrope">
+                {formatCurrency(paidTotal)}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="bg-white rounded-lg border border-gray-200 p-3 min-w-[120px]">
-                <p className="text-xs text-gray-600 font-manrope">Total Paid</p>
-                <p className="text-xl font-bold text-green-600 font-manrope">
-                  {formatCurrency(paidTotal)}
-                </p>
-              </div>
-
-              <button
-                onClick={handleSyncFromStripe}
-                disabled={syncing}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-btn-gold text-heading-dark rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-manrope font-semibold"
-              >
-                <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                {syncing ? 'Syncing...' : 'Sync from Stripe'}
-              </button>
-            </div>
+            <button
+              onClick={handleSyncFromStripe}
+              disabled={syncing}
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-btn-gold text-heading-dark rounded-lg hover:bg-yellow-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-manrope font-semibold"
+            >
+              <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Syncing...' : 'Sync from Stripe'}
+            </button>
           </div>
         </div>
 
-        {/* Sync Message */}
         {syncMessage && (
-          <div className={`mb-4 p-3 rounded-lg text-sm ${
+          <div className={`shrink-0 mb-3 p-2 sm:p-3 rounded-lg text-xs sm:text-sm ${
             syncMessage.type === 'success'
               ? 'bg-green-50 text-green-700 border border-green-200'
               : 'bg-red-50 text-red-700 border border-red-200'
@@ -298,18 +295,18 @@ export default function Invoices() {
           </div>
         )}
 
-        {/* Filters */}
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by invoice # or customer..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by invoice # or customer..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
           <DataTable
             columns={columns}
             data={invoices}

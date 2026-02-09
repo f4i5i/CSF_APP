@@ -9,6 +9,7 @@ import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import waitlistService from '../../api/services/waitlist.service';
+import Header from '../../components/Header';
 
 export default function Waitlist() {
   const [waitlistEntries, setWaitlistEntries] = useState([]);
@@ -184,33 +185,41 @@ export default function Waitlist() {
   };
 
   return (
-    <div className="h-full py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#173151] font-manrope">
-            Waitlist Management
-          </h1>
-          <p className="text-gray-600 font-manrope mt-1">
-            Manage students on class waitlists
-          </p>
+    <div className="h-screen flex flex-col overflow-hidden">
+      <Header />
+
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Waitlist Management
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              Manage students on class waitlists
+            </p>
+          </div>
         </div>
 
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by child name, parent, or class..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by child name, parent, or class..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
 
-        <DataTable
-          columns={columns}
-          data={waitlistEntries}
-          loading={loading}
-          emptyMessage="No students on waitlist"
-          pagination={false}
-        />
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
+          <DataTable
+            columns={columns}
+            data={waitlistEntries}
+            loading={loading}
+            emptyMessage="No students on waitlist"
+            pagination={false}
+          />
+        </div>
       </div>
 
       <ConfirmDialog

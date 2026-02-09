@@ -283,45 +283,42 @@ export default function CancellationRequests() {
   ];
 
   return (
-    <div className="h-full max-sm:pb-20">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-[#173151] font-manrope">
-                Cancellation Requests
-              </h1>
-              <p className="text-gray-600 font-manrope mt-1">
-                Review and process enrollment cancellation requests
+
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Cancellation Requests
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              Review and process enrollment cancellation requests
+            </p>
+          </div>
+
+          <div className="flex gap-2 sm:gap-4 shrink-0">
+            <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 min-w-[80px] sm:min-w-[140px]">
+              <p className="text-xs sm:text-sm text-gray-600 font-manrope">Pending</p>
+              <p className="text-lg sm:text-2xl font-bold text-yellow-600 font-manrope mt-1">
+                {stats.pending}
               </p>
             </div>
-
-            {/* Stats Cards */}
-            <div className="flex gap-4">
-              <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-[140px]">
-                <p className="text-sm text-gray-600 font-manrope">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600 font-manrope mt-1">
-                  {stats.pending}
-                </p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-[140px]">
-                <p className="text-sm text-gray-600 font-manrope">Total Refunded</p>
-                <p className="text-2xl font-bold text-green-600 font-manrope mt-1">
-                  ${parseFloat(stats.total_refunded || 0).toFixed(2)}
-                </p>
-              </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 min-w-[80px] sm:min-w-[140px]">
+              <p className="text-xs sm:text-sm text-gray-600 font-manrope">Total Refunded</p>
+              <p className="text-lg sm:text-2xl font-bold text-green-600 font-manrope mt-1">
+                ${parseFloat(stats.total_refunded || 0).toFixed(2)}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Policy Info Banner */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="shrink-0 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 hidden sm:block">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-blue-800">Cancellation Policy</h3>
-              <p className="text-sm text-blue-700 mt-1">
+              <h3 className="font-semibold text-blue-800 text-sm">Cancellation Policy</h3>
+              <p className="text-xs sm:text-sm text-blue-700 mt-1">
                 <strong>15+ days before class start:</strong> Auto-approved with full refund<br />
                 <strong>Less than 15 days:</strong> Requires admin review - appears in Pending tab
               </p>
@@ -329,8 +326,7 @@ export default function CancellationRequests() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="shrink-0 flex gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -341,16 +337,16 @@ export default function CancellationRequests() {
                   setActiveTab(tab.id);
                   setCurrentPage(1);
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-manrope text-sm transition-colors whitespace-nowrap ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-manrope text-xs sm:text-sm transition-colors whitespace-nowrap ${
                   isActive
                     ? 'bg-[#173151] text-white'
                     : 'bg-white text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                 {tab.label}
                 {tab.count !== undefined && tab.count > 0 && (
-                  <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                  <span className={`ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${
                     isActive ? 'bg-white/20' : tab.id === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100'
                   }`}>
                     {tab.count}
@@ -361,7 +357,7 @@ export default function CancellationRequests() {
           })}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
           <DataTable
             columns={columns}
             data={requests}

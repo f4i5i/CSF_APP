@@ -23,6 +23,7 @@ import { useApi } from '../../hooks';
 import waiversService from '../../api/services/waivers.service';
 import WaiverFormModal from '../../components/admin/WaiverFormModal';
 import WaiverVersionModal from '../../components/admin/WaiverVersionModal';
+import Header from '../../components/Header';
 
 const WaiversManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -181,31 +182,30 @@ const WaiversManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#173151]">
-                Waiver Templates
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Manage waiver templates for enrollments
-              </p>
-            </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-[#173151] text-white rounded-lg font-semibold hover:bg-[#1f3d67] transition"
-            >
-              <Plus className="w-5 h-5" />
-              Create Waiver
-            </button>
+    <div className="h-screen flex flex-col overflow-hidden">
+      <Header />
+
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full overflow-y-auto">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Waiver Templates
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              Manage waiver templates for enrollments
+            </p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-1.5 sm:gap-2 font-manrope bg-btn-gold text-text-body px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base shrink-0"
+          >
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Create </span>Waiver
+          </button>
         </div>
 
         {/* Filters & Search */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="shrink-0 bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="md:col-span-2">

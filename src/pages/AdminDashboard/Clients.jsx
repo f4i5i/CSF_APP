@@ -407,44 +407,48 @@ export default function Clients() {
   };
 
   return (
-    <div className="h-full">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header />
 
-      <div className="max-w-9xl mx-auto sm:px-4 px-0">
-        <div className="mb-8 flex lg:flex-row flex-col lg:items-center items-start lg:gap-0 gap-4 justify-between">
-          <div>
-            <h1 className="lg:text-[46px] text-[20px] md:text-[30px] font-bold text-text-primary font-kollektif">
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
               Clients Management
             </h1>
-            <p className="text-neutral-main font-manrope mt-1">
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
               Manage client accounts and their enrollments
             </p>
           </div>
         </div>
 
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by name or email..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by name or email..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
 
-        <DataTable
-          columns={columns}
-          data={clients}
-          loading={loading}
-          emptyMessage="No clients found"
-          pagination={true}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-          expandable={true}
-          onExpand={handleExpandClient}
-          renderExpanded={renderExpandedContent}
-        />
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
+          <DataTable
+            columns={columns}
+            data={clients}
+            loading={loading}
+            emptyMessage="No clients found"
+            pagination={true}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+            expandable={true}
+            onExpand={handleExpandClient}
+            renderExpanded={renderExpandedContent}
+          />
+        </div>
       </div>
 
       <ConfirmDialog

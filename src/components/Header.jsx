@@ -129,13 +129,13 @@ const Header = () => {
   // Desktop admin uses sidebar navigation in AdminLayout
   const navItemsadmin = [
     { name: "Home", icon: Home, path: "/admin" },
-    { name: "Account", icon: Settings, path: "/company-settings" },
+    { name: "Account", icon: Settings, path: "/settings" },
     { name: "Clients", icon: Users, path: "/clients" },
-    { name: "Classes", icon: GraduationCap, path: "/classes" },
+    { name: "Classes", icon: GraduationCap, path: "/admin/classes" },
     { name: "Calendar", icon: Calendar, path: "/calendar" },
     { name: "Finance", icon: Wallet, path: "/financials" },
     { name: "Register", icon: Person, path: "/registerchild" },
-    { name: "Communication", icon: MessageCircle, path: "/communication" },
+    { name: "Communication", icon: MessageCircle, path: "/admin/announcements" },
   ];
 
   // Select appropriate navigation items based on user role

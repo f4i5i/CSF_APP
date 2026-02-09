@@ -15,6 +15,7 @@ import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import installmentsService from '../../api/services/installments.service';
+import Header from '../../components/Header';
 
 export default function Installments() {
   const [plans, setPlans] = useState([]);
@@ -274,53 +275,51 @@ export default function Installments() {
   const totalActive = plans.filter((p) => p.status === 'active').length;
 
   return (
-    <div className="h-full py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#173151] font-manrope">
-                Installments Management
-              </h1>
-              <p className="text-gray-600 font-manrope mt-1">
-                Manage payment plans and schedules
+    <div className="h-screen flex flex-col overflow-hidden">
+      <Header />
+
+      <div className="max-w-9xl mx-auto px-3 sm:px-4 py-4 flex-1 flex flex-col min-h-0 w-full">
+        <div className="shrink-0 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 justify-between">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-[30px] lg:text-[46px] font-bold text-text-primary font-kollektif truncate">
+              Installments Management
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-main font-manrope mt-1 hidden sm:block">
+              Manage payment plans and schedules
+            </p>
+          </div>
+
+          <div className="flex gap-2 sm:gap-4 shrink-0">
+            <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 min-w-[80px] sm:min-w-[120px]">
+              <p className="text-xs sm:text-sm text-gray-600 font-manrope">Active Plans</p>
+              <p className="text-lg sm:text-2xl font-bold text-[#173151] font-manrope mt-1">
+                {totalActive}
               </p>
             </div>
-
-            {/* Stats Cards */}
-            <div className="flex gap-4">
-              <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-[120px]">
-                <p className="text-sm text-gray-600 font-manrope">Active Plans</p>
-                <p className="text-2xl font-bold text-[#173151] font-manrope mt-1">
-                  {totalActive}
-                </p>
+            <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 min-w-[80px] sm:min-w-[120px]">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />
+                <p className="text-xs sm:text-sm text-gray-600 font-manrope">Overdue</p>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-[120px]">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-600" />
-                  <p className="text-sm text-gray-600 font-manrope">Overdue</p>
-                </div>
-                <p className="text-2xl font-bold text-red-600 font-manrope mt-1">
-                  {overduePlans}
-                </p>
-              </div>
+              <p className="text-lg sm:text-2xl font-bold text-red-600 font-manrope mt-1">
+                {overduePlans}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Filters */}
-        <FilterBar
-          searchValue={searchQuery}
-          searchPlaceholder="Search by customer name, child, or class..."
-          onSearch={setSearchQuery}
-          filters={filters}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={clearFilters}
-        />
+        <div className="shrink-0">
+          <FilterBar
+            searchValue={searchQuery}
+            searchPlaceholder="Search by customer name, child, or class..."
+            onSearch={setSearchQuery}
+            filters={filters}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        </div>
 
-        {/* Overdue Toggle */}
-        <div className="mb-4">
+        <div className="shrink-0 mb-2 sm:mb-4">
           <label className="flex items-center gap-2 cursor-pointer w-fit">
             <input
               type="checkbox"
@@ -328,24 +327,25 @@ export default function Installments() {
               onChange={(e) => setOverdueOnly(e.target.checked)}
               className="w-4 h-4 text-[#F3BC48] focus:ring-[#F3BC48] rounded"
             />
-            <span className="text-sm font-manrope text-gray-700 font-semibold">
+            <span className="text-xs sm:text-sm font-manrope text-gray-700 font-semibold">
               Show Overdue Only
             </span>
           </label>
         </div>
 
-        {/* Installments Table */}
-        <DataTable
-          columns={columns}
-          data={plans}
-          loading={loading}
-          emptyMessage="No installment plans found"
-          pagination={true}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          totalItems={totalItems}
-          onPageChange={setCurrentPage}
-        />
+        <div className="flex-1 min-h-0 flex flex-col pb-2">
+          <DataTable
+            columns={columns}
+            data={plans}
+            loading={loading}
+            emptyMessage="No installment plans found"
+            pagination={true}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
 
       {/* Confirm Dialog */}
