@@ -1085,9 +1085,10 @@ export default function Classes() {
         const schoolName = cls.school?.name || cls.school_name;
         const schoolCode = cls.school_code || cls.school?.code;
         const coaches = cls.coaches || cls.instructors || [];
-        const priceDisplay = cls.price_display || cls.price_text || (cls.base_price ? `$${cls.base_price}` : 'Contact for pricing');
         const classType = cls.class_type === 'one-time' ? 'One-time' : cls.class_type === 'membership' ? 'Membership' : cls.class_type || 'N/A';
         const registrationLink = `${window.location.origin}/checkout?classId=${cls.id}`;
+        const paymentOptions = cls.payment_options || [];
+        const customFees = cls.custom_fees || [];
 
         return (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
@@ -1202,15 +1203,6 @@ export default function Classes() {
                     <p className="text-sm text-text-primary font-manrope">{classType}</p>
                   </div>
 
-                  {/* Price */}
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <DollarSign className="w-3.5 h-3.5 text-btn-gold shrink-0" />
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Price</span>
-                    </div>
-                    <p className="text-sm text-text-primary font-manrope font-semibold">{priceDisplay}</p>
-                  </div>
-
                   {/* Coaches */}
                   {coaches.length > 0 && (
                     <div className="bg-gray-50 rounded-lg p-3">
@@ -1227,6 +1219,99 @@ export default function Classes() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* ── Pricing & Payment Options Section ── */}
+                <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-btn-gold shrink-0" />
+                      <span className="text-sm font-semibold text-heading-dark font-manrope">Pricing & Payment Options</span>
+                    </div>
+                  </div>
+                  <div className="p-3 sm:p-4">
+                    {/* Base Price */}
+                    {cls.base_price != null && (
+                      <div className="flex items-center justify-between mb-3 pb-3 border-b border-dashed border-gray-200">
+                        <span className="text-sm text-text-muted font-manrope">Base Price</span>
+                        <span className="text-lg font-bold text-heading-dark font-manrope">${Number(cls.base_price).toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {/* Payment Options */}
+                    {paymentOptions.length > 0 ? (
+                      <div className="space-y-2">
+                        {paymentOptions.map((opt, idx) => {
+                          const optName = opt.custom_name || opt.display_name || opt.name || opt.type || 'Payment Option';
+                          const optAmount = opt.amount ?? opt.price ?? 0;
+                          const optType = opt.type === 'recurring' || opt.type === 'monthly_subscription' ? 'Recurring' : opt.type === 'one_time' || opt.type === 'full_payment' ? 'One-time' : opt.type || '';
+                          const isInstallment = (opt.name || '').toLowerCase().includes('installment') || (opt.type || '').includes('installment');
+
+                          return (
+                            <div key={opt.id || idx} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2.5">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <div className={`w-2 h-2 rounded-full shrink-0 ${opt.enabled !== false ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-text-primary font-manrope truncate">{optName}</p>
+                                  {optType && (
+                                    <p className="text-[10px] text-text-muted font-manrope">
+                                      {optType}{isInstallment ? ' / per installment' : optType === 'Recurring' ? ' / month' : ''}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-sm font-bold text-heading-dark font-manrope shrink-0 ml-3">
+                                ${Number(optAmount).toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-text-muted font-manrope italic">No payment options configured</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Custom Fees Section ── */}
+                <div className="mt-3 border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 px-3 py-2.5 border-b border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-btn-gold shrink-0" />
+                      <span className="text-sm font-semibold text-heading-dark font-manrope">Custom Fees</span>
+                      {customFees.length > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-btn-gold/20 text-btn-gold font-semibold">{customFees.length}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-3 sm:p-4">
+                    {customFees.length > 0 ? (
+                      <div className="space-y-2">
+                        {customFees.map((fee, idx) => (
+                          <div key={fee.id || idx} className="flex items-start justify-between bg-gray-50 rounded-lg px-3 py-2.5">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-text-primary font-manrope truncate">{fee.name || 'Unnamed Fee'}</p>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold shrink-0 ${
+                                  fee.is_optional ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'
+                                }`}>
+                                  {fee.is_optional ? 'Optional' : 'Required'}
+                                </span>
+                              </div>
+                              {fee.description && (
+                                <p className="text-xs text-text-muted font-manrope mt-0.5">{fee.description}</p>
+                              )}
+                            </div>
+                            <span className="text-sm font-bold text-heading-dark font-manrope shrink-0 ml-3">
+                              ${Number(fee.amount || 0).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-text-muted font-manrope italic">No custom fees configured</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Registration Link */}
