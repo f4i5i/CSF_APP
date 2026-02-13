@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Edit, Trash2, Calendar, Copy, Users, X, Link, Loader2, User, Mail, Phone, CheckCircle, ExternalLink, AlertTriangle, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Edit, Trash2, Calendar, Copy, Users, X, Link, Loader2, User, Mail, Phone, CheckCircle, ExternalLink, AlertTriangle, ArrowRight, Eye } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -18,6 +19,7 @@ import toast from "react-hot-toast";
 import Header from "../../components/Header";
 
 export default function Classes() {
+  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -527,6 +529,11 @@ export default function Classes() {
       type: "actions",
       align: "right",
       actions: (row) => [
+        {
+          label: "View",
+          icon: Eye,
+          onClick: () => navigate(`/class/${row.id}`),
+        },
         {
           label: "Roster",
           icon: Users,
