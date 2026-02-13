@@ -48,6 +48,7 @@ export default function CheckOut() {
     enrollmentData,
     paymentSucceeded,
     siblingDiscountPreview, // NEW: Sibling discount line items
+    backendProcessingFee, // Processing fee from backend order
 
     // Methods
     initializeCheckout,
@@ -406,7 +407,7 @@ export default function CheckOut() {
               <OrderSummary
                 classPrice={classPrice}
                 registrationFee={0}
-                processingFeePercent={0}
+                processingFeePercent={3.2}
                 discount={appliedDiscount}
                 paymentMethod={paymentMethod}
                 installmentPlan={selectedInstallmentPlan}
@@ -420,6 +421,7 @@ export default function CheckOut() {
                 lineItems={siblingDiscountPreview}
                 classData={classData}
                 backendTotal={orderTotal}
+                backendProcessingFee={backendProcessingFee}
               />
 
               {/* Help Text */}

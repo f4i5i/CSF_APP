@@ -956,14 +956,20 @@ export default function Classes() {
 
                   <div className="grid gap-2 sm:gap-3">
                     {rosterModal.roster.map((student, idx) => {
-                      // Handle different response structures
-                      const child = student.child || student;
-                      const parent = student.parent || child.parent;
-                      const enrollment = student.enrollment || student;
+                      // Handle both flat (backend) and nested response structures
+                      const childName = student.child_name || `${student.child?.first_name || student.first_name || ''} ${student.child?.last_name || student.last_name || ''}`.trim();
+                      const childAge = student.child_age ?? student.child?.age;
+                      const childDob = student.child_dob || student.child?.date_of_birth;
+                      const childGrade = student.child?.grade || student.grade;
+                      const parentName = student.parent_name || `${student.parent?.first_name || ''} ${student.parent?.last_name || ''}`.trim() || student.parent?.full_name;
+                      const parentEmail = student.parent_email || student.parent?.email;
+                      const parentPhone = student.parent_phone || student.parent?.phone;
+                      const enrollmentStatus = student.enrollment_status || student.enrollment?.status || student.status;
+                      const studentId = student.child_id || student.child?.id || student.enrollment_id || idx;
 
                       return (
                         <div
-                          key={child.id || idx}
+                          key={studentId}
                           className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 hover:bg-gray-100 transition-colors"
                         >
                           <div className="flex items-start gap-2 sm:gap-4">
@@ -974,42 +980,42 @@ export default function Classes() {
                               <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                   <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
-                                    {child.first_name} {child.last_name}
+                                    {childName || 'Unknown Student'}
                                   </h4>
                                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-xs sm:text-sm text-text-muted font-manrope">
-                                    {child.date_of_birth && (
-                                      <span>Age: {new Date().getFullYear() - new Date(child.date_of_birth).getFullYear()}</span>
+                                    {(childAge != null || childDob) && (
+                                      <span>Age: {childAge ?? (new Date().getFullYear() - new Date(childDob).getFullYear())}</span>
                                     )}
-                                    {child.grade && <span>Grade {child.grade}</span>}
+                                    {childGrade && <span>Grade {childGrade}</span>}
                                   </div>
                                 </div>
-                                {enrollment.status && (
+                                {enrollmentStatus && (
                                   <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-full font-medium shrink-0 ${
-                                    enrollment.status === 'ACTIVE' || enrollment.status === 'active'
+                                    enrollmentStatus === 'ACTIVE' || enrollmentStatus === 'active'
                                       ? 'bg-green-100 text-green-700'
                                       : 'bg-gray-100 text-gray-600'
                                   }`}>
-                                    {enrollment.status}
+                                    {enrollmentStatus}
                                   </span>
                                 )}
                               </div>
 
                               {/* Parent Info */}
-                              {parent && (
+                              {(parentName || parentEmail || parentPhone) && (
                                 <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200">
                                   <p className="text-[10px] sm:text-xs font-medium text-text-muted mb-1 font-manrope">Parent/Guardian</p>
                                   <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-text-primary font-manrope">
-                                    <span className="font-medium">{parent.first_name || parent.full_name?.split(' ')[0]} {parent.last_name || parent.full_name?.split(' ').slice(1).join(' ')}</span>
-                                    {parent.email && (
+                                    {parentName && <span className="font-medium">{parentName}</span>}
+                                    {parentEmail && (
                                       <span className="flex items-center gap-1 text-text-muted truncate">
                                         <Mail className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                                        <span className="truncate">{parent.email}</span>
+                                        <span className="truncate">{parentEmail}</span>
                                       </span>
                                     )}
-                                    {parent.phone && (
+                                    {parentPhone && (
                                       <span className="flex items-center gap-1 text-text-muted">
                                         <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                                        {parent.phone}
+                                        {parentPhone}
                                       </span>
                                     )}
                                   </div>

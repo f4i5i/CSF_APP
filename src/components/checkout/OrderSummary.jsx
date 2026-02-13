@@ -33,6 +33,7 @@ export default function OrderSummary({
   lineItems = null, // NEW: Line items from order (with sibling discounts)
   classData = null, // NEW: Class data for subscription end date
   backendTotal = null, // NEW: Use actual backend total when available
+  backendProcessingFee = null, // Processing fee from backend order
 }) {
   // Calculate subscription duration
   const getSubscriptionInfo = () => {
@@ -108,8 +109,10 @@ export default function OrderSummary({
   // Calculate amount after discount
   const afterDiscount = subtotal - discountAmount;
 
-  // Calculate processing fee
-  const processingFee = (afterDiscount * processingFeePercent) / 100;
+  // Calculate processing fee - use backend value when available
+  const processingFee = backendProcessingFee != null && backendProcessingFee > 0
+    ? parseFloat(backendProcessingFee)
+    : (afterDiscount * processingFeePercent) / 100;
 
   // Calculate total - use backend total when available for accuracy
   const total = backendTotal && backendTotal > 0 ? parseFloat(backendTotal) : afterDiscount + processingFee;
@@ -268,6 +271,18 @@ export default function OrderSummary({
             </div>
             <span className="font-manrope font-semibold text-fluid-base text-green-700">
               -${discountAmount.toFixed(2)}
+            </span>
+          </div>
+        )}
+
+        {/* Processing Fee */}
+        {processingFee > 0 && (
+          <div className="flex justify-between items-center">
+            <span className="font-manrope font-normal text-fluid-base text-[#666D80]">
+              Processing Fee (3.2%)
+            </span>
+            <span className="font-manrope font-medium text-fluid-base text-[#173151]">
+              ${processingFee.toFixed(2)}
             </span>
           </div>
         )}

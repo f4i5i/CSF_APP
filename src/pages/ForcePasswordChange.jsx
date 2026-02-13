@@ -4,6 +4,7 @@ import { useAuth } from '../context/auth'
 import LogoLogin from '../components/LogoLogin'
 import toast from 'react-hot-toast'
 import apiClient from '../api/client'
+import usersService from '../api/services/users.service'
 import { API_ENDPOINTS } from '../constants/api.constants'
 import { Eye, EyeOff } from 'lucide-react'
 
@@ -59,15 +60,14 @@ export default function ForcePasswordChange() {
         confirm_password: confirmPassword,
       })
 
-      // Update user context to clear must_change_password
-      if (user) {
-        updateUser({ ...user, must_change_password: false })
-      }
+      // Re-fetch user from API to get updated must_change_password flag
+      const freshUser = await usersService.getMe()
+      updateUser(freshUser)
 
       toast.success('Password set successfully!')
 
       // Redirect based on role
-      const normalizedRole = user?.role?.toUpperCase()
+      const normalizedRole = (freshUser?.role || user?.role)?.toUpperCase()
       const roleRoutes = {
         COACH: '/coachdashboard',
         ADMIN: '/admin',
@@ -78,7 +78,9 @@ export default function ForcePasswordChange() {
       const targetRoute = roleRoutes[normalizedRole] || '/dashboard'
       navigate(targetRoute, { replace: true })
     } catch (error) {
+      // Handle both transformed errors (from interceptor) and raw axios errors
       const message =
+        error.message ||
         error.response?.data?.detail ||
         error.response?.data?.message ||
         'Failed to change password. Please try again.'

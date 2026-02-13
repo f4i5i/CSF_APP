@@ -275,6 +275,7 @@ export const useCheckoutFlow = () => {
         appliedDiscount: order.discount,
         // Store line items for sibling discount display
         siblingDiscountPreview: order.line_items || null,
+        backendProcessingFee: order.processing_fee || 0,
         isLoading: false,
       }));
 

@@ -88,6 +88,7 @@ import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
 import RegisterChild from './pages/AdminDashboard/RegisterChild'
 import AdminClasses from './pages/AdminDashboard/Classes'
+import ClassRoster from './pages/AdminDashboard/ClassRoster'
 import AdminUsers from './pages/AdminDashboard/Users'
 import AdminPrograms from './pages/AdminDashboard/Programs'
 import AdminAreas from './pages/AdminDashboard/Areas'
@@ -390,6 +391,13 @@ return (
     Uses AdminLayout wrapper for consistent admin navigation and layout
     ProtectedRoute with requiredRole="admin" enforces role-based access control
 */}
+
+{/* Class Roster - Standalone page accessible via shareable link */}
+<Route path="/roster/:classId" element={
+  <ProtectedRoute requiredRole="admin">
+    <ClassRoster />
+  </ProtectedRoute>
+} />
 
 {/*
   Admin Layout Wrapper - Nested routes share AdminLayout

@@ -222,6 +222,10 @@ export default function ProtectedRoute({ children, requiredRole }) {
     if (requiredRoleUpper === 'ADMIN') {
       // Admin routes: Allow ADMIN and OWNER
       hasAccess = canAccessAdmin(userRole);
+    } else if (requiredRoleUpper === 'PARENT') {
+      // Parent-only routes: Only PARENT role can access
+      // OWNER/ADMIN/COACH should go to their own dashboards
+      hasAccess = userRole === 'PARENT';
     } else {
       // Other routes: Check if user's role is at or above required role
       hasAccess = isRoleAtLeast(userRole, requiredRoleUpper);
