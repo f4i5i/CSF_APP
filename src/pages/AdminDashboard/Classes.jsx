@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Edit, Trash2, Calendar, Copy, Users, X, Link, Loader2, User, Mail, Phone, CheckCircle, ExternalLink, AlertTriangle, ArrowRight, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Copy, Users, X, Link, Loader2, User, Mail, Phone, CheckCircle, ExternalLink, AlertTriangle, ArrowRight, Eye, MapPin, Clock, DollarSign, Tag } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -55,6 +55,12 @@ export default function Classes() {
     loading: false,
     shareLink: "",
     linkCopied: false,
+  });
+
+  // View class detail modal state
+  const [viewModal, setViewModal] = useState({
+    isOpen: false,
+    classData: null,
   });
 
   // Delete with enrollments modal state
@@ -354,6 +360,15 @@ export default function Classes() {
     }
   };
 
+  // Handle viewing class details in modal
+  const handleViewClass = (classData) => {
+    setViewModal({ isOpen: true, classData });
+  };
+
+  const closeViewModal = () => {
+    setViewModal({ isOpen: false, classData: null });
+  };
+
   // Close roster modal
   const closeRosterModal = () => {
     setRosterModal({
@@ -532,7 +547,7 @@ export default function Classes() {
         {
           label: "View",
           icon: Eye,
-          onClick: () => navigate(`/class/${row.id}`),
+          onClick: () => handleViewClass(row),
         },
         {
           label: "Roster",
@@ -1061,6 +1076,228 @@ export default function Classes() {
           </div>
         </div>
       )}
+      {/* View Class Detail Modal */}
+      {viewModal.isOpen && viewModal.classData && (() => {
+        const cls = viewModal.classData;
+        const image = cls.cover_photo_url || cls.image_url;
+        const programName = cls.program?.name || cls.program_name;
+        const areaName = cls.area?.name || cls.area_name;
+        const schoolName = cls.school?.name || cls.school_name;
+        const schoolCode = cls.school_code || cls.school?.code;
+        const coaches = cls.coaches || cls.instructors || [];
+        const priceDisplay = cls.price_display || cls.price_text || (cls.base_price ? `$${cls.base_price}` : 'Contact for pricing');
+        const classType = cls.class_type === 'one-time' ? 'One-time' : cls.class_type === 'membership' ? 'Membership' : cls.class_type || 'N/A';
+        const registrationLink = `${window.location.origin}/checkout?classId=${cls.id}`;
+
+        return (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-xl flex flex-col">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-gray-50">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-base sm:text-lg text-heading-dark font-manrope flex items-center gap-1.5 sm:gap-2">
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-btn-gold shrink-0" />
+                    Class Details
+                  </h3>
+                </div>
+                <button
+                  onClick={closeViewModal}
+                  className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="flex-1 overflow-y-auto p-3 sm:p-5">
+                {/* Image + Title Section */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                  {image ? (
+                    <div className="w-full sm:w-40 h-32 sm:h-28 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                      <img src={image} alt={cls.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-full sm:w-40 h-32 sm:h-28 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                      <span className="text-xs text-gray-400">No image</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-heading-dark font-manrope truncate">{cls.name}</h2>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      {programName && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">{programName}</span>
+                      )}
+                      {areaName && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-medium">{areaName}</span>
+                      )}
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${cls.is_active ? 'bg-[#DFF5E8] text-status-success' : 'bg-amber-100 text-amber-700'}`}>
+                        {cls.is_active ? 'Active' : 'Draft'}
+                      </span>
+                    </div>
+                    {cls.description && (
+                      <p className="text-xs sm:text-sm text-text-muted font-manrope mt-2 line-clamp-3">{cls.description}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {/* Schedule */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Schedule</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope">{formatSchedule(cls)}</p>
+                  </div>
+
+                  {/* Dates */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Clock className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dates</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope">
+                      {cls.start_date ? new Date(cls.start_date).toLocaleDateString() : 'N/A'} — {cls.end_date ? new Date(cls.end_date).toLocaleDateString() : 'N/A'}
+                    </p>
+                  </div>
+
+                  {/* Location / School */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope">{cls.location || schoolName || 'To be announced'}</p>
+                    {schoolCode && <p className="text-xs text-text-muted font-mono mt-0.5">Code: {schoolCode}</p>}
+                  </div>
+
+                  {/* Capacity */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Users className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Capacity</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope">
+                      <span className="font-semibold">{cls.current_enrollment || 0}</span>
+                      <span className="text-text-muted"> / {cls.capacity || 0} enrolled</span>
+                    </p>
+                  </div>
+
+                  {/* Age Range */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <User className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Age Range</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope">{cls.min_age || 0} – {cls.max_age || 18} years</p>
+                  </div>
+
+                  {/* Class Type */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Tag className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Class Type</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope">{classType}</p>
+                  </div>
+
+                  {/* Price */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <DollarSign className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Price</span>
+                    </div>
+                    <p className="text-sm text-text-primary font-manrope font-semibold">{priceDisplay}</p>
+                  </div>
+
+                  {/* Coaches */}
+                  {coaches.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <User className="w-3.5 h-3.5 text-btn-gold shrink-0" />
+                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Coach{coaches.length > 1 ? 'es' : ''}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {coaches.map((coach, idx) => (
+                          <span key={coach.id || idx} className="text-xs px-2 py-0.5 rounded-full bg-white border border-gray-200 text-text-primary font-manrope">
+                            {coach.full_name || coach.name || `${coach.first_name || ''} ${coach.last_name || ''}`.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Registration Link */}
+                <div className="mt-4 bg-blue-50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Link className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                    <span className="text-xs font-semibold text-blue-800 uppercase tracking-wide">Registration Link</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={cls.registration_link || cls.registration_url || registrationLink}
+                      className="flex-1 text-xs sm:text-sm bg-white border border-blue-200 rounded-lg px-3 py-1.5 text-blue-700 font-mono truncate"
+                    />
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(cls.registration_link || cls.registration_url || registrationLink);
+                          toast.success('Registration link copied!');
+                        } catch {
+                          toast.error('Failed to copy link');
+                        }
+                      }}
+                      className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shrink-0"
+                    >
+                      <Copy className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                {/* Website Link */}
+                {cls.website_link && (
+                  <div className="mt-3">
+                    <a
+                      href={cls.website_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-manrope"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      View Website
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 p-3 sm:p-4 border-t bg-gray-50">
+                <button
+                  onClick={closeViewModal}
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    closeViewModal();
+                    handleEditClass(cls);
+                  }}
+                  className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-btn-gold rounded-lg hover:bg-btn-gold/90 transition-colors font-manrope"
+                >
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+                  Edit Class
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
