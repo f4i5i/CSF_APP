@@ -7,7 +7,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useCheckoutFlow } from '../hooks/useCheckoutFlow';
 import waiversService from '../api/services/waivers.service';
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft, Home, CheckCircle } from 'lucide-react';
 
 // Import all checkout components
 import CheckoutLoading from '../components/checkout/CheckoutLoading';
@@ -20,6 +20,7 @@ import PaymentMethodSelector from '../components/checkout/PaymentMethodSelector'
 import InstallmentPlanSelector from '../components/checkout/InstallmentPlanSelector';
 import DiscountCodeInput from '../components/checkout/DiscountCodeInput';
 import OrderSummary from '../components/checkout/OrderSummary';
+import CustomFeesSelector from '../components/checkout/CustomFeesSelector';
 import WaiverCheckModal from '../components/checkout/WaiverCheckModal';
 
 export default function CheckOut() {
@@ -49,11 +50,13 @@ export default function CheckOut() {
     paymentSucceeded,
     siblingDiscountPreview, // NEW: Sibling discount line items
     backendProcessingFee, // Processing fee from backend order
+    selectedFeesByChild, // Custom fee selections per child
 
     // Methods
     initializeCheckout,
     selectChild,
     toggleChildSelection, // NEW: Multi-select toggle
+    toggleCustomFee, // Custom fee toggle
     selectPaymentMethod,
     selectInstallmentPlan,
     applyDiscount,
@@ -191,10 +194,48 @@ export default function CheckOut() {
     );
   }
 
+  // Show success for free enrollment (backend already activated enrollments)
+  if (clientSecret === 'FREE' || (paymentSucceeded && !orderData)) {
+    return (
+      <div className="min-h-screen w-full bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] py-8">
+        <div className="max-w-lg mx-auto px-4 text-center pt-20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-white/20">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-[#173151] font-kollektif mb-2">
+              Enrollment Confirmed!
+            </h1>
+            <p className="text-[#666D80] font-manrope mb-2">
+              {classData?.name && (
+                <span className="block font-semibold text-[#173151] mb-1">{classData.name}</span>
+              )}
+              Your child has been successfully enrolled in this free class.
+            </p>
+            <p className="text-sm text-[#666D80] font-manrope mb-6">
+              A confirmation email has been sent to your email address.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full py-3 bg-[#173151] hover:bg-[#0f2240] text-white font-manrope font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <Home size={20} />
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Calculate totals for OrderSummary
   const classPrice = classData?.price || 0;
   const registrationFee = 25; // Default registration fee
   const processingFeePercent = 2.9; // Default processing fee
+
+  // Check if class is effectively free (no price + no required custom fees)
+  const requiredFeesTotal = (classData?.custom_fees || [])
+    .filter(f => !f.is_optional)
+    .reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+  const isFreeClass = Number(classPrice) === 0 && requiredFeesTotal === 0;
 
   // Check if at least one child is selected (support both single and multi-select)
   const hasChildSelected = (selectedChildIds?.length > 0) || selectedChildId;
@@ -262,8 +303,19 @@ export default function CheckOut() {
               </div>
             )}
 
-            {/* Payment Method Selection (only show after waivers checked) */}
-            {hasChildSelected && waiversChecked && (
+            {/* Custom Fees Selection (only show after waivers checked) */}
+            {hasChildSelected && waiversChecked && classData?.custom_fees?.length > 0 && (
+              <CustomFeesSelector
+                classData={classData}
+                selectedChildIds={selectedChildIds || (selectedChildId ? [selectedChildId] : [])}
+                children={children}
+                selectedFeesByChild={selectedFeesByChild}
+                onToggleFee={toggleCustomFee}
+              />
+            )}
+
+            {/* Payment Method Selection (only show after waivers checked, hide for free classes) */}
+            {hasChildSelected && waiversChecked && !isFreeClass && (
               <PaymentMethodSelector
                 selected={paymentMethod}
                 onSelect={selectPaymentMethod}
@@ -273,7 +325,7 @@ export default function CheckOut() {
             )}
 
             {/* Installment Plan Selection (only if installments selected) */}
-            {hasChildSelected && paymentMethod === 'installments' && (
+            {hasChildSelected && paymentMethod === 'installments' && !isFreeClass && (
               <InstallmentPlanSelector
                 orderTotal={orderTotal}
                 selectedPlan={selectedInstallmentPlan}
@@ -281,8 +333,8 @@ export default function CheckOut() {
               />
             )}
 
-            {/* Discount Code Input */}
-            {hasChildSelected && paymentMethod && (
+            {/* Discount Code Input (hide for free classes) */}
+            {hasChildSelected && paymentMethod && !isFreeClass && (
               <DiscountCodeInput
                 onApply={handleApplyDiscount}
                 onRemove={removeDiscount}
@@ -291,39 +343,54 @@ export default function CheckOut() {
               />
             )}
 
-            {/* Review Order Button - Shows before order is created */}
+            {/* Review Order / Free Enrollment Button - Shows before order is created */}
             {hasChildSelected &&
-              paymentMethod &&
-              (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
+              waiversChecked &&
+              (isFreeClass || (paymentMethod && (paymentMethod !== 'installments' || selectedInstallmentPlan))) &&
               !orderId &&
               !isLoading && (
                 <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
                   <div className="text-center">
                     <h3 className="text-fluid-lg font-semibold font-manrope text-[#173151] mb-2">
-                      Ready to Review Your Order?
+                      {isFreeClass ? 'Ready to Enroll?' : 'Ready to Review Your Order?'}
                     </h3>
                     <p className="text-sm font-manrope text-[#666D80] mb-6">
                       You've selected {selectedChildIds?.length || 1} child{(selectedChildIds?.length || 1) > 1 ? 'ren' : ''} for enrollment.
-                      Click below to calculate your total with any applicable discounts.
+                      {isFreeClass
+                        ? ' This is a free class — no payment required!'
+                        : ' Click below to calculate your total with any applicable discounts.'}
                     </p>
                     <button
                       onClick={createOrder}
-                      className="w-full py-4 bg-[#173151] hover:bg-[#0f2240] text-white font-manrope font-bold text-lg rounded-lg transition-colors flex items-center justify-center gap-2"
+                      className={`w-full py-4 font-manrope font-bold text-lg rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                        isFreeClass
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'bg-[#173151] hover:bg-[#0f2240] text-white'
+                      }`}
                     >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                        />
-                      </svg>
-                      Review Order & Calculate Total
+                      {isFreeClass ? (
+                        <>
+                          <CheckCircle className="w-5 h-5" />
+                          Complete Free Enrollment
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                            />
+                          </svg>
+                          Review Order & Calculate Total
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -422,6 +489,8 @@ export default function CheckOut() {
                 classData={classData}
                 backendTotal={orderTotal}
                 backendProcessingFee={backendProcessingFee}
+                customFees={classData?.custom_fees || []}
+                selectedFeesByChild={selectedFeesByChild}
               />
 
               {/* Help Text */}

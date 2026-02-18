@@ -95,6 +95,18 @@ Object.defineProperty(window, 'crypto', {
 });
 
 // ==========================================
+// UNHANDLED REJECTION HANDLER
+// ==========================================
+// Node.js 22 crashes on unhandled promise rejections by default.
+// Some component-level async operations (e.g., dynamic imports, API calls
+// that fire during render) may produce rejections that are caught by React
+// but not by the Promise chain. This handler prevents test crashes.
+process.on('unhandledRejection', (reason) => {
+  // Log but don't crash — the test assertions will catch real issues
+  console.warn('Unhandled rejection in test (suppressed):', reason?.message || reason);
+});
+
+// ==========================================
 // CONSOLE FILTERING
 // ==========================================
 

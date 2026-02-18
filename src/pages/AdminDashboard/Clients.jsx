@@ -5,12 +5,14 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Mail, Phone, Users, Eye, User, BookOpen, Plus, Loader2 } from "lucide-react";
+import { Trash2, Mail, Phone, Users, Eye, User, BookOpen, Plus, Loader2, Pencil, UserPlus } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import AdminChildForm from "../../components/admin/AdminChildForm";
 import Header from "../../components/Header";
 import adminService from "../../api/services/admin.service";
+import childrenService from "../../api/services/children.service";
 import toast from "react-hot-toast";
 
 export default function Clients() {
@@ -34,6 +36,15 @@ export default function Clients() {
   // State for expanded client details (children)
   const [expandedClientDetails, setExpandedClientDetails] = useState({});
   const [loadingClientDetails, setLoadingClientDetails] = useState({});
+
+  // State for child form modal
+  const [childFormModal, setChildFormModal] = useState({
+    isOpen: false,
+    mode: "create",
+    initialData: null,
+    parentId: null,
+    parentName: null,
+  });
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -109,6 +120,33 @@ export default function Clients() {
     }
   };
 
+  // Delete a child
+  const handleDeleteChild = async (childId, clientId) => {
+    try {
+      await childrenService.delete(childId);
+      toast.success("Child deleted successfully");
+      // Refresh the expanded client details
+      setExpandedClientDetails(prev => {
+        const updated = { ...prev };
+        delete updated[clientId];
+        return updated;
+      });
+      // Re-fetch client details
+      handleExpandClient({ id: clientId });
+      fetchClients(); // Refresh counts
+      setConfirmDialog({ isOpen: false });
+    } catch (error) {
+      console.error("Failed to delete child:", error);
+      toast.error(error.response?.data?.detail || "Failed to delete child");
+    }
+  };
+
+  // Refresh child data after create/edit
+  const handleChildFormSuccess = (clientId) => {
+    handleExpandClient({ id: clientId }, true);
+    fetchClients(); // Refresh counts
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -119,9 +157,9 @@ export default function Clients() {
   };
 
   // Handle row expansion - fetch client details including children
-  const handleExpandClient = async (client) => {
-    // Skip if already loaded
-    if (expandedClientDetails[client.id]) return;
+  const handleExpandClient = async (client, forceRefresh = false) => {
+    // Skip if already loaded (unless force refresh)
+    if (!forceRefresh && expandedClientDetails[client.id]) return;
 
     setLoadingClientDetails(prev => ({ ...prev, [client.id]: true }));
 
@@ -163,21 +201,39 @@ export default function Clients() {
 
     const children = details.children || [];
 
+    const parentName = `${client.first_name} ${client.last_name}`.trim();
+
     if (children.length === 0) {
       return (
         <div className="text-center py-6 text-text-muted font-manrope">
           <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
           <p>No children registered</p>
+          <button
+            onClick={() => setChildFormModal({ isOpen: true, mode: "create", initialData: null, parentId: client.id, parentName })}
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-btn-gold hover:bg-[#e5ad35] text-text-primary text-xs font-semibold rounded-lg transition-colors"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            Add Child
+          </button>
         </div>
       );
     }
 
     return (
       <div className="space-y-3">
-        <h4 className="font-semibold text-sm text-text-primary font-manrope flex items-center gap-2">
-          <Users className="w-4 h-4" />
-          Registered Children ({children.length})
-        </h4>
+        <div className="flex items-center justify-between">
+          <h4 className="font-semibold text-sm text-text-primary font-manrope flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Registered Children ({children.length})
+          </h4>
+          <button
+            onClick={() => setChildFormModal({ isOpen: true, mode: "create", initialData: null, parentId: client.id, parentName })}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-gold hover:bg-[#e5ad35] text-text-primary text-xs font-semibold rounded-lg transition-colors"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            Add Child
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {children.map((child) => {
             const age = child.date_of_birth ? calculateAge(child.date_of_birth) : null;
@@ -194,9 +250,33 @@ export default function Clients() {
                     <User className="w-5 h-5 text-btn-gold" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h5 className="font-semibold text-text-primary font-manrope text-sm truncate">
-                      {child.first_name} {child.last_name}
-                    </h5>
+                    <div className="flex items-start justify-between gap-1">
+                      <h5 className="font-semibold text-text-primary font-manrope text-sm truncate">
+                        {child.first_name} {child.last_name}
+                      </h5>
+                      {/* Edit / Delete buttons */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => setChildFormModal({ isOpen: true, mode: "edit", initialData: child, parentId: client.id, parentName })}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                          title="Edit child"
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-gray-500" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmDialog({
+                            isOpen: true,
+                            title: "Delete Child",
+                            message: `Are you sure you want to delete "${child.first_name} ${child.last_name}"? This action cannot be undone.`,
+                            action: () => handleDeleteChild(child.id, client.id),
+                          })}
+                          className="p-1 hover:bg-red-50 rounded transition-colors"
+                          title="Delete child"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                        </button>
+                      </div>
+                    </div>
                     <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-text-muted font-manrope">
                       {age && <span>Age: {age}</span>}
                       {child.grade && <span>• Grade {child.grade}</span>}
@@ -458,6 +538,16 @@ export default function Clients() {
         title={confirmDialog.title}
         message={confirmDialog.message}
         variant="danger"
+      />
+
+      <AdminChildForm
+        isOpen={childFormModal.isOpen}
+        onClose={() => setChildFormModal(prev => ({ ...prev, isOpen: false }))}
+        mode={childFormModal.mode}
+        initialData={childFormModal.initialData}
+        parentId={childFormModal.parentId}
+        parentName={childFormModal.parentName}
+        onSuccess={() => handleChildFormSuccess(childFormModal.parentId)}
       />
     </div>
   );

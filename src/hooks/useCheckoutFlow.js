@@ -36,6 +36,9 @@ export const useCheckoutFlow = () => {
     // Sibling discount preview
     siblingDiscountPreview: null, // NEW: Store calculated sibling discounts
 
+    // Custom fee selections per child: { [childId]: [0, 2] } (indices of selected optional fees)
+    selectedFeesByChild: {},
+
     // Payment
     paymentMethod: 'full', // 'full' | 'subscribe' | 'installments'
     installmentPlan: null,
@@ -136,7 +139,39 @@ export const useCheckoutFlow = () => {
         orderId: null,
         clientSecret: null,
         siblingDiscountPreview: null,
+        selectedFeesByChild: {},
         isLoading: false,
+      };
+    });
+  }, []);
+
+  /**
+   * Toggle a custom fee selection for a specific child
+   */
+  const toggleCustomFee = useCallback((childId, feeIndex) => {
+    // Reset creation flags to allow new order creation
+    isCreatingOrder.current = false;
+    isCreatingPayment.current = false;
+    orderCreationFailed.current = false;
+    paymentCreationFailed.current = false;
+
+    setState((prev) => {
+      const currentFees = prev.selectedFeesByChild[childId] || [];
+      const isSelected = currentFees.includes(feeIndex);
+      const newFees = isSelected
+        ? currentFees.filter(i => i !== feeIndex)
+        : [...currentFees, feeIndex];
+
+      return {
+        ...prev,
+        selectedFeesByChild: {
+          ...prev.selectedFeesByChild,
+          [childId]: newFees,
+        },
+        // Reset order when fee selection changes
+        orderId: null,
+        clientSecret: null,
+        siblingDiscountPreview: null,
       };
     });
   }, []);
@@ -239,11 +274,12 @@ export const useCheckoutFlow = () => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Build items array for all selected children
+      // Build items array for all selected children (with optional fee selections)
       const items = childIdsToEnroll.map(childId => ({
         class_id: classData.id,
         child_id: childId,
         amount: classData.base_price || classData.price,
+        selected_optional_fee_indices: state.selectedFeesByChild[childId] || [],
       }));
 
       console.log('[DEBUG] Creating order with items:', items);
@@ -322,6 +358,19 @@ export const useCheckoutFlow = () => {
       });
 
       console.log('[DEBUG] Payment created for orderId:', orderId);
+
+      // FREE ORDER: Backend already activated enrollments, skip Stripe
+      if (paymentIntent.client_secret === 'FREE') {
+        console.log('[DEBUG] Free order detected, enrollment activated directly');
+        setState((prev) => ({
+          ...prev,
+          clientSecret: 'FREE',
+          paymentSucceeded: true,
+          currentStep: 'success',
+          isLoading: false,
+        }));
+        return paymentIntent;
+      }
 
       // Store the checkout URL in clientSecret
       // IMPORTANT: Only set clientSecret if the orderId hasn't changed during the request
@@ -446,6 +495,7 @@ export const useCheckoutFlow = () => {
       selectedChildId: null,
       selectedChildIds: [], // NEW: Reset multi-select array
       siblingDiscountPreview: null, // NEW: Reset sibling discount preview
+      selectedFeesByChild: {}, // Reset custom fee selections
       paymentMethod: 'full',
       installmentPlan: null,
       orderId: null,
@@ -539,6 +589,7 @@ export const useCheckoutFlow = () => {
     initializeCheckout,
     selectChild,
     toggleChildSelection, // NEW: Multi-select support
+    toggleCustomFee, // Custom fee selection
     selectPaymentMethod,
     selectInstallmentPlan,
     applyDiscount,

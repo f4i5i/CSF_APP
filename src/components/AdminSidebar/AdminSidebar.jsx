@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings, Bell, Shield } from "lucide-react";
+import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings, Bell, Shield, Tag, Mail } from "lucide-react";
 import { useAuth } from "../../context/auth";
 import { usePermissions } from "../../hooks/usePermissions";
 
@@ -48,12 +48,14 @@ const categorizedRoutes = [
       { name: "Financials", to: "/financials", icon: DollarSign, permission: "canViewFinancials" },
       { name: "Refunds", to: "/admin/refunds", icon: RotateCcw, permission: "canProcessRefunds" },
       { name: "Cancellations", to: "/admin/cancellations", icon: XCircle, permission: "canManageFinancials" },
+      { name: "Discounts", to: "/admin/discounts", icon: Tag, permission: "canManageFinancials" },
     ]
   },
   {
     category: "Media",
     icon: Image,
     items: [
+      { name: "Mass Email", to: "/admin/mass-email", icon: Mail },
       { name: "Announcements", to: "/admin/announcements", icon: Bell },
       { name: "Calendar", to: "/admin/calendar", icon: Calendar },
       { name: "Events", to: "/admin/events", icon: CalendarDays },

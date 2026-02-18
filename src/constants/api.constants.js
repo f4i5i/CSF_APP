@@ -179,6 +179,18 @@ export const API_ENDPOINTS = {
     // Discount Codes (ADMIN)
     CODES: '/discounts/codes',
     CODE_BY_ID: (id) => `/discounts/codes/${id}`,
+    // Aliases used by discounts.service.js
+    LIST: '/discounts/codes',
+    CREATE: '/discounts/codes',
+    BY_ID: (id) => `/discounts/codes/${id}`,
+    DEACTIVATE: (id) => `/discounts/codes/${id}/deactivate`,
+    ACTIVATE: (id) => `/discounts/codes/${id}/activate`,
+    USAGE_STATS: (id) => `/discounts/codes/${id}/usage`,
+    AVAILABLE: '/discounts/available',
+    MY_USAGE: '/discounts/my-usage',
+    CHECK_ELIGIBILITY: '/discounts/check-eligibility',
+    GENERATE_BULK: '/discounts/codes/bulk',
+    EXPORT: '/discounts/codes/export',
 
     // Scholarships (ADMIN)
     SCHOLARSHIPS: '/discounts/scholarships',
@@ -311,6 +323,9 @@ export const API_ENDPOINTS = {
     CANCELLATION_REQUEST_APPROVE: (id) => `/cancellation-requests/${id}/approve`, // Approve
     CANCELLATION_REQUEST_REJECT: (id) => `/cancellation-requests/${id}/reject`, // Reject
     CANCELLATION_REQUESTS_STATS: '/cancellation-requests/stats/summary', // Get stats
+
+    // Bulk Communications
+    BULK_EMAIL: '/admin/bulk/email', // Send bulk email
 
     // Support
     SEND_SUPPORT_LOGS: '/admin/support/send-logs', // Send server logs to developer

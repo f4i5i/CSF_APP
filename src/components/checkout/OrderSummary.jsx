@@ -34,6 +34,8 @@ export default function OrderSummary({
   classData = null, // NEW: Class data for subscription end date
   backendTotal = null, // NEW: Use actual backend total when available
   backendProcessingFee = null, // Processing fee from backend order
+  customFees = [], // Custom fees from classData
+  selectedFeesByChild = {}, // Current fee selections per child
 }) {
   // Calculate subscription duration
   const getSubscriptionInfo = () => {
@@ -92,9 +94,32 @@ export default function OrderSummary({
 
   const siblingCalc = calculateWithSiblingDiscount();
 
-  // Calculate subtotal (class fees after sibling discount + registration fee)
+  // Calculate custom fees total for pre-order estimate
+  const calculateCustomFeesTotal = () => {
+    if (!customFees || customFees.length === 0 || !children || children.length === 0) return 0;
+
+    let total = 0;
+    const childIds = children.map(c => c?.id).filter(Boolean);
+
+    for (const childId of childIds) {
+      // Required fees apply to every child
+      for (let i = 0; i < customFees.length; i++) {
+        const fee = customFees[i];
+        if (!fee.is_optional) {
+          total += parseFloat(fee.amount);
+        } else if ((selectedFeesByChild[childId] || []).includes(i)) {
+          total += parseFloat(fee.amount);
+        }
+      }
+    }
+    return total;
+  };
+
+  const customFeesEstimate = lineItems ? 0 : calculateCustomFeesTotal();
+
+  // Calculate subtotal (class fees after sibling discount + registration fee + custom fees)
   const classFeesTotal = siblingCalc.totalAfterSibling;
-  const subtotal = classFeesTotal + parseFloat(registrationFee);
+  const subtotal = classFeesTotal + parseFloat(registrationFee) + customFeesEstimate;
 
   // Calculate discount amount
   let discountAmount = 0;
@@ -250,6 +275,44 @@ export default function OrderSummary({
                   <span className="font-manrope font-semibold text-sm text-green-700">
                     -${siblingCalc.siblingDiscount.toFixed(2)}
                   </span>
+                </div>
+              )}
+
+              {/* Custom Fees Preview (pre-order) */}
+              {customFees.length > 0 && customFeesEstimate > 0 && (
+                <div className="space-y-1 pt-2 border-t border-gray-100">
+                  {customFees.map((fee, i) => {
+                    if (!fee.is_optional) {
+                      // Required fee: show for all children
+                      return (
+                        <div key={`req-${i}`} className="flex justify-between items-center py-0.5">
+                          <span className="font-manrope font-normal text-sm text-[#666D80]">
+                            {fee.name} <span className="text-xs text-gray-400">(Required)</span>
+                            {childCount > 1 && <span className="text-xs text-gray-400"> x{childCount}</span>}
+                          </span>
+                          <span className="font-manrope font-medium text-sm text-[#173151]">
+                            ${(parseFloat(fee.amount) * childCount).toFixed(2)}
+                          </span>
+                        </div>
+                      );
+                    }
+                    // Optional fee: only show if any child selected it
+                    const selectedCount = children.filter(c =>
+                      c?.id && (selectedFeesByChild[c.id] || []).includes(i)
+                    ).length;
+                    if (selectedCount === 0) return null;
+                    return (
+                      <div key={`opt-${i}`} className="flex justify-between items-center py-0.5">
+                        <span className="font-manrope font-normal text-sm text-[#666D80]">
+                          {fee.name} <span className="text-xs text-blue-500">(Optional)</span>
+                          {selectedCount > 1 && <span className="text-xs text-gray-400"> x{selectedCount}</span>}
+                        </span>
+                        <span className="font-manrope font-medium text-sm text-[#173151]">
+                          ${(parseFloat(fee.amount) * selectedCount).toFixed(2)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </>

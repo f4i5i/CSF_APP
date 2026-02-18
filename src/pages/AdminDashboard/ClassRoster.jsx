@@ -202,6 +202,24 @@ const ClassRoster = () => {
                           )}
                         </div>
 
+                        {/* Custom Fees Paid */}
+                        {student.selected_custom_fees?.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {student.selected_custom_fees.map((fee, i) => (
+                              <span
+                                key={i}
+                                className={`text-xs px-2 py-0.5 rounded-full ${
+                                  fee.is_optional
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}
+                              >
+                                {fee.name}: ${parseFloat(fee.amount).toFixed(2)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
                         {/* Parent Info */}
                         {(parentName || parentEmail || parentPhone) && (
                           <div className="mt-3 pt-3 border-t border-gray-200">

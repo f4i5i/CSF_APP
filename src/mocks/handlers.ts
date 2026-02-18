@@ -105,6 +105,8 @@ export const mockClasses = [
     coach_id: 'user-coach-1',
     capacity: 20,
     enrolled_count: 15,
+    available_spots: 5,
+    has_capacity: true,
     price: 150,
     start_date: '2024-02-01',
     end_date: '2024-05-01',
@@ -124,6 +126,8 @@ export const mockClasses = [
     coach_id: 'user-coach-1',
     capacity: 15,
     enrolled_count: 10,
+    available_spots: 5,
+    has_capacity: true,
     price: 175,
     start_date: '2024-02-01',
     end_date: '2024-05-01',
@@ -527,6 +531,14 @@ export const handlers = [
     return HttpResponse.json(mockWaivers);
   }),
 
+  http.get(`${API_BASE}/waivers/pending`, () => {
+    return HttpResponse.json({ items: [], pending_count: 0, total: 0 });
+  }),
+
+  http.post(`${API_BASE}/waivers/sign-multiple`, async ({ request }) => {
+    return HttpResponse.json({ success: true, failed_count: 0 });
+  }),
+
   // ==========================================
   // ANNOUNCEMENTS ENDPOINTS
   // ==========================================
@@ -594,6 +606,14 @@ export const handlers = [
     return HttpResponse.json(mockEvents);
   }),
 
+  http.get(`${API_BASE}/events/class/:classId`, () => {
+    return HttpResponse.json(mockEvents);
+  }),
+
+  http.get(`${API_BASE}/events`, () => {
+    return HttpResponse.json(mockEvents);
+  }),
+
   http.get(`${API_BASE}/events/:id`, ({ params }) => {
     const event = mockEvents.find(e => e.id === params.id);
     return HttpResponse.json(event || mockEvents[0]);
@@ -641,6 +661,10 @@ export const handlers = [
     return HttpResponse.json([
       { child_id: 'child-1', badges: [mockBadges[0]] }
     ]);
+  }),
+
+  http.get(`${API_BASE}/badges/enrollment/:enrollmentId`, () => {
+    return HttpResponse.json([mockBadges[0]]);
   }),
 
   http.get(`${API_BASE}/badges/child/:childId`, () => {
@@ -812,6 +836,25 @@ export const handlers = [
   }),
 
   // ==========================================
+  // ADMIN BULK EMAIL
+  // ==========================================
+  http.post(`${API_BASE}/admin/bulk/email`, async ({ request }) => {
+    const data = await request.json() as JsonBody;
+    return HttpResponse.json({
+      successful: 10,
+      failed: 0,
+      total_recipients: 10,
+    });
+  }),
+
+  // ==========================================
+  // ADMIN REFUNDS SEARCH
+  // ==========================================
+  http.get(`${API_BASE}/admin/refunds/search`, () => {
+    return HttpResponse.json({ items: [], total: 0 });
+  }),
+
+  // ==========================================
   // AREAS ENDPOINTS
   // ==========================================
   http.get(`${API_BASE}/areas`, () => {
@@ -826,6 +869,15 @@ export const handlers = [
   // ==========================================
   http.get(`${API_BASE}/installments/my`, () => {
     return HttpResponse.json([]);
+  }),
+
+  http.get(`${API_BASE}/installments/summary`, () => {
+    return HttpResponse.json({
+      total_paid: 0,
+      total_due: 0,
+      next_payment_date: null,
+      next_payment_amount: 0,
+    });
   }),
 
   http.post(`${API_BASE}/installments/preview`, () => {

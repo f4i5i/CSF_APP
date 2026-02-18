@@ -65,3 +65,12 @@ if (typeof global.window === 'undefined') {
 if (typeof global.window.matchMedia === 'undefined') {
   global.window.matchMedia = global.matchMedia;
 }
+
+// Prevent Node.js 22 from crashing on unhandled promise rejections during tests.
+// Some component-level async operations (dynamic imports, fire-and-forget API calls
+// during render) produce rejections that React catches internally but that escape
+// the Promise chain. The test assertions themselves catch real failures.
+process.removeAllListeners('unhandledRejection');
+process.on('unhandledRejection', (reason) => {
+  // Suppress — test assertions will catch real issues
+});

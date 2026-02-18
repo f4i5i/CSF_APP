@@ -138,6 +138,10 @@ export default function ChildSelector({
     return { eligible: true, message: null, alreadyEnrolled: false, hasActiveClass: false };
   };
 
+  // Check if class is free (no sibling discounts for free classes)
+  const classFee = Number(classData?.base_price || classData?.price || 0);
+  const isFreeClass = classFee === 0;
+
   // Handle click based on mode
   const handleChildClick = (childId) => {
     if (multiSelect && onToggle) {
@@ -196,7 +200,9 @@ export default function ChildSelector({
       {/* Multi-select hint */}
       {multiSelect && children.length > 1 && (
         <p className="text-sm font-manrope text-[#666D80] mb-3">
-          Select multiple children to enroll them together and get sibling discounts!
+          {isFreeClass
+            ? 'Select the children you want to enroll in this free class.'
+            : 'Select multiple children to enroll them together and get sibling discounts!'}
         </p>
       )}
 
@@ -234,7 +240,7 @@ export default function ChildSelector({
               </div>
 
               {/* Sibling Discount Badge */}
-              {isSelected && discountPercent > 0 && (
+              {isSelected && discountPercent > 0 && !isFreeClass && (
                 <div className="absolute top-2 left-2">
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-500 text-white">
                     {discountPercent}% OFF
@@ -270,7 +276,7 @@ export default function ChildSelector({
                   </div>
 
                   {/* Sibling Position Label */}
-                  {isSelected && position > 0 && (
+                  {isSelected && position > 0 && !isFreeClass && (
                     <div className="mt-2 text-xs font-manrope text-[#173151]">
                       {position === 1 && 'First child (no discount)'}
                       {position === 2 && '2nd child - 25% sibling discount'}
@@ -299,7 +305,7 @@ export default function ChildSelector({
       </div>
 
       {/* Sibling Discount Summary */}
-      {multiSelect && selectedIds.length > 1 && totalSavings > 0 && (
+      {multiSelect && selectedIds.length > 1 && totalSavings > 0 && !isFreeClass && (
         <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center justify-between">
             <div>

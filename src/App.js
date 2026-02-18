@@ -87,6 +87,7 @@ import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
 import RegisterChild from './pages/AdminDashboard/RegisterChild'
+import EditChild from './pages/EditChild'
 import AdminClasses from './pages/AdminDashboard/Classes'
 import ClassRoster from './pages/AdminDashboard/ClassRoster'
 import AdminUsers from './pages/AdminDashboard/Users'
@@ -104,6 +105,8 @@ import BadgesManagement from './pages/AdminDashboard/BadgesManagement'
 import PhotosManagement from './pages/AdminDashboard/PhotosManagement'
 import AnnouncementsManagement from './pages/AdminDashboard/AnnouncementsManagement'
 import AdminCalendar from './pages/AdminDashboard/AdminCalendar'
+import DiscountManagement from './pages/AdminDashboard/DiscountManagement'
+import MassEmail from './pages/AdminDashboard/MassEmail'
 import WaiversManagement from './pages/admin/WaiversManagement'
 import WaiverReports from './pages/admin/WaiverReports'
 
@@ -384,6 +387,13 @@ return (
 }
 />
 
+{/* Edit Child - Edit existing child (parent only) */}
+<Route path="/editchild/:childId" element={
+  <ProtectedRoute requiredRole="parent">
+    <EditChild />
+  </ProtectedRoute>
+} />
+
 {/* ========================================
     ADMIN-ONLY ROUTES
     ========================================
@@ -470,6 +480,12 @@ return (
 
   {/* Calendar - View events across all classes */}
   <Route path="/admin/calendar" element={<AdminCalendar />} />
+
+  {/* Discount Management - Create and manage discount codes */}
+  <Route path="/admin/discounts" element={<DiscountManagement />} />
+
+  {/* Mass Email - Send bulk emails to parents */}
+  <Route path="/admin/mass-email" element={<MassEmail />} />
 </Route>
 
 </Routes>
