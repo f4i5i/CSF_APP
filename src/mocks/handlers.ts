@@ -535,7 +535,7 @@ export const handlers = [
     return HttpResponse.json({ items: [], pending_count: 0, total: 0 });
   }),
 
-  http.post(`${API_BASE}/waivers/sign-multiple`, async ({ request }) => {
+  http.post(`${API_BASE}/waivers/sign-multiple`, async () => {
     return HttpResponse.json({ success: true, failed_count: 0 });
   }),
 
