@@ -838,8 +838,7 @@ export const handlers = [
   // ==========================================
   // ADMIN BULK EMAIL
   // ==========================================
-  http.post(`${API_BASE}/admin/bulk/email`, async ({ request }) => {
-    const data = await request.json() as JsonBody;
+  http.post(`${API_BASE}/admin/bulk/email`, async () => {
     return HttpResponse.json({
       successful: 10,
       failed: 0,
