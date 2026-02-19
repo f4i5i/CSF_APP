@@ -22,6 +22,7 @@ const categorizedRoutes = [
     items: [
       { name: "Classes", to: "/admin/classes", icon: BookOpen, permission: "canManageClasses" },
       { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList, permission: "canManageClasses" },
+      { name: "Discounts", to: "/admin/discounts", icon: Tag, permission: "canManageDiscounts" },
     ]
   },
   {
@@ -48,7 +49,6 @@ const categorizedRoutes = [
       { name: "Financials", to: "/financials", icon: DollarSign, permission: "canViewFinancials" },
       { name: "Refunds", to: "/admin/refunds", icon: RotateCcw, permission: "canProcessRefunds" },
       { name: "Cancellations", to: "/admin/cancellations", icon: XCircle, permission: "canManageFinancials" },
-      { name: "Discounts", to: "/admin/discounts", icon: Tag, permission: "canManageDiscounts" },
     ]
   },
   {

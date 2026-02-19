@@ -61,7 +61,7 @@ function CustomDropdown({
           pointerEvents: isOpen ? "auto" : "none",
         }}
         transition={{ duration: 0.18 }}
-        className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-10"
+        className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50"
       >
         <div className="max-h-48 overflow-y-auto custom-scrollbar">
           {options.map((opt) => {
@@ -103,10 +103,10 @@ export default function FilterBar({
   hasActiveFilters = false,
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
-      <div className="flex flex-col gap-3 sm:gap-4">
-        {/* Search Input - Always full width on mobile */}
-        <div className="w-full">
+    <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 relative z-20">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        {/* Search Input */}
+        <div className="w-full sm:w-auto sm:min-w-[200px] sm:max-w-[300px]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <input
@@ -120,7 +120,7 @@ export default function FilterBar({
           </div>
         </div>
 
-        {/* Filter Dropdowns - Grid on mobile, flex on larger screens */}
+        {/* Filter Dropdowns - inline with search */}
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4">
           {filters.map((filter, index) => (
             <div key={index} className="w-full sm:w-auto">
