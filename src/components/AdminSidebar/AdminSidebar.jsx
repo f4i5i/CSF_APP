@@ -48,7 +48,7 @@ const categorizedRoutes = [
       { name: "Financials", to: "/financials", icon: DollarSign, permission: "canViewFinancials" },
       { name: "Refunds", to: "/admin/refunds", icon: RotateCcw, permission: "canProcessRefunds" },
       { name: "Cancellations", to: "/admin/cancellations", icon: XCircle, permission: "canManageFinancials" },
-      { name: "Discounts", to: "/admin/discounts", icon: Tag, permission: "canManageFinancials" },
+      { name: "Discounts", to: "/admin/discounts", icon: Tag, permission: "canManageDiscounts" },
     ]
   },
   {

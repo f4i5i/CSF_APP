@@ -41,6 +41,7 @@ export const ROLE_PERMISSIONS = {
     canShareRosters: true,
     canViewReports: true,
     canExportData: true,
+    canManageDiscounts: true,
     canManageSystemSettings: true,
   },
   ADMIN: {
@@ -57,6 +58,7 @@ export const ROLE_PERMISSIONS = {
     canViewFinancials: false, // Only Owner can view financials
     canManageFinancials: false, // Only Owner can manage financials
     canProcessRefunds: false, // Only Owner can process refunds
+    canManageDiscounts: true, // Admin can manage discounts/coupons
     canViewAllClients: true,
     canDeleteClients: false, // Only Owner can delete clients
     canViewRosters: true,
@@ -79,6 +81,7 @@ export const ROLE_PERMISSIONS = {
     canViewFinancials: false,
     canManageFinancials: false,
     canProcessRefunds: false,
+    canManageDiscounts: false,
     canViewAllClients: false,
     canDeleteClients: false,
     canViewRosters: true, // Coaches can view rosters of their classes
@@ -106,6 +109,7 @@ export const ROLE_PERMISSIONS = {
     canViewFinancials: false,
     canManageFinancials: false,
     canProcessRefunds: false,
+    canManageDiscounts: false,
     canViewAllClients: false,
     canDeleteClients: false,
     canViewRosters: false,
