@@ -35,7 +35,7 @@ export default function AdminLayout(){
       )}
 
       {/* Main content */}
-      <main className={`flex-1 transition-all sm:px-6 px-0 pb-12 overflow-auto ${
+      <main className={`flex-1 transition-all pt-2 sm:px-6 px-0 pb-12 overflow-auto ${
         collapsed ? "md:ml-20" : "md:ml-64"
       }`}>
         <div className="max-w-9xl max-sm:py-2 max-sm:mx-3">

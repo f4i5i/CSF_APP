@@ -92,6 +92,8 @@ export default function DiscountForm({ isOpen, onClose, mode = "create", initial
   const validate = () => {
     const newErrors = {};
     if (!form.code.trim()) newErrors.code = "Code is required";
+    else if (form.code.trim().length < 3) newErrors.code = "Code must be at least 3 characters";
+    else if (form.code.trim().length > 40) newErrors.code = "Code must be at most 40 characters";
     if (!form.discount_value || Number(form.discount_value) <= 0) newErrors.discount_value = "Value must be greater than 0";
     if (form.discount_type === "percentage" && Number(form.discount_value) > 100) {
       newErrors.discount_value = "Percentage cannot exceed 100";
@@ -229,10 +231,14 @@ export default function DiscountForm({ isOpen, onClose, mode = "create", initial
                 onChange={handleChange}
                 className={inputStyle("code")}
                 placeholder="e.g. SUMMER25"
+                maxLength={40}
                 disabled={mode === "edit"}
                 style={{ textTransform: "uppercase" }}
               />
-              {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code}</p>}
+              <div className="flex justify-between items-center mt-1">
+                {errors.code ? <p className="text-red-500 text-xs">{errors.code}</p> : <span />}
+                <span className={`text-xs ${form.code.length > 35 ? "text-orange-500" : "text-gray-400"}`}>{form.code.length}/40</span>
+              </div>
             </div>
 
             {/* Description */}
