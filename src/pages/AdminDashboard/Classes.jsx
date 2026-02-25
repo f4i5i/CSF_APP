@@ -1086,7 +1086,9 @@ export default function Classes() {
         const schoolCode = cls.school_code || cls.school?.code;
         const coaches = cls.coaches || cls.instructors || [];
         const classType = cls.class_type === 'one-time' ? 'One-time' : cls.class_type === 'membership' ? 'Membership' : cls.class_type || 'N/A';
-        const registrationLink = `${window.location.origin}/checkout?classId=${cls.id}`;
+        const registrationLink = cls.slug
+          ? `${window.location.origin}/register/${cls.slug}`
+          : `${window.location.origin}/checkout?classId=${cls.id}`;
         const paymentOptions = cls.payment_options || [];
         const customFees = cls.custom_fees || [];
 

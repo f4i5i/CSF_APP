@@ -88,6 +88,7 @@ import Financials from './pages/AdminDashboard/Financials'
 import Clients from './pages/AdminDashboard/Clients'
 import RegisterChild from './pages/AdminDashboard/RegisterChild'
 import EditChild from './pages/EditChild'
+import MyChildren from './pages/MyChildren'
 import AdminClasses from './pages/AdminDashboard/Classes'
 import ClassRoster from './pages/AdminDashboard/ClassRoster'
 import AdminUsers from './pages/AdminDashboard/Users'
@@ -391,6 +392,13 @@ return (
 <Route path="/editchild/:childId" element={
   <ProtectedRoute requiredRole="parent">
     <EditChild />
+  </ProtectedRoute>
+} />
+
+{/* My Children - Manage children profiles (parent only) */}
+<Route path="/mychildren" element={
+  <ProtectedRoute requiredRole="parent">
+    <MyChildren />
   </ProtectedRoute>
 } />
 

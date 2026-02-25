@@ -68,7 +68,8 @@ export default function Login() {
       }
 
       // Priority 2: Check if user was redirected from another page
-      const from = location.state?.from?.pathname;
+      const fromLocation = location.state?.from;
+      const from = fromLocation ? (fromLocation.pathname + (fromLocation.search || '')) : null;
       const intendedRoute = from && from !== '/login' ? from : target.route;
 
       // Navigate to intended page or fallback to role-based default

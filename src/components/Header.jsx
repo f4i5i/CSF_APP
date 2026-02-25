@@ -522,14 +522,14 @@ const Header = () => {
                 navigate("/contactus");
               }}
             />
-            {/* Add Child - Parent only */}
+            {/* My Children - Parent only */}
             {role !== "coach" && (
               <MenuItem
-                icon={UserPlus}
-                label="Add Child"
+                icon={Users}
+                label="My Children"
                 onClick={() => {
                   setOpen(false);
-                  navigate("/registerchild");
+                  navigate("/mychildren");
                 }}
               />
             )}

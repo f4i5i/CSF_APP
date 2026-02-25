@@ -8,12 +8,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import classesService from '../api/services/classes.service';
+import { useAuth } from '../context/auth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 export default function ClassRegister() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [classData, setClassData] = useState(null);
@@ -29,8 +31,15 @@ export default function ClassRegister() {
 
         if (response && response.id) {
           setClassData(response);
-          // Redirect to checkout with the class ID
-          navigate(`/checkout?classId=${response.id}`, { replace: true });
+
+          if (!user) {
+            // Not logged in - save class intent and redirect to login
+            sessionStorage.setItem('intendedClass', response.id);
+            navigate('/login', { replace: true });
+          } else {
+            // Logged in - go directly to checkout
+            navigate(`/checkout?classId=${response.id}`, { replace: true });
+          }
         } else {
           setError('Class not found');
         }

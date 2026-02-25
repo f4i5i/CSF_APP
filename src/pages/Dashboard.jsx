@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, UserPlus, Pencil } from 'lucide-react';
+import { ChevronDown, UserPlus } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import WaiversAlert from '../components/WaiversAlert';
@@ -365,16 +365,6 @@ export default function Dashboard() {
                 </span>
                 <ChevronDown size={20} className="text-[#1B1B1B] pointer-events-none" />
               </div>
-              {/* Edit Child Button */}
-              {selectedChild && (
-                <button
-                  onClick={() => navigate(`/editchild/${selectedChild.id}`)}
-                  className="p-2 bg-white/50 hover:bg-white border border-[#e1e1e1] rounded-full text-[#173151] transition-colors shadow-sm"
-                  title="Edit child info"
-                >
-                  <Pencil size={16} />
-                </button>
-              )}
               </>
             )}
           </div>
