@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Mail, Send, Users, Loader2, CheckCircle, AlertCircle, Eye, X } from "lucide-react";
+import {
+  Mail,
+  Send,
+  Users,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Eye,
+  X,
+} from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Header from "../../components/Header";
@@ -8,10 +17,31 @@ import adminService from "../../api/services/admin.service";
 import toast from "react-hot-toast";
 
 const RECIPIENT_TYPES = [
-  { value: "all", label: "All Parents", description: "Send to all registered parents" },
-  { value: "class", label: "By Class", description: "Send to parents of a specific class" },
-  { value: "program", label: "By Program", description: "Send to parents in a program" },
-  { value: "area", label: "By Area", description: "Send to parents in an area" },
+  {
+    value: "all",
+    label: "All Parents",
+    description: "Parents with active enrollments",
+  },
+  {
+    value: "all_accounts",
+    label: "All Accounts",
+    description: "Everyone who created an account",
+  },
+  {
+    value: "class",
+    label: "By Class",
+    description: "Send to parents of a specific class",
+  },
+  {
+    value: "program",
+    label: "By Program",
+    description: "Send to parents in a program",
+  },
+  {
+    value: "area",
+    label: "By Area",
+    description: "Send to parents in an area",
+  },
 ];
 
 export default function MassEmail() {
@@ -34,21 +64,33 @@ export default function MassEmail() {
   const [showPreview, setShowPreview] = useState(false);
 
   // Quill editor toolbar configuration
-  const quillModules = useMemo(() => ({
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ color: [] }, { background: [] }],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ align: [] }],
-      ["link"],
-      ["clean"],
-    ],
-  }), []);
+  const quillModules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ color: [] }, { background: [] }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ align: [] }],
+        ["link"],
+        ["clean"],
+      ],
+    }),
+    [],
+  );
 
   const quillFormats = [
-    "header", "bold", "italic", "underline", "strike",
-    "color", "background", "list", "bullet", "align", "link",
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "color",
+    "background",
+    "list",
+    "bullet",
+    "align",
+    "link",
   ];
 
   // Check if message has actual content (not just empty tags)
@@ -64,9 +106,15 @@ export default function MassEmail() {
       setLoadingOptions(true);
       try {
         const [classesRes, programsRes, areasRes] = await Promise.allSettled([
-          import("../../api/services/classes.service").then((m) => m.default.getAll()),
-          import("../../api/services/programs.service").then((m) => m.default.getAll()),
-          import("../../api/services/areas.service").then((m) => m.default.getAll()),
+          import("../../api/services/classes.service").then((m) =>
+            m.default.getAll(),
+          ),
+          import("../../api/services/programs.service").then((m) =>
+            m.default.getAll(),
+          ),
+          import("../../api/services/areas.service").then((m) =>
+            m.default.getAll(),
+          ),
         ]);
 
         if (classesRes.status === "fulfilled") {
@@ -150,7 +198,10 @@ export default function MassEmail() {
       }
     } catch (error) {
       console.error("Failed to send bulk email:", error);
-      const msg = error.response?.data?.detail || error.response?.data?.message || "Failed to send emails";
+      const msg =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        "Failed to send emails";
       toast.error(typeof msg === "string" ? msg : "Failed to send emails");
     } finally {
       setIsSending(false);
@@ -160,7 +211,9 @@ export default function MassEmail() {
   const getRecipientLabel = () => {
     switch (recipientType) {
       case "all":
-        return "all parents";
+        return "all parents with active enrollments";
+      case "all_accounts":
+        return "all account holders";
       case "class": {
         const cls = classes.find((c) => c.id === selectedClassId);
         return cls ? `parents in "${cls.name}"` : "selected class parents";
@@ -208,7 +261,9 @@ export default function MassEmail() {
 
         {/* Send Result */}
         {sendResult && (
-          <div className={`mb-6 p-4 rounded-lg border ${sendResult.failed > 0 ? "bg-orange-50 border-orange-200" : "bg-green-50 border-green-200"}`}>
+          <div
+            className={`mb-6 p-4 rounded-lg border ${sendResult.failed > 0 ? "bg-orange-50 border-orange-200" : "bg-green-50 border-green-200"}`}
+          >
             <div className="flex items-start gap-3">
               {sendResult.failed > 0 ? (
                 <AlertCircle className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
@@ -220,7 +275,8 @@ export default function MassEmail() {
                   Email Sent
                 </h3>
                 <p className="text-sm font-manrope text-gray-600 mt-1">
-                  {sendResult.successful} of {sendResult.total_recipients} emails sent successfully.
+                  {sendResult.successful} of {sendResult.total_recipients}{" "}
+                  emails sent successfully.
                   {sendResult.failed > 0 && ` ${sendResult.failed} failed.`}
                 </p>
                 <button
@@ -243,7 +299,7 @@ export default function MassEmail() {
                 Recipients
               </h2>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
                 {RECIPIENT_TYPES.map((type) => (
                   <button
                     key={type.value}
@@ -259,8 +315,12 @@ export default function MassEmail() {
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <p className="font-semibold text-sm font-manrope text-text-primary">{type.label}</p>
-                    <p className="text-xs text-text-muted font-manrope mt-0.5">{type.description}</p>
+                    <p className="font-semibold text-sm font-manrope text-text-primary">
+                      {type.label}
+                    </p>
+                    <p className="text-xs text-text-muted font-manrope mt-0.5">
+                      {type.description}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -268,7 +328,9 @@ export default function MassEmail() {
               {/* Dynamic dropdown based on recipient type */}
               {recipientType === "class" && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700 font-manrope">Select Class *</label>
+                  <label className="text-sm font-medium text-gray-700 font-manrope">
+                    Select Class *
+                  </label>
                   <select
                     value={selectedClassId}
                     onChange={(e) => setSelectedClassId(e.target.value)}
@@ -289,7 +351,9 @@ export default function MassEmail() {
 
               {recipientType === "program" && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700 font-manrope">Select Program *</label>
+                  <label className="text-sm font-medium text-gray-700 font-manrope">
+                    Select Program *
+                  </label>
                   <select
                     value={selectedProgramId}
                     onChange={(e) => setSelectedProgramId(e.target.value)}
@@ -297,7 +361,9 @@ export default function MassEmail() {
                     disabled={loadingOptions}
                   >
                     <option value="">
-                      {loadingOptions ? "Loading programs..." : "Choose a program"}
+                      {loadingOptions
+                        ? "Loading programs..."
+                        : "Choose a program"}
                     </option>
                     {programs.map((prog) => (
                       <option key={prog.id} value={prog.id}>
@@ -310,7 +376,9 @@ export default function MassEmail() {
 
               {recipientType === "area" && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700 font-manrope">Select Area *</label>
+                  <label className="text-sm font-medium text-gray-700 font-manrope">
+                    Select Area *
+                  </label>
                   <select
                     value={selectedAreaId}
                     onChange={(e) => setSelectedAreaId(e.target.value)}
@@ -350,7 +418,9 @@ export default function MassEmail() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 font-manrope">Subject *</label>
+                  <label className="text-sm font-medium text-gray-700 font-manrope">
+                    Subject *
+                  </label>
                   <input
                     type="text"
                     value={subject}
@@ -361,7 +431,9 @@ export default function MassEmail() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700 font-manrope mb-1 block">Message *</label>
+                  <label className="text-sm font-medium text-gray-700 font-manrope mb-1 block">
+                    Message *
+                  </label>
                   <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#F3BC48] focus-within:border-transparent">
                     <ReactQuill
                       theme="snow"
@@ -380,7 +452,10 @@ export default function MassEmail() {
             {/* Send Button */}
             <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
               <div className="text-sm font-manrope text-text-muted">
-                Sending to: <strong className="text-text-primary">{getRecipientLabel()}</strong>
+                Sending to:{" "}
+                <strong className="text-text-primary">
+                  {getRecipientLabel()}
+                </strong>
               </div>
               <button
                 onClick={handleSend}
@@ -414,115 +489,193 @@ export default function MassEmail() {
       />
 
       {/* Email Preview Modal */}
-      {showPreview && (() => {
-        const selectedClassName = recipientType === "class"
-          ? classes.find((c) => c.id === selectedClassId)?.name
-          : null;
+      {showPreview &&
+        (() => {
+          const selectedClassName =
+            recipientType === "class"
+              ? classes.find((c) => c.id === selectedClassId)?.name
+              : null;
 
-        return (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4" onClick={() => setShowPreview(false)}>
-            <div className="bg-[#f3f6fb] rounded-xl max-w-[640px] w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-xl flex flex-col" onClick={(e) => e.stopPropagation()}>
-              {/* Preview Header */}
-              <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-white">
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-base sm:text-lg text-heading-dark font-manrope flex items-center gap-1.5 sm:gap-2">
-                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-btn-gold shrink-0" />
-                    Email Preview
-                  </h3>
-                  <p className="text-xs text-text-muted font-manrope mt-0.5">This is how the email will appear to recipients</p>
-                </div>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition-colors shrink-0"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-                </button>
-              </div>
-
-              {/* Subject Bar */}
-              <div className="px-4 py-2 bg-white border-b border-gray-200">
-                <p className="text-xs text-text-muted font-manrope">Subject</p>
-                <p className="text-sm font-semibold text-text-primary font-manrope">{subject || "(No subject)"}</p>
-              </div>
-
-              {/* Email Render */}
-              <div className="flex-1 overflow-y-auto p-3 sm:p-5">
-                <div style={{ maxWidth: 600, margin: "0 auto", fontFamily: "'Segoe UI', Arial, sans-serif" }}>
-                  {/* Header */}
-                  <div style={{
-                    background: "linear-gradient(135deg, #173151 0%, #1e3a5f 100%)",
-                    color: "white",
-                    padding: "30px 20px",
-                    textAlign: "center",
-                    borderRadius: "10px 10px 0 0",
-                  }}>
-                    <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>Carolina Soccer Factory</h1>
-                    <p style={{ margin: "5px 0 0 0", fontSize: 14, opacity: 0.9 }}>Announcement</p>
+          return (
+            <div
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4"
+              onClick={() => setShowPreview(false)}
+            >
+              <div
+                className="bg-[#f3f6fb] rounded-xl max-w-[640px] w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-xl flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Preview Header */}
+                <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-white">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-base sm:text-lg text-heading-dark font-manrope flex items-center gap-1.5 sm:gap-2">
+                      <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-btn-gold shrink-0" />
+                      Email Preview
+                    </h3>
+                    <p className="text-xs text-text-muted font-manrope mt-0.5">
+                      This is how the email will appear to recipients
+                    </p>
                   </div>
+                  <button
+                    onClick={() => setShowPreview(false)}
+                    className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition-colors shrink-0"
+                  >
+                    <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                  </button>
+                </div>
 
-                  {/* Content */}
-                  <div style={{
-                    backgroundColor: "#ffffff",
-                    padding: 30,
-                    border: "1px solid #dee5f2",
-                    borderRadius: "0 0 10px 10px",
-                    lineHeight: 1.6,
-                    color: "#173151",
-                  }}>
-                    <p style={{ margin: "0 0 16px 0" }}>Hi <strong>Parent Name</strong>,</p>
+                {/* Subject Bar */}
+                <div className="px-4 py-2 bg-white border-b border-gray-200">
+                  <p className="text-xs text-text-muted font-manrope">
+                    Subject
+                  </p>
+                  <p className="text-sm font-semibold text-text-primary font-manrope">
+                    {subject || "(No subject)"}
+                  </p>
+                </div>
 
-                    <div dangerouslySetInnerHTML={{ __html: message }} />
+                {/* Email Render */}
+                <div className="flex-1 overflow-y-auto p-3 sm:p-5">
+                  <div
+                    style={{
+                      maxWidth: 600,
+                      margin: "0 auto",
+                      fontFamily: "'Segoe UI', Arial, sans-serif",
+                    }}
+                  >
+                    {/* Header */}
+                    <div
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #173151 0%, #1e3a5f 100%)",
+                        color: "white",
+                        padding: "30px 20px",
+                        textAlign: "center",
+                        borderRadius: "10px 10px 0 0",
+                      }}
+                    >
+                      <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>
+                        Carolina Soccer Factory
+                      </h1>
+                      <p
+                        style={{
+                          margin: "5px 0 0 0",
+                          fontSize: 14,
+                          opacity: 0.9,
+                        }}
+                      >
+                        Announcement
+                      </p>
+                    </div>
 
-                    {selectedClassName && (
-                      <div style={{
-                        backgroundColor: "#f3f6fb",
+                    {/* Content */}
+                    <div
+                      style={{
+                        backgroundColor: "#ffffff",
+                        padding: 30,
+                        border: "1px solid #dee5f2",
+                        borderRadius: "0 0 10px 10px",
+                        lineHeight: 1.6,
+                        color: "#173151",
+                      }}
+                    >
+                      <p style={{ margin: "0 0 16px 0" }}>
+                        Hi <strong>Parent Name</strong>,
+                      </p>
+
+                      <div dangerouslySetInnerHTML={{ __html: message }} />
+
+                      {selectedClassName && (
+                        <div
+                          style={{
+                            backgroundColor: "#f3f6fb",
+                            padding: 20,
+                            margin: "20px 0",
+                            borderRadius: 8,
+                            borderLeft: "4px solid #F3BC48",
+                          }}
+                        >
+                          <p style={{ margin: 0 }}>
+                            <strong>Regarding:</strong> {selectedClassName}
+                          </p>
+                        </div>
+                      )}
+
+                      <p style={{ margin: "16px 0 0 0" }}>
+                        If you have any questions, please don't hesitate to
+                        contact us.
+                      </p>
+                      <p style={{ margin: "16px 0 0 0" }}>
+                        Best regards,
+                        <br />
+                        <strong>Carolina Soccer Factory Team</strong>
+                      </p>
+                    </div>
+
+                    {/* Footer */}
+                    <div
+                      style={{
+                        textAlign: "center",
+                        marginTop: 30,
                         padding: 20,
-                        margin: "20px 0",
-                        borderRadius: 8,
-                        borderLeft: "4px solid #F3BC48",
-                      }}>
-                        <p style={{ margin: 0 }}><strong>Regarding:</strong> {selectedClassName}</p>
-                      </div>
-                    )}
-
-                    <p style={{ margin: "16px 0 0 0" }}>If you have any questions, please don't hesitate to contact us.</p>
-                    <p style={{ margin: "16px 0 0 0" }}>
-                      Best regards,<br />
-                      <strong>Carolina Soccer Factory Team</strong>
-                    </p>
-                  </div>
-
-                  {/* Footer */}
-                  <div style={{ textAlign: "center", marginTop: 30, padding: 20, color: "#666", fontSize: "0.85em" }}>
-                    <p style={{ margin: 0 }}>
-                      Carolina Soccer Factory<br />
-                      <a href="#" style={{ color: "#173151" }} onClick={(e) => e.preventDefault()}>carolinasoccerfactory.com</a>
-                    </p>
-                    <hr style={{ border: "none", borderTop: "1px solid #dee5f2", margin: "20px 0" }} />
-                    <p style={{ margin: 0 }}>
-                      This is an automated email. Please do not reply directly to this message.<br />
-                      If you have questions, contact us at <a href="#" style={{ color: "#173151" }} onClick={(e) => e.preventDefault()}>info@carolinasoccerfactory.com</a>
-                    </p>
+                        color: "#666",
+                        fontSize: "0.85em",
+                      }}
+                    >
+                      <p style={{ margin: 0 }}>
+                        Carolina Soccer Factory
+                        <br />
+                        <a
+                          href="#"
+                          style={{ color: "#173151" }}
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          carolinasoccerfactory.com
+                        </a>
+                      </p>
+                      <hr
+                        style={{
+                          border: "none",
+                          borderTop: "1px solid #dee5f2",
+                          margin: "20px 0",
+                        }}
+                      />
+                      <p style={{ margin: 0 }}>
+                        This is an automated email. Please do not reply directly
+                        to this message.
+                        <br />
+                        If you have questions, contact us at{" "}
+                        <a
+                          href="#"
+                          style={{ color: "#173151" }}
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          info@carolinasoccerfactory.com
+                        </a>
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Preview Footer */}
-              <div className="p-3 sm:p-4 border-t bg-white flex items-center justify-between">
-                <p className="text-xs text-text-muted font-manrope">
-                  Sending to: <strong className="text-text-primary">{getRecipientLabel()}</strong>
-                </p>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope"
-                >
-                  Close
-                </button>
+                {/* Preview Footer */}
+                <div className="p-3 sm:p-4 border-t bg-white flex items-center justify-between">
+                  <p className="text-xs text-text-muted font-manrope">
+                    Sending to:{" "}
+                    <strong className="text-text-primary">
+                      {getRecipientLabel()}
+                    </strong>
+                  </p>
+                  <button
+                    onClick={() => setShowPreview(false)}
+                    className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
       {/* Quill editor styles */}
       <style>{`

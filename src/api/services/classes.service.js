@@ -3,8 +3,8 @@
  * Handles class/program management and enrollment operations
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 /**
  * Transform schedule array to backend format
@@ -17,7 +17,7 @@ const transformScheduleToBackend = (schedule) => {
   }
 
   // Extract unique weekdays
-  const weekdays = schedule.map(s => s.day_of_week);
+  const weekdays = schedule.map((s) => s.day_of_week);
 
   // Use first schedule entry's times (assuming same time for all days)
   const { start_time, end_time } = schedule[0];
@@ -38,50 +38,50 @@ const transformPaymentOptionsToBackend = (paymentOptions) => {
   if (!paymentOptions) return [];
 
   const typeMapping = {
-    'full_payment': {
-      name: 'Full Payment',
-      type: 'one_time',
+    full_payment: {
+      name: "Full Payment",
+      type: "one_time",
       interval: null,
       interval_count: 1,
     },
-    'monthly_subscription': {
-      name: 'Monthly Subscription',
-      type: 'recurring',
-      interval: 'month',
+    monthly_subscription: {
+      name: "Monthly Subscription",
+      type: "recurring",
+      interval: "month",
       interval_count: 1,
     },
-    'installment_2': {
-      name: '2 Installments',
-      type: 'one_time',
+    installment_2: {
+      name: "2 Installments",
+      type: "one_time",
       interval: null,
       interval_count: 1,
     },
-    'installment_3': {
-      name: '3 Installments',
-      type: 'one_time',
+    installment_3: {
+      name: "3 Installments",
+      type: "one_time",
       interval: null,
       interval_count: 1,
     },
-    'installment_4': {
-      name: '4 Installments',
-      type: 'one_time',
+    installment_4: {
+      name: "4 Installments",
+      type: "one_time",
       interval: null,
       interval_count: 1,
     },
-    'installment_6': {
-      name: '6 Installments',
-      type: 'one_time',
+    installment_6: {
+      name: "6 Installments",
+      type: "one_time",
       interval: null,
       interval_count: 1,
     },
   };
 
   return paymentOptions
-    .filter(opt => opt.enabled)
-    .map(opt => {
+    .filter((opt) => opt.enabled)
+    .map((opt) => {
       const mapping = typeMapping[opt.type] || {
         name: opt.type,
-        type: 'one_time',
+        type: "one_time",
         interval: null,
         interval_count: 1,
       };
@@ -101,38 +101,42 @@ const transformPaymentOptionsToBackend = (paymentOptions) => {
  * Transform frontend class data to backend format
  */
 const transformClassDataToBackend = (classData) => {
-  const { schedule, payment_options, class_type, custom_fees, ...rest } = classData;
+  const { schedule, payment_options, class_type, custom_fees, ...rest } =
+    classData;
 
   // Transform schedule
   const scheduleData = transformScheduleToBackend(schedule);
 
   // Transform payment options
-  const transformedPaymentOptions = transformPaymentOptionsToBackend(payment_options);
+  const transformedPaymentOptions =
+    transformPaymentOptionsToBackend(payment_options);
 
   // Map class_type: 'one-time' stays 'one-time', 'membership' stays 'membership'
   // Backend now supports 'one-time' value
   const mappedClassType = class_type;
 
   // Calculate legacy price field (required by backend)
-  const firstPaymentOption = payment_options?.find(opt => opt.enabled);
+  const firstPaymentOption = payment_options?.find((opt) => opt.enabled);
   const price = firstPaymentOption ? parseFloat(firstPaymentOption.price) : 0;
 
   // Transform custom fees (filter out empty ones)
-  const transformedCustomFees = custom_fees
-    ?.filter(fee => fee.name && fee.name.trim())
-    .map(fee => ({
-      name: fee.name.trim(),
-      amount: parseFloat(fee.amount) || 0,
-      is_optional: fee.is_optional ?? true,
-      description: fee.description?.trim() || '',
-    })) || [];
+  const transformedCustomFees =
+    custom_fees
+      ?.filter((fee) => fee.name && fee.name.trim())
+      .map((fee) => ({
+        name: fee.name.trim(),
+        amount: parseFloat(fee.amount) || 0,
+        is_optional: fee.is_optional ?? true,
+        description: fee.description?.trim() || "",
+      })) || [];
 
   return {
     ...rest,
     ...scheduleData,
     class_type: mappedClassType,
     payment_options: transformedPaymentOptions,
-    custom_fees: transformedCustomFees.length > 0 ? transformedCustomFees : undefined,
+    custom_fees:
+      transformedCustomFees.length > 0 ? transformedCustomFees : undefined,
     price, // Legacy field - use first enabled payment option
     auto_create_stripe_prices: true, // Enable automatic Stripe Price creation
   };
@@ -233,15 +237,19 @@ const classesService = {
     const transformedData = transformClassDataToBackend(classData);
 
     // Extract image File for separate upload after class creation
-    const imageFile = classData.class_image instanceof File ? classData.class_image : null;
+    const imageFile =
+      classData.class_image instanceof File ? classData.class_image : null;
     delete transformedData.class_image;
 
     // If it's a string URL (not a File), pass as image_url
-    if (typeof classData.class_image === 'string' && classData.class_image) {
+    if (typeof classData.class_image === "string" && classData.class_image) {
       transformedData.image_url = classData.class_image;
     }
 
-    const { data } = await apiClient.post(API_ENDPOINTS.CLASSES.CREATE, transformedData);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.CLASSES.CREATE,
+      transformedData,
+    );
 
     // Upload image as a separate call after class creation
     if (imageFile && data.id) {
@@ -249,7 +257,7 @@ const classesService = {
         const updatedData = await this.uploadImage(data.id, imageFile);
         return updatedData;
       } catch (err) {
-        console.error('Image upload failed:', err);
+        console.error("Image upload failed:", err);
         // Return class data even if image upload fails
         return data;
       }
@@ -269,15 +277,19 @@ const classesService = {
     const transformedData = transformClassDataToBackend(classData);
 
     // Extract image File for separate upload
-    const imageFile = classData.class_image instanceof File ? classData.class_image : null;
+    const imageFile =
+      classData.class_image instanceof File ? classData.class_image : null;
     delete transformedData.class_image;
 
     // If it's a string URL (not a File), pass as image_url
-    if (typeof classData.class_image === 'string' && classData.class_image) {
+    if (typeof classData.class_image === "string" && classData.class_image) {
       transformedData.image_url = classData.class_image;
     }
 
-    const { data } = await apiClient.put(API_ENDPOINTS.CLASSES.BY_ID(id), transformedData);
+    const { data } = await apiClient.put(
+      API_ENDPOINTS.CLASSES.BY_ID(id),
+      transformedData,
+    );
 
     // Upload new image if provided
     if (imageFile) {
@@ -285,7 +297,7 @@ const classesService = {
         const updatedData = await this.uploadImage(id, imageFile);
         return updatedData;
       } catch (err) {
-        console.error('Image upload failed:', err);
+        console.error("Image upload failed:", err);
         return data;
       }
     }
@@ -301,11 +313,11 @@ const classesService = {
    */
   async uploadImage(classId, file) {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     const { data } = await apiClient.post(
       API_ENDPOINTS.CLASSES.IMAGE_UPLOAD(classId),
       formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   },
@@ -360,6 +372,47 @@ const classesService = {
    */
   async getAvailable() {
     return this.getAll({ has_capacity: true });
+  },
+
+  /**
+   * Get generated practice dates for a class
+   * @param {string} classId - Class ID
+   * @param {Object} params - Optional {year, month} filters
+   * @returns {Promise<Object>} Practice list with cancellation status
+   */
+  async getPractices(classId, params = {}) {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.CLASSES.PRACTICES(classId),
+      { params },
+    );
+    return data;
+  },
+
+  /**
+   * Cancel a specific practice date
+   * @param {string} classId - Class ID
+   * @param {string} date - Date in YYYY-MM-DD format
+   * @param {string} [reason] - Cancellation reason
+   */
+  async cancelPractice(classId, date, reason = null) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.CLASSES.CANCEL_PRACTICE(classId),
+      { date, reason },
+    );
+    return data;
+  },
+
+  /**
+   * Restore a previously cancelled practice date
+   * @param {string} classId - Class ID
+   * @param {string} date - Date in YYYY-MM-DD format
+   */
+  async restorePractice(classId, date) {
+    const { data } = await apiClient.delete(
+      API_ENDPOINTS.CLASSES.CANCEL_PRACTICE(classId),
+      { params: { date } },
+    );
+    return data;
   },
 };
 

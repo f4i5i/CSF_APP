@@ -10,12 +10,31 @@ const localizer = momentLocalizer(moment);
 const CustomEvent = ({ event }) => {
   const startTime = moment(event.start).format('h:mm a');
   const endTime = moment(event.end).format('h:mm a');
-  const isYellow = event.className?.includes('yellow');
+
+  // Determine color scheme
+  let bgClass, borderClass, textClass;
+  if (event._isCancelled) {
+    bgClass = 'bg-red-200';
+    borderClass = 'border-red-300';
+    textClass = 'text-red-700';
+  } else if (event._isPractice) {
+    bgClass = 'bg-emerald-600';
+    borderClass = 'border-emerald-600';
+    textClass = 'text-white';
+  } else if (event.className?.includes('yellow')) {
+    bgClass = 'bg-[#F3BC48]';
+    borderClass = 'border-[#F3BC48]';
+    textClass = 'text-[#000]';
+  } else {
+    bgClass = 'bg-[#173963]';
+    borderClass = 'border-[#173963]';
+    textClass = 'text-white';
+  }
 
   return (
     <div
       className={`flex flex-col gap-1 rounded-lg sm:rounded-[15px] p-1 lg:mx-2 sm:px-4 sm:py-2 max-w-full shadow-sm border overflow-hidden
-        ${isYellow ? 'bg-[#F3BC48] border-[#F3BC48] text-[#000]' : 'bg-[#173963] border-[#173963] text-white'}`}
+        ${bgClass} ${borderClass} ${textClass} ${event._isCancelled ? 'line-through opacity-70' : ''} ${event._isPractice ? 'cursor-pointer' : ''}`}
     >
       <span className="text-[8px] sm:text-[12px] font-medium tracking-[0.01em] font-manrope truncate max-w-[120px] sm:max-w-[150px]">
         {event.title}
@@ -27,7 +46,7 @@ const CustomEvent = ({ event }) => {
   );
 };
 
-export default function EventCalendar({ events: propEvents = [], loading = false }) {
+export default function EventCalendar({ events: propEvents = [], loading = false, onEventClick }) {
   const today = useMemo(() => new Date(), []);
   const [currentDate, setCurrentDate] = useState(today);
   const [view, setView] = useState("month");
@@ -68,10 +87,22 @@ export default function EventCalendar({ events: propEvents = [], loading = false
         start: new Date(event.start_datetime || event.start),
         end: new Date(event.end_datetime || event.end || event.start_datetime || event.start),
         className: event.type === 'tournament' || event.type === 'match' ? 'yellow' : 'blue',
+        // Pass through practice metadata
+        _isPractice: event._isPractice || false,
+        _isCancelled: event._isCancelled || false,
+        _classId: event._classId,
+        _className: event._className,
+        _practiceDate: event._practiceDate,
       }));
     }
     return demoEvents;
   }, [propEvents, demoEvents]);
+
+  const handleSelectEvent = (event) => {
+    if (onEventClick && event._isPractice) {
+      onEventClick(event);
+    }
+  };
 
   return (
     <div className={`w-full h-full ${loading ? 'opacity-60' : ''}`}>
@@ -89,6 +120,7 @@ export default function EventCalendar({ events: propEvents = [], loading = false
             setView("day");
           }
         }}
+        onSelectEvent={handleSelectEvent}
         components={{
           toolbar: (props) => <CustomToolbar {...props} />, // ✅ custom toolbar
           event: CustomEvent, // ✅ SHOWS TIME WITH EVENT TITLE
