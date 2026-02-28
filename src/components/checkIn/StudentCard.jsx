@@ -1,10 +1,11 @@
 import { Check, FileText } from "lucide-react";
+import { formatGrade } from "../../utils/format";
 
 const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
   // Generate initials for fallback avatar
   const getInitials = (name) => {
-    if (!name) return '?';
-    const parts = name.split(' ');
+    if (!name) return "?";
+    const parts = name.split(" ");
     return parts.length > 1
       ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
       : name.substring(0, 2).toUpperCase();
@@ -33,11 +34,12 @@ const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
         <div
           onClick={handleCheckInClick}
           className={`w-10 h-10 xl:w-12 xl:h-12 rounded-full flex items-center justify-center transition-colors
-            ${student.checked
-              ? "bg-green-500 text-white hover:bg-green-600"
-              : "border border-[#C9CBD3] hover:bg-gray-100"
+            ${
+              student.checked
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "border border-[#C9CBD3] hover:bg-gray-100"
             }
-            ${checkingIn ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
+            ${checkingIn ? "opacity-50 cursor-wait" : "cursor-pointer"}
           `}
         >
           {student.checked && <Check size={14} />}
@@ -62,7 +64,9 @@ const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
             {student.name}
           </p>
           <p className="text-sm max-sm:text-xs max-xxl:text-xs font-manrope font-medium opacity-50 text-[#000]">
-            {student.grade !== '-' ? `Grade ${student.grade}` : 'Grade N/A'}
+            {student.grade !== "-"
+              ? `Grade ${formatGrade(student.grade)}`
+              : "Grade N/A"}
           </p>
         </div>
       </div>

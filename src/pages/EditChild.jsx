@@ -365,7 +365,8 @@ export default function EditChild() {
                 className={inputStyle("grade")}
               >
                 <option value="">Select grade</option>
-                <option value="K">K</option>
+                <option value="pre_k">PRE-K</option>
+                <option value="k">K</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>

@@ -5,7 +5,19 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Mail, Phone, Users, Eye, User, BookOpen, Plus, Loader2, Pencil, UserPlus } from "lucide-react";
+import {
+  Trash2,
+  Mail,
+  Phone,
+  Users,
+  Eye,
+  User,
+  BookOpen,
+  Plus,
+  Loader2,
+  Pencil,
+  UserPlus,
+} from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -13,6 +25,7 @@ import AdminChildForm from "../../components/admin/AdminChildForm";
 import Header from "../../components/Header";
 import adminService from "../../api/services/admin.service";
 import childrenService from "../../api/services/children.service";
+import { formatGrade } from "../../utils/format";
 import toast from "react-hot-toast";
 
 export default function Clients() {
@@ -61,7 +74,7 @@ export default function Clients() {
       const response = await adminService.getClients(params);
 
       // Transform API data
-      let clientsData = (response.items || []).map(client => {
+      let clientsData = (response.items || []).map((client) => {
         const nameParts = (client.full_name || "").split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
@@ -82,7 +95,9 @@ export default function Clients() {
       if (statusFilter !== "") {
         const hasEnrollments = statusFilter === "true";
         clientsData = clientsData.filter((c) =>
-          hasEnrollments ? c.active_enrollments > 0 : c.active_enrollments === 0
+          hasEnrollments
+            ? c.active_enrollments > 0
+            : c.active_enrollments === 0,
         );
       }
 
@@ -104,7 +119,9 @@ export default function Clients() {
 
   const handleViewClient = (clientData) => {
     // TODO: Navigate to client detail page or open modal
-    toast.success(`Viewing client: ${clientData.first_name} ${clientData.last_name}`);
+    toast.success(
+      `Viewing client: ${clientData.first_name} ${clientData.last_name}`,
+    );
   };
 
   const handleDeleteClient = async (clientId) => {
@@ -126,7 +143,7 @@ export default function Clients() {
       await childrenService.delete(childId);
       toast.success("Child deleted successfully");
       // Refresh the expanded client details
-      setExpandedClientDetails(prev => {
+      setExpandedClientDetails((prev) => {
         const updated = { ...prev };
         delete updated[clientId];
         return updated;
@@ -161,19 +178,19 @@ export default function Clients() {
     // Skip if already loaded (unless force refresh)
     if (!forceRefresh && expandedClientDetails[client.id]) return;
 
-    setLoadingClientDetails(prev => ({ ...prev, [client.id]: true }));
+    setLoadingClientDetails((prev) => ({ ...prev, [client.id]: true }));
 
     try {
       const details = await adminService.getClientById(client.id);
-      setExpandedClientDetails(prev => ({
+      setExpandedClientDetails((prev) => ({
         ...prev,
-        [client.id]: details
+        [client.id]: details,
       }));
     } catch (error) {
       console.error("Failed to fetch client details:", error);
       toast.error("Failed to load client details");
     } finally {
-      setLoadingClientDetails(prev => ({ ...prev, [client.id]: false }));
+      setLoadingClientDetails((prev) => ({ ...prev, [client.id]: false }));
     }
   };
 
@@ -186,7 +203,9 @@ export default function Clients() {
       return (
         <div className="flex items-center justify-center py-6">
           <Loader2 className="w-6 h-6 animate-spin text-btn-gold mr-2" />
-          <span className="text-sm text-text-muted font-manrope">Loading children details...</span>
+          <span className="text-sm text-text-muted font-manrope">
+            Loading children details...
+          </span>
         </div>
       );
     }
@@ -209,7 +228,15 @@ export default function Clients() {
           <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
           <p>No children registered</p>
           <button
-            onClick={() => setChildFormModal({ isOpen: true, mode: "create", initialData: null, parentId: client.id, parentName })}
+            onClick={() =>
+              setChildFormModal({
+                isOpen: true,
+                mode: "create",
+                initialData: null,
+                parentId: client.id,
+                parentName,
+              })
+            }
             className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-btn-gold hover:bg-[#e5ad35] text-text-primary text-xs font-semibold rounded-lg transition-colors"
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -227,7 +254,15 @@ export default function Clients() {
             Registered Children ({children.length})
           </h4>
           <button
-            onClick={() => setChildFormModal({ isOpen: true, mode: "create", initialData: null, parentId: client.id, parentName })}
+            onClick={() =>
+              setChildFormModal({
+                isOpen: true,
+                mode: "create",
+                initialData: null,
+                parentId: client.id,
+                parentName,
+              })
+            }
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-gold hover:bg-[#e5ad35] text-text-primary text-xs font-semibold rounded-lg transition-colors"
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -236,9 +271,13 @@ export default function Clients() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {children.map((child) => {
-            const age = child.date_of_birth ? calculateAge(child.date_of_birth) : null;
+            const age = child.date_of_birth
+              ? calculateAge(child.date_of_birth)
+              : null;
             const enrollments = child.enrollments || [];
-            const activeEnrollments = enrollments.filter(e => e.status === 'ACTIVE' || e.status === 'active');
+            const activeEnrollments = enrollments.filter(
+              (e) => e.status === "ACTIVE" || e.status === "active",
+            );
 
             return (
               <div
@@ -257,19 +296,30 @@ export default function Clients() {
                       {/* Edit / Delete buttons */}
                       <div className="flex items-center gap-1 shrink-0">
                         <button
-                          onClick={() => setChildFormModal({ isOpen: true, mode: "edit", initialData: child, parentId: client.id, parentName })}
+                          onClick={() =>
+                            setChildFormModal({
+                              isOpen: true,
+                              mode: "edit",
+                              initialData: child,
+                              parentId: client.id,
+                              parentName,
+                            })
+                          }
                           className="p-1 hover:bg-gray-100 rounded transition-colors"
                           title="Edit child"
                         >
                           <Pencil className="w-3.5 h-3.5 text-gray-500" />
                         </button>
                         <button
-                          onClick={() => setConfirmDialog({
-                            isOpen: true,
-                            title: "Delete Child",
-                            message: `Are you sure you want to delete "${child.first_name} ${child.last_name}"? This action cannot be undone.`,
-                            action: () => handleDeleteChild(child.id, client.id),
-                          })}
+                          onClick={() =>
+                            setConfirmDialog({
+                              isOpen: true,
+                              title: "Delete Child",
+                              message: `Are you sure you want to delete "${child.first_name} ${child.last_name}"? This action cannot be undone.`,
+                              action: () =>
+                                handleDeleteChild(child.id, client.id),
+                            })
+                          }
                           className="p-1 hover:bg-red-50 rounded transition-colors"
                           title="Delete child"
                         >
@@ -279,7 +329,9 @@ export default function Clients() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-text-muted font-manrope">
                       {age && <span>Age: {age}</span>}
-                      {child.grade && <span>• Grade {child.grade}</span>}
+                      {child.grade && (
+                        <span>• Grade {formatGrade(child.grade)}</span>
+                      )}
                     </div>
 
                     {/* Enrollments */}
@@ -294,13 +346,16 @@ export default function Clients() {
                             <div
                               key={idx}
                               className={`text-xs px-2 py-1 rounded flex items-center justify-between ${
-                                enrollment.status === 'ACTIVE' || enrollment.status === 'active'
-                                  ? 'bg-green-50 text-green-700'
-                                  : 'bg-gray-50 text-gray-600'
+                                enrollment.status === "ACTIVE" ||
+                                enrollment.status === "active"
+                                  ? "bg-green-50 text-green-700"
+                                  : "bg-gray-50 text-gray-600"
                               }`}
                             >
                               <span className="truncate flex-1 mr-2">
-                                {enrollment.class?.name || enrollment.class_name || 'Class'}
+                                {enrollment.class?.name ||
+                                  enrollment.class_name ||
+                                  "Class"}
                               </span>
                               <span className="text-[10px] font-medium uppercase">
                                 {enrollment.status}
@@ -315,7 +370,9 @@ export default function Clients() {
                         </div>
                       </div>
                     ) : (
-                      <p className="mt-3 text-xs text-text-muted italic">No enrollments</p>
+                      <p className="mt-3 text-xs text-text-muted italic">
+                        No enrollments
+                      </p>
                     )}
 
                     {/* Add Class Button */}
@@ -343,7 +400,10 @@ export default function Clients() {
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;
@@ -357,7 +417,8 @@ export default function Clients() {
       render: (value, row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#173151] flex items-center justify-center text-white font-semibold text-sm">
-            {row.first_name?.[0]?.toUpperCase()}{row.last_name?.[0]?.toUpperCase()}
+            {row.first_name?.[0]?.toUpperCase()}
+            {row.last_name?.[0]?.toUpperCase()}
           </div>
           <div>
             <p className="font-semibold font-manrope text-text-primary">
@@ -542,7 +603,9 @@ export default function Clients() {
 
       <AdminChildForm
         isOpen={childFormModal.isOpen}
-        onClose={() => setChildFormModal(prev => ({ ...prev, isOpen: false }))}
+        onClose={() =>
+          setChildFormModal((prev) => ({ ...prev, isOpen: false }))
+        }
         mode={childFormModal.mode}
         initialData={childFormModal.initialData}
         parentId={childFormModal.parentId}

@@ -96,3 +96,17 @@ export const formatNumber = (num) => {
   if (num === null || num === undefined) return '-';
   return new Intl.NumberFormat('en-US').format(num);
 };
+
+/**
+ * Format grade value for display
+ * Backend stores: "pre_k", "k", "1", "2", etc.
+ * Display as: "PRE-K", "K", "1", "2", etc.
+ * @param {string} grade - Grade value from API
+ * @returns {string} Formatted grade for display
+ */
+export const formatGrade = (grade) => {
+  if (!grade) return '';
+  if (grade === 'pre_k') return 'PRE-K';
+  if (grade === 'k') return 'K';
+  return grade.toUpperCase();
+};

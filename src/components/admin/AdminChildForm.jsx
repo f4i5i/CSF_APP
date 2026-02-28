@@ -4,11 +4,33 @@ import { X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import childrenService from "../../api/services/children.service";
 
-const GRADE_OPTIONS = ["K", "1", "2", "3", "4", "5"];
+const GRADE_OPTIONS = [
+  { value: "pre_k", label: "PRE-K" },
+  { value: "k", label: "K" },
+  { value: "1", label: "1" },
+  { value: "2", label: "2" },
+  { value: "3", label: "3" },
+  { value: "4", label: "4" },
+  { value: "5", label: "5" },
+];
 const JERSEY_SIZES = ["xs", "s", "m", "l", "xl", "xxl"];
-const RELATION_OPTIONS = ["Parent", "Guardian", "Grandparent", "Sibling", "Other"];
+const RELATION_OPTIONS = [
+  "Parent",
+  "Guardian",
+  "Grandparent",
+  "Sibling",
+  "Other",
+];
 
-export default function AdminChildForm({ isOpen, onClose, mode = "create", initialData = null, parentId = null, parentName = null, onSuccess }) {
+export default function AdminChildForm({
+  isOpen,
+  onClose,
+  mode = "create",
+  initialData = null,
+  parentId = null,
+  parentName = null,
+  onSuccess,
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     first_name: "",
@@ -32,7 +54,9 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
       setForm({
         first_name: initialData.first_name || "",
         last_name: initialData.last_name || "",
-        date_of_birth: initialData.date_of_birth ? initialData.date_of_birth.split("T")[0] : "",
+        date_of_birth: initialData.date_of_birth
+          ? initialData.date_of_birth.split("T")[0]
+          : "",
         grade: initialData.grade || "",
         jersey_size: initialData.jersey_size || "",
         medical_conditions: initialData.medical_conditions || "",
@@ -40,7 +64,8 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
         health_insurance_number: initialData.health_insurance_number || "",
         emergency_name: emergencyContact.name || "",
         emergency_phone: emergencyContact.phone || "",
-        emergency_relation: emergencyContact.relation || emergencyContact.relationship || "",
+        emergency_relation:
+          emergencyContact.relation || emergencyContact.relationship || "",
       });
     } else if (mode === "create") {
       setForm({
@@ -73,9 +98,11 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
 
   const validate = () => {
     const newErrors = {};
-    if (!form.first_name.trim()) newErrors.first_name = "First name is required";
+    if (!form.first_name.trim())
+      newErrors.first_name = "First name is required";
     if (!form.last_name.trim()) newErrors.last_name = "Last name is required";
-    if (!form.date_of_birth) newErrors.date_of_birth = "Date of birth is required";
+    if (!form.date_of_birth)
+      newErrors.date_of_birth = "Date of birth is required";
     if (!form.grade) newErrors.grade = "Grade is required";
     if (!form.jersey_size) newErrors.jersey_size = "Jersey size is required";
     setErrors(newErrors);
@@ -97,7 +124,9 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
         medical_conditions: form.medical_conditions || null,
         has_no_medical_conditions: !form.medical_conditions,
         after_school_attendance: form.after_school_attendance,
-        after_school_program: form.after_school_attendance ? "Default Program" : null,
+        after_school_program: form.after_school_attendance
+          ? "Default Program"
+          : null,
         health_insurance_number: form.health_insurance_number || null,
         emergency_contacts: form.emergency_name
           ? [
@@ -132,7 +161,9 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
         error.response?.data?.detail ||
         error.response?.data?.message ||
         `Failed to ${mode === "edit" ? "update" : "create"} child`;
-      toast.error(typeof errorMessage === "string" ? errorMessage : "An error occurred");
+      toast.error(
+        typeof errorMessage === "string" ? errorMessage : "An error occurred",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -173,51 +204,110 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* First Name */}
             <div>
-              <label className="text-sm font-medium text-gray-700 font-manrope">First Name *</label>
-              <input type="text" name="first_name" value={form.first_name} onChange={handleChange} className={inputStyle("first_name")} />
-              {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                First Name *
+              </label>
+              <input
+                type="text"
+                name="first_name"
+                value={form.first_name}
+                onChange={handleChange}
+                className={inputStyle("first_name")}
+              />
+              {errors.first_name && (
+                <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>
+              )}
             </div>
 
             {/* Last Name */}
             <div>
-              <label className="text-sm font-medium text-gray-700 font-manrope">Last Name *</label>
-              <input type="text" name="last_name" value={form.last_name} onChange={handleChange} className={inputStyle("last_name")} />
-              {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                name="last_name"
+                value={form.last_name}
+                onChange={handleChange}
+                className={inputStyle("last_name")}
+              />
+              {errors.last_name && (
+                <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>
+              )}
             </div>
 
             {/* DOB */}
             <div>
-              <label className="text-sm font-medium text-gray-700 font-manrope">Date of Birth *</label>
-              <input type="date" name="date_of_birth" value={form.date_of_birth} onChange={handleChange} className={inputStyle("date_of_birth")} />
-              {errors.date_of_birth && <p className="text-red-500 text-xs mt-1">{errors.date_of_birth}</p>}
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Date of Birth *
+              </label>
+              <input
+                type="date"
+                name="date_of_birth"
+                value={form.date_of_birth}
+                onChange={handleChange}
+                className={inputStyle("date_of_birth")}
+              />
+              {errors.date_of_birth && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.date_of_birth}
+                </p>
+              )}
             </div>
 
             {/* Grade */}
             <div>
-              <label className="text-sm font-medium text-gray-700 font-manrope">Grade *</label>
-              <select name="grade" value={form.grade} onChange={handleChange} className={inputStyle("grade")}>
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Grade *
+              </label>
+              <select
+                name="grade"
+                value={form.grade}
+                onChange={handleChange}
+                className={inputStyle("grade")}
+              >
                 <option value="">Select grade</option>
                 {GRADE_OPTIONS.map((g) => (
-                  <option key={g} value={g}>{g}</option>
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
                 ))}
               </select>
-              {errors.grade && <p className="text-red-500 text-xs mt-1">{errors.grade}</p>}
+              {errors.grade && (
+                <p className="text-red-500 text-xs mt-1">{errors.grade}</p>
+              )}
             </div>
 
             {/* Jersey Size */}
             <div>
-              <label className="text-sm font-medium text-gray-700 font-manrope">Jersey Size *</label>
-              <select name="jersey_size" value={form.jersey_size} onChange={handleChange} className={inputStyle("jersey_size")}>
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Jersey Size *
+              </label>
+              <select
+                name="jersey_size"
+                value={form.jersey_size}
+                onChange={handleChange}
+                className={inputStyle("jersey_size")}
+              >
                 <option value="">Select size</option>
                 {JERSEY_SIZES.map((s) => (
-                  <option key={s} value={s}>{s.toUpperCase()}</option>
+                  <option key={s} value={s}>
+                    {s.toUpperCase()}
+                  </option>
                 ))}
               </select>
-              {errors.jersey_size && <p className="text-red-500 text-xs mt-1">{errors.jersey_size}</p>}
+              {errors.jersey_size && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.jersey_size}
+                </p>
+              )}
             </div>
 
             {/* After School */}
@@ -229,39 +319,87 @@ export default function AdminChildForm({ isOpen, onClose, mode = "create", initi
                 onChange={handleChange}
                 className="w-4 h-4 rounded border-gray-300 text-[#F3BC48] focus:ring-[#F3BC48]"
               />
-              <label className="text-sm font-medium text-gray-700 font-manrope">Attends Afterschool</label>
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Attends Afterschool
+              </label>
             </div>
 
             {/* Medical Conditions */}
             <div className="sm:col-span-2">
-              <label className="text-sm font-medium text-gray-700 font-manrope">Medical Conditions</label>
-              <textarea name="medical_conditions" value={form.medical_conditions} onChange={handleChange} className={inputStyle("medical_conditions")} rows={2} placeholder="Any medical conditions or allergies..." />
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Medical Conditions
+              </label>
+              <textarea
+                name="medical_conditions"
+                value={form.medical_conditions}
+                onChange={handleChange}
+                className={inputStyle("medical_conditions")}
+                rows={2}
+                placeholder="Any medical conditions or allergies..."
+              />
             </div>
 
             {/* Insurance */}
             <div className="sm:col-span-2">
-              <label className="text-sm font-medium text-gray-700 font-manrope">Health Insurance # (optional)</label>
-              <input type="text" name="health_insurance_number" value={form.health_insurance_number} onChange={handleChange} className={inputStyle("health_insurance_number")} />
+              <label className="text-sm font-medium text-gray-700 font-manrope">
+                Health Insurance # (optional)
+              </label>
+              <input
+                type="text"
+                name="health_insurance_number"
+                value={form.health_insurance_number}
+                onChange={handleChange}
+                className={inputStyle("health_insurance_number")}
+              />
             </div>
 
             {/* Emergency Contact Section */}
             <div className="sm:col-span-2 border-t border-gray-200 pt-4 mt-2">
-              <h3 className="text-sm font-semibold text-gray-700 font-manrope mb-3">Emergency Contact</h3>
+              <h3 className="text-sm font-semibold text-gray-700 font-manrope mb-3">
+                Emergency Contact
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-gray-600 font-manrope">Name</label>
-                  <input type="text" name="emergency_name" value={form.emergency_name} onChange={handleChange} className={inputStyle("emergency_name")} placeholder="Contact name" />
+                  <label className="text-xs font-medium text-gray-600 font-manrope">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    name="emergency_name"
+                    value={form.emergency_name}
+                    onChange={handleChange}
+                    className={inputStyle("emergency_name")}
+                    placeholder="Contact name"
+                  />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-600 font-manrope">Phone</label>
-                  <input type="tel" name="emergency_phone" value={form.emergency_phone} onChange={handleChange} className={inputStyle("emergency_phone")} placeholder="+1234567890" />
+                  <label className="text-xs font-medium text-gray-600 font-manrope">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="emergency_phone"
+                    value={form.emergency_phone}
+                    onChange={handleChange}
+                    className={inputStyle("emergency_phone")}
+                    placeholder="+1234567890"
+                  />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-600 font-manrope">Relation</label>
-                  <select name="emergency_relation" value={form.emergency_relation} onChange={handleChange} className={inputStyle("emergency_relation")}>
+                  <label className="text-xs font-medium text-gray-600 font-manrope">
+                    Relation
+                  </label>
+                  <select
+                    name="emergency_relation"
+                    value={form.emergency_relation}
+                    onChange={handleChange}
+                    className={inputStyle("emergency_relation")}
+                  >
                     <option value="">Select relation</option>
                     {RELATION_OPTIONS.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
                     ))}
                   </select>
                 </div>

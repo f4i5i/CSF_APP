@@ -1,15 +1,16 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown, UserPlus } from 'lucide-react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import WaiversAlert from '../components/WaiversAlert';
-import StatCard from '../components/dashboard/StatCard';
-import DashboardWidgets from '@/components/DashboardWidgets';
-import AnnouncementsSection from '@/components/AnnouncementsSection';
+import React, { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, UserPlus } from "lucide-react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import WaiversAlert from "../components/WaiversAlert";
+import StatCard from "../components/dashboard/StatCard";
+import DashboardWidgets from "@/components/DashboardWidgets";
+import AnnouncementsSection from "@/components/AnnouncementsSection";
 // Hooks
-import { useAuth } from '../context/auth';
-import { useChildren, useApi } from '../hooks';
+import { useAuth } from "../context/auth";
+import { useChildren, useApi } from "../hooks";
+import { formatGrade } from "../utils/format";
 
 // Services
 import {
@@ -20,7 +21,7 @@ import {
   attendanceService,
   enrollmentsService,
   waiversService,
-} from '../api/services';
+} from "../api/services";
 
 export default function Dashboard() {
   // 1. User from auth context
@@ -44,13 +45,13 @@ export default function Dashboard() {
     () =>
       enrollmentsService.getMy({
         child_id: selectedChild?.id,
-        status: 'active',
+        status: "active",
       }),
     {
       initialData: [],
       dependencies: [selectedChild?.id],
       autoFetch: !!selectedChild,
-    }
+    },
   );
 
   // State for selected enrollment (class)
@@ -62,7 +63,7 @@ export default function Dashboard() {
 
     // If API returns all enrollments for all children, filter by selected child
     const filtered = enrollmentsData.filter(
-      enrollment => enrollment.child_id === selectedChild.id
+      (enrollment) => enrollment.child_id === selectedChild.id,
     );
 
     return filtered;
@@ -72,8 +73,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (activeEnrollments.length > 0) {
       // Check if current selection is still valid for this child
-      const currentStillValid = selectedEnrollment &&
-        activeEnrollments.some(e => e.id === selectedEnrollment.id);
+      const currentStillValid =
+        selectedEnrollment &&
+        activeEnrollments.some((e) => e.id === selectedEnrollment.id);
 
       if (!currentStillValid) {
         setSelectedEnrollment(activeEnrollments[0]);
@@ -86,18 +88,19 @@ export default function Dashboard() {
 
   // Get class name for display
   const getClassName = (enrollment) => {
-    if (!enrollment) return '';
-    return enrollment.class?.name || enrollment.class_name || 'Class';
+    if (!enrollment) return "";
+    return enrollment.class?.name || enrollment.class_name || "Class";
   };
 
   // Get school name for enrollment
   const getEnrollmentSchool = (enrollment) => {
-    if (!enrollment) return '';
-    return enrollment.school_name || enrollment.class?.school?.name || '';
+    if (!enrollment) return "";
+    return enrollment.school_name || enrollment.class?.school?.name || "";
   };
 
   // Use selected enrollment for data fetching
-  const currentEnrollment = selectedEnrollment || activeEnrollments?.[0] || null;
+  const currentEnrollment =
+    selectedEnrollment || activeEnrollments?.[0] || null;
 
   // Resolve class ID from selected enrollment
   const derivedClassId = useMemo(() => {
@@ -105,15 +108,12 @@ export default function Dashboard() {
     if (currentEnrollment?.class_id) return currentEnrollment.class_id;
 
     // Fallback to child's first enrollment if no selected enrollment
-    const childEnrollment = selectedChild?.enrollments?.find(
-      (enrollment) => enrollment.status === 'active'
-    ) || selectedChild?.enrollments?.[0];
+    const childEnrollment =
+      selectedChild?.enrollments?.find(
+        (enrollment) => enrollment.status === "active",
+      ) || selectedChild?.enrollments?.[0];
 
-    return (
-      childEnrollment?.class?.id ||
-      childEnrollment?.class_id ||
-      null
-    );
+    return childEnrollment?.class?.id || childEnrollment?.class_id || null;
   }, [currentEnrollment, selectedChild]);
 
   // 3. Announcements - Fetch for derived class
@@ -123,7 +123,7 @@ export default function Dashboard() {
       initialData: [],
       dependencies: [derivedClassId],
       autoFetch: !!derivedClassId,
-    }
+    },
   );
 
   // 7. Recent photos (only if enrollment has class)
@@ -133,7 +133,7 @@ export default function Dashboard() {
       initialData: { items: [] },
       dependencies: [derivedClassId],
       autoFetch: !!derivedClassId,
-    }
+    },
   );
 
   // Extract photos array from API response
@@ -150,7 +150,7 @@ export default function Dashboard() {
       initialData: [],
       dependencies: [currentEnrollment?.id],
       autoFetch: !!currentEnrollment?.id,
-    }
+    },
   );
 
   // 9. Attendance stats (only if enrollment exists)
@@ -159,7 +159,7 @@ export default function Dashboard() {
     {
       dependencies: [currentEnrollment?.id],
       autoFetch: !!currentEnrollment?.id,
-    }
+    },
   );
 
   // 10. Events for class (only if enrollment has class)
@@ -169,7 +169,7 @@ export default function Dashboard() {
       initialData: [],
       dependencies: [derivedClassId],
       autoFetch: !!derivedClassId,
-    }
+    },
   );
 
   const { data: fallbackEvents = [], loading: loadingFallbackEvents } = useApi(
@@ -177,8 +177,8 @@ export default function Dashboard() {
     {
       initialData: [],
       autoFetch: !derivedClassId,
-      onError: (err) => console.warn('Failed to load upcoming events', err),
-    }
+      onError: (err) => console.warn("Failed to load upcoming events", err),
+    },
   );
 
   const normalizeEvents = (events) => {
@@ -188,14 +188,14 @@ export default function Dashboard() {
 
       const { event_date, start_time, end_time } = event;
       const normalizeTime = (time) => {
-        if (!time) return '00:00';
-        const [h = '00', m = '00'] = time.split(':');
+        if (!time) return "00:00";
+        const [h = "00", m = "00"] = time.split(":");
         const hour = Math.min(Math.max(parseInt(h, 10) || 0, 0), 23)
           .toString()
-          .padStart(2, '0');
+          .padStart(2, "0");
         const minute = Math.min(Math.max(parseInt(m, 10) || 0, 0), 59)
           .toString()
-          .padStart(2, '0');
+          .padStart(2, "0");
         return `${hour}:${minute}`;
       };
 
@@ -215,16 +215,17 @@ export default function Dashboard() {
     });
   };
 
-  const sourceEvents = normalizeEvents(classEvents).length > 0
-    ? normalizeEvents(classEvents)
-    : normalizeEvents(fallbackEvents);
+  const sourceEvents =
+    normalizeEvents(classEvents).length > 0
+      ? normalizeEvents(classEvents)
+      : normalizeEvents(fallbackEvents);
 
   // Get upcoming events from class events (filter and sort on frontend)
   const upcomingEvents = useMemo(() => {
     if (!sourceEvents) return [];
     const now = new Date();
     return sourceEvents
-      .filter(event => new Date(event.start_datetime) >= now)
+      .filter((event) => new Date(event.start_datetime) >= now)
       .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
       .slice(0, 3);
   }, [sourceEvents]);
@@ -239,7 +240,7 @@ export default function Dashboard() {
       return [];
     }
 
-    return sourceEvents.filter(event => {
+    return sourceEvents.filter((event) => {
       const eventDate = new Date(event.start_datetime);
       return eventDate >= startOfMonth && eventDate <= endOfMonth;
     });
@@ -250,14 +251,16 @@ export default function Dashboard() {
     () => waiversService.getPending(),
     {
       initialData: [],
-    }
+    },
   );
 
   // Computed values
   const attendanceStreak = attendanceStats?.current_streak || 0;
   const badgeCount = badges?.length || 0;
   const nextEvent = upcomingEvents?.[0] || null;
-  const nextEventLoading = derivedClassId ? loadingEvents : loadingFallbackEvents;
+  const nextEventLoading = derivedClassId
+    ? loadingEvents
+    : loadingFallbackEvents;
 
   // Recent badges (sorted by earned_at)
   const recentBadges = useMemo(() => {
@@ -274,118 +277,144 @@ export default function Dashboard() {
 
       <main className="px-6 py-10 max-xxl:py-5 max-sm:py-6 max-sm:px-3 my-8 mb-12 ">
         <div className="w-full">
-        {/* Subheader Section */}
-        <div className="flex flex-row lg:flex-row items-start lg:items-start justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
-          {/* Welcome Message & Child Selector */}
-          <div className="flex flex-col gap-1">
-            <h1 className="text-fluid-2xl text-[#173151] font-kollektif font-normal leading-[1.002] tracking-[-0.02em] max-sm:ml-3">
-              Welcome back, {user?.first_name || 'Parent'}! 👋
-            </h1>
+          {/* Subheader Section */}
+          <div className="flex flex-row lg:flex-row items-start lg:items-start justify-between mb-6 max-xxl:mb-4 gap-4 max-sm:gap-10">
+            {/* Welcome Message & Child Selector */}
+            <div className="flex flex-col gap-1">
+              <h1 className="text-fluid-2xl text-[#173151] font-kollektif font-normal leading-[1.002] tracking-[-0.02em] max-sm:ml-3">
+                Welcome back, {user?.first_name || "Parent"}! 👋
+              </h1>
 
-            {/* Child Selector or Add Child Button */}
-            {loadingChildren ? (
-              // Loading skeleton
-              <div className="py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-fluid-2xl animate-pulse max-sm:self-end max-sm:mr-2">
-                <div className="h-6 bg-gray-200 rounded-full w-64"></div>
-              </div>
-            ) : children.length === 0 ? (
-              // Add Child Button - shown when no children registered
-              <button
-                onClick={() => navigate('/registerchild')}
-                className="flex items-center gap-2 py-2 px-4 bg-[#F3BC48] hover:bg-[#e5a920] border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#173151] max-sm:self-end max-sm:mr-2 transition-colors shadow-sm"
-              >
-                <UserPlus size={20} className="text-[#173151]" />
-                <span>Add Your First Child</span>
-              </button>
-            ) : (
-              // Single dropdown showing Child + Class combinations
-              <>
-              <div className="relative py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#1B1B1B] max-sm:self-end max-sm:mr-2 flex items-center gap-2">
-                <select
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  value={currentEnrollment ? `${selectedChild?.id}|${currentEnrollment.enrollment_id || currentEnrollment.id}` : ''}
-                  onChange={(e) => {
-                    const [childId, enrollmentId] = e.target.value.split('|');
-                    const child = children.find((c) => c.id === childId);
-                    if (child) {
-                      selectChild(child);
-                      // Find enrollment in enrollmentsData or child's enrollments
-                      // Check both id and enrollment_id properties for match
-                      const enrollment = enrollmentsData?.find(
-                        (en) => en.id === enrollmentId || en.enrollment_id === enrollmentId
-                      ) || child.enrollments?.find(
-                        (en) => en.id === enrollmentId || en.enrollment_id === enrollmentId
-                      );
-                      if (enrollment) {
-                        setSelectedEnrollment(enrollment);
-                      }
-                    }
-                  }}
+              {/* Child Selector or Add Child Button */}
+              {loadingChildren ? (
+                // Loading skeleton
+                <div className="py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-fluid-2xl animate-pulse max-sm:self-end max-sm:mr-2">
+                  <div className="h-6 bg-gray-200 rounded-full w-64"></div>
+                </div>
+              ) : children.length === 0 ? (
+                // Add Child Button - shown when no children registered
+                <button
+                  onClick={() => navigate("/registerchild")}
+                  className="flex items-center gap-2 py-2 px-4 bg-[#F3BC48] hover:bg-[#e5a920] border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#173151] max-sm:self-end max-sm:mr-2 transition-colors shadow-sm"
                 >
-                  {children.flatMap((child) => {
-                    const childName = `${child.first_name || ''} ${child.last_name || ''}`.trim() || 'Student';
-                    // Get enrollments for this child
-                    const childEnrollments = child.enrollments?.filter(e =>
-                      e.status === 'active' || e.status === 'ACTIVE'
-                    ) || [];
+                  <UserPlus size={20} className="text-[#173151]" />
+                  <span>Add Your First Child</span>
+                </button>
+              ) : (
+                // Single dropdown showing Child + Class combinations
+                <>
+                  <div className="relative py-2 px-3 bg-white/30 border border-[#e1e1e1] w-fit text-base font-medium font-manrope rounded-[42px] text-[#1B1B1B] max-sm:self-end max-sm:mr-2 flex items-center gap-2">
+                    <select
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      value={
+                        currentEnrollment
+                          ? `${selectedChild?.id}|${currentEnrollment.enrollment_id || currentEnrollment.id}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const [childId, enrollmentId] =
+                          e.target.value.split("|");
+                        const child = children.find((c) => c.id === childId);
+                        if (child) {
+                          selectChild(child);
+                          // Find enrollment in enrollmentsData or child's enrollments
+                          // Check both id and enrollment_id properties for match
+                          const enrollment =
+                            enrollmentsData?.find(
+                              (en) =>
+                                en.id === enrollmentId ||
+                                en.enrollment_id === enrollmentId,
+                            ) ||
+                            child.enrollments?.find(
+                              (en) =>
+                                en.id === enrollmentId ||
+                                en.enrollment_id === enrollmentId,
+                            );
+                          if (enrollment) {
+                            setSelectedEnrollment(enrollment);
+                          }
+                        }
+                      }}
+                    >
+                      {children.flatMap((child) => {
+                        const childName =
+                          `${child.first_name || ""} ${child.last_name || ""}`.trim() ||
+                          "Student";
+                        // Get enrollments for this child
+                        const childEnrollments =
+                          child.enrollments?.filter(
+                            (e) =>
+                              e.status === "active" || e.status === "ACTIVE",
+                          ) || [];
 
-                    if (childEnrollments.length === 0) {
-                      // Show child without class if no enrollments
-                      return (
-                        <option key={child.id} value={`${child.id}|`}>
-                          {childName}
-                          {child.grade ? ` • Grade ${child.grade}` : ''}
-                        </option>
-                      );
-                    }
+                        if (childEnrollments.length === 0) {
+                          // Show child without class if no enrollments
+                          return (
+                            <option key={child.id} value={`${child.id}|`}>
+                              {childName}
+                              {child.grade
+                                ? ` • Grade ${formatGrade(child.grade)}`
+                                : ""}
+                            </option>
+                          );
+                        }
 
-                    // Show each child+class combination
-                    return childEnrollments.map((enrollment) => {
-                      const enrollId = enrollment.enrollment_id || enrollment.id;
-                      return (
-                        <option
-                          key={`${child.id}|${enrollId}`}
-                          value={`${child.id}|${enrollId}`}
-                        >
-                          {childName} • {enrollment.class_name || 'Class'}
-                          {enrollment.school_name ? ` • ${enrollment.school_name}` : ''}
-                        </option>
-                      );
-                    });
-                  })}
-                </select>
-                <span className="font-manrope font-medium text-base text-[#1B1B1B] pointer-events-none">
-                  {selectedChild ? (
-                    <>
-                      {`${selectedChild.first_name || ''} ${selectedChild.last_name || ''}`.trim() || 'Student'}
-                      {currentEnrollment ? ` • ${getClassName(currentEnrollment)}` : ''}
-                      {getEnrollmentSchool(currentEnrollment) ? ` • ${getEnrollmentSchool(currentEnrollment)}` : ''}
-                    </>
-                  ) : null}
-                </span>
-                <ChevronDown size={20} className="text-[#1B1B1B] pointer-events-none" />
-              </div>
-              </>
-            )}
+                        // Show each child+class combination
+                        return childEnrollments.map((enrollment) => {
+                          const enrollId =
+                            enrollment.enrollment_id || enrollment.id;
+                          return (
+                            <option
+                              key={`${child.id}|${enrollId}`}
+                              value={`${child.id}|${enrollId}`}
+                            >
+                              {childName} • {enrollment.class_name || "Class"}
+                              {enrollment.school_name
+                                ? ` • ${enrollment.school_name}`
+                                : ""}
+                            </option>
+                          );
+                        });
+                      })}
+                    </select>
+                    <span className="font-manrope font-medium text-base text-[#1B1B1B] pointer-events-none">
+                      {selectedChild ? (
+                        <>
+                          {`${selectedChild.first_name || ""} ${selectedChild.last_name || ""}`.trim() ||
+                            "Student"}
+                          {currentEnrollment
+                            ? ` • ${getClassName(currentEnrollment)}`
+                            : ""}
+                          {getEnrollmentSchool(currentEnrollment)
+                            ? ` • ${getEnrollmentSchool(currentEnrollment)}`
+                            : ""}
+                        </>
+                      ) : null}
+                    </span>
+                    <ChevronDown
+                      size={20}
+                      className="text-[#1B1B1B] pointer-events-none"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-[42px] max-sm:hidden">
+              <StatCard value={attendanceStreak} label="Attendance Streak" />
+              <StatCard value={badgeCount} label="Badges Earned" />
+            </div>
           </div>
 
-          {/* Stats */}
-          <div className="flex items-center gap-[42px] max-sm:hidden">
-            <StatCard value={attendanceStreak} label="Attendance Streak" />
-            <StatCard value={badgeCount} label="Badges Earned" />
-          </div>
-        </div>
+          {/* Waivers Alert */}
+          <WaiversAlert
+            pendingWaivers={pendingWaivers?.items || []}
+            loading={loadingWaivers}
+          />
 
-        {/* Waivers Alert */}
-        <WaiversAlert
-          pendingWaivers={pendingWaivers?.items || []}
-          loading={loadingWaivers}
-        />
-
-        <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
-
-
-                    <div className="flex flex-col lg:flex-row items-start justify-center gap-3 w-full">
+          <div className="flex flex-col md:flex-row lg:flex-row gap-4 max-sm:gap-6">
+            <div className="flex flex-col lg:flex-row items-start justify-center gap-3 w-full">
               <AnnouncementsSection
                 announcements={announcements}
                 nextEvent={nextEvent}
@@ -401,9 +430,9 @@ export default function Dashboard() {
                 loadingBadges={loadingBadges}
                 loadingPhoto={loadingPhotos}
               />
-          </div>
-          {/* Left Column - Announcements */}
-          {/* <div className="w-full lg:w-[48%] max-sm:hidden">
+            </div>
+            {/* Left Column - Announcements */}
+            {/* <div className="w-full lg:w-[48%] max-sm:hidden">
 
             <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm">
             <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px] mb-4">Announcements</h2>
@@ -414,23 +443,23 @@ export default function Dashboard() {
             </div>
           </div> */}
 
-          {/* Right Column */}
-          {/* <div className="w-full lg:w-[48%] space-y-4 max-sm:space-y-6"> */}
+            {/* Right Column */}
+            {/* <div className="w-full lg:w-[48%] space-y-4 max-sm:space-y-6"> */}
             {/* Calendar & Next Event Card */}
             {/* <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm"> */}
-              {/* <div className="flex gap-6 max-md:flex-col"> */}
-                {/* Calendar Section */}
-                {/* <div className="flex-1">
+            {/* <div className="flex gap-6 max-md:flex-col"> */}
+            {/* Calendar Section */}
+            {/* <div className="flex-1">
                   <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Calendar</h2>
                   <Calender1 events={calendarEvents} />
                 </div> */}
 
-                {/* Next Event Section */}
-                {/* <div className="flex-1">
+            {/* Next Event Section */}
+            {/* <div className="flex-1">
                   <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">Next Event</h2>
                   <NextEvent event={nextEvent} loading={nextEventLoading} />
                 </div> */}
-              {/* </div> */}
+            {/* </div> */}
             {/* </div> */}
 
             {/* Program Photos & Badges - Stacked Vertically */}
@@ -438,10 +467,10 @@ export default function Dashboard() {
               <ProgramPhotoCard photo={recentPhotos?.[0]} loading={loadingPhotos} />
               <BadgeCard badges={recentBadges} loading={loadingBadges} />
             </div> */}
-          {/* </div> */}
+            {/* </div> */}
 
-          {/* Mobile: Announcements */}
-          {/* <div className="hidden max-sm:block w-full">
+            {/* Mobile: Announcements */}
+            {/* <div className="hidden max-sm:block w-full">
             <h2 className="text-fluid-lg font-semibold font-manrope text-[#1b1b1b] leading-[1.5] tracking-[-0.2px] mb-4">Announcements</h2>
             <div className="bg-white/50 rounded-fluid-xl p-fluid-5 shadow-sm">
               <AnnouncementCard
@@ -450,7 +479,7 @@ export default function Dashboard() {
               />
             </div>
           </div> */}
-        </div>
+          </div>
         </div>
       </main>
       <Footer mobileHidden={true} />
