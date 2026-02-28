@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Camera, X, Loader2 } from "lucide-react";
 import childrenService from "../api/services/children.service";
 import Logo from "../components/Logo";
+import { GRADE_OPTIONS } from "../utils/format";
 
 export default function EditChild() {
   const navigate = useNavigate();
@@ -57,7 +58,8 @@ export default function EditChild() {
           afterschool: child.after_school_attendance ? "yes" : "no",
           emergencyName: emergencyContact.name || "",
           emergencyPhone: emergencyContact.phone || "",
-          emergencyRelation: emergencyContact.relation || emergencyContact.relationship || "",
+          emergencyRelation:
+            emergencyContact.relation || emergencyContact.relationship || "",
           insurance: child.health_insurance_number || "",
           hearAbout: child.how_heard_about_us || "",
         });
@@ -87,7 +89,10 @@ export default function EditChild() {
       const birthDate = new Date(form.dob);
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
         age--;
       }
       setCalculatedAge(age);
@@ -103,9 +108,12 @@ export default function EditChild() {
     if (!form.dob) newErrors.dob = "Date of birth is required.";
     if (!form.grade) newErrors.grade = "Grade is required.";
     if (!form.jersey) newErrors.jersey = "Select a jersey size.";
-    if (!form.emergencyName.trim()) newErrors.emergencyName = "Emergency contact name is required.";
-    if (!form.emergencyPhone.trim()) newErrors.emergencyPhone = "Emergency contact phone is required.";
-    if (!form.emergencyRelation.trim()) newErrors.emergencyRelation = "Emergency contact relation is required.";
+    if (!form.emergencyName.trim())
+      newErrors.emergencyName = "Emergency contact name is required.";
+    if (!form.emergencyPhone.trim())
+      newErrors.emergencyPhone = "Emergency contact phone is required.";
+    if (!form.emergencyRelation.trim())
+      newErrors.emergencyRelation = "Emergency contact relation is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -130,7 +138,9 @@ export default function EditChild() {
       img.onload = () => {
         URL.revokeObjectURL(img.src);
         if (img.width > 400 || img.height > 400) {
-          toast.error(`Image must be max 400x400 pixels. Your image is ${img.width}x${img.height}`);
+          toast.error(
+            `Image must be max 400x400 pixels. Your image is ${img.width}x${img.height}`,
+          );
           if (fileInputRef.current) fileInputRef.current.value = "";
           return;
         }
@@ -166,7 +176,8 @@ export default function EditChild() {
         medical_conditions: form.medical || null,
         has_no_medical_conditions: !form.medical,
         after_school_attendance: form.afterschool === "yes",
-        after_school_program: form.afterschool === "yes" ? "Default Program" : null,
+        after_school_program:
+          form.afterschool === "yes" ? "Default Program" : null,
         health_insurance_number: form.insurance || null,
         how_heard_about_us: form.hearAbout || null,
         emergency_contacts: form.emergencyName
@@ -198,7 +209,10 @@ export default function EditChild() {
     } catch (error) {
       console.error("Failed to update child:", error);
 
-      if (error.response?.data?.detail && Array.isArray(error.response.data.detail)) {
+      if (
+        error.response?.data?.detail &&
+        Array.isArray(error.response.data.detail)
+      ) {
         const validationErrors = {};
         const errorMessages = [];
         error.response.data.detail.forEach((err) => {
@@ -244,7 +258,9 @@ export default function EditChild() {
       <div className="h-full w-full flex items-center justify-center">
         <div className="flex items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-[#F3BC48]" />
-          <span className="text-gray-600 font-manrope text-lg">Loading child data...</span>
+          <span className="text-gray-600 font-manrope text-lg">
+            Loading child data...
+          </span>
         </div>
       </div>
     );
@@ -266,8 +282,12 @@ export default function EditChild() {
             <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
               <Logo />
             </div>
-            <h2 className="text-2xl font-semibold text-[#0f172a]">Edit Child</h2>
-            <p className="text-gray-500 mt-1">Update your child's information</p>
+            <h2 className="text-2xl font-semibold text-[#0f172a]">
+              Edit Child
+            </h2>
+            <p className="text-gray-500 mt-1">
+              Update your child's information
+            </p>
           </div>
 
           {submitError && (
@@ -278,7 +298,9 @@ export default function EditChild() {
 
           {/* Profile Image Upload */}
           <div className="flex flex-col items-center mb-6">
-            <span className="font-medium text-gray-700 mb-2">Profile Photo (Optional)</span>
+            <span className="font-medium text-gray-700 mb-2">
+              Profile Photo (Optional)
+            </span>
             {profileImagePreview ? (
               <div className="relative">
                 <img
@@ -307,7 +329,9 @@ export default function EditChild() {
                 />
               </label>
             )}
-            <p className="text-xs text-gray-500 mt-2">Max 400x400 pixels, max 1MB</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Max 400x400 pixels, max 1MB
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -321,7 +345,9 @@ export default function EditChild() {
                 onChange={handleChange}
                 className={inputStyle("firstName")}
               />
-              {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+              {errors.firstName && (
+                <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+              )}
             </div>
 
             {/* Last Name */}
@@ -334,7 +360,9 @@ export default function EditChild() {
                 onChange={handleChange}
                 className={inputStyle("lastName")}
               />
-              {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+              {errors.lastName && (
+                <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+              )}
             </div>
 
             {/* DOB */}
@@ -347,10 +375,13 @@ export default function EditChild() {
                 onChange={handleChange}
                 className={inputStyle("dob")}
               />
-              {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
+              {errors.dob && (
+                <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
+              )}
               {calculatedAge !== null && (
                 <p className="text-[#173151] text-sm mt-1 font-medium">
-                  Age: {calculatedAge} {calculatedAge === 1 ? "year" : "years"} old
+                  Age: {calculatedAge} {calculatedAge === 1 ? "year" : "years"}{" "}
+                  old
                 </p>
               )}
             </div>
@@ -365,15 +396,15 @@ export default function EditChild() {
                 className={inputStyle("grade")}
               >
                 <option value="">Select grade</option>
-                <option value="pre_k">PRE-K</option>
-                <option value="k">K</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
+                {GRADE_OPTIONS.map((g) => (
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
+                ))}
               </select>
-              {errors.grade && <p className="text-red-500 text-xs mt-1">{errors.grade}</p>}
+              {errors.grade && (
+                <p className="text-red-500 text-xs mt-1">{errors.grade}</p>
+              )}
             </div>
 
             {/* Jersey */}
@@ -393,12 +424,16 @@ export default function EditChild() {
                 <option value="xl">XL</option>
                 <option value="xxl">XXL</option>
               </select>
-              {errors.jersey && <p className="text-red-500 text-xs mt-1">{errors.jersey}</p>}
+              {errors.jersey && (
+                <p className="text-red-500 text-xs mt-1">{errors.jersey}</p>
+              )}
             </div>
 
             {/* Afterschool */}
             <div>
-              <label className="font-medium text-gray-700">Attends Afterschool?</label>
+              <label className="font-medium text-gray-700">
+                Attends Afterschool?
+              </label>
               <select
                 name="afterschool"
                 value={form.afterschool}
@@ -412,7 +447,9 @@ export default function EditChild() {
 
             {/* Medical */}
             <div className="md:col-span-2">
-              <label className="font-medium text-gray-700">Medical Conditions</label>
+              <label className="font-medium text-gray-700">
+                Medical Conditions
+              </label>
               <textarea
                 name="medical"
                 value={form.medical}
@@ -424,7 +461,9 @@ export default function EditChild() {
 
             {/* Emergency Contact Name */}
             <div>
-              <label className="font-medium text-gray-700">Emergency Contact Name</label>
+              <label className="font-medium text-gray-700">
+                Emergency Contact Name
+              </label>
               <input
                 type="text"
                 name="emergencyName"
@@ -433,12 +472,18 @@ export default function EditChild() {
                 className={inputStyle("emergencyName")}
                 placeholder="Full name"
               />
-              {errors.emergencyName && <p className="text-red-500 text-xs mt-1">{errors.emergencyName}</p>}
+              {errors.emergencyName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.emergencyName}
+                </p>
+              )}
             </div>
 
             {/* Emergency Contact Phone */}
             <div>
-              <label className="font-medium text-gray-700">Emergency Contact Phone</label>
+              <label className="font-medium text-gray-700">
+                Emergency Contact Phone
+              </label>
               <input
                 type="tel"
                 name="emergencyPhone"
@@ -447,12 +492,18 @@ export default function EditChild() {
                 className={inputStyle("emergencyPhone")}
                 placeholder="+1234567890"
               />
-              {errors.emergencyPhone && <p className="text-red-500 text-xs mt-1">{errors.emergencyPhone}</p>}
+              {errors.emergencyPhone && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.emergencyPhone}
+                </p>
+              )}
             </div>
 
             {/* Emergency Contact Relation */}
             <div>
-              <label className="font-medium text-gray-700">Emergency Contact Relation</label>
+              <label className="font-medium text-gray-700">
+                Emergency Contact Relation
+              </label>
               <select
                 name="emergencyRelation"
                 value={form.emergencyRelation}
@@ -466,12 +517,18 @@ export default function EditChild() {
                 <option value="Sibling">Sibling</option>
                 <option value="Other">Other</option>
               </select>
-              {errors.emergencyRelation && <p className="text-red-500 text-xs mt-1">{errors.emergencyRelation}</p>}
+              {errors.emergencyRelation && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.emergencyRelation}
+                </p>
+              )}
             </div>
 
             {/* Insurance */}
             <div>
-              <label className="font-medium text-gray-700">Health Insurance # (optional)</label>
+              <label className="font-medium text-gray-700">
+                Health Insurance # (optional)
+              </label>
               <input
                 type="text"
                 name="insurance"
@@ -483,7 +540,9 @@ export default function EditChild() {
 
             {/* Hear About Us */}
             <div>
-              <label className="font-medium text-gray-700">How did you hear about us?</label>
+              <label className="font-medium text-gray-700">
+                How did you hear about us?
+              </label>
               <select
                 name="hearAbout"
                 value={form.hearAbout}
@@ -492,7 +551,9 @@ export default function EditChild() {
               >
                 <option value="">Select an option</option>
                 <option value="friend">Friend/Word of Mouth</option>
-                <option value="social_media">Social Media (Facebook, Instagram, etc.)</option>
+                <option value="social_media">
+                  Social Media (Facebook, Instagram, etc.)
+                </option>
                 <option value="school">School</option>
                 <option value="flyer">Flyer</option>
                 <option value="google">Google Search</option>

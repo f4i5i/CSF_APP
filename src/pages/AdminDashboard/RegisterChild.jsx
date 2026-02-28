@@ -7,6 +7,7 @@ import childrenService from "../../api/services/children.service";
 import waiversService from "../../api/services/waivers.service";
 import Logo from "../../components/Logo";
 import WaiverCheckModal from "../../components/checkout/WaiverCheckModal";
+import { GRADE_OPTIONS } from "../../utils/format";
 
 export default function RegisterChild() {
   const navigate = useNavigate();
@@ -417,13 +418,11 @@ export default function RegisterChild() {
                 className={inputStyle("grade")}
               >
                 <option value="">Select grade</option>
-                <option value="pre_k">PRE-K</option>
-                <option value="k">K</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
+                {GRADE_OPTIONS.map((g) => (
+                  <option key={g.value} value={g.value}>
+                    {g.label}
+                  </option>
+                ))}
               </select>
               {errors.grade && (
                 <p className="text-red-500 text-xs mt-1">{errors.grade}</p>

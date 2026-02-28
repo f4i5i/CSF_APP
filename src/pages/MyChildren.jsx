@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import childrenService from "../api/services/children.service";
-import { formatGrade } from "../utils/format";
+import { formatGrade, GRADE_OPTIONS } from "../utils/format";
 
 // Calculate age from DOB
 function calculateAge(dob) {
@@ -544,18 +544,7 @@ export default function MyChildren() {
                     className={inputClass("grade")}
                   >
                     <option value="">Select</option>
-                    {[
-                      { value: "pre_k", label: "PRE-K" },
-                      { value: "k", label: "K" },
-                      { value: "1", label: "1" },
-                      { value: "2", label: "2" },
-                      { value: "3", label: "3" },
-                      { value: "4", label: "4" },
-                      { value: "5", label: "5" },
-                      { value: "6", label: "6" },
-                      { value: "7", label: "7" },
-                      { value: "8", label: "8" },
-                    ].map((g) => (
+                    {GRADE_OPTIONS.map((g) => (
                       <option key={g.value} value={g.value}>
                         {g.label}
                       </option>

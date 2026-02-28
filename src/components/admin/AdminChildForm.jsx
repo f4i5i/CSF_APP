@@ -3,16 +3,7 @@ import { motion } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import childrenService from "../../api/services/children.service";
-
-const GRADE_OPTIONS = [
-  { value: "pre_k", label: "PRE-K" },
-  { value: "k", label: "K" },
-  { value: "1", label: "1" },
-  { value: "2", label: "2" },
-  { value: "3", label: "3" },
-  { value: "4", label: "4" },
-  { value: "5", label: "5" },
-];
+import { GRADE_OPTIONS } from "../../utils/format";
 const JERSEY_SIZES = ["xs", "s", "m", "l", "xl", "xxl"];
 const RELATION_OPTIONS = [
   "Parent",
