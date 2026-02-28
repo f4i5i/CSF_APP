@@ -117,11 +117,9 @@ export default function Clients() {
     fetchClients();
   }, [fetchClients]);
 
-  const handleViewClient = (clientData) => {
-    // TODO: Navigate to client detail page or open modal
-    toast.success(
-      `Viewing client: ${clientData.first_name} ${clientData.last_name}`,
-    );
+  // View client = expand the row to show children
+  const handleViewClient = (toggleExpand) => {
+    if (toggleExpand) toggleExpand();
   };
 
   const handleDeleteClient = async (clientId) => {
@@ -503,11 +501,11 @@ export default function Clients() {
       label: "Actions",
       type: "actions",
       align: "right",
-      actions: (row) => [
+      actions: (row, { toggleExpand } = {}) => [
         {
           label: "View",
           icon: Eye,
-          onClick: () => handleViewClient(row),
+          onClick: () => handleViewClient(toggleExpand),
         },
         {
           label: "Delete",

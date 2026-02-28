@@ -40,9 +40,9 @@ export default function DataTable({
       await onExpand(row);
     }
 
-    setExpandedRows(prev => ({
+    setExpandedRows((prev) => ({
       ...prev,
-      [rowId]: !prev[rowId]
+      [rowId]: !prev[rowId],
     }));
   };
 
@@ -81,7 +81,14 @@ export default function DataTable({
     const start = (currentPage - 1) * itemsPerPage;
     const end = currentPage * itemsPerPage;
     return (sortedData || []).slice(start, end);
-  }, [sortedData, pagination, currentPage, itemsPerPage, totalItems, data.length]);
+  }, [
+    sortedData,
+    pagination,
+    currentPage,
+    itemsPerPage,
+    totalItems,
+    data.length,
+  ]);
 
   // Pagination calculations
   const totalPages = itemsPerPage ? Math.ceil(totalItems / itemsPerPage) : 1;
@@ -132,43 +139,50 @@ export default function DataTable({
     }
 
     // Actions menu
-      if (column.type === "actions" && column.actions) {
-        const actions =
-          typeof column.actions === "function"
-            ? column.actions(row)
-            : column.actions;
+    if (column.type === "actions" && column.actions) {
+      const actions =
+        typeof column.actions === "function"
+          ? column.actions(row, {
+              isExpanded,
+              toggleExpand: () => toggleExpand(rowId, row),
+              expandable,
+            })
+          : column.actions;
 
-        return (
-          <div className="flex items-center justify-end gap-1 flex-wrap min-w-[100px]">
-            {actions.map((action, i) => {
-              const Icon = action.icon;
-              const onClick = (e) => {
-                e.stopPropagation();
-                action.onClick && action.onClick();
-              };
+      return (
+        <div className="flex items-center justify-end gap-1 flex-wrap min-w-[100px]">
+          {actions.map((action, i) => {
+            const Icon = action.icon;
+            const onClick = (e) => {
+              e.stopPropagation();
+              action.onClick && action.onClick();
+            };
 
-              const baseClass =
-                "inline-flex items-center justify-center p-1.5 lg:px-2.5 lg:py-1.5 rounded-md text-xs font-medium transition";
-              const variantClass = action.variant === "destructive"
+            const baseClass =
+              "inline-flex items-center justify-center p-1.5 lg:px-2.5 lg:py-1.5 rounded-md text-xs font-medium transition";
+            const variantClass =
+              action.variant === "destructive"
                 ? "bg-error-dark text-white hover:bg-red-700"
                 : "bg-btn-gold text-text-body hover:bg-btn-gold/90";
 
-              return (
-                <button
-                  key={i}
-                  onClick={onClick}
-                  className={`${baseClass} ${variantClass}`}
-                  type="button"
-                  title={action.label}
-                >
-                  {Icon && <Icon className="w-3.5 h-3.5 lg:mr-1" />}
-                  <span className="hidden lg:inline whitespace-nowrap">{action.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        );
-      }
+            return (
+              <button
+                key={i}
+                onClick={onClick}
+                className={`${baseClass} ${variantClass}`}
+                type="button"
+                title={action.label}
+              >
+                {Icon && <Icon className="w-3.5 h-3.5 lg:mr-1" />}
+                <span className="hidden lg:inline whitespace-nowrap">
+                  {action.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      );
+    }
 
     // Default: text
     return value || "-";
@@ -198,9 +212,12 @@ export default function DataTable({
               {[...Array(5)].map((_, rowIndex) => (
                 <tr key={rowIndex} className="animate-pulse">
                   {columns.map((column, colIndex) => (
-                    <td key={colIndex} className={`px-3 sm:px-6 py-3 sm:py-4 ${
-                      column.hideOnMobile ? "hidden md:table-cell" : ""
-                    }`}>
+                    <td
+                      key={colIndex}
+                      className={`px-3 sm:px-6 py-3 sm:py-4 ${
+                        column.hideOnMobile ? "hidden md:table-cell" : ""
+                      }`}
+                    >
                       <div className="h-4 bg-border-light rounded w-3/4"></div>
                     </td>
                   ))}
@@ -236,7 +253,9 @@ export default function DataTable({
           </table>
         </div>
         <div className="py-8 sm:py-12 text-center">
-          <p className="text-text-muted font-manrope text-sm sm:text-base">{emptyMessage}</p>
+          <p className="text-text-muted font-manrope text-sm sm:text-base">
+            {emptyMessage}
+          </p>
         </div>
       </div>
     );
@@ -350,9 +369,11 @@ export default function DataTable({
         <div className="shrink-0 sm:px-6 px-3 py-4 border-t border-border-light flex flex-col sm:flex-row items-center justify-between gap-3 bg-white">
           {/* Results info */}
           <div className="text-xs sm:text-sm text-text-muted font-semibold font-manrope text-center sm:text-left">
-            Showing <span className="font-bold text-text-primary">{startItem}</span> to{" "}
+            Showing{" "}
+            <span className="font-bold text-text-primary">{startItem}</span> to{" "}
             <span className="font-bold text-text-primary">{endItem}</span> of{" "}
-            <span className="font-bold text-text-primary">{totalItems}</span> results
+            <span className="font-bold text-text-primary">{totalItems}</span>{" "}
+            results
           </div>
 
           {/* Pagination Controls */}
@@ -368,40 +389,44 @@ export default function DataTable({
 
             {/* Page Numbers */}
             <div className="flex items-center gap-0.5 sm:gap-1 font-manrope">
-              {totalPages > 0 && [...Array(totalPages)].map((_, index) => {
-                const page = index + 1;
+              {totalPages > 0 &&
+                [...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
 
-                if (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => onPageChange && onPageChange(page)}
-                      className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition ${
-                        page === currentPage
-                          ? "bg-btn-gold text-neutral-white shadow-sm"
-                          : "text-text-muted hover:bg-btn-gold/10 hover:text-heading-dark"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                } else if (
-                  page === currentPage - 2 ||
-                  page === currentPage + 2
-                ) {
-                  return (
-                    <span key={page} className="px-1 sm:px-2 text-text-muted text-xs sm:text-sm">
-                      •••
-                    </span>
-                  );
-                }
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => onPageChange && onPageChange(page)}
+                        className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition ${
+                          page === currentPage
+                            ? "bg-btn-gold text-neutral-white shadow-sm"
+                            : "text-text-muted hover:bg-btn-gold/10 hover:text-heading-dark"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  } else if (
+                    page === currentPage - 2 ||
+                    page === currentPage + 2
+                  ) {
+                    return (
+                      <span
+                        key={page}
+                        className="px-1 sm:px-2 text-text-muted text-xs sm:text-sm"
+                      >
+                        •••
+                      </span>
+                    );
+                  }
 
-                return null;
-              })}
+                  return null;
+                })}
             </div>
 
             {/* Next Button */}
