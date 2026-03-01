@@ -3,8 +3,8 @@
  * Handles achievement badges and awards management
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 const badgesService = {
   /**
@@ -43,7 +43,10 @@ const badgesService = {
    * @returns {Promise<Object>} Created badge
    */
   async create(badgeData) {
-    const { data } = await apiClient.post(API_ENDPOINTS.BADGES.CREATE, badgeData);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.BADGES.CREATE,
+      badgeData,
+    );
     return data;
   },
 
@@ -54,7 +57,10 @@ const badgesService = {
    * @returns {Promise<Object>} Updated badge
    */
   async update(id, badgeData) {
-    const { data } = await apiClient.put(API_ENDPOINTS.BADGES.BY_ID(id), badgeData);
+    const { data } = await apiClient.put(
+      API_ENDPOINTS.BADGES.BY_ID(id),
+      badgeData,
+    );
     return data;
   },
 
@@ -74,7 +80,9 @@ const badgesService = {
    * @returns {Promise<Array>} List of earned badges with earn dates
    */
   async getByChild(childId) {
-    const { data } = await apiClient.get(API_ENDPOINTS.BADGES.BY_CHILD(childId));
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.BADGES.BY_CHILD(childId),
+    );
     return data;
   },
 
@@ -84,14 +92,35 @@ const badgesService = {
    * @returns {Promise<Array>} List of earned badges with earn dates
    */
   async getByEnrollment(enrollmentId) {
-    const { data } = await apiClient.get(API_ENDPOINTS.BADGES.BY_ENROLLMENT(enrollmentId));
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.BADGES.BY_ENROLLMENT(enrollmentId),
+    );
+
+    // Handle the nested response format: { enrollment_id, badges: [{ badge: {...}, is_unlocked, awarded_at }] }
+    if (data && data.badges && Array.isArray(data.badges)) {
+      return data.badges
+        .filter((item) => item.is_unlocked)
+        .map((item) => ({
+          id: item.badge?.id,
+          name: item.badge?.name,
+          title: item.badge?.name,
+          description: item.badge?.description,
+          category: item.badge?.category,
+          criteria: item.badge?.criteria,
+          icon_url: item.badge?.icon_url,
+          image_url: item.badge?.icon_url,
+          earned_at: item.awarded_at,
+          progress: item.progress,
+          progress_max: item.progress_max,
+        }));
+    }
 
     // Handle paginated response format {items: [...], total: X}
     if (data && data.items) {
       return data.items;
     }
 
-    // Return data as-is if not paginated (or if it's a direct array)
+    // Return data as-is if it's a direct array
     return data;
   },
 
@@ -116,7 +145,7 @@ const badgesService = {
   async awardBadge(awardData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.BADGES.AWARD,
-      awardData
+      awardData,
     );
     return data;
   },
@@ -130,10 +159,7 @@ const badgesService = {
    * @returns {Promise<Object>} Bulk award confirmation with success/failure counts
    */
   async awardBadgeToClass(bulkAwardData) {
-    const { data } = await apiClient.post(
-      '/badges/award-class',
-      bulkAwardData
-    );
+    const { data } = await apiClient.post("/badges/award-class", bulkAwardData);
     return data;
   },
 
@@ -147,7 +173,7 @@ const badgesService = {
   async revokeBadge(awardId, revocationData = {}) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.BADGES.REVOKE(awardId),
-      revocationData
+      revocationData,
     );
     return data;
   },
@@ -189,7 +215,7 @@ const badgesService = {
   async checkEligibility(childId, badgeId) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.BADGES.CHECK_ELIGIBILITY,
-      { child_id: childId, badge_id: badgeId }
+      { child_id: childId, badge_id: badgeId },
     );
     return data;
   },

@@ -15,7 +15,7 @@ export default function AnnouncementsSection({
 }) {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [viewMoreAnnouncement, setViewMoreAnnouncement] = useState(null);
-  const [viewMoreEvent, setViewMoreEvent] = useState(false); 
+  const [viewMoreEvent, setViewMoreEvent] = useState(false);
   const dropdownRefs = useRef({});
 
   const renderTextWithLinks = (text) => {
@@ -42,37 +42,37 @@ export default function AnnouncementsSection({
 
   // Format date for display
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true,
     });
   };
 
   // Format time for event display
   const formatTime = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false,
     });
   };
 
   // Format event date
   const formatEventDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -81,7 +81,7 @@ export default function AnnouncementsSection({
     if (announcement.author?.first_name) {
       return `Coach ${announcement.author.first_name}`;
     }
-    return announcement.author_name || 'Coach';
+    return announcement.author_name || "Coach";
   };
   // Get author avatar
   const getAuthorAvatar = (announcement) => {
@@ -96,32 +96,38 @@ export default function AnnouncementsSection({
 
   // Get attachment info
   const getAttachmentInfo = (announcement) => {
-    if (!announcement.attachments || announcement.attachments.length === 0) return null;
+    if (!announcement.attachments || announcement.attachments.length === 0)
+      return null;
     const attachment = announcement.attachments[0];
-    const isImage = attachment.file_type === 'image' || 
-                    attachment.file_type === 'IMAGE' ||
-                    attachment.type?.startsWith('image/') ||
-                    attachment.name?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
-                    attachment.mime_type?.startsWith('image/');
-    
+    const isImage =
+      attachment.file_type === "image" ||
+      attachment.file_type === "IMAGE" ||
+      attachment.type?.startsWith("image/") ||
+      attachment.name?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+      attachment.mime_type?.startsWith("image/");
+
+    const attachmentUrl =
+      attachment.file_url || attachment.file_path || attachment.url;
     return {
-      name: attachment.file_name || attachment.name || 'attachment',
-      url: attachment.file_path || attachment.url,
+      name: attachment.file_name || attachment.name || "attachment",
+      url: attachmentUrl,
       isImage,
-      img: isImage ? (attachment.file_path || attachment.url || teamList1) : teamList,
+      img: isImage ? attachmentUrl || teamList1 : teamList,
     };
   };
 
   const renderContentWithViewMore = (content, announcementId) => {
     if (!content) return null;
-    
+
     const maxLength = 500;
     const shouldShowViewMore = content.length > maxLength;
-    
+
     return (
       <div className="mb-3">
         <p className="text-sm sm:text-base font-medium opacity-80">
-          {shouldShowViewMore ? `${content.substring(0, maxLength)}...` : content}
+          {shouldShowViewMore
+            ? `${content.substring(0, maxLength)}...`
+            : content}
         </p>
         {shouldShowViewMore && (
           <button
@@ -135,17 +141,19 @@ export default function AnnouncementsSection({
     );
   };
 
-  // Function to render event description with "View More" for mobile 
+  // Function to render event description with "View More" for mobile
   const renderEventDescriptionWithViewMore = (description) => {
     if (!description) return null;
-    
-    const maxLength = 400; 
+
+    const maxLength = 400;
     const shouldShowViewMore = description.length > maxLength;
-    
+
     return (
       <div>
         <p className="text-sm font-semibold text-[#1B1B1B]">
-          {shouldShowViewMore ? `${description.substring(0, maxLength)}...` : description}
+          {shouldShowViewMore
+            ? `${description.substring(0, maxLength)}...`
+            : description}
         </p>
         {shouldShowViewMore && (
           <button
@@ -170,7 +178,7 @@ export default function AnnouncementsSection({
 
   // Find announcement by ID for view more modal
   const getAnnouncementById = (id) => {
-    return displayAnnouncements.find(ann => ann.id === id);
+    return displayAnnouncements.find((ann) => ann.id === id);
   };
 
   useEffect(() => {
@@ -185,8 +193,7 @@ export default function AnnouncementsSection({
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openDropdown]);
 
   return (
@@ -221,7 +228,9 @@ export default function AnnouncementsSection({
 
               <hr className="border-black/10" />
 
-              {renderEventDescriptionWithViewMore(displayNextEvent?.description)}
+              {renderEventDescriptionWithViewMore(
+                displayNextEvent?.description,
+              )}
 
               {displayNextEvent?.attachment_name && (
                 <button className="flex items-center gap-2 bg-[#eff2f5] px-3 py-2 rounded-[60px] text-xs text-gray-700">
@@ -230,15 +239,28 @@ export default function AnnouncementsSection({
                     alt="PDF"
                     className="size-[13px] object-cover"
                   />
-                  <span className="font-semibold">{displayNextEvent.attachment_name}</span>
+                  <span className="font-semibold">
+                    {displayNextEvent.attachment_name}
+                  </span>
                 </button>
               )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-3 bg-white/50 shadow-sm rounded-[10px] px-2 py-6 mt-2">
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
               </div>
               <p className="text-sm text-gray-500">No upcoming events</p>
@@ -255,35 +277,54 @@ export default function AnnouncementsSection({
         <div className="space-y-3 sm:space-y-4">
           {loading ? (
             // Loading skeleton
-            Array(3).fill(0).map((_, i) => (
-              <div key={i} className="bg-white/50 rounded-[20px] p-3 sm:p-5 shadow-sm animate-pulse">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="size-[54px] bg-gray-200 rounded-full"></div>
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-24"></div>
+            Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white/50 rounded-[20px] p-3 sm:p-5 shadow-sm animate-pulse"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="size-[54px] bg-gray-200 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                    </div>
                   </div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
                 </div>
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-full"></div>
-              </div>
-            ))
+              ))
           ) : displayAnnouncements.length === 0 ? (
             // Empty state
             <div className="flex flex-col items-center justify-center py-12 px-4">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+                  />
                 </svg>
               </div>
               <p className="text-gray-500 text-center">No announcements yet</p>
-              <p className="text-sm text-gray-400 text-center mt-1">Check back later for updates from your coach</p>
+              <p className="text-sm text-gray-400 text-center mt-1">
+                Check back later for updates from your coach
+              </p>
             </div>
           ) : (
             displayAnnouncements.map((announcement) => {
               const attachmentInfo = getAttachmentInfo(announcement);
-              const content = announcement.content || announcement.description || '';
-              
+              const content =
+                announcement.content || announcement.description || "";
+
               return (
                 <div
                   key={announcement.id}
@@ -315,7 +356,8 @@ export default function AnnouncementsSection({
                     </h3>
                   )}
 
-                  {content && renderContentWithViewMore(content, announcement.id)}
+                  {content &&
+                    renderContentWithViewMore(content, announcement.id)}
 
                   {attachmentInfo && (
                     <div className="flex items-center gap-2">
@@ -403,46 +445,70 @@ export default function AnnouncementsSection({
                     {/* Scrollable description */}
                     <div className="flex-1 overflow-y-auto max-sm:max-h-72 max-h-80 px-6 py-4">
                       <div className="text-[#1b1b1b] opacity-80 font-manrope leading-relaxed whitespace-pre-wrap">
-                        {renderTextWithLinks(announcement.content || announcement.description || '')}
+                        {renderTextWithLinks(
+                          announcement.content ||
+                            announcement.description ||
+                            "",
+                        )}
                       </div>
                     </div>
 
                     {/* Fixed attachments section */}
-                    {announcement.attachments && announcement.attachments.length > 0 && (
-                      <div className="px-6 py-4 border-t border-border-light bg-gray-50 flex-shrink-0">
-                        <p className="text-sm font-manrope font-semibold text-gray-600 mb-3">
-                          Attachments ({announcement.attachments.length})
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                          {announcement.attachments.map((attachment, index) => {
-                            const isImage = attachment.file_type === 'image' || 
-                                          attachment.file_type === 'IMAGE' ||
-                                          attachment.type?.startsWith('image/') ||
-                                          attachment.name?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
-                                          attachment.mime_type?.startsWith('image/');
-                            
-                            return (
-                              <a
-                                key={index}
-                                href={attachment.file_path || attachment.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 bg-white hover:bg-gray-100 rounded-lg px-4 py-2 transition cursor-pointer border border-border-light"
-                              >
-                                <img
-                                  src={isImage ? (attachment.file_path || attachment.url || teamList1) : teamList}
-                                  alt={attachment.file_name || attachment.name || 'attachment'}
-                                  className="w-8 h-8 rounded object-cover"
-                                />
-                                <span className="font-manrope text-sm text-gray-700 max-w-[150px] truncate">
-                                  {attachment.file_name || attachment.name || 'attachment'}
-                                </span>
-                              </a>
-                            );
-                          })}
+                    {announcement.attachments &&
+                      announcement.attachments.length > 0 && (
+                        <div className="px-6 py-4 border-t border-border-light bg-gray-50 flex-shrink-0">
+                          <p className="text-sm font-manrope font-semibold text-gray-600 mb-3">
+                            Attachments ({announcement.attachments.length})
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            {announcement.attachments.map(
+                              (attachment, index) => {
+                                const isImage =
+                                  attachment.file_type === "image" ||
+                                  attachment.file_type === "IMAGE" ||
+                                  attachment.type?.startsWith("image/") ||
+                                  attachment.name?.match(
+                                    /\.(jpg|jpeg|png|gif|webp)$/i,
+                                  ) ||
+                                  attachment.mime_type?.startsWith("image/");
+
+                                const modalAttachmentUrl =
+                                  attachment.file_url ||
+                                  attachment.file_path ||
+                                  attachment.url;
+                                return (
+                                  <a
+                                    key={index}
+                                    href={modalAttachmentUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 bg-white hover:bg-gray-100 rounded-lg px-4 py-2 transition cursor-pointer border border-border-light"
+                                  >
+                                    <img
+                                      src={
+                                        isImage
+                                          ? modalAttachmentUrl || teamList1
+                                          : teamList
+                                      }
+                                      alt={
+                                        attachment.file_name ||
+                                        attachment.name ||
+                                        "attachment"
+                                      }
+                                      className="w-8 h-8 rounded object-cover"
+                                    />
+                                    <span className="font-manrope text-sm text-gray-700 max-w-[150px] truncate">
+                                      {attachment.file_name ||
+                                        attachment.name ||
+                                        "attachment"}
+                                    </span>
+                                  </a>
+                                );
+                              },
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 );
               })()}
@@ -510,7 +576,7 @@ export default function AnnouncementsSection({
                 {/*  description */}
                 <div className="flex-1 overflow-y-auto max-h-64 px-6 py-4">
                   <div className="text-[#1b1b1b] opacity-80 font-manrope leading-relaxed whitespace-pre-wrap">
-                    {renderTextWithLinks(displayNextEvent?.description || '')}
+                    {renderTextWithLinks(displayNextEvent?.description || "")}
                   </div>
                 </div>
 
@@ -521,14 +587,14 @@ export default function AnnouncementsSection({
                       Attachment
                     </p>
 
-                      <img
-                        src={pdfIcon}
-                        alt="PDF"
-                        className="w-8 h-8 rounded object-cover"
-                      />
-                      <span className="font-manrope text-sm text-gray-700">
-                        {displayNextEvent.attachment_name}
-                      </span>
+                    <img
+                      src={pdfIcon}
+                      alt="PDF"
+                      className="w-8 h-8 rounded object-cover"
+                    />
+                    <span className="font-manrope text-sm text-gray-700">
+                      {displayNextEvent.attachment_name}
+                    </span>
                   </div>
                 )}
               </div>
