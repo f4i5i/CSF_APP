@@ -64,6 +64,8 @@ export default function MyChildren() {
 
   // Delete confirmation
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteCheckResult, setDeleteCheckResult] = useState(null);
+  const [isCheckingDelete, setIsCheckingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch children
@@ -138,6 +140,9 @@ export default function MyChildren() {
     if (!form.firstName.trim()) newErrors.firstName = "Required";
     if (!form.lastName.trim()) newErrors.lastName = "Required";
     if (!form.dob) newErrors.dob = "Required";
+    if (!form.emergencyName.trim()) newErrors.emergencyName = "Required";
+    if (!form.emergencyPhone.trim()) newErrors.emergencyPhone = "Required";
+    if (!form.emergencyRelation) newErrors.emergencyRelation = "Required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -152,25 +157,21 @@ export default function MyChildren() {
       last_name: form.lastName.trim(),
       date_of_birth: form.dob,
       grade: form.grade || null,
-      classroom: form.classroom || null,
-      jersey_size: form.jersey || null,
+      jersey_size: form.jersey ? form.jersey.toLowerCase() : null,
       medical_conditions: form.medical || null,
       has_no_medical_conditions: !form.medical,
       after_school_attendance: form.afterschool === "yes",
       health_insurance_number: form.insurance || null,
       how_heard_about_us: form.hearAbout || null,
-    };
-
-    // Add emergency contact if provided
-    if (form.emergencyName && form.emergencyPhone) {
-      payload.emergency_contacts = [
+      emergency_contacts: [
         {
-          name: form.emergencyName,
-          phone: form.emergencyPhone,
+          name: form.emergencyName.trim(),
+          phone: form.emergencyPhone.trim(),
           relation: form.emergencyRelation || "Parent",
+          is_primary: true,
         },
-      ];
-    }
+      ],
+    };
 
     try {
       let childId;
@@ -204,6 +205,23 @@ export default function MyChildren() {
     }
   };
 
+  // Pre-check delete
+  const handleDeleteClick = async (childId) => {
+    setIsCheckingDelete(true);
+    setDeleteConfirm(childId);
+    setDeleteCheckResult(null);
+    try {
+      const check = await childrenService.deleteCheck(childId);
+      setDeleteCheckResult(check);
+    } catch (err) {
+      console.error("Failed to check delete:", err);
+      // If check fails, still allow showing a basic confirm
+      setDeleteCheckResult({ can_delete: true });
+    } finally {
+      setIsCheckingDelete(false);
+    }
+  };
+
   // Delete child
   const handleDelete = async (childId) => {
     setIsDeleting(true);
@@ -211,11 +229,12 @@ export default function MyChildren() {
       await childrenService.delete(childId);
       toast.success("Child removed");
       setDeleteConfirm(null);
+      setDeleteCheckResult(null);
       if (expandedChild === childId) setExpandedChild(null);
       fetchChildren();
     } catch (err) {
       console.error("Failed to delete child:", err);
-      toast.error("Failed to remove child");
+      toast.error(err?.response?.data?.message || "Failed to remove child");
     } finally {
       setIsDeleting(false);
     }
@@ -334,7 +353,7 @@ export default function MyChildren() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setDeleteConfirm(child.id);
+                          handleDeleteClick(child.id);
                         }}
                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete"
@@ -398,27 +417,86 @@ export default function MyChildren() {
                   {/* Delete confirmation */}
                   {deleteConfirm === child.id && (
                     <div className="px-4 pb-4 border-t border-red-100 bg-red-50/50 pt-3">
-                      <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle size={16} className="text-red-500" />
-                        <p className="text-sm text-red-700 font-manrope font-medium">
-                          Remove {child.first_name}? This cannot be undone.
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleDelete(child.id)}
-                          disabled={isDeleting}
-                          className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-manrope font-medium rounded-lg disabled:opacity-50 transition-colors"
-                        >
-                          {isDeleting ? "Removing..." : "Yes, Remove"}
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(null)}
-                          className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-manrope font-medium rounded-lg transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                      {isCheckingDelete ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2
+                            size={16}
+                            className="animate-spin text-gray-500"
+                          />
+                          <p className="text-sm text-gray-600 font-manrope">
+                            Checking...
+                          </p>
+                        </div>
+                      ) : deleteCheckResult && !deleteCheckResult.can_delete ? (
+                        <>
+                          <div className="flex items-center gap-2 mb-2">
+                            <AlertTriangle
+                              size={16}
+                              className="text-amber-500"
+                            />
+                            <p className="text-sm text-amber-700 font-manrope font-medium">
+                              Cannot remove {child.first_name}
+                            </p>
+                          </div>
+                          <p className="text-xs text-gray-600 font-manrope mb-2">
+                            This child has active enrollments that must be
+                            cancelled first:
+                          </p>
+                          <ul className="text-xs text-gray-700 font-manrope mb-3 space-y-1">
+                            {deleteCheckResult.active_enrollments?.map((e) => (
+                              <li
+                                key={e.enrollment_id}
+                                className="flex items-center gap-2"
+                              >
+                                <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                                {e.class_name} ({e.status})
+                              </li>
+                            ))}
+                          </ul>
+                          {deleteCheckResult.pending_cancellations > 0 && (
+                            <p className="text-xs text-gray-600 font-manrope mb-3">
+                              {deleteCheckResult.pending_cancellations} pending
+                              cancellation request(s) in progress.
+                            </p>
+                          )}
+                          <button
+                            onClick={() => {
+                              setDeleteConfirm(null);
+                              setDeleteCheckResult(null);
+                            }}
+                            className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-manrope font-medium rounded-lg transition-colors"
+                          >
+                            OK
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 mb-3">
+                            <AlertTriangle size={16} className="text-red-500" />
+                            <p className="text-sm text-red-700 font-manrope font-medium">
+                              Remove {child.first_name}? This cannot be undone.
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleDelete(child.id)}
+                              disabled={isDeleting}
+                              className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-manrope font-medium rounded-lg disabled:opacity-50 transition-colors"
+                            >
+                              {isDeleting ? "Removing..." : "Yes, Remove"}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDeleteConfirm(null);
+                                setDeleteCheckResult(null);
+                              }}
+                              className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-manrope font-medium rounded-lg transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

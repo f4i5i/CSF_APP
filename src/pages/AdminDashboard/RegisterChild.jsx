@@ -165,16 +165,14 @@ export default function RegisterChild() {
           form.afterschool === "yes" ? "Default Program" : null,
         health_insurance_number: form.insurance || null,
         how_heard_about_us: form.hearAbout || null,
-        emergency_contacts: form.emergencyName
-          ? [
-              {
-                name: form.emergencyName,
-                relation: form.emergencyRelation, // Changed from 'relationship' to 'relation'
-                phone: form.emergencyPhone,
-                is_primary: true,
-              },
-            ]
-          : [],
+        emergency_contacts: [
+          {
+            name: form.emergencyName,
+            relation: form.emergencyRelation,
+            phone: form.emergencyPhone,
+            is_primary: true,
+          },
+        ],
       };
 
       // Create child via API

@@ -119,16 +119,14 @@ export default function AdminChildForm({
           ? "Default Program"
           : null,
         health_insurance_number: form.health_insurance_number || null,
-        emergency_contacts: form.emergency_name
-          ? [
-              {
-                name: form.emergency_name,
-                relation: form.emergency_relation || "Other",
-                phone: form.emergency_phone,
-                is_primary: true,
-              },
-            ]
-          : [],
+        emergency_contacts: [
+          {
+            name: form.emergency_name,
+            relation: form.emergency_relation || "Other",
+            phone: form.emergency_phone,
+            is_primary: true,
+          },
+        ],
       };
 
       // For admin creating a child under a parent, include parent_id

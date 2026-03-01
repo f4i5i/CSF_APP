@@ -135,10 +135,10 @@ export default function Clients() {
     }
   };
 
-  // Delete a child
-  const handleDeleteChild = async (childId, clientId) => {
+  // Delete a child (with optional force for admin)
+  const handleDeleteChild = async (childId, clientId, force = false) => {
     try {
-      await childrenService.delete(childId);
+      await childrenService.delete(childId, force);
       toast.success("Child deleted successfully");
       // Refresh the expanded client details
       setExpandedClientDetails((prev) => {
@@ -152,7 +152,50 @@ export default function Clients() {
       setConfirmDialog({ isOpen: false });
     } catch (error) {
       console.error("Failed to delete child:", error);
-      toast.error(error.response?.data?.detail || "Failed to delete child");
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Failed to delete child",
+      );
+    }
+  };
+
+  // Pre-check before deleting a child (admin)
+  const handleDeleteChildClick = async (child, clientId) => {
+    try {
+      const check = await childrenService.deleteCheck(child.id);
+      if (check.can_delete) {
+        // No blocking factors - show simple confirm
+        setConfirmDialog({
+          isOpen: true,
+          title: "Delete Child",
+          message: `Are you sure you want to delete "${child.first_name} ${child.last_name}"? This action cannot be undone.`,
+          action: () => handleDeleteChild(child.id, clientId),
+        });
+      } else {
+        // Has active enrollments - show force delete option
+        const enrollmentList = (check.active_enrollments || [])
+          .map((e) => `• ${e.class_name} (${e.status})`)
+          .join("\n");
+        const subNote = check.has_stripe_subscriptions
+          ? "\n\nActive Stripe subscriptions will be cancelled immediately."
+          : "";
+        setConfirmDialog({
+          isOpen: true,
+          title: "Force Delete Child",
+          message: `"${child.first_name} ${child.last_name}" has active enrollments:\n\n${enrollmentList}${subNote}\n\nForce delete will cancel all enrollments and subscriptions. Continue?`,
+          action: () => handleDeleteChild(child.id, clientId, true),
+        });
+      }
+    } catch (error) {
+      console.error("Failed to check delete:", error);
+      // Fallback to simple confirm
+      setConfirmDialog({
+        isOpen: true,
+        title: "Delete Child",
+        message: `Are you sure you want to delete "${child.first_name} ${child.last_name}"? This action cannot be undone.`,
+        action: () => handleDeleteChild(child.id, clientId),
+      });
     }
   };
 
@@ -310,13 +353,7 @@ export default function Clients() {
                         </button>
                         <button
                           onClick={() =>
-                            setConfirmDialog({
-                              isOpen: true,
-                              title: "Delete Child",
-                              message: `Are you sure you want to delete "${child.first_name} ${child.last_name}"? This action cannot be undone.`,
-                              action: () =>
-                                handleDeleteChild(child.id, client.id),
-                            })
+                            handleDeleteChildClick(child, client.id)
                           }
                           className="p-1 hover:bg-red-50 rounded transition-colors"
                           title="Delete child"

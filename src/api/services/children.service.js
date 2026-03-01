@@ -3,8 +3,8 @@
  * Handles child/student management and emergency contacts
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 const childrenService = {
   /**
@@ -57,7 +57,10 @@ const childrenService = {
    * @returns {Promise<Object>} Created child
    */
   async create(childData) {
-    const { data } = await apiClient.post(API_ENDPOINTS.CHILDREN.CREATE, childData);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.CHILDREN.CREATE,
+      childData,
+    );
     return data;
   },
 
@@ -78,17 +81,35 @@ const childrenService = {
    * @returns {Promise<Object>} Updated child
    */
   async update(id, childData) {
-    const { data } = await apiClient.put(API_ENDPOINTS.CHILDREN.BY_ID(id), childData);
+    const { data } = await apiClient.put(
+      API_ENDPOINTS.CHILDREN.BY_ID(id),
+      childData,
+    );
+    return data;
+  },
+
+  /**
+   * Pre-check before deleting a child
+   * @param {string} id - Child ID
+   * @returns {Promise<Object>} Delete check result with can_delete, active_enrollments, etc.
+   */
+  async deleteCheck(id) {
+    const { data } = await apiClient.get(
+      `${API_ENDPOINTS.CHILDREN.BY_ID(id)}/delete-check`,
+    );
     return data;
   },
 
   /**
    * Delete child (soft delete)
    * @param {string} id - Child ID
+   * @param {boolean} [force=false] - Force delete (admin only, cancels subscriptions)
    * @returns {Promise<Object>} Deletion confirmation
    */
-  async delete(id) {
-    const { data } = await apiClient.delete(API_ENDPOINTS.CHILDREN.BY_ID(id));
+  async delete(id, force = false) {
+    const { data } = await apiClient.delete(API_ENDPOINTS.CHILDREN.BY_ID(id), {
+      params: force ? { force: true } : {},
+    });
     return data;
   },
 
@@ -100,11 +121,11 @@ const childrenService = {
    */
   async uploadProfileImage(childId, file) {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     const { data } = await apiClient.post(
       `${API_ENDPOINTS.CHILDREN.BY_ID(childId)}/profile-image`,
       formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   },
@@ -116,7 +137,7 @@ const childrenService = {
    */
   async getEmergencyContacts(childId) {
     const { data } = await apiClient.get(
-      API_ENDPOINTS.CHILDREN.EMERGENCY_CONTACTS(childId)
+      API_ENDPOINTS.CHILDREN.EMERGENCY_CONTACTS(childId),
     );
     return data;
   },
@@ -135,7 +156,7 @@ const childrenService = {
   async addEmergencyContact(childId, contactData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.CHILDREN.EMERGENCY_CONTACTS(childId),
-      contactData
+      contactData,
     );
     return data;
   },
@@ -149,7 +170,7 @@ const childrenService = {
   async updateEmergencyContact(contactId, contactData) {
     const { data } = await apiClient.put(
       API_ENDPOINTS.CHILDREN.EMERGENCY_CONTACT_BY_ID(contactId),
-      contactData
+      contactData,
     );
     return data;
   },
@@ -161,7 +182,7 @@ const childrenService = {
    */
   async deleteEmergencyContact(contactId) {
     const { data } = await apiClient.delete(
-      API_ENDPOINTS.CHILDREN.EMERGENCY_CONTACT_BY_ID(contactId)
+      API_ENDPOINTS.CHILDREN.EMERGENCY_CONTACT_BY_ID(contactId),
     );
     return data;
   },
