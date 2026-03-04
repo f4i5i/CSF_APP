@@ -3,8 +3,8 @@
  * Handles admin dashboard and management operations
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 const adminService = {
   /**
@@ -25,7 +25,9 @@ const adminService = {
    * @returns {Promise<Object>} Revenue report data
    */
   async getRevenueReport(params = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.REVENUE, { params });
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.REVENUE, {
+      params,
+    });
     return data;
   },
 
@@ -40,7 +42,9 @@ const adminService = {
    * @returns {Promise<Object>} Paginated clients list
    */
   async getClients(params = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CLIENTS, { params });
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CLIENTS, {
+      params,
+    });
     return data;
   },
 
@@ -50,7 +54,9 @@ const adminService = {
    * @returns {Promise<Object>} Detailed client information
    */
   async getClientById(clientId) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CLIENT_BY_ID(clientId));
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ADMIN.CLIENT_BY_ID(clientId),
+    );
     return data;
   },
 
@@ -60,7 +66,9 @@ const adminService = {
    * @returns {Promise<Object>} Deletion confirmation
    */
   async deleteClient(clientId) {
-    const { data } = await apiClient.delete(API_ENDPOINTS.ADMIN.CLIENT_BY_ID(clientId));
+    const { data } = await apiClient.delete(
+      API_ENDPOINTS.ADMIN.CLIENT_BY_ID(clientId),
+    );
     return data;
   },
 
@@ -84,6 +92,18 @@ const adminService = {
   },
 
   /**
+   * Generate or retrieve a public share token for a class roster
+   * @param {string} classId - Class ID
+   * @returns {Promise<Object>} { share_token, share_url }
+   */
+  async generateRosterShareToken(classId) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.GENERATE_ROSTER_TOKEN(classId),
+    );
+    return data;
+  },
+
+  /**
    * Search refunds with filters
    * @param {Object} params - Filter parameters
    * @param {string} [params.start_date] - Filter by refund date (start)
@@ -97,7 +117,9 @@ const adminService = {
    * @returns {Promise<Object>} Paginated refunds list
    */
   async getRefunds(params = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.REFUNDS_SEARCH, { params });
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.REFUNDS_SEARCH, {
+      params,
+    });
     return data;
   },
 
@@ -116,7 +138,9 @@ const adminService = {
    * @returns {Promise<Object>} Approval confirmation
    */
   async approveRefund(paymentId) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.REFUND_APPROVE(paymentId));
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.REFUND_APPROVE(paymentId),
+    );
     return data;
   },
 
@@ -127,9 +151,12 @@ const adminService = {
    * @returns {Promise<Object>} Rejection confirmation
    */
   async rejectRefund(paymentId, reason) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.REFUND_REJECT(paymentId), {
-      rejection_reason: reason,
-    });
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.REFUND_REJECT(paymentId),
+      {
+        rejection_reason: reason,
+      },
+    );
     return data;
   },
 
@@ -146,7 +173,10 @@ const adminService = {
    * @returns {Promise<Object>} List of cancellation requests
    */
   async getCancellationRequests(params = {}) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS, { params });
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS,
+      { params },
+    );
     return data;
   },
 
@@ -155,7 +185,9 @@ const adminService = {
    * @returns {Promise<Object>} List of pending requests
    */
   async getPendingCancellationRequests() {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_PENDING);
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_PENDING,
+    );
     return data;
   },
 
@@ -165,7 +197,9 @@ const adminService = {
    * @returns {Promise<Object>} Cancellation request details
    */
   async getCancellationRequestById(requestId) {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_BY_ID(requestId));
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_BY_ID(requestId),
+    );
     return data;
   },
 
@@ -178,7 +212,10 @@ const adminService = {
    * @returns {Promise<Object>} Approval result
    */
   async approveCancellationRequest(requestId, body = {}) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_APPROVE(requestId), body);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_APPROVE(requestId),
+      body,
+    );
     return data;
   },
 
@@ -191,7 +228,10 @@ const adminService = {
    * @returns {Promise<Object>} Rejection result
    */
   async rejectCancellationRequest(requestId, body) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_REJECT(requestId), body);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.CANCELLATION_REQUEST_REJECT(requestId),
+      body,
+    );
     return data;
   },
 
@@ -200,7 +240,9 @@ const adminService = {
    * @returns {Promise<Object>} Stats summary
    */
   async getCancellationRequestStats() {
-    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_STATS);
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ADMIN.CANCELLATION_REQUESTS_STATS,
+    );
     return data;
   },
 
@@ -220,7 +262,9 @@ const adminService = {
    * @returns {Promise<Object>} Refunded invoices list
    */
   async getRefundedInvoices(params = {}) {
-    const { data } = await apiClient.get('/admin/invoices/refunded', { params });
+    const { data } = await apiClient.get("/admin/invoices/refunded", {
+      params,
+    });
     return data;
   },
 
@@ -229,7 +273,7 @@ const adminService = {
    * @returns {Promise<Object>} Invoice stats by status
    */
   async getInvoiceStats() {
-    const { data } = await apiClient.get('/admin/invoices/stats');
+    const { data } = await apiClient.get("/admin/invoices/stats");
     return data;
   },
 
@@ -238,7 +282,9 @@ const adminService = {
    * @returns {Promise<Object>} Success message
    */
   async sendSupportLogs() {
-    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.SEND_SUPPORT_LOGS);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.SEND_SUPPORT_LOGS,
+    );
     return data;
   },
 
@@ -256,7 +302,10 @@ const adminService = {
    * @returns {Promise<Object>} Results with total_recipients, successful, failed, details
    */
   async sendBulkEmail(emailData) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ADMIN.BULK_EMAIL, emailData);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ADMIN.BULK_EMAIL,
+      emailData,
+    );
     return data;
   },
 };

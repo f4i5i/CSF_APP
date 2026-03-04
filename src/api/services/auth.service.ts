@@ -75,9 +75,9 @@
 // ========================================
 // IMPORTS
 // ========================================
-import apiClient from '../client/axios-client';
-import { ENDPOINTS } from '../config/endpoints';
-import { API_CONFIG } from '../config/api.config';
+import apiClient from "../client/axios-client";
+import { ENDPOINTS } from "../config/endpoints";
+import { API_CONFIG } from "../config/api.config";
 import type {
   LoginRequest,
   LoginResponse,
@@ -85,7 +85,7 @@ import type {
   GoogleAuthRequest,
   RefreshTokenRequest,
   RefreshTokenResponse,
-} from '../types/auth.types';
+} from "../types/auth.types";
 
 // ========================================
 // INTERNAL UTILITIES
@@ -130,7 +130,7 @@ const storeTokens = (tokens?: Partial<LoginResponse>): void => {
   if (tokens.refresh_token) {
     localStorage.setItem(
       API_CONFIG.REFRESH_TOKEN_STORAGE_KEY,
-      tokens.refresh_token
+      tokens.refresh_token,
     );
   }
 };
@@ -199,20 +199,23 @@ export const authService = {
    *   }
    * }
    */
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
+  async login(
+    credentials: LoginRequest,
+  ): Promise<LoginResponse & { user?: any }> {
     // Call login endpoint with email and password
-    const { data } = await apiClient.post<LoginResponse | { tokens: LoginResponse }>(
-      ENDPOINTS.AUTH.LOGIN,
-      credentials
-    );
+    const { data } = await apiClient.post<
+      LoginResponse | { user: any; tokens: LoginResponse }
+    >(ENDPOINTS.AUTH.LOGIN, credentials);
 
     // Normalize response: Extract tokens whether they're at root or nested
-    const tokens = 'tokens' in data ? data.tokens : data;
+    const tokens = "tokens" in data ? data.tokens : data;
 
     // Store tokens in localStorage for subsequent requests
     storeTokens(tokens);
 
-    return tokens;
+    // Return tokens with user data if available
+    const user = "user" in data ? data.user : undefined;
+    return { ...tokens, user };
   },
 
   /**
@@ -277,13 +280,12 @@ export const authService = {
    */
   async register(userData: RegisterRequest): Promise<LoginResponse> {
     // Call registration endpoint with user data
-    const { data } = await apiClient.post<{ user: any; tokens: LoginResponse } | LoginResponse>(
-      ENDPOINTS.AUTH.REGISTER,
-      userData
-    );
+    const { data } = await apiClient.post<
+      { user: any; tokens: LoginResponse } | LoginResponse
+    >(ENDPOINTS.AUTH.REGISTER, userData);
 
     // Normalize response: Extract tokens whether they're at root or nested
-    const tokens = 'tokens' in data ? data.tokens : data;
+    const tokens = "tokens" in data ? data.tokens : data;
 
     // Store tokens in localStorage to auto-login the user
     storeTokens(tokens);
@@ -346,18 +348,18 @@ export const authService = {
   async refreshToken(): Promise<RefreshTokenResponse> {
     // Retrieve refresh token from localStorage
     const refreshToken = localStorage.getItem(
-      API_CONFIG.REFRESH_TOKEN_STORAGE_KEY
+      API_CONFIG.REFRESH_TOKEN_STORAGE_KEY,
     );
 
     // Throw error if no refresh token is available
     if (!refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error("No refresh token available");
     }
 
     // Call refresh endpoint with current refresh token
     const { data } = await apiClient.post<RefreshTokenResponse>(
       ENDPOINTS.AUTH.REFRESH,
-      { refresh_token: refreshToken } as RefreshTokenRequest
+      { refresh_token: refreshToken } as RefreshTokenRequest,
     );
 
     // Store new tokens in localStorage
@@ -438,11 +440,13 @@ export const authService = {
    *   }
    * }
    */
-  async googleAuth(googleToken: string): Promise<{ user: any; tokens: LoginResponse }> {
+  async googleAuth(
+    googleToken: string,
+  ): Promise<{ user: any; tokens: LoginResponse }> {
     // Call Google OAuth endpoint with Google token
     const { data } = await apiClient.post<{ user: any; tokens: LoginResponse }>(
       ENDPOINTS.AUTH.GOOGLE,
-      { token: googleToken } as GoogleAuthRequest
+      { token: googleToken } as GoogleAuthRequest,
     );
 
     // Store authentication tokens in localStorage
@@ -525,7 +529,7 @@ export const authService = {
       // Clear Authorization header from axios client
       // Prevents subsequent requests from using old token
       if (apiClient.defaults.headers.common) {
-        delete apiClient.defaults.headers.common['Authorization'];
+        delete apiClient.defaults.headers.common["Authorization"];
       }
     }
   },
@@ -687,15 +691,18 @@ export const authService = {
   async forgotPassword(email: string): Promise<{ message: string }> {
     const { data } = await apiClient.post<{ message: string }>(
       ENDPOINTS.AUTH.FORGOT_PASSWORD,
-      { email }
+      { email },
     );
     return data;
   },
 
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
     const { data } = await apiClient.post<{ message: string }>(
       ENDPOINTS.AUTH.RESET_PASSWORD,
-      { token, new_password: newPassword }
+      { token, new_password: newPassword },
     );
     return data;
   },

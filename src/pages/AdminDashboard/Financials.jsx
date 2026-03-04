@@ -62,7 +62,7 @@ const Financials = () => {
     }
   };
 
-  // Calculate totals from dashboard metrics
+  // Calculate totals from dashboard metrics (all real backend data)
   const totals = useMemo(() => {
     if (!dashboardMetrics) {
       return { "24h": 0, "7d": 0, "30d": 0, "90d": 0, YTD: 0 };
@@ -72,35 +72,27 @@ const Financials = () => {
       "24h": dashboardMetrics.revenue_today || 0,
       "7d": dashboardMetrics.revenue_this_week || 0,
       "30d": dashboardMetrics.revenue_this_month || 0,
-      "90d": dashboardMetrics.revenue_this_month * 3 || 0, // Estimate
-      YTD: dashboardMetrics.total_revenue || 0,
+      "90d": dashboardMetrics.revenue_90d || 0,
+      YTD: dashboardMetrics.revenue_ytd || 0,
     };
   }, [dashboardMetrics]);
 
-  // Calculate program revenues from dashboard metrics
+  // Calculate program revenues from dashboard metrics (using actual revenue data)
   const programRevenues = useMemo(() => {
-    if (!dashboardMetrics?.programs_with_counts || !programs.length) {
+    if (!dashboardMetrics?.programs_with_counts) {
       return [];
     }
 
-    // Map programs with their enrollment counts
-    // Revenue is estimated based on enrollment count and average class price
-    return programs.map((program) => {
-      const programData = dashboardMetrics.programs_with_counts?.find(
-        (p) => p.id === program.id || p.name === program.name
-      );
-      const enrollmentCount = programData?.count || 0;
-      // Estimate revenue based on enrollments (rough estimate)
-      const estimatedRevenue = enrollmentCount * 150; // Average $150 per enrollment
-
-      return {
-        id: program.id,
-        name: program.name,
-        revenue: estimatedRevenue,
-        enrollments: enrollmentCount,
-      };
-    }).filter(p => p.enrollments > 0).sort((a, b) => b.revenue - a.revenue);
-  }, [dashboardMetrics, programs]);
+    return dashboardMetrics.programs_with_counts
+      .map((programData) => ({
+        id: programData.id,
+        name: programData.name,
+        revenue: programData.revenue || 0,
+        enrollments: programData.count || 0,
+      }))
+      .filter((p) => p.enrollments > 0)
+      .sort((a, b) => b.revenue - a.revenue);
+  }, [dashboardMetrics]);
 
   // Transform classes for chart dropdown
   const classOptions = useMemo(() => {
@@ -114,7 +106,7 @@ const Financials = () => {
 
   const selectedClass = useMemo(
     () => classOptions.find((c) => c.id === selectedClassId) || classOptions[0],
-    [selectedClassId, classOptions]
+    [selectedClassId, classOptions],
   );
 
   // Calculate average per student by program
@@ -240,18 +232,30 @@ function generateMonthlyData(revenueReport, classId) {
   // If we have revenue by date, extract monthly totals
   if (revenueReport?.revenue_by_date) {
     const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
     const monthlyTotals = months.map(() => 0);
 
-    Object.entries(revenueReport.revenue_by_date).forEach(([dateStr, values]) => {
-      const date = new Date(dateStr);
-      const monthIndex = date.getMonth();
-      const total = Object.values(values).reduce((sum, val) => sum + val, 0);
-      monthlyTotals[monthIndex] += total;
-    });
+    Object.entries(revenueReport.revenue_by_date).forEach(
+      ([dateStr, values]) => {
+        const date = new Date(dateStr);
+        const monthIndex = date.getMonth();
+        const total = Object.values(values).reduce((sum, val) => sum + val, 0);
+        monthlyTotals[monthIndex] += total;
+      },
+    );
 
     // Return non-zero values or sample data
     const hasData = monthlyTotals.some((v) => v > 0);

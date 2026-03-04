@@ -1,8 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Users, User, Mail, Phone, ArrowLeft, Loader2, Copy, CheckCircle, Link } from 'lucide-react';
-import toast from 'react-hot-toast';
-import adminService from '../../api/services/admin.service';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Users,
+  User,
+  Mail,
+  Phone,
+  ArrowLeft,
+  Loader2,
+  Copy,
+  CheckCircle,
+  Link,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import adminService from "../../api/services/admin.service";
 
 const ClassRoster = () => {
   const { classId } = useParams();
@@ -11,6 +21,8 @@ const ClassRoster = () => {
   const [rosterData, setRosterData] = useState(null);
   const [error, setError] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [shareLink, setShareLink] = useState(null);
+  const [generatingLink, setGeneratingLink] = useState(false);
 
   useEffect(() => {
     const fetchRoster = async () => {
@@ -19,9 +31,9 @@ const ClassRoster = () => {
         const data = await adminService.getClassRoster(classId);
         setRosterData(data);
       } catch (err) {
-        console.error('Failed to fetch roster:', err);
-        setError(err.response?.data?.detail || 'Failed to load class roster');
-        toast.error('Failed to load class roster');
+        console.error("Failed to fetch roster:", err);
+        setError(err.response?.data?.detail || "Failed to load class roster");
+        toast.error("Failed to load class roster");
       } finally {
         setLoading(false);
       }
@@ -32,14 +44,29 @@ const ClassRoster = () => {
     }
   }, [classId]);
 
-  const copyShareLink = async () => {
+  const generateShareLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      setGeneratingLink(true);
+      const data = await adminService.generateRosterShareToken(classId);
+      const publicUrl = `${window.location.origin}/public/roster/${data.share_token}`;
+      setShareLink(publicUrl);
+      toast.success("Public roster link generated!");
+    } catch {
+      toast.error("Failed to generate share link");
+    } finally {
+      setGeneratingLink(false);
+    }
+  };
+
+  const copyShareLink = async () => {
+    const urlToCopy = shareLink || window.location.href;
+    try {
+      await navigator.clipboard.writeText(urlToCopy);
       setLinkCopied(true);
-      toast.success('Roster link copied to clipboard!');
+      toast.success("Roster link copied to clipboard!");
       setTimeout(() => setLinkCopied(false), 3000);
     } catch {
-      toast.error('Failed to copy link');
+      toast.error("Failed to copy link");
     }
   };
 
@@ -50,7 +77,9 @@ const ClassRoster = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-btn-gold" />
-          <span className="text-text-muted font-manrope text-lg">Loading roster...</span>
+          <span className="text-text-muted font-manrope text-lg">
+            Loading roster...
+          </span>
         </div>
       </div>
     );
@@ -61,7 +90,9 @@ const ClassRoster = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
           <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h2 className="text-xl font-semibold text-gray-700 font-manrope mb-2">Unable to Load Roster</h2>
+          <h2 className="text-xl font-semibold text-gray-700 font-manrope mb-2">
+            Unable to Load Roster
+          </h2>
           <p className="text-text-muted font-manrope mb-6">{error}</p>
           <button
             onClick={() => navigate(-1)}
@@ -102,41 +133,91 @@ const ClassRoster = () => {
           {/* Class Info */}
           {rosterData && (
             <div className="flex flex-wrap gap-4 text-sm text-text-muted font-manrope mt-2">
-              {rosterData.program_name && <span>Program: <strong>{rosterData.program_name}</strong></span>}
-              {rosterData.school_name && <span>Site: <strong>{rosterData.school_name}</strong></span>}
+              {rosterData.program_name && (
+                <span>
+                  Program: <strong>{rosterData.program_name}</strong>
+                </span>
+              )}
+              {rosterData.school_name && (
+                <span>
+                  Site: <strong>{rosterData.school_name}</strong>
+                </span>
+              )}
               {rosterData.start_date && rosterData.end_date && (
-                <span>{new Date(rosterData.start_date).toLocaleDateString()} - {new Date(rosterData.end_date).toLocaleDateString()}</span>
+                <span>
+                  {new Date(rosterData.start_date).toLocaleDateString()} -{" "}
+                  {new Date(rosterData.end_date).toLocaleDateString()}
+                </span>
               )}
             </div>
           )}
 
           {/* Share Link */}
-          <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 bg-blue-50 rounded-lg p-3 border border-blue-100">
-            <div className="flex items-center gap-2 flex-1 min-w-0 w-full sm:w-auto">
-              <Link className="w-4 h-4 text-blue-600 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-blue-800 font-manrope">Share:</span>
-              <span className="text-xs sm:text-sm text-blue-600 truncate font-mono">{window.location.href}</span>
-            </div>
-            <button
-              onClick={copyShareLink}
-              className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shrink-0 w-full sm:w-auto ${
-                linkCopied
-                  ? 'bg-green-600 text-white'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {linkCopied ? (
-                <>
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  Copy Link
-                </>
-              )}
-            </button>
+          <div className="mt-4 bg-blue-50 rounded-lg p-3 border border-blue-100">
+            {shareLink ? (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 flex-1 min-w-0 w-full sm:w-auto">
+                  <Link className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span className="text-xs sm:text-sm font-medium text-blue-800 font-manrope">
+                    Public Link:
+                  </span>
+                  <span className="text-xs sm:text-sm text-blue-600 truncate font-mono">
+                    {shareLink}
+                  </span>
+                </div>
+                <button
+                  onClick={copyShareLink}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shrink-0 w-full sm:w-auto ${
+                    linkCopied
+                      ? "bg-green-600 text-white"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
+                >
+                  {linkCopied ? (
+                    <>
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      Copy Link
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Link className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span className="text-xs sm:text-sm text-blue-800 font-manrope">
+                    Generate a public link to share this roster with schools and
+                    teachers (no login required).
+                  </span>
+                </div>
+                <button
+                  onClick={generateShareLink}
+                  disabled={generatingLink}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shrink-0 w-full sm:w-auto disabled:opacity-50"
+                >
+                  {generatingLink ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Link className="w-3.5 h-3.5" />
+                      Generate Public Link
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+            <p className="text-xs text-blue-600/70 mt-2 font-manrope">
+              Public link shows student names, grades, and teachers only — no
+              parent contact info.
+            </p>
           </div>
         </div>
       </div>
@@ -146,28 +227,48 @@ const ClassRoster = () => {
         {students.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border">
             <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-text-muted font-manrope">No students enrolled in this class</p>
+            <p className="text-text-muted font-manrope">
+              No students enrolled in this class
+            </p>
           </div>
         ) : (
           <div>
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-text-primary font-manrope">
-                {students.length} Student{students.length !== 1 ? 's' : ''} Enrolled
+                {students.length} Student{students.length !== 1 ? "s" : ""}{" "}
+                Enrolled
               </p>
             </div>
 
             <div className="grid gap-3">
               {students.map((student, idx) => {
                 // Handle both flat (backend) and nested response structures
-                const childName = student.child_name || `${student.child?.first_name || student.first_name || ''} ${student.child?.last_name || student.last_name || ''}`.trim();
+                const childName =
+                  student.child_name ||
+                  `${student.child?.first_name || student.first_name || ""} ${student.child?.last_name || student.last_name || ""}`.trim();
                 const childAge = student.child_age ?? student.child?.age;
-                const childDob = student.child_dob || student.child?.date_of_birth;
-                const childGrade = student.child?.grade || student.grade;
-                const parentName = student.parent_name || `${student.parent?.first_name || ''} ${student.parent?.last_name || ''}`.trim() || student.parent?.full_name;
-                const parentEmail = student.parent_email || student.parent?.email;
-                const parentPhone = student.parent_phone || student.parent?.phone;
-                const enrollmentStatus = student.enrollment_status || student.enrollment?.status || student.status;
-                const studentId = student.child_id || student.child?.id || student.enrollment_id || idx;
+                const childDob =
+                  student.child_dob || student.child?.date_of_birth;
+                const childGrade =
+                  student.child_grade || student.child?.grade || student.grade;
+                const classroomTeacher = student.classroom_teacher;
+                const parentName =
+                  student.parent_name ||
+                  `${student.parent?.first_name || ""} ${student.parent?.last_name || ""}`.trim() ||
+                  student.parent?.full_name;
+                const parentEmail =
+                  student.parent_email || student.parent?.email;
+                const parentPhone =
+                  student.parent_phone || student.parent?.phone;
+                const enrollmentStatus =
+                  student.enrollment_status ||
+                  student.enrollment?.status ||
+                  student.status;
+                const studentId =
+                  student.child_id ||
+                  student.child?.id ||
+                  student.enrollment_id ||
+                  idx;
 
                 return (
                   <div
@@ -182,21 +283,32 @@ const ClassRoster = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
-                              {childName || 'Unknown Student'}
+                              {childName || "Unknown Student"}
                             </h4>
                             <div className="flex flex-wrap items-center gap-3 mt-1 text-xs sm:text-sm text-text-muted font-manrope">
                               {(childAge != null || childDob) && (
-                                <span>Age: {childAge ?? (new Date().getFullYear() - new Date(childDob).getFullYear())}</span>
+                                <span>
+                                  Age:{" "}
+                                  {childAge ??
+                                    new Date().getFullYear() -
+                                      new Date(childDob).getFullYear()}
+                                </span>
                               )}
                               {childGrade && <span>Grade {childGrade}</span>}
+                              {classroomTeacher && (
+                                <span>Teacher: {classroomTeacher}</span>
+                              )}
                             </div>
                           </div>
                           {enrollmentStatus && (
-                            <span className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${
-                              enrollmentStatus === 'ACTIVE' || enrollmentStatus === 'active'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-600'
-                            }`}>
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full font-medium shrink-0 ${
+                                enrollmentStatus === "ACTIVE" ||
+                                enrollmentStatus === "active"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-600"
+                              }`}
+                            >
                               {enrollmentStatus}
                             </span>
                           )}
@@ -210,8 +322,8 @@ const ClassRoster = () => {
                                 key={i}
                                 className={`text-xs px-2 py-0.5 rounded-full ${
                                   fee.is_optional
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : 'bg-gray-100 text-gray-600'
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-gray-100 text-gray-600"
                                 }`}
                               >
                                 {fee.name}: ${parseFloat(fee.amount).toFixed(2)}
@@ -223,13 +335,21 @@ const ClassRoster = () => {
                         {/* Parent Info */}
                         {(parentName || parentEmail || parentPhone) && (
                           <div className="mt-3 pt-3 border-t border-gray-200">
-                            <p className="text-xs font-medium text-text-muted mb-1 font-manrope">Parent/Guardian</p>
+                            <p className="text-xs font-medium text-text-muted mb-1 font-manrope">
+                              Parent/Guardian
+                            </p>
                             <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-text-primary font-manrope">
-                              {parentName && <span className="font-medium">{parentName}</span>}
+                              {parentName && (
+                                <span className="font-medium">
+                                  {parentName}
+                                </span>
+                              )}
                               {parentEmail && (
                                 <span className="flex items-center gap-1 text-text-muted truncate">
                                   <Mail className="w-3.5 h-3.5 shrink-0" />
-                                  <span className="truncate">{parentEmail}</span>
+                                  <span className="truncate">
+                                    {parentEmail}
+                                  </span>
                                 </span>
                               )}
                               {parentPhone && (

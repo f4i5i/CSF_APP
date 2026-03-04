@@ -60,7 +60,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import authService from "../api/services/auth.service";
 import usersService from "../api/services/users.service";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import { getErrorMessage } from "../lib/errorHandler";
 
 // ========================================
@@ -201,14 +201,14 @@ export const AuthProvider = (props) => {
   const login = async (email, password) => {
     try {
       // Call login API - stores JWT tokens in localStorage
-      await authService.login(email, password);
+      const result = await authService.login(email, password);
 
-      // Fetch user data from /users/me endpoint
-      const userData = await usersService.getMe();
+      // Use user data from login response if available, otherwise fetch from /users/me
+      const userData = result.user || (await usersService.getMe());
       setUser(userData);
 
       // Show success notification
-      toast.success('Welcome back!');
+      toast.success("Welcome back!");
       return userData;
     } catch (error) {
       // Transform error to user-friendly message
@@ -260,7 +260,7 @@ export const AuthProvider = (props) => {
       setUser(user);
 
       // Show success notification
-      toast.success('Account created successfully!');
+      toast.success("Account created successfully!");
       return user;
     } catch (error) {
       // Transform error to user-friendly message
@@ -301,7 +301,7 @@ export const AuthProvider = (props) => {
       setUser(userData);
 
       // Show success notification
-      toast.success('Welcome back!');
+      toast.success("Welcome back!");
       return userData;
     } catch (error) {
       // Transform error to user-friendly message
@@ -336,7 +336,7 @@ export const AuthProvider = (props) => {
     try {
       // Call logout API - invalidates refresh token on server
       await authService.logout();
-      toast.success('Logged out successfully');
+      toast.success("Logged out successfully");
     } catch (error) {
       // Transform error to user-friendly message
       const errorMsg = getErrorMessage(error);
@@ -385,7 +385,15 @@ export const AuthProvider = (props) => {
    */
   return (
     <AuthContext.Provider
-      value={{ user, login, loginWithGoogle, register, logout, updateUser, loading }}
+      value={{
+        user,
+        login,
+        loginWithGoogle,
+        register,
+        logout,
+        updateUser,
+        loading,
+      }}
     >
       {props.children}
     </AuthContext.Provider>

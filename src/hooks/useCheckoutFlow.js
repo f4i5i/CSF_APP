@@ -74,6 +74,9 @@ export const useCheckoutFlow = () => {
     // Custom fee selections per child: { [childId]: [0, 2] } (indices of selected optional fees)
     selectedFeesByChild: {},
 
+    // Classroom / Teacher (optional free-text)
+    classroomTeacher: "",
+
     // Payment
     paymentMethod: "full", // 'full' | 'subscribe' | 'installments'
     installmentPlan: null,
@@ -344,12 +347,19 @@ export const useCheckoutFlow = () => {
 
     try {
       // Build items array for all selected children (with optional fee selections)
-      const items = childIdsToEnroll.map((childId) => ({
-        class_id: classData.id,
-        child_id: childId,
-        amount: classData.base_price || classData.price,
-        selected_optional_fee_indices: state.selectedFeesByChild[childId] || [],
-      }));
+      const items = childIdsToEnroll.map((childId) => {
+        const item = {
+          class_id: classData.id,
+          child_id: childId,
+          amount: classData.base_price || classData.price,
+          selected_optional_fee_indices:
+            state.selectedFeesByChild[childId] || [],
+        };
+        if (state.classroomTeacher?.trim()) {
+          item.classroom_teacher = state.classroomTeacher.trim();
+        }
+        return item;
+      });
 
       console.log("[DEBUG] Creating order with items:", items);
       console.log("[DEBUG] Items count:", items.length);
@@ -711,6 +721,8 @@ export const useCheckoutFlow = () => {
     downloadReceipt,
     retry,
     reset,
+    setClassroomTeacher: (value) =>
+      setState((prev) => ({ ...prev, classroomTeacher: value })),
   };
 };
 

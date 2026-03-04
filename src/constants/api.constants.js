@@ -335,6 +335,15 @@ export const API_ENDPOINTS = {
 
     // Support
     SEND_SUPPORT_LOGS: "/admin/support/send-logs", // Send server logs to developer
+    GENERATE_ROSTER_TOKEN: (classId) =>
+      `/public/roster/${classId}/generate-token`, // Generate roster share token
+  },
+
+  // ===================
+  // PUBLIC
+  // ===================
+  PUBLIC: {
+    ROSTER: (shareToken) => `/public/roster/${shareToken}`, // Public roster (no auth)
   },
 
   // ===================

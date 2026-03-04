@@ -1,17 +1,30 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import StudentCard from "./StudentCard";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
-const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, checkingIn }) => {
+const StudentList = ({
+  students,
+  search,
+  sort,
+  setSort,
+  onOpen,
+  onCheckIn,
+  checkingIn,
+}) => {
   const [page, setPage] = useState(1);
   const [sortOpen, setSortOpen] = useState(false);
   const perPage = 5;
 
-  const sortOptions = ["Alphabetical", "Grade", "Check-In Status"];
+  const sortOptions = ["Alphabetical", "Grade", "Age", "Check-In Status"];
+
+  // Reset page when search or sort changes
+  React.useEffect(() => {
+    setPage(1);
+  }, [search, sort]);
 
   // SEARCH FILTER
   const filtered = students.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+    s.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   // SORT
@@ -20,7 +33,15 @@ const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, check
       case "Alphabetical":
         return a.name.localeCompare(b.name);
       case "Grade":
-        return (a.grade || 0) - (b.grade || 0);
+        return (a.grade || "")
+          .toString()
+          .localeCompare((b.grade || "").toString());
+      case "Age":
+        // Sort by DOB ascending (youngest first = latest DOB first)
+        if (!a.dob && !b.dob) return 0;
+        if (!a.dob) return 1;
+        if (!b.dob) return -1;
+        return new Date(b.dob) - new Date(a.dob);
       case "Check-In Status":
         return (b.checked ? 1 : 0) - (a.checked ? 1 : 0);
       default:
@@ -35,11 +56,11 @@ const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, check
 
   return (
     <div className="bg-white/60 p-4 lg:p-7 rounded-3xl shadow-md backdrop-blur-md border">
-
       {/* HEADER */}
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-xl font-manrope text-[#1B1B1B]">
-          Students ({filtered.filter((s) => s.checked).length}/{filtered.length})
+          Students ({filtered.filter((s) => s.checked).length}/{filtered.length}
+          )
         </h2>
 
         {/* Sort Dropdown */}
@@ -48,7 +69,11 @@ const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, check
             onClick={() => setSortOpen(!sortOpen)}
             className="flex items-center gap-2 justify-center bg-[#FFFFFF80] text-black w-[150px] h-10 px-4 py-2 rounded-full shadow text-[16px]"
           >
-            {sort} <ChevronDown size={16} className={`transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
+            {sort}{" "}
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${sortOpen ? "rotate-180" : ""}`}
+            />
           </button>
 
           {sortOpen && (
@@ -61,7 +86,7 @@ const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, check
                     setSortOpen(false);
                   }}
                   className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-100 ${
-                    sort === option ? 'bg-gray-50 font-semibold' : ''
+                    sort === option ? "bg-gray-50 font-semibold" : ""
                   }`}
                 >
                   {option}
@@ -94,7 +119,6 @@ const StudentList = ({ students, search, sort, setSort, onOpen, onCheckIn, check
       {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-3 mt-4">
-
           {/* PREV (Chevron Left) */}
           <button
             onClick={() => page > 1 && setPage(page - 1)}

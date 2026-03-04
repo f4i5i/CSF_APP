@@ -1,4 +1,4 @@
-import { Check, FileText } from "lucide-react";
+import { Check, FileText, X } from "lucide-react";
 import { formatGrade } from "../../utils/format";
 
 const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
@@ -37,12 +37,18 @@ const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
             ${
               student.checked
                 ? "bg-green-500 text-white hover:bg-green-600"
-                : "border border-[#C9CBD3] hover:bg-gray-100"
+                : student.wasUnchecked
+                  ? "bg-red-400 text-white hover:bg-red-500"
+                  : "border border-[#C9CBD3] hover:bg-gray-100"
             }
             ${checkingIn ? "opacity-50 cursor-wait" : "cursor-pointer"}
           `}
         >
-          {student.checked && <Check size={14} />}
+          {student.checked ? (
+            <Check size={14} />
+          ) : student.wasUnchecked ? (
+            <X size={14} />
+          ) : null}
         </div>
 
         {/* Avatar */}

@@ -3,30 +3,30 @@
  * Integrates all checkout components for class enrollment with Stripe payment
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useCheckoutFlow } from '../hooks/useCheckoutFlow';
-import waiversService from '../api/services/waivers.service';
-import { ArrowLeft, Home, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useCheckoutFlow } from "../hooks/useCheckoutFlow";
+import waiversService from "../api/services/waivers.service";
+import { ArrowLeft, Home, CheckCircle } from "lucide-react";
 
 // Import all checkout components
-import CheckoutLoading from '../components/checkout/CheckoutLoading';
-import CheckoutError from '../components/checkout/CheckoutError';
-import WaitlistFlow from '../components/checkout/WaitlistFlow';
-import OrderConfirmation from '../components/checkout/OrderConfirmation';
-import ClassDetailsSummary from '../components/checkout/ClassDetailsSummary';
-import ChildSelector from '../components/checkout/ChildSelector';
-import PaymentMethodSelector from '../components/checkout/PaymentMethodSelector';
-import InstallmentPlanSelector from '../components/checkout/InstallmentPlanSelector';
-import DiscountCodeInput from '../components/checkout/DiscountCodeInput';
-import OrderSummary from '../components/checkout/OrderSummary';
-import CustomFeesSelector from '../components/checkout/CustomFeesSelector';
-import WaiverCheckModal from '../components/checkout/WaiverCheckModal';
+import CheckoutLoading from "../components/checkout/CheckoutLoading";
+import CheckoutError from "../components/checkout/CheckoutError";
+import WaitlistFlow from "../components/checkout/WaitlistFlow";
+import OrderConfirmation from "../components/checkout/OrderConfirmation";
+import ClassDetailsSummary from "../components/checkout/ClassDetailsSummary";
+import ChildSelector from "../components/checkout/ChildSelector";
+import PaymentMethodSelector from "../components/checkout/PaymentMethodSelector";
+import InstallmentPlanSelector from "../components/checkout/InstallmentPlanSelector";
+import DiscountCodeInput from "../components/checkout/DiscountCodeInput";
+import OrderSummary from "../components/checkout/OrderSummary";
+import CustomFeesSelector from "../components/checkout/CustomFeesSelector";
+import WaiverCheckModal from "../components/checkout/WaiverCheckModal";
 
 export default function CheckOut() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const classId = searchParams.get('classId');
+  const classId = searchParams.get("classId");
 
   // Get checkout state and methods from hook
   const {
@@ -51,6 +51,7 @@ export default function CheckOut() {
     siblingDiscountPreview, // NEW: Sibling discount line items
     backendProcessingFee, // Processing fee from backend order
     selectedFeesByChild, // Custom fee selections per child
+    classroomTeacher, // Classroom / Teacher text
 
     // Methods
     initializeCheckout,
@@ -65,6 +66,7 @@ export default function CheckOut() {
     joinWaitlist,
     downloadReceipt,
     retry,
+    setClassroomTeacher,
   } = useCheckoutFlow();
 
   // State for discount loading
@@ -82,7 +84,7 @@ export default function CheckOut() {
   // Initialize checkout on mount
   useEffect(() => {
     if (!classId) {
-      navigate('/classes');
+      navigate("/classes");
       return;
     }
 
@@ -101,7 +103,12 @@ export default function CheckOut() {
   // Check for pending waivers when child is selected (only once per child)
   useEffect(() => {
     // Skip if no child selected, no class data, already checked for this child, or already checking
-    if (!selectedChildId || !classData || waiverCheckDoneForChild.current === selectedChildId || checkingWaivers) {
+    if (
+      !selectedChildId ||
+      !classData ||
+      waiverCheckDoneForChild.current === selectedChildId ||
+      checkingWaivers
+    ) {
       return;
     }
 
@@ -127,7 +134,7 @@ export default function CheckOut() {
           setWaiversChecked(true);
         }
       } catch (error) {
-        console.error('Failed to check pending waivers:', error);
+        console.error("Failed to check pending waivers:", error);
         // Mark as checked to not block checkout on error
         waiverCheckDoneForChild.current = selectedChildId;
         setWaiversChecked(true);
@@ -167,7 +174,7 @@ export default function CheckOut() {
       <CheckoutError
         error={error}
         onRetry={retry}
-        onGoHome={() => navigate('/classes')}
+        onGoHome={() => navigate("/classes")}
       />
     );
   }
@@ -195,7 +202,7 @@ export default function CheckOut() {
   }
 
   // Show success for free enrollment (backend already activated enrollments)
-  if (clientSecret === 'FREE' || (paymentSucceeded && !orderData)) {
+  if (clientSecret === "FREE" || (paymentSucceeded && !orderData)) {
     return (
       <div className="min-h-screen w-full bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] py-8">
         <div className="max-w-lg mx-auto px-4 text-center pt-20">
@@ -206,7 +213,9 @@ export default function CheckOut() {
             </h1>
             <p className="text-[#666D80] font-manrope mb-2">
               {classData?.name && (
-                <span className="block font-semibold text-[#173151] mb-1">{classData.name}</span>
+                <span className="block font-semibold text-[#173151] mb-1">
+                  {classData.name}
+                </span>
               )}
               Your child has been successfully enrolled in this free class.
             </p>
@@ -214,7 +223,7 @@ export default function CheckOut() {
               A confirmation email has been sent to your email address.
             </p>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate("/dashboard")}
               className="w-full py-3 bg-[#173151] hover:bg-[#0f2240] text-white font-manrope font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               <Home size={20} />
@@ -233,12 +242,12 @@ export default function CheckOut() {
 
   // Check if class is effectively free (no price + no required custom fees)
   const requiredFeesTotal = (classData?.custom_fees || [])
-    .filter(f => !f.is_optional)
+    .filter((f) => !f.is_optional)
     .reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
   const isFreeClass = Number(classPrice) === 0 && requiredFeesTotal === 0;
 
   // Check if at least one child is selected (support both single and multi-select)
-  const hasChildSelected = (selectedChildIds?.length > 0) || selectedChildId;
+  const hasChildSelected = selectedChildIds?.length > 0 || selectedChildId;
 
   // Main checkout flow
   return (
@@ -255,7 +264,7 @@ export default function CheckOut() {
           </button>
 
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white/80 text-[#173151] rounded-lg transition-colors font-manrope font-medium border border-gray-200"
           >
             <Home size={20} />
@@ -278,7 +287,10 @@ export default function CheckOut() {
           {/* Left Column - Main Checkout Flow */}
           <div className="lg:col-span-2 space-y-6">
             {/* Class Details */}
-            <ClassDetailsSummary classData={classData} hasCapacity={hasCapacity} />
+            <ClassDetailsSummary
+              classData={classData}
+              hasCapacity={hasCapacity}
+            />
 
             {/* Child Selection - Multi-select with Sibling Discount */}
             <ChildSelector
@@ -290,6 +302,27 @@ export default function CheckOut() {
               classData={classData}
               multiSelect={children?.length > 1} // Enable multi-select when multiple children
             />
+
+            {/* Classroom / Teacher (Optional) */}
+            {hasChildSelected && (
+              <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
+                <label className="block text-sm font-semibold font-manrope text-[#173151] mb-2">
+                  Classroom / Teacher (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mrs. Johnson, Room 204"
+                  value={classroomTeacher || ""}
+                  onChange={(e) => setClassroomTeacher(e.target.value)}
+                  className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-300 outline-none focus:ring-2 focus:ring-[#F3BC48] font-manrope"
+                  maxLength={255}
+                />
+                <p className="text-xs text-[#666D80] mt-1 font-manrope">
+                  Enter your child's classroom or teacher name so we can include
+                  it on the roster.
+                </p>
+              </div>
+            )}
 
             {/* Waiver Check Notice (if checking) */}
             {hasChildSelected && checkingWaivers && (
@@ -304,15 +337,20 @@ export default function CheckOut() {
             )}
 
             {/* Custom Fees Selection (only show after waivers checked) */}
-            {hasChildSelected && waiversChecked && classData?.custom_fees?.length > 0 && (
-              <CustomFeesSelector
-                classData={classData}
-                selectedChildIds={selectedChildIds || (selectedChildId ? [selectedChildId] : [])}
-                children={children}
-                selectedFeesByChild={selectedFeesByChild}
-                onToggleFee={toggleCustomFee}
-              />
-            )}
+            {hasChildSelected &&
+              waiversChecked &&
+              classData?.custom_fees?.length > 0 && (
+                <CustomFeesSelector
+                  classData={classData}
+                  selectedChildIds={
+                    selectedChildIds ||
+                    (selectedChildId ? [selectedChildId] : [])
+                  }
+                  children={children}
+                  selectedFeesByChild={selectedFeesByChild}
+                  onToggleFee={toggleCustomFee}
+                />
+              )}
 
             {/* Payment Method Selection (only show after waivers checked, hide for free classes) */}
             {hasChildSelected && waiversChecked && !isFreeClass && (
@@ -325,13 +363,15 @@ export default function CheckOut() {
             )}
 
             {/* Installment Plan Selection (only if installments selected) */}
-            {hasChildSelected && paymentMethod === 'installments' && !isFreeClass && (
-              <InstallmentPlanSelector
-                orderTotal={orderTotal}
-                selectedPlan={selectedInstallmentPlan}
-                onSelect={selectInstallmentPlan}
-              />
-            )}
+            {hasChildSelected &&
+              paymentMethod === "installments" &&
+              !isFreeClass && (
+                <InstallmentPlanSelector
+                  orderTotal={orderTotal}
+                  selectedPlan={selectedInstallmentPlan}
+                  onSelect={selectInstallmentPlan}
+                />
+              )}
 
             {/* Discount Code Input (hide for free classes) */}
             {hasChildSelected && paymentMethod && !isFreeClass && (
@@ -346,26 +386,33 @@ export default function CheckOut() {
             {/* Review Order / Free Enrollment Button - Shows before order is created */}
             {hasChildSelected &&
               waiversChecked &&
-              (isFreeClass || (paymentMethod && (paymentMethod !== 'installments' || selectedInstallmentPlan))) &&
+              (isFreeClass ||
+                (paymentMethod &&
+                  (paymentMethod !== "installments" ||
+                    selectedInstallmentPlan))) &&
               !orderId &&
               !isLoading && (
                 <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
                   <div className="text-center">
                     <h3 className="text-fluid-lg font-semibold font-manrope text-[#173151] mb-2">
-                      {isFreeClass ? 'Ready to Enroll?' : 'Ready to Review Your Order?'}
+                      {isFreeClass
+                        ? "Ready to Enroll?"
+                        : "Ready to Review Your Order?"}
                     </h3>
                     <p className="text-sm font-manrope text-[#666D80] mb-6">
-                      You've selected {selectedChildIds?.length || 1} child{(selectedChildIds?.length || 1) > 1 ? 'ren' : ''} for enrollment.
+                      You've selected {selectedChildIds?.length || 1} child
+                      {(selectedChildIds?.length || 1) > 1 ? "ren" : ""} for
+                      enrollment.
                       {isFreeClass
-                        ? ' This is a free class — no payment required!'
-                        : ' Click below to calculate your total with any applicable discounts.'}
+                        ? " This is a free class — no payment required!"
+                        : " Click below to calculate your total with any applicable discounts."}
                     </p>
                     <button
                       onClick={createOrder}
                       className={`w-full py-4 font-manrope font-bold text-lg rounded-lg transition-colors flex items-center justify-center gap-2 ${
                         isFreeClass
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'bg-[#173151] hover:bg-[#0f2240] text-white'
+                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          : "bg-[#173151] hover:bg-[#0f2240] text-white"
                       }`}
                     >
                       {isFreeClass ? (
@@ -413,7 +460,7 @@ export default function CheckOut() {
             {/* Proceed to Stripe Checkout Button - Shows after order is created */}
             {hasChildSelected &&
               paymentMethod &&
-              (paymentMethod !== 'installments' || selectedInstallmentPlan) &&
+              (paymentMethod !== "installments" || selectedInstallmentPlan) &&
               clientSecret && (
                 <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
                   <div className="text-center">
@@ -421,7 +468,8 @@ export default function CheckOut() {
                       Ready to Complete Payment
                     </h3>
                     <p className="text-sm font-manrope text-[#666D80] mb-6">
-                      Review your order summary on the right, then proceed to secure Stripe checkout
+                      Review your order summary on the right, then proceed to
+                      secure Stripe checkout
                     </p>
                     <button
                       onClick={() => {
@@ -446,7 +494,8 @@ export default function CheckOut() {
                       Proceed to Stripe Checkout
                     </button>
                     <p className="text-xs font-manrope text-[#666D80] mt-3">
-                      🔒 You'll be securely redirected to Stripe to complete your payment
+                      🔒 You'll be securely redirected to Stripe to complete
+                      your payment
                     </p>
                   </div>
                 </div>
@@ -478,12 +527,19 @@ export default function CheckOut() {
                 discount={appliedDiscount}
                 paymentMethod={paymentMethod}
                 installmentPlan={selectedInstallmentPlan}
-                childCount={selectedChildIds?.length || (selectedChildId ? 1 : 0)}
-                children={selectedChildIds?.length > 0
-                  ? selectedChildIds.map(id => children.find(c => c.id === id)).filter(Boolean)
-                  : selectedChildId
-                    ? [children.find(c => c.id === selectedChildId)].filter(Boolean)
-                    : []
+                childCount={
+                  selectedChildIds?.length || (selectedChildId ? 1 : 0)
+                }
+                children={
+                  selectedChildIds?.length > 0
+                    ? selectedChildIds
+                        .map((id) => children.find((c) => c.id === id))
+                        .filter(Boolean)
+                    : selectedChildId
+                      ? [children.find((c) => c.id === selectedChildId)].filter(
+                          Boolean,
+                        )
+                      : []
                 }
                 lineItems={siblingDiscountPreview}
                 classData={classData}
@@ -499,7 +555,7 @@ export default function CheckOut() {
                   <strong>Need Help?</strong>
                 </p>
                 <p className="text-xs font-manrope text-blue-700 mt-1">
-                  Contact us at{' '}
+                  Contact us at{" "}
                   <a
                     href="mailto:support@csfacademy.com"
                     className="underline font-semibold"
@@ -517,17 +573,17 @@ export default function CheckOut() {
           <div className="flex items-center justify-center gap-2">
             <div
               className={`h-2 flex-1 rounded-full ${
-                selectedChildId ? 'bg-[#F3BC48]' : 'bg-gray-300'
+                selectedChildId ? "bg-[#F3BC48]" : "bg-gray-300"
               }`}
             ></div>
             <div
               className={`h-2 flex-1 rounded-full ${
-                paymentMethod ? 'bg-[#F3BC48]' : 'bg-gray-300'
+                paymentMethod ? "bg-[#F3BC48]" : "bg-gray-300"
               }`}
             ></div>
             <div
               className={`h-2 flex-1 rounded-full ${
-                clientSecret ? 'bg-[#F3BC48]' : 'bg-gray-300'
+                clientSecret ? "bg-[#F3BC48]" : "bg-gray-300"
               }`}
             ></div>
           </div>
@@ -541,7 +597,8 @@ export default function CheckOut() {
         {/* Security Badge */}
         <div className="mt-8 text-center">
           <p className="text-xs font-manrope text-[#666D80]">
-            🔒 Secured by Stripe | Your payment information is encrypted and secure
+            🔒 Secured by Stripe | Your payment information is encrypted and
+            secure
           </p>
         </div>
       </div>

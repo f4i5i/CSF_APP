@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import StudentList from "../../components/checkIn/StudentList";
 import { MessageSquare, Search } from "lucide-react";
+import toast from "react-hot-toast";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import StudentDetailsModal from "../../components/checkIn/StudentDetailsModal";
@@ -21,6 +22,7 @@ const CheckIn = () => {
   const [sort, setSort] = useState("Alphabetical");
   const [selectedClass, setSelectedClass] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [uncheckedIds, setUncheckedIds] = useState(new Set());
 
   // ============================================================================
   // API DATA FETCHING
@@ -33,7 +35,7 @@ const CheckIn = () => {
       initialData: { items: [] },
       dependencies: [user?.id],
       autoFetch: !!user?.id,
-    }
+    },
   );
 
   // Extract classes array from response
@@ -50,22 +52,29 @@ const CheckIn = () => {
   }, [classes]);
 
   // Fetch check-in status for selected class
-  const { data: checkInStatus, loading: loadingStudents, refetch: refetchStatus, error: checkInError } = useApi(
-    () => checkinService.getClassStatus(selectedClass?.id),
-    {
-      initialData: [],
-      dependencies: [selectedClass?.id],
-      autoFetch: !!selectedClass?.id,
-      onError: (error) => {
-        console.error('Failed to fetch check-in status:', error);
-      }
-    }
-  );
+  const {
+    data: checkInStatus,
+    loading: loadingStudents,
+    refetch: refetchStatus,
+    error: checkInError,
+  } = useApi(() => checkinService.getClassStatus(selectedClass?.id), {
+    initialData: [],
+    dependencies: [selectedClass?.id],
+    autoFetch: !!selectedClass?.id,
+    onError: (error) => {
+      console.error("Failed to fetch check-in status:", error);
+    },
+  });
 
   // Debug log for troubleshooting roster data issues
   React.useEffect(() => {
     if (selectedClass?.id && !loadingStudents) {
-      console.log('Check-in status for class', selectedClass.name, ':', checkInStatus);
+      console.log(
+        "Check-in status for class",
+        selectedClass.name,
+        ":",
+        checkInStatus,
+      );
     }
   }, [selectedClass, checkInStatus, loadingStudents]);
 
@@ -76,7 +85,7 @@ const CheckIn = () => {
       onSuccess: () => {
         refetchStatus();
       },
-    }
+    },
   );
 
   // ============================================================================
@@ -89,39 +98,61 @@ const CheckIn = () => {
     let statusArray = [];
     if (Array.isArray(checkInStatus)) {
       statusArray = checkInStatus;
-    } else if (checkInStatus?.statuses && Array.isArray(checkInStatus.statuses)) {
+    } else if (
+      checkInStatus?.statuses &&
+      Array.isArray(checkInStatus.statuses)
+    ) {
       statusArray = checkInStatus.statuses;
     } else if (checkInStatus?.items && Array.isArray(checkInStatus.items)) {
       statusArray = checkInStatus.items;
     }
 
     if (statusArray.length === 0) {
-      console.log('No students found in check-in status:', checkInStatus);
+      console.log("No students found in check-in status:", checkInStatus);
       return [];
     }
 
     return statusArray.map((item) => {
-      const profileImage = item.child?.profile_image || item.profile_image || null;
-      const firstName = item.child?.first_name || item.first_name || '';
-      const lastName = item.child?.last_name || item.last_name || '';
+      const profileImage =
+        item.child?.profile_image || item.profile_image || null;
+      const firstName =
+        item.child_first_name ||
+        item.child?.first_name ||
+        item.first_name ||
+        "";
+      const lastName =
+        item.child_last_name || item.child?.last_name || item.last_name || "";
       const childName = item.child_name || `${firstName} ${lastName}`.trim();
+      const isChecked =
+        item.is_checked_in || item.checked_in || item.checked || false;
+      const enrollId = item.enrollment_id || item.id;
+
+      // Build parent object from flat API fields or nested object
+      const parent = item.parent || {
+        first_name: item.parent_name?.split(" ")[0] || "",
+        last_name: item.parent_name?.split(" ").slice(1).join(" ") || "",
+        phone: item.parent_phone || null,
+        email: item.parent_email || null,
+      };
 
       return {
-        id: item.enrollment_id || item.id,
-        enrollment_id: item.enrollment_id || item.id,
-        name: childName || 'Unknown',
-        grade: item.child?.grade || item.grade || '-',
-        checked: item.is_checked_in || item.checked_in || item.checked || false,
+        id: enrollId,
+        enrollment_id: enrollId,
+        name: childName || "Unknown",
+        grade: item.child?.grade || item.grade || "-",
+        checked: isChecked,
+        wasUnchecked: !isChecked && uncheckedIds.has(enrollId),
         checkInId: item.check_in_id || item.checkin_id || null,
         img: profileImage ? getFileUrl(profileImage) : null,
+        dob: item.child_dob || item.child?.date_of_birth || null,
         // Additional data for modal
         child: item.child,
-        parent: item.parent,
+        parent,
         medical_info: item.medical_info || item.child?.medical_info,
         notes: item.notes,
       };
     });
-  }, [checkInStatus]);
+  }, [checkInStatus, uncheckedIds]);
 
   // ============================================================================
   // HANDLERS
@@ -139,13 +170,26 @@ const CheckIn = () => {
 
   const handleCheckIn = async (student) => {
     try {
+      // Track toggle state for visual feedback
+      if (student.checked) {
+        setUncheckedIds((prev) => new Set([...prev, student.enrollment_id]));
+      } else {
+        setUncheckedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(student.enrollment_id);
+          return next;
+        });
+      }
       await toggleCheckIn({
         enrollment_id: student.enrollment_id,
         class_id: selectedClass?.id,
-        check_in_date: new Date().toISOString().split('T')[0],
+        check_in_date: new Date().toISOString().split("T")[0],
       });
     } catch (error) {
-      console.error('Check-in error:', error);
+      console.error("Check-in error:", error);
+      toast.error("Failed to update check-in. Please try again.");
+      // Revert the optimistic UI update
+      refetchStatus();
     }
   };
 
@@ -193,13 +237,11 @@ const CheckIn = () => {
                            bg-[#FFFFFF66] px-6 py-[14px] rounded-full
                            shadow-sm text-fluid-base font-medium text-nuetral-200"
               >
-                {loadingClasses ? (
-                  "Loading classes..."
-                ) : selectedClass ? (
-                  selectedClass.name
-                ) : (
-                  "Select a class"
-                )}
+                {loadingClasses
+                  ? "Loading classes..."
+                  : selectedClass
+                    ? selectedClass.name
+                    : "Select a class"}
 
                 <svg
                   className={`w-4 h-4 text-[#7c7c7c] transition-transform ${
@@ -210,7 +252,11 @@ const CheckIn = () => {
                   strokeWidth="2"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
 
@@ -222,7 +268,7 @@ const CheckIn = () => {
                       key={classItem.id}
                       onClick={() => handleClassChange(classItem)}
                       className={`w-full text-nuetral-200 font-semibold border-b-border-light shadow-sm text-left px-6 py-4 text-[15px] max-xl:text-sm hover:bg-gray-100 ${
-                        selectedClass?.id === classItem.id ? 'bg-gray-50' : ''
+                        selectedClass?.id === classItem.id ? "bg-gray-50" : ""
                       }`}
                     >
                       {classItem.name}
@@ -247,7 +293,10 @@ const CheckIn = () => {
           <div className="bg-white/60 p-4 lg:p-7 rounded-3xl shadow-md backdrop-blur-md border">
             <div className="animate-pulse space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center gap-4 p-4 bg-white/30 rounded-xl">
+                <div
+                  key={i}
+                  className="flex items-center gap-4 p-4 bg-white/30 rounded-xl"
+                >
                   <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
                   <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
                   <div className="flex-1">
@@ -261,25 +310,51 @@ const CheckIn = () => {
         ) : !selectedClass ? (
           <div className="bg-white/60 p-8 lg:p-12 rounded-3xl shadow-md backdrop-blur-md border text-center">
             <div className="text-gray-400 mb-2">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-600 mb-1">No Class Selected</h3>
-            <p className="text-gray-500 text-sm">Please select a class from the dropdown above to view students.</p>
+            <h3 className="text-lg font-semibold text-gray-600 mb-1">
+              No Class Selected
+            </h3>
+            <p className="text-gray-500 text-sm">
+              Please select a class from the dropdown above to view students.
+            </p>
           </div>
         ) : students.length === 0 ? (
           <div className="bg-white/60 p-8 lg:p-12 rounded-3xl shadow-md backdrop-blur-md border text-center">
             <div className="text-gray-400 mb-2">
-              <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-600 mb-1">No Students Enrolled</h3>
+            <h3 className="text-lg font-semibold text-gray-600 mb-1">
+              No Students Enrolled
+            </h3>
             <p className="text-gray-500 text-sm">
               {checkInError
                 ? "There was an error loading students. Please try refreshing the page."
-                : `No students are currently enrolled in ${selectedClass?.name || 'this class'}.`}
+                : `No students are currently enrolled in ${selectedClass?.name || "this class"}.`}
             </p>
             <button
               onClick={() => refetchStatus()}
