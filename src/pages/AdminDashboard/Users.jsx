@@ -138,7 +138,8 @@ export default function Users() {
       render: (value, row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#173151] flex items-center justify-center text-white font-semibold text-sm">
-            {row.first_name?.[0]?.toUpperCase()}{row.last_name?.[0]?.toUpperCase()}
+            {row.first_name?.[0]?.toUpperCase()}
+            {row.last_name?.[0]?.toUpperCase()}
           </div>
           <div>
             <p className="font-semibold font-manrope text-text-primary">
@@ -188,6 +189,7 @@ export default function Users() {
     {
       key: "is_verified",
       label: "Verified",
+      sortable: true,
       render: (value) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -241,7 +243,9 @@ export default function Users() {
         // Admin cannot edit/delete owner or admin accounts
         // Owner can edit/delete anyone except themselves
         const canEdit = isOwner ? !isSelf : !targetIsOwner && !targetIsAdmin;
-        const canDelete = isOwner ? !isSelf : !targetIsOwner && !targetIsAdmin && !isSelf;
+        const canDelete = isOwner
+          ? !isSelf
+          : !targetIsOwner && !targetIsAdmin && !isSelf;
 
         const actions = [];
 

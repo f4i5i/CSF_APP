@@ -107,7 +107,6 @@ export default function AnnouncementsManagement() {
         limit: itemsPerPage,
       };
 
-      if (typeFilter) params.type = typeFilter;
       if (classFilter) params.class_id = classFilter;
       if (searchQuery) params.search = searchQuery;
 
@@ -230,7 +229,7 @@ export default function AnnouncementsManagement() {
       if (selectedAnnouncement) {
         savedAnnouncement = await announcementsService.update(
           selectedAnnouncement.id,
-          payload
+          payload,
         );
         toast.success("Announcement updated successfully");
       } else {
@@ -244,7 +243,7 @@ export default function AnnouncementsManagement() {
         try {
           await announcementsService.uploadAttachment(
             savedAnnouncement.id,
-            file
+            file,
           );
         } catch (err) {
           console.error("Failed to upload attachment:", err);
@@ -306,6 +305,7 @@ export default function AnnouncementsManagement() {
     {
       key: "type",
       label: "Type",
+      sortable: true,
       render: (value, row) => {
         const type = value || row.announcement_type || "general";
         const config = getTypeConfig(type);
@@ -344,6 +344,7 @@ export default function AnnouncementsManagement() {
     {
       key: "created_at",
       label: "Date",
+      sortable: true,
       render: (value) => (
         <span className="text-xs font-manrope text-text-muted">
           {formatDate(value)}
@@ -456,7 +457,15 @@ export default function AnnouncementsManagement() {
         <div className="flex-1 min-h-0 flex flex-col pb-2">
           <DataTable
             columns={columns}
-            data={announcements}
+            data={(() => {
+              let filtered = announcements;
+              if (typeFilter) {
+                filtered = filtered.filter(
+                  (a) => (a.type || a.announcement_type) === typeFilter,
+                );
+              }
+              return filtered;
+            })()}
             loading={loading}
             emptyMessage="No announcements found"
             pagination={true}
@@ -606,8 +615,8 @@ export default function AnnouncementsManagement() {
                   {saving
                     ? "Saving..."
                     : modalMode === "edit"
-                    ? "Update Announcement"
-                    : "Create Announcement"}
+                      ? "Update Announcement"
+                      : "Create Announcement"}
                 </button>
               </div>
             </form>

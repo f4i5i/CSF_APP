@@ -4,22 +4,22 @@
  * Uses Invoice table as source of truth for billing records
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { FileText, Eye, RefreshCw } from 'lucide-react';
-import DataTable from '../../components/admin/DataTable';
-import FilterBar from '../../components/admin/FilterBar';
-import Header from '../../components/Header';
-import adminService from '../../api/services/admin.service';
-import { formatDate, formatCurrency } from '../../utils/format';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect, useCallback } from "react";
+import { FileText, Eye, RefreshCw } from "lucide-react";
+import DataTable from "../../components/admin/DataTable";
+import FilterBar from "../../components/admin/FilterBar";
+import Header from "../../components/Header";
+import adminService from "../../api/services/admin.service";
+import { formatDate, formatCurrency } from "../../utils/format";
+import toast from "react-hot-toast";
 
 export default function RefundsManagement() {
   const [refunds, setRefunds] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -46,8 +46,8 @@ export default function RefundsManagement() {
       setTotalItems(response.total || 0);
       setTotalRefunded(response.total_refunded || 0);
     } catch (error) {
-      console.error('Failed to fetch refunds:', error);
-      toast.error('Failed to load refunds');
+      console.error("Failed to fetch refunds:", error);
+      toast.error("Failed to load refunds");
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ export default function RefundsManagement() {
       const response = await adminService.getInvoiceStats();
       setStats(response);
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      console.error("Failed to fetch stats:", error);
     }
   };
 
@@ -74,8 +74,9 @@ export default function RefundsManagement() {
 
   const columns = [
     {
-      key: 'invoice_number',
-      label: 'Invoice #',
+      key: "invoice_number",
+      label: "Invoice #",
+      sortable: true,
       render: (value) => (
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-gray-400" />
@@ -84,37 +85,40 @@ export default function RefundsManagement() {
       ),
     },
     {
-      key: 'user_name',
-      label: 'Customer',
+      key: "user_name",
+      label: "Customer",
+      sortable: true,
       render: (value, row) => (
         <div>
-          <p className="font-semibold text-[#173151]">{value || 'N/A'}</p>
+          <p className="font-semibold text-[#173151]">{value || "N/A"}</p>
           <p className="text-xs text-gray-500">{row.user_email}</p>
         </div>
       ),
     },
     {
-      key: 'invoice_date',
-      label: 'Date',
+      key: "invoice_date",
+      label: "Date",
+      sortable: true,
       render: (value) => (
         <span className="text-sm text-gray-600">
-          {value ? formatDate(value) : 'N/A'}
+          {value ? formatDate(value) : "N/A"}
         </span>
       ),
     },
     {
-      key: 'description',
-      label: 'Description',
+      key: "description",
+      label: "Description",
       render: (value) => (
         <span className="text-sm text-gray-600 line-clamp-1">
-          {value || 'Class Registration'}
+          {value || "Class Registration"}
         </span>
       ),
     },
     {
-      key: 'total',
-      label: 'Amount',
-      align: 'right',
+      key: "total",
+      label: "Amount",
+      sortable: true,
+      align: "right",
       render: (value) => (
         <span className="font-semibold text-red-600">
           {formatCurrency(value)}
@@ -122,13 +126,13 @@ export default function RefundsManagement() {
       ),
     },
     {
-      key: 'actions',
-      label: 'Actions',
-      type: 'actions',
-      align: 'right',
+      key: "actions",
+      label: "Actions",
+      type: "actions",
+      align: "right",
       actions: (row) => [
         {
-          label: 'View',
+          label: "View",
           icon: Eye,
           onClick: () => handleViewRefund(row),
         },
@@ -138,7 +142,7 @@ export default function RefundsManagement() {
 
   const filters = [
     {
-      type: 'daterange',
+      type: "daterange",
       startValue: dateFrom,
       endValue: dateTo,
       onStartChange: setDateFrom,
@@ -148,9 +152,9 @@ export default function RefundsManagement() {
 
   const hasActiveFilters = searchQuery || dateFrom || dateTo;
   const clearFilters = () => {
-    setSearchQuery('');
-    setDateFrom('');
-    setDateTo('');
+    setSearchQuery("");
+    setDateFrom("");
+    setDateTo("");
     setCurrentPage(1);
   };
 
@@ -170,7 +174,10 @@ export default function RefundsManagement() {
           </div>
 
           <button
-            onClick={() => { fetchRefunds(); fetchStats(); }}
+            onClick={() => {
+              fetchRefunds();
+              fetchStats();
+            }}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
           >
             <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -180,13 +187,17 @@ export default function RefundsManagement() {
 
         <div className="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
-            <p className="text-xs sm:text-sm text-gray-600 font-manrope">Total Refunded</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-manrope">
+              Total Refunded
+            </p>
             <p className="text-lg sm:text-2xl font-bold text-red-600 font-manrope mt-1">
               {formatCurrency(totalRefunded)}
             </p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
-            <p className="text-xs sm:text-sm text-gray-600 font-manrope">Refund Count</p>
+            <p className="text-xs sm:text-sm text-gray-600 font-manrope">
+              Refund Count
+            </p>
             <p className="text-lg sm:text-2xl font-bold text-[#173151] font-manrope mt-1">
               {totalItems}
             </p>
@@ -194,7 +205,9 @@ export default function RefundsManagement() {
           {stats && (
             <>
               <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
-                <p className="text-xs sm:text-sm text-gray-600 font-manrope">Last 30 Days</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-manrope">
+                  Last 30 Days
+                </p>
                 <p className="text-lg sm:text-2xl font-bold text-orange-600 font-manrope mt-1">
                   {formatCurrency(stats.refunds_last_30_days?.amount || 0)}
                 </p>
@@ -203,7 +216,9 @@ export default function RefundsManagement() {
                 </p>
               </div>
               <div className="bg-white rounded-xl border border-gray-200 p-2 sm:p-4">
-                <p className="text-xs sm:text-sm text-gray-600 font-manrope">Total Invoices</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-manrope">
+                  Total Invoices
+                </p>
                 <p className="text-lg sm:text-2xl font-bold text-[#173151] font-manrope mt-1">
                   {stats.total_invoices || 0}
                 </p>
@@ -251,30 +266,38 @@ export default function RefundsManagement() {
             <div className="p-6 space-y-4">
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Invoice Number</span>
-                <span className="font-medium">{selectedRefund.invoice_number}</span>
+                <span className="font-medium">
+                  {selectedRefund.invoice_number}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Customer</span>
                 <div className="text-right">
                   <p className="font-medium">{selectedRefund.user_name}</p>
-                  <p className="text-sm text-gray-500">{selectedRefund.user_email}</p>
+                  <p className="text-sm text-gray-500">
+                    {selectedRefund.user_email}
+                  </p>
                 </div>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Invoice Date</span>
                 <span className="font-medium">
-                  {selectedRefund.invoice_date ? formatDate(selectedRefund.invoice_date) : 'N/A'}
+                  {selectedRefund.invoice_date
+                    ? formatDate(selectedRefund.invoice_date)
+                    : "N/A"}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Description</span>
                 <span className="font-medium text-right max-w-[200px]">
-                  {selectedRefund.description || 'Class Registration'}
+                  {selectedRefund.description || "Class Registration"}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">{formatCurrency(selectedRefund.subtotal)}</span>
+                <span className="font-medium">
+                  {formatCurrency(selectedRefund.subtotal)}
+                </span>
               </div>
               {selectedRefund.discount > 0 && (
                 <div className="flex justify-between py-2 border-b">
@@ -286,7 +309,9 @@ export default function RefundsManagement() {
               )}
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Total</span>
-                <span className="font-bold text-lg">{formatCurrency(selectedRefund.total)}</span>
+                <span className="font-bold text-lg">
+                  {formatCurrency(selectedRefund.total)}
+                </span>
               </div>
               <div className="flex justify-between py-2 bg-red-50 px-3 rounded-lg">
                 <span className="text-red-700 font-medium">Refund Amount</span>

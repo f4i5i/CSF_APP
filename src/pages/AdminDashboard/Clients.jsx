@@ -25,6 +25,7 @@ import AdminChildForm from "../../components/admin/AdminChildForm";
 import Header from "../../components/Header";
 import adminService from "../../api/services/admin.service";
 import childrenService from "../../api/services/children.service";
+import programsService from "../../api/services/programs.service";
 import { formatGrade } from "../../utils/format";
 import toast from "react-hot-toast";
 
@@ -34,6 +35,8 @@ export default function Clients() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [programFilter, setProgramFilter] = useState("");
+  const [programsList, setProgramsList] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -70,11 +73,14 @@ export default function Clients() {
       };
 
       if (searchQuery) params.search = searchQuery;
+      if (programFilter) params.program_id = programFilter;
+      if (statusFilter !== "")
+        params.has_active_enrollment = statusFilter === "true";
 
       const response = await adminService.getClients(params);
 
       // Transform API data
-      let clientsData = (response.items || []).map((client) => {
+      const clientsData = (response.items || []).map((client) => {
         const nameParts = (client.full_name || "").split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
@@ -91,16 +97,6 @@ export default function Clients() {
         };
       });
 
-      // Filter by enrollment status on frontend if needed
-      if (statusFilter !== "") {
-        const hasEnrollments = statusFilter === "true";
-        clientsData = clientsData.filter((c) =>
-          hasEnrollments
-            ? c.active_enrollments > 0
-            : c.active_enrollments === 0,
-        );
-      }
-
       setClients(clientsData);
       setTotalItems(response.total || 0);
     } catch (error) {
@@ -111,11 +107,25 @@ export default function Clients() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, searchQuery]);
+  }, [currentPage, statusFilter, searchQuery, programFilter]);
 
   useEffect(() => {
     fetchClients();
   }, [fetchClients]);
+
+  // Fetch programs for filter dropdown
+  useEffect(() => {
+    const loadPrograms = async () => {
+      try {
+        const data = await programsService.getAll();
+        const list = Array.isArray(data) ? data : data.items || data.data || [];
+        setProgramsList(list);
+      } catch (error) {
+        console.error("Failed to fetch programs:", error);
+      }
+    };
+    loadPrograms();
+  }, []);
 
   // View client = expand the row to show children
   const handleViewClient = (toggleExpand) => {
@@ -470,6 +480,7 @@ export default function Clients() {
     {
       key: "phone",
       label: "Phone",
+      sortable: true,
       render: (value) => (
         <div className="flex items-center gap-1 text-sm font-manrope text-text-muted">
           {value ? (
@@ -486,6 +497,7 @@ export default function Clients() {
     {
       key: "children_count",
       label: "Children",
+      sortable: true,
       render: (value, row, { toggleExpand, isExpanded, expandable } = {}) => (
         <button
           onClick={(e) => {
@@ -564,6 +576,16 @@ export default function Clients() {
   const filters = [
     {
       type: "select",
+      placeholder: "All Programs",
+      value: programFilter,
+      onChange: setProgramFilter,
+      options: [
+        { value: "", label: "All Programs" },
+        ...programsList.map((p) => ({ value: p.id, label: p.name })),
+      ],
+    },
+    {
+      type: "select",
       placeholder: "All Clients",
       value: statusFilter,
       onChange: setStatusFilter,
@@ -575,10 +597,11 @@ export default function Clients() {
     },
   ];
 
-  const hasActiveFilters = statusFilter || searchQuery;
+  const hasActiveFilters = statusFilter || searchQuery || programFilter;
   const clearFilters = () => {
     setSearchQuery("");
     setStatusFilter("");
+    setProgramFilter("");
     setCurrentPage(1);
   };
 

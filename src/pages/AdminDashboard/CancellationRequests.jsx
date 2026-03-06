@@ -7,30 +7,32 @@
  * - Less than 15 days: Requires admin review
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   XCircle,
   CheckCircle,
   Clock,
   AlertCircle,
-  RefreshCw
-} from 'lucide-react';
-import DataTable from '../../components/admin/DataTable';
-import Header from '../../components/Header';
-import adminService from '../../api/services/admin.service';
-import toast from 'react-hot-toast';
+  RefreshCw,
+} from "lucide-react";
+import DataTable from "../../components/admin/DataTable";
+import FilterBar from "../../components/admin/FilterBar";
+import Header from "../../components/Header";
+import adminService from "../../api/services/admin.service";
+import toast from "react-hot-toast";
 
 export default function CancellationRequests() {
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState("pending");
   const [requests, setRequests] = useState([]);
   const [stats, setStats] = useState({
     pending: 0,
     approved: 0,
     auto_approved: 0,
     rejected: 0,
-    total_refunded: '0.00',
+    total_refunded: "0.00",
   });
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -41,9 +43,9 @@ export default function CancellationRequests() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [approvedAmount, setApprovedAmount] = useState('');
-  const [adminNotes, setAdminNotes] = useState('');
+  const [rejectReason, setRejectReason] = useState("");
+  const [approvedAmount, setApprovedAmount] = useState("");
+  const [adminNotes, setAdminNotes] = useState("");
   const [processing, setProcessing] = useState(false);
 
   const fetchStats = useCallback(async () => {
@@ -51,7 +53,7 @@ export default function CancellationRequests() {
       const data = await adminService.getCancellationRequestStats();
       setStats(data);
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      console.error("Failed to fetch stats:", error);
     }
   }, []);
 
@@ -59,7 +61,7 @@ export default function CancellationRequests() {
     setLoading(true);
     try {
       let data;
-      if (activeTab === 'pending') {
+      if (activeTab === "pending") {
         data = await adminService.getPendingCancellationRequests();
       } else {
         data = await adminService.getCancellationRequests({
@@ -71,8 +73,8 @@ export default function CancellationRequests() {
       setRequests(data.items || []);
       setTotalItems(data.total || data.items?.length || 0);
     } catch (error) {
-      console.error('Failed to fetch cancellation requests:', error);
-      toast.error('Failed to load cancellation requests');
+      console.error("Failed to fetch cancellation requests:", error);
+      toast.error("Failed to load cancellation requests");
     } finally {
       setLoading(false);
     }
@@ -90,15 +92,15 @@ export default function CancellationRequests() {
 
   const handleApprove = (request) => {
     setSelectedRequest(request);
-    setApprovedAmount(request.requested_refund_amount || '');
-    setAdminNotes('');
+    setApprovedAmount(request.requested_refund_amount || "");
+    setAdminNotes("");
     setShowApproveModal(true);
   };
 
   const handleReject = (request) => {
     setSelectedRequest(request);
-    setRejectReason('');
-    setAdminNotes('');
+    setRejectReason("");
+    setAdminNotes("");
     setShowRejectModal(true);
   };
 
@@ -109,18 +111,22 @@ export default function CancellationRequests() {
       const body = {
         admin_notes: adminNotes || undefined,
       };
-      if (approvedAmount && parseFloat(approvedAmount) !== parseFloat(selectedRequest.requested_refund_amount)) {
+      if (
+        approvedAmount &&
+        parseFloat(approvedAmount) !==
+          parseFloat(selectedRequest.requested_refund_amount)
+      ) {
         body.approved_amount = parseFloat(approvedAmount);
       }
       await adminService.approveCancellationRequest(selectedRequest.id, body);
-      toast.success('Cancellation approved and refund processed');
+      toast.success("Cancellation approved and refund processed");
       setShowApproveModal(false);
       setSelectedRequest(null);
       fetchRequests();
       fetchStats();
     } catch (error) {
-      console.error('Failed to approve cancellation:', error);
-      toast.error(error.message || 'Failed to approve cancellation');
+      console.error("Failed to approve cancellation:", error);
+      toast.error(error.message || "Failed to approve cancellation");
     } finally {
       setProcessing(false);
     }
@@ -128,7 +134,7 @@ export default function CancellationRequests() {
 
   const confirmReject = async () => {
     if (!selectedRequest || !rejectReason.trim()) {
-      toast.error('Please provide a rejection reason');
+      toast.error("Please provide a rejection reason");
       return;
     }
     setProcessing(true);
@@ -137,15 +143,15 @@ export default function CancellationRequests() {
         rejection_reason: rejectReason,
         admin_notes: adminNotes || undefined,
       });
-      toast.success('Cancellation request rejected');
+      toast.success("Cancellation request rejected");
       setShowRejectModal(false);
       setSelectedRequest(null);
-      setRejectReason('');
+      setRejectReason("");
       fetchRequests();
       fetchStats();
     } catch (error) {
-      console.error('Failed to reject cancellation:', error);
-      toast.error(error.message || 'Failed to reject cancellation');
+      console.error("Failed to reject cancellation:", error);
+      toast.error(error.message || "Failed to reject cancellation");
     } finally {
       setProcessing(false);
     }
@@ -153,116 +159,138 @@ export default function CancellationRequests() {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      pending: { label: 'Pending Review', color: 'yellow', icon: Clock },
-      approved: { label: 'Approved', color: 'green', icon: CheckCircle },
-      auto_approved: { label: 'Auto-Approved', color: 'blue', icon: RefreshCw },
-      rejected: { label: 'Rejected', color: 'red', icon: XCircle },
+      pending: { label: "Pending Review", color: "yellow", icon: Clock },
+      approved: { label: "Approved", color: "green", icon: CheckCircle },
+      auto_approved: { label: "Auto-Approved", color: "blue", icon: RefreshCw },
+      rejected: { label: "Rejected", color: "red", icon: XCircle },
     };
     const config = statusConfig[status] || statusConfig.pending;
     const Icon = config.icon;
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-${config.color}-100 text-${config.color}-800`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-${config.color}-100 text-${config.color}-800`}
+      >
         <Icon className="w-3 h-3" />
         {config.label}
       </span>
     );
   };
 
+  // Client-side search filter
+  const filteredRequests = requests.filter((r) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      r.user_name?.toLowerCase().includes(q) ||
+      r.child_name?.toLowerCase().includes(q) ||
+      r.class_name?.toLowerCase().includes(q) ||
+      r.user_email?.toLowerCase().includes(q)
+    );
+  });
+
   const columns = [
     {
-      key: 'user_name',
-      label: 'Customer',
+      key: "user_name",
+      label: "Customer",
+      sortable: true,
       render: (value, row) => (
         <div>
-          <p className="font-semibold text-[#173151]">{value || 'N/A'}</p>
+          <p className="font-semibold text-[#173151]">{value || "N/A"}</p>
           <p className="text-xs text-gray-500">{row.user_email}</p>
         </div>
       ),
     },
     {
-      key: 'child_name',
-      label: 'Child',
+      key: "child_name",
+      label: "Child",
+      sortable: true,
       render: (value) => (
-        <span className="text-gray-700">{value || 'N/A'}</span>
+        <span className="text-gray-700">{value || "N/A"}</span>
       ),
     },
     {
-      key: 'class_name',
-      label: 'Class',
+      key: "class_name",
+      label: "Class",
+      sortable: true,
       render: (value) => (
-        <span className="font-medium text-[#173151]">{value || 'N/A'}</span>
+        <span className="font-medium text-[#173151]">{value || "N/A"}</span>
       ),
     },
     {
-      key: 'days_until_class',
-      label: 'Days Until Class',
+      key: "days_until_class",
+      label: "Days Until Class",
+      sortable: true,
       render: (value, row) => (
         <div className="text-center">
-          <span className={`font-bold ${value < 15 ? 'text-red-600' : 'text-green-600'}`}>
+          <span
+            className={`font-bold ${value < 15 ? "text-red-600" : "text-green-600"}`}
+          >
             {value}
           </span>
           <p className="text-xs text-gray-500">{row.class_start_date}</p>
         </div>
       ),
-      align: 'center',
+      align: "center",
     },
     {
-      key: 'requested_refund_amount',
-      label: 'Refund Amount',
+      key: "requested_refund_amount",
+      label: "Refund Amount",
+      sortable: true,
       render: (value, row) => (
         <div className="text-right">
           <span className="font-semibold text-[#173151]">
             ${parseFloat(value || 0).toFixed(2)}
           </span>
-          {row.approved_refund_amount && row.status !== 'pending' && (
+          {row.approved_refund_amount && row.status !== "pending" && (
             <p className="text-xs text-green-600">
               Refunded: ${parseFloat(row.approved_refund_amount).toFixed(2)}
             </p>
           )}
         </div>
       ),
-      align: 'right',
+      align: "right",
     },
     {
-      key: 'status',
-      label: 'Status',
+      key: "status",
+      label: "Status",
+      sortable: true,
       render: (value) => getStatusBadge(value),
-      align: 'center',
+      align: "center",
     },
     {
-      key: 'created_at',
-      label: 'Requested',
-      type: 'date',
+      key: "created_at",
+      label: "Requested",
+      type: "date",
       sortable: true,
     },
   ];
 
   // Add actions column for pending requests
-  if (activeTab === 'pending') {
+  if (activeTab === "pending") {
     columns.push({
-      key: 'actions',
-      label: 'Actions',
-      type: 'actions',
-      align: 'right',
+      key: "actions",
+      label: "Actions",
+      type: "actions",
+      align: "right",
       actions: (row) => [
         {
-          label: 'Approve',
+          label: "Approve",
           icon: CheckCircle,
           onClick: () => handleApprove(row),
-          className: 'text-green-600 hover:text-green-700',
+          className: "text-green-600 hover:text-green-700",
         },
         {
-          label: 'Reject',
+          label: "Reject",
           icon: XCircle,
           onClick: () => handleReject(row),
-          className: 'text-red-600 hover:text-red-700',
+          className: "text-red-600 hover:text-red-700",
         },
       ],
     });
   } else {
     columns.push({
-      key: 'view',
-      label: '',
+      key: "view",
+      label: "",
       render: (_, row) => (
         <button
           onClick={() => handleViewDetails(row)}
@@ -271,15 +299,30 @@ export default function CancellationRequests() {
           View Details
         </button>
       ),
-      align: 'right',
+      align: "right",
     });
   }
 
   const tabs = [
-    { id: 'pending', label: 'Pending Review', icon: Clock, count: stats.pending },
-    { id: 'approved', label: 'Approved', icon: CheckCircle, count: stats.approved },
-    { id: 'auto_approved', label: 'Auto-Approved', icon: RefreshCw, count: stats.auto_approved },
-    { id: 'rejected', label: 'Rejected', icon: XCircle, count: stats.rejected },
+    {
+      id: "pending",
+      label: "Pending Review",
+      icon: Clock,
+      count: stats.pending,
+    },
+    {
+      id: "approved",
+      label: "Approved",
+      icon: CheckCircle,
+      count: stats.approved,
+    },
+    {
+      id: "auto_approved",
+      label: "Auto-Approved",
+      icon: RefreshCw,
+      count: stats.auto_approved,
+    },
+    { id: "rejected", label: "Rejected", icon: XCircle, count: stats.rejected },
   ];
 
   return (
@@ -299,13 +342,17 @@ export default function CancellationRequests() {
 
           <div className="flex gap-2 sm:gap-4 shrink-0">
             <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 min-w-[80px] sm:min-w-[140px]">
-              <p className="text-xs sm:text-sm text-gray-600 font-manrope">Pending</p>
+              <p className="text-xs sm:text-sm text-gray-600 font-manrope">
+                Pending
+              </p>
               <p className="text-lg sm:text-2xl font-bold text-yellow-600 font-manrope mt-1">
                 {stats.pending}
               </p>
             </div>
             <div className="bg-white rounded-lg border border-gray-200 p-2 sm:p-4 min-w-[80px] sm:min-w-[140px]">
-              <p className="text-xs sm:text-sm text-gray-600 font-manrope">Total Refunded</p>
+              <p className="text-xs sm:text-sm text-gray-600 font-manrope">
+                Total Refunded
+              </p>
               <p className="text-lg sm:text-2xl font-bold text-green-600 font-manrope mt-1">
                 ${parseFloat(stats.total_refunded || 0).toFixed(2)}
               </p>
@@ -317,10 +364,15 @@ export default function CancellationRequests() {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-blue-800 text-sm">Cancellation Policy</h3>
+              <h3 className="font-semibold text-blue-800 text-sm">
+                Cancellation Policy
+              </h3>
               <p className="text-xs sm:text-sm text-blue-700 mt-1">
-                <strong>15+ days before class start:</strong> Auto-approved with full refund<br />
-                <strong>Less than 15 days:</strong> Requires admin review - appears in Pending tab
+                <strong>15+ days before class start:</strong> Auto-approved with
+                full refund
+                <br />
+                <strong>Less than 15 days:</strong> Requires admin review -
+                appears in Pending tab
               </p>
             </div>
           </div>
@@ -339,16 +391,22 @@ export default function CancellationRequests() {
                 }}
                 className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-manrope text-xs sm:text-sm transition-colors whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#173151] text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-100'
+                    ? "bg-[#173151] text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                 {tab.label}
                 {tab.count !== undefined && tab.count > 0 && (
-                  <span className={`ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${
-                    isActive ? 'bg-white/20' : tab.id === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100'
-                  }`}>
+                  <span
+                    className={`ml-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs ${
+                      isActive
+                        ? "bg-white/20"
+                        : tab.id === "pending"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-gray-100"
+                    }`}
+                  >
                     {tab.count}
                   </span>
                 )}
@@ -357,17 +415,26 @@ export default function CancellationRequests() {
           })}
         </div>
 
+        <FilterBar
+          onSearch={setSearchQuery}
+          searchValue={searchQuery}
+          searchPlaceholder="Search by customer, child, class..."
+          filters={[]}
+          hasActiveFilters={!!searchQuery}
+          onClearFilters={() => setSearchQuery("")}
+        />
+
         <div className="flex-1 min-h-0 flex flex-col pb-2">
           <DataTable
             columns={columns}
-            data={requests}
+            data={filteredRequests}
             loading={loading}
             emptyMessage={
-              activeTab === 'pending'
-                ? 'No pending cancellation requests'
-                : `No ${activeTab.replace('_', '-')} requests found`
+              activeTab === "pending"
+                ? "No pending cancellation requests"
+                : `No ${activeTab.replace("_", "-")} requests found`
             }
-            pagination={activeTab !== 'pending'}
+            pagination={activeTab !== "pending"}
             itemsPerPage={itemsPerPage}
             currentPage={currentPage}
             totalItems={totalItems}
@@ -383,25 +450,35 @@ export default function CancellationRequests() {
                 <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-[#173151]">Approve Cancellation</h2>
+                <h2 className="text-xl font-semibold text-[#173151]">
+                  Approve Cancellation
+                </h2>
               </div>
 
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Customer</span>
-                  <span className="font-medium">{selectedRequest.user_name}</span>
+                  <span className="font-medium">
+                    {selectedRequest.user_name}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Child</span>
-                  <span className="font-medium">{selectedRequest.child_name}</span>
+                  <span className="font-medium">
+                    {selectedRequest.child_name}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Class</span>
-                  <span className="font-medium">{selectedRequest.class_name}</span>
+                  <span className="font-medium">
+                    {selectedRequest.class_name}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Days Until Class</span>
-                  <span className={`font-medium ${selectedRequest.days_until_class < 15 ? 'text-red-600' : 'text-green-600'}`}>
+                  <span
+                    className={`font-medium ${selectedRequest.days_until_class < 15 ? "text-red-600" : "text-green-600"}`}
+                  >
                     {selectedRequest.days_until_class} days
                   </span>
                 </div>
@@ -412,7 +489,9 @@ export default function CancellationRequests() {
                   Refund Amount
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
                   <input
                     type="number"
                     step="0.01"
@@ -422,7 +501,10 @@ export default function CancellationRequests() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Original amount: ${parseFloat(selectedRequest.enrollment_amount || 0).toFixed(2)}
+                  Original amount: $
+                  {parseFloat(selectedRequest.enrollment_amount || 0).toFixed(
+                    2,
+                  )}
                 </p>
               </div>
 
@@ -440,7 +522,8 @@ export default function CancellationRequests() {
               </div>
 
               <p className="text-sm text-gray-500 mb-6">
-                This will process the refund through Stripe and cancel the enrollment.
+                This will process the refund through Stripe and cancel the
+                enrollment.
               </p>
 
               <div className="flex gap-3">
@@ -481,22 +564,31 @@ export default function CancellationRequests() {
                 <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                   <XCircle className="w-5 h-5 text-red-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-[#173151]">Reject Cancellation</h2>
+                <h2 className="text-xl font-semibold text-[#173151]">
+                  Reject Cancellation
+                </h2>
               </div>
 
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Customer</span>
-                  <span className="font-medium">{selectedRequest.user_name}</span>
+                  <span className="font-medium">
+                    {selectedRequest.user_name}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Child</span>
-                  <span className="font-medium">{selectedRequest.child_name}</span>
+                  <span className="font-medium">
+                    {selectedRequest.child_name}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Refund Requested</span>
                   <span className="font-medium text-red-600">
-                    ${parseFloat(selectedRequest.requested_refund_amount || 0).toFixed(2)}
+                    $
+                    {parseFloat(
+                      selectedRequest.requested_refund_amount || 0,
+                    ).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -528,7 +620,8 @@ export default function CancellationRequests() {
               </div>
 
               <p className="text-sm text-gray-500 mb-6">
-                The enrollment will remain active. The customer will be notified of the rejection.
+                The enrollment will remain active. The customer will be notified
+                of the rejection.
               </p>
 
               <div className="flex gap-3">
@@ -566,7 +659,9 @@ export default function CancellationRequests() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-[#173151]">Request Details</h2>
+                <h2 className="text-xl font-semibold text-[#173151]">
+                  Request Details
+                </h2>
                 <button
                   onClick={() => setShowDetailsModal(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -584,7 +679,9 @@ export default function CancellationRequests() {
                   <div>
                     <p className="text-sm text-gray-500">Customer</p>
                     <p className="font-medium">{selectedRequest.user_name}</p>
-                    <p className="text-xs text-gray-500">{selectedRequest.user_email}</p>
+                    <p className="text-xs text-gray-500">
+                      {selectedRequest.user_email}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Child</p>
@@ -596,17 +693,27 @@ export default function CancellationRequests() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Class Start Date</p>
-                    <p className="font-medium">{selectedRequest.class_start_date}</p>
+                    <p className="font-medium">
+                      {selectedRequest.class_start_date}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Days Until Class (at request)</p>
-                    <p className={`font-medium ${selectedRequest.days_until_class < 15 ? 'text-red-600' : 'text-green-600'}`}>
+                    <p className="text-sm text-gray-500">
+                      Days Until Class (at request)
+                    </p>
+                    <p
+                      className={`font-medium ${selectedRequest.days_until_class < 15 ? "text-red-600" : "text-green-600"}`}
+                    >
                       {selectedRequest.days_until_class} days
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Requested</p>
-                    <p className="font-medium">{new Date(selectedRequest.created_at).toLocaleDateString()}</p>
+                    <p className="font-medium">
+                      {new Date(
+                        selectedRequest.created_at,
+                      ).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
 
@@ -614,22 +721,41 @@ export default function CancellationRequests() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500">Enrollment Amount</p>
-                      <p className="font-medium">${parseFloat(selectedRequest.enrollment_amount || 0).toFixed(2)}</p>
+                      <p className="font-medium">
+                        $
+                        {parseFloat(
+                          selectedRequest.enrollment_amount || 0,
+                        ).toFixed(2)}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Requested Refund</p>
-                      <p className="font-medium">${parseFloat(selectedRequest.requested_refund_amount || 0).toFixed(2)}</p>
+                      <p className="font-medium">
+                        $
+                        {parseFloat(
+                          selectedRequest.requested_refund_amount || 0,
+                        ).toFixed(2)}
+                      </p>
                     </div>
                     {selectedRequest.approved_refund_amount && (
                       <div>
                         <p className="text-sm text-gray-500">Approved Refund</p>
-                        <p className="font-medium text-green-600">${parseFloat(selectedRequest.approved_refund_amount).toFixed(2)}</p>
+                        <p className="font-medium text-green-600">
+                          $
+                          {parseFloat(
+                            selectedRequest.approved_refund_amount,
+                          ).toFixed(2)}
+                        </p>
                       </div>
                     )}
                     {selectedRequest.stripe_refund_id && (
                       <div>
-                        <p className="text-sm text-gray-500">Stripe Refund ID</p>
-                        <p className="font-mono text-sm">{selectedRequest.stripe_refund_id}</p>
+                        <p className="text-sm text-gray-500">
+                          Stripe Refund ID
+                        </p>
+                        <p className="font-mono text-sm">
+                          {selectedRequest.stripe_refund_id}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -637,29 +763,41 @@ export default function CancellationRequests() {
 
                 {selectedRequest.reason && (
                   <div className="border-t pt-4 mt-4">
-                    <p className="text-sm text-gray-500 mb-1">Customer's Reason</p>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedRequest.reason}</p>
+                    <p className="text-sm text-gray-500 mb-1">
+                      Customer's Reason
+                    </p>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
+                      {selectedRequest.reason}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.rejection_reason && (
                   <div className="border-t pt-4 mt-4">
-                    <p className="text-sm text-gray-500 mb-1">Rejection Reason</p>
-                    <p className="text-red-700 bg-red-50 p-3 rounded-lg">{selectedRequest.rejection_reason}</p>
+                    <p className="text-sm text-gray-500 mb-1">
+                      Rejection Reason
+                    </p>
+                    <p className="text-red-700 bg-red-50 p-3 rounded-lg">
+                      {selectedRequest.rejection_reason}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.admin_notes && (
                   <div className="border-t pt-4 mt-4">
                     <p className="text-sm text-gray-500 mb-1">Admin Notes</p>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedRequest.admin_notes}</p>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
+                      {selectedRequest.admin_notes}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.reviewed_by_name && (
                   <div className="border-t pt-4 mt-4">
                     <p className="text-sm text-gray-500 mb-1">Reviewed By</p>
-                    <p className="font-medium">{selectedRequest.reviewed_by_name}</p>
+                    <p className="font-medium">
+                      {selectedRequest.reviewed_by_name}
+                    </p>
                     {selectedRequest.reviewed_at && (
                       <p className="text-xs text-gray-500">
                         {new Date(selectedRequest.reviewed_at).toLocaleString()}

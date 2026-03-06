@@ -29,6 +29,8 @@ export default function Programs() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [sportTypeFilter, setSportTypeFilter] = useState("");
+  const [seasonFilter, setSeasonFilter] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("create");
@@ -109,15 +111,31 @@ export default function Programs() {
     });
   };
 
-  // Filter programs by search query
+  // Filter programs by search query and filters
   const filteredPrograms = programs.filter((program) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      program.name?.toLowerCase().includes(query) ||
-      program.description?.toLowerCase().includes(query)
-    );
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      if (
+        !program.name?.toLowerCase().includes(query) &&
+        !program.description?.toLowerCase().includes(query)
+      )
+        return false;
+    }
+    if (sportTypeFilter && program.sport_type !== sportTypeFilter) return false;
+    if (seasonFilter && program.season !== seasonFilter) return false;
+    return true;
   });
+
+  // Build dynamic sport type options from data
+  const sportTypeOptions = [
+    { value: "", label: "All Sports" },
+    ...[...new Set(programs.map((p) => p.sport_type).filter(Boolean))].map(
+      (t) => ({
+        value: t,
+        label: t.charAt(0).toUpperCase() + t.slice(1),
+      }),
+    ),
+  ];
 
   const columns = [
     {
@@ -133,6 +151,26 @@ export default function Programs() {
             </p>
           )}
         </div>
+      ),
+    },
+    {
+      key: "sport_type",
+      label: "Sport",
+      sortable: true,
+      render: (value) => (
+        <span className="text-sm text-gray-700 font-manrope capitalize">
+          {value || "N/A"}
+        </span>
+      ),
+    },
+    {
+      key: "season",
+      label: "Season",
+      sortable: true,
+      render: (value) => (
+        <span className="text-sm text-gray-700 font-manrope capitalize">
+          {value || "N/A"}
+        </span>
       ),
     },
     {
@@ -187,6 +225,14 @@ export default function Programs() {
     },
   ];
 
+  const SEASON_OPTIONS = [
+    { value: "", label: "All Seasons" },
+    { value: "fall", label: "Fall" },
+    { value: "winter", label: "Winter" },
+    { value: "spring", label: "Spring" },
+    { value: "summer", label: "Summer" },
+  ];
+
   const filters = [
     {
       type: "select",
@@ -195,12 +241,29 @@ export default function Programs() {
       onChange: setStatusFilter,
       options: STATUS_OPTIONS,
     },
+    {
+      type: "select",
+      placeholder: "All Sports",
+      value: sportTypeFilter,
+      onChange: setSportTypeFilter,
+      options: sportTypeOptions,
+    },
+    {
+      type: "select",
+      placeholder: "All Seasons",
+      value: seasonFilter,
+      onChange: setSeasonFilter,
+      options: SEASON_OPTIONS,
+    },
   ];
 
-  const hasActiveFilters = statusFilter || searchQuery;
+  const hasActiveFilters =
+    statusFilter || searchQuery || sportTypeFilter || seasonFilter;
   const clearFilters = () => {
     setSearchQuery("");
     setStatusFilter("");
+    setSportTypeFilter("");
+    setSeasonFilter("");
   };
 
   return (

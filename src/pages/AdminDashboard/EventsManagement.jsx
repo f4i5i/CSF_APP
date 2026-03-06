@@ -5,7 +5,22 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Edit, Trash2, Clock, MapPin, Users, Eye, X, UserCheck, UserX, HelpCircle, Loader2, Mail, ClipboardList } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Clock,
+  MapPin,
+  Users,
+  Eye,
+  X,
+  UserCheck,
+  UserX,
+  HelpCircle,
+  Loader2,
+  Mail,
+  ClipboardList,
+} from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
@@ -31,6 +46,8 @@ export default function EventsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [classFilter, setClassFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   // Filter options from API
   const [classes, setClasses] = useState([]);
@@ -53,7 +70,7 @@ export default function EventsManagement() {
     start_datetime: "",
     end_datetime: "",
     location: "",
-    class_ids: [],  // Multi-class support
+    class_ids: [], // Multi-class support
     max_attendees: "",
     requires_rsvp: true,
   });
@@ -73,7 +90,7 @@ export default function EventsManagement() {
   const [rsvpEvent, setRsvpEvent] = useState(null);
   const [rsvpData, setRsvpData] = useState(null);
   const [rsvpLoading, setRsvpLoading] = useState(false);
-  const [rsvpFilter, setRsvpFilter] = useState('all'); // all, attending, not_attending, maybe
+  const [rsvpFilter, setRsvpFilter] = useState("all"); // all, attending, not_attending, maybe
 
   // Fetch filter options on mount
   useEffect(() => {
@@ -118,6 +135,8 @@ export default function EventsManagement() {
       if (typeFilter) params.type = typeFilter;
       if (classFilter) params.class_id = classFilter;
       if (searchQuery) params.search = searchQuery;
+      if (dateFrom) params.start_date = dateFrom;
+      if (dateTo) params.end_date = dateTo;
 
       const response = await eventsService.getAll(params);
       const eventsData = response.items || response || [];
@@ -133,7 +152,7 @@ export default function EventsManagement() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, typeFilter, classFilter, searchQuery]);
+  }, [currentPage, typeFilter, classFilter, searchQuery, dateFrom, dateTo]);
 
   // Fetch events when filters change
   useEffect(() => {
@@ -150,7 +169,7 @@ export default function EventsManagement() {
       start_datetime: "",
       end_datetime: "",
       location: "",
-      class_ids: [],  // Multi-class support
+      class_ids: [], // Multi-class support
       max_attendees: "",
       requires_rsvp: true,
     });
@@ -177,7 +196,7 @@ export default function EventsManagement() {
         ? eventData.end_datetime.slice(0, 16)
         : "",
       location: eventData.location || "",
-      class_ids: classIds,  // Multi-class support
+      class_ids: classIds, // Multi-class support
       max_attendees: eventData.max_attendees || "",
       requires_rsvp: eventData.requires_rsvp ?? true,
     });
@@ -205,7 +224,7 @@ export default function EventsManagement() {
     setRsvpEvent(eventData);
     setRsvpModalOpen(true);
     setRsvpLoading(true);
-    setRsvpFilter('all');
+    setRsvpFilter("all");
 
     try {
       const summary = await eventsService.getAttendeeSummary(eventData.id);
@@ -221,25 +240,25 @@ export default function EventsManagement() {
 
   const getFilteredRsvps = () => {
     if (!rsvpData?.attendees) return [];
-    if (rsvpFilter === 'all') return rsvpData.attendees;
-    return rsvpData.attendees.filter(rsvp => rsvp.status === rsvpFilter);
+    if (rsvpFilter === "all") return rsvpData.attendees;
+    return rsvpData.attendees.filter((rsvp) => rsvp.status === rsvpFilter);
   };
 
   const getRsvpStatusBadge = (status) => {
     switch (status) {
-      case 'attending':
+      case "attending":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
             <UserCheck className="w-3 h-3" /> Going
           </span>
         );
-      case 'not_attending':
+      case "not_attending":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
             <UserX className="w-3 h-3" /> Not Going
           </span>
         );
-      case 'maybe':
+      case "maybe":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
             <HelpCircle className="w-3 h-3" /> Maybe
@@ -282,7 +301,7 @@ export default function EventsManagement() {
         start_datetime: formData.start_datetime,
         end_datetime: formData.end_datetime || null,
         location: formData.location,
-        class_ids: formData.class_ids,  // Multi-class support
+        class_ids: formData.class_ids, // Multi-class support
         max_attendees: formData.max_attendees
           ? parseInt(formData.max_attendees)
           : null,
@@ -333,6 +352,7 @@ export default function EventsManagement() {
     {
       key: "type",
       label: "Type",
+      sortable: true,
       render: (value) => (
         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
           {value || "N/A"}
@@ -342,6 +362,7 @@ export default function EventsManagement() {
     {
       key: "start_datetime",
       label: "Date/Time",
+      sortable: true,
       render: (value) => (
         <span className="text-xs font-manrope text-text-muted">
           {formatDateTime(value)}
@@ -351,6 +372,7 @@ export default function EventsManagement() {
     {
       key: "location",
       label: "Location",
+      sortable: true,
       render: (value) => (
         <span className="text-xs font-manrope text-text-muted">
           {truncateText(value || "TBD", 20)}
@@ -360,6 +382,7 @@ export default function EventsManagement() {
     {
       key: "max_attendees",
       label: "Capacity",
+      sortable: true,
       render: (value, row) => (
         <span className="text-xs font-manrope text-text-primary">
           {row.children_attending_count || row.rsvp_count || 0}/{value || "∞"}
@@ -425,10 +448,7 @@ export default function EventsManagement() {
       placeholder: "All Types",
       value: typeFilter,
       onChange: setTypeFilter,
-      options: [
-        { value: "", label: "All Types" },
-        ...EVENT_TYPES,
-      ],
+      options: [{ value: "", label: "All Types" }, ...EVENT_TYPES],
     },
     {
       type: "select",
@@ -444,13 +464,23 @@ export default function EventsManagement() {
       ],
       disabled: filtersLoading,
     },
+    {
+      type: "daterange",
+      startValue: dateFrom,
+      endValue: dateTo,
+      onStartChange: setDateFrom,
+      onEndChange: setDateTo,
+    },
   ];
 
-  const hasActiveFilters = typeFilter || classFilter || searchQuery;
+  const hasActiveFilters =
+    typeFilter || classFilter || searchQuery || dateFrom || dateTo;
   const clearFilters = () => {
     setSearchQuery("");
     setTypeFilter("");
     setClassFilter("");
+    setDateFrom("");
+    setDateTo("");
     setCurrentPage(1);
   };
 
@@ -567,7 +597,9 @@ export default function EventsManagement() {
                 <MultiClassSelector
                   classes={classes}
                   selectedIds={formData.class_ids}
-                  onChange={(ids) => setFormData({ ...formData, class_ids: ids })}
+                  onChange={(ids) =>
+                    setFormData({ ...formData, class_ids: ids })
+                  }
                   label="Target Classes *"
                   maxHeight="120px"
                   disabled={filtersLoading}
@@ -583,7 +615,10 @@ export default function EventsManagement() {
                     type="datetime-local"
                     value={formData.start_datetime}
                     onChange={(e) =>
-                      setFormData({ ...formData, start_datetime: e.target.value })
+                      setFormData({
+                        ...formData,
+                        start_datetime: e.target.value,
+                      })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
                   />
@@ -633,7 +668,10 @@ export default function EventsManagement() {
                     type="number"
                     value={formData.max_attendees}
                     onChange={(e) =>
-                      setFormData({ ...formData, max_attendees: e.target.value })
+                      setFormData({
+                        ...formData,
+                        max_attendees: e.target.value,
+                      })
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btn-gold focus:border-btn-gold font-manrope"
                     placeholder="Unlimited"
@@ -647,7 +685,10 @@ export default function EventsManagement() {
                       type="checkbox"
                       checked={formData.requires_rsvp}
                       onChange={(e) =>
-                        setFormData({ ...formData, requires_rsvp: e.target.checked })
+                        setFormData({
+                          ...formData,
+                          requires_rsvp: e.target.checked,
+                        })
                       }
                       className="w-4 h-4 text-btn-gold border-gray-300 rounded focus:ring-btn-gold"
                     />
@@ -673,8 +714,8 @@ export default function EventsManagement() {
                   {saving
                     ? "Saving..."
                     : modalMode === "edit"
-                    ? "Update Event"
-                    : "Create Event"}
+                      ? "Update Event"
+                      : "Create Event"}
                 </button>
               </div>
             </form>
@@ -775,10 +816,18 @@ export default function EventsManagement() {
                   </label>
                   <div className="flex items-center gap-2 text-text-primary font-manrope">
                     <Users className="w-4 h-4 text-text-muted" />
-                    <span className="font-semibold">{viewEvent.children_attending_count || viewEvent.rsvp_count || 0}</span>
-                    <span className="text-text-muted">/ {viewEvent.max_attendees || "Unlimited"}</span>
+                    <span className="font-semibold">
+                      {viewEvent.children_attending_count ||
+                        viewEvent.rsvp_count ||
+                        0}
+                    </span>
+                    <span className="text-text-muted">
+                      / {viewEvent.max_attendees || "Unlimited"}
+                    </span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1 font-manrope">View RSVPs for child breakdown</p>
+                  <p className="text-xs text-gray-400 mt-1 font-manrope">
+                    View RSVPs for child breakdown
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1 font-manrope">
@@ -863,23 +912,35 @@ export default function EventsManagement() {
                   <p className="text-2xl font-bold text-text-primary font-manrope">
                     {rsvpData.total_rsvps || 0}
                   </p>
-                  <p className="text-xs text-gray-500 font-manrope">Total RSVPs</p>
+                  <p className="text-xs text-gray-500 font-manrope">
+                    Total RSVPs
+                  </p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-green-700 font-manrope">
                     {/* Count children from attending RSVPs */}
                     {rsvpData.attendees
-                      ?.filter(rsvp => rsvp.status === 'attending')
-                      .reduce((sum, rsvp) => sum + (rsvp.children_details?.length || 0), 0) || 0}
+                      ?.filter((rsvp) => rsvp.status === "attending")
+                      .reduce(
+                        (sum, rsvp) =>
+                          sum + (rsvp.children_details?.length || 0),
+                        0,
+                      ) || 0}
                   </p>
-                  <p className="text-xs text-green-600 font-manrope">Children Attending</p>
+                  <p className="text-xs text-green-600 font-manrope">
+                    Children Attending
+                  </p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-red-700 font-manrope">
                     {/* Count children from not_attending RSVPs */}
                     {rsvpData.attendees
-                      ?.filter(rsvp => rsvp.status === 'not_attending')
-                      .reduce((sum, rsvp) => sum + (rsvp.children_details?.length || 0), 0) || 0}
+                      ?.filter((rsvp) => rsvp.status === "not_attending")
+                      .reduce(
+                        (sum, rsvp) =>
+                          sum + (rsvp.children_details?.length || 0),
+                        0,
+                      ) || 0}
                   </p>
                   <p className="text-xs text-red-600 font-manrope">Not Going</p>
                 </div>
@@ -887,8 +948,12 @@ export default function EventsManagement() {
                   <p className="text-2xl font-bold text-yellow-700 font-manrope">
                     {/* Count children from maybe RSVPs */}
                     {rsvpData.attendees
-                      ?.filter(rsvp => rsvp.status === 'maybe')
-                      .reduce((sum, rsvp) => sum + (rsvp.children_details?.length || 0), 0) || 0}
+                      ?.filter((rsvp) => rsvp.status === "maybe")
+                      .reduce(
+                        (sum, rsvp) =>
+                          sum + (rsvp.children_details?.length || 0),
+                        0,
+                      ) || 0}
                   </p>
                   <p className="text-xs text-yellow-600 font-manrope">Maybe</p>
                 </div>
@@ -898,18 +963,18 @@ export default function EventsManagement() {
             {/* Filter Tabs */}
             <div className="flex gap-2 mb-4 flex-shrink-0">
               {[
-                { key: 'all', label: 'All' },
-                { key: 'attending', label: 'Going' },
-                { key: 'not_attending', label: 'Not Going' },
-                { key: 'maybe', label: 'Maybe' },
+                { key: "all", label: "All" },
+                { key: "attending", label: "Going" },
+                { key: "not_attending", label: "Not Going" },
+                { key: "maybe", label: "Maybe" },
               ].map(({ key, label }) => (
                 <button
                   key={key}
                   onClick={() => setRsvpFilter(key)}
                   className={`px-4 py-2 rounded-full text-sm font-medium font-manrope transition-colors ${
                     rsvpFilter === key
-                      ? 'bg-btn-gold text-text-body'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? "bg-btn-gold text-text-body"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
                   {label}
@@ -926,7 +991,12 @@ export default function EventsManagement() {
               ) : !rsvpData || getFilteredRsvps().length === 0 ? (
                 <div className="text-center py-12 text-gray-500 font-manrope">
                   <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No RSVPs {rsvpFilter !== 'all' ? `with status "${rsvpFilter.replace('_', ' ')}"` : 'yet'}</p>
+                  <p>
+                    No RSVPs{" "}
+                    {rsvpFilter !== "all"
+                      ? `with status "${rsvpFilter.replace("_", " ")}"`
+                      : "yet"}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -939,11 +1009,11 @@ export default function EventsManagement() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center text-btn-gold font-semibold">
-                            {(rsvp.attendee_name || 'U')[0].toUpperCase()}
+                            {(rsvp.attendee_name || "U")[0].toUpperCase()}
                           </div>
                           <div>
                             <p className="font-semibold text-text-primary font-manrope">
-                              {rsvp.attendee_name || 'Unknown'}
+                              {rsvp.attendee_name || "Unknown"}
                             </p>
                             {rsvp.attendee_email && (
                               <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
@@ -957,50 +1027,53 @@ export default function EventsManagement() {
                           {getRsvpStatusBadge(rsvp.status)}
                           {rsvp.number_of_guests > 0 && (
                             <p className="text-xs text-gray-500 font-manrope flex items-center gap-1">
-                              <Users className="w-3 h-3" />
-                              +{rsvp.number_of_guests} guest{rsvp.number_of_guests > 1 ? 's' : ''}
+                              <Users className="w-3 h-3" />+
+                              {rsvp.number_of_guests} guest
+                              {rsvp.number_of_guests > 1 ? "s" : ""}
                             </p>
                           )}
                         </div>
                       </div>
 
                       {/* Children Attending Details */}
-                      {rsvp.children_details && rsvp.children_details.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-xs font-medium text-gray-500 mb-2 font-manrope flex items-center gap-1">
-                            <UserCheck className="w-3 h-3" />
-                            Children Attending:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {rsvp.children_details.map((child, idx) => (
-                              <div
-                                key={idx}
-                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm"
-                              >
-                                <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-semibold">
-                                  {(child.child_name || 'C')[0].toUpperCase()}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-text-primary font-manrope">
-                                    {child.child_name}
-                                  </p>
-                                  {child.class_name && (
-                                    <p className="text-xs text-gray-500 font-manrope">
-                                      {child.class_name}
+                      {rsvp.children_details &&
+                        rsvp.children_details.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-xs font-medium text-gray-500 mb-2 font-manrope flex items-center gap-1">
+                              <UserCheck className="w-3 h-3" />
+                              Children Attending:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {rsvp.children_details.map((child, idx) => (
+                                <div
+                                  key={idx}
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm"
+                                >
+                                  <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-semibold">
+                                    {(child.child_name || "C")[0].toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-text-primary font-manrope">
+                                      {child.child_name}
                                     </p>
-                                  )}
+                                    {child.class_name && (
+                                      <p className="text-xs text-gray-500 font-manrope">
+                                        {child.class_name}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
                       {/* Notes */}
                       {rsvp.notes && (
                         <div className="mt-2 pt-2 border-t border-gray-200">
                           <p className="text-xs text-gray-500 font-manrope">
-                            <span className="font-medium">Note:</span> "{rsvp.notes}"
+                            <span className="font-medium">Note:</span> "
+                            {rsvp.notes}"
                           </p>
                         </div>
                       )}
