@@ -1,12 +1,16 @@
 import { useState, useRef, useMemo } from "react";
-import image from "../assets/image (2).png"
-import image7 from "../assets/image7.jpg"
+import image from "../assets/image (2).png";
+import image7 from "../assets/image7.jpg";
 import { useNavigate } from "react-router-dom";
-import { usePrograms } from '../api/hooks/classes/usePrograms';
-import { useAreas } from '../api/hooks/classes/useAreas';
-import { useClasses } from '../api/hooks/classes/useClasses';
+import { usePrograms } from "../api/hooks/classes/usePrograms";
+import { useAreas } from "../api/hooks/classes/useAreas";
+import { useClasses } from "../api/hooks/classes/useClasses";
 import ClassCard from "../components/ClassCard";
-import { formatDateRange, formatSchedule } from "../utils/formatters";
+import {
+  formatDateRange,
+  formatSchedule,
+  buildScheduleFromClass,
+} from "../utils/formatters";
 import {
   getCapacityMeta,
   getOfferingLabel,
@@ -28,23 +32,23 @@ export default function ProgramOverview() {
   const {
     data: programsData = [],
     isLoading: programsLoading,
-    error: programsError
+    error: programsError,
   } = usePrograms();
 
   // Fetch areas from API
   const {
     data: areasData = [],
     isLoading: areasLoading,
-    error: areasError
+    error: areasError,
   } = useAreas();
 
   const DEFAULT_FILTERS = {
-    school: 'all',
-    weekday: 'all',
-    timeOfDay: 'all',
-    ageRange: 'all',
-    capacity: 'all',
-    offeringType: 'all',
+    school: "all",
+    weekday: "all",
+    timeOfDay: "all",
+    ageRange: "all",
+    capacity: "all",
+    offeringType: "all",
   };
 
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -59,12 +63,12 @@ export default function ProgramOverview() {
     filters: {
       program_id: selectedProgram,
       area_id: openArea,
-      is_active: true
+      is_active: true,
     },
     queryOptions: {
       enabled: !!(selectedProgram && openArea), // Only fetch when both selected
-      placeholderData: [] // Ensure data is always an array when disabled
-    }
+      placeholderData: [], // Ensure data is always an array when disabled
+    },
   });
 
   // Ensure classesData is always an array
@@ -73,13 +77,22 @@ export default function ProgramOverview() {
   const classesLoading = classesQuery.isLoading;
   const classesError = classesQuery.error;
 
-  const weekdayOptions = ['all', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const timeOfDayOptions = ['all', 'morning', 'afternoon', 'evening'];
-  const capacityOptions = ['all', 'available', 'full'];
+  const weekdayOptions = [
+    "all",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+  const timeOfDayOptions = ["all", "morning", "afternoon", "evening"];
+  const capacityOptions = ["all", "available", "full"];
   const programTypeOptions = [
-    { value: 'all', label: 'Membership + Short-term' },
-    { value: 'membership', label: 'Membership only' },
-    { value: 'short-term', label: 'Short-term only' },
+    { value: "all", label: "Membership + Short-term" },
+    { value: "membership", label: "Membership only" },
+    { value: "short-term", label: "Short-term only" },
   ];
 
   const schoolOptions = useMemo(() => {
@@ -91,25 +104,28 @@ export default function ProgramOverview() {
         unique.set(cls.school_name, cls.school_name);
       }
     });
-    return Array.from(unique.entries()).map(([value, label]) => ({ value, label }));
+    return Array.from(unique.entries()).map(([value, label]) => ({
+      value,
+      label,
+    }));
   }, [classesData]);
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
-    setSearch('');
+    setSearch("");
   };
 
   // Transform API programs to match UI format
   const PROGRAMS = programsData.map((program, index) => ({
     id: program.id,
     title: program.name,
-    desc: program.description || 'Program description',
+    desc: program.description || "Program description",
   }));
 
   // Transform API areas to match UI format
   const AREAS = areasData.map((area) => ({
     id: area.id,
-    name: area.name
+    name: area.name,
   }));
 
   // Filter and transform classes for display
@@ -124,33 +140,39 @@ export default function ProgramOverview() {
           cls.name.toLowerCase().includes(searchValue) ||
           cls.description?.toLowerCase().includes(searchValue);
 
-        const schoolId = cls.school?.id ?? cls.school_name ?? '';
-        const schoolName = cls.school?.name ?? cls.school_name ?? '';
+        const schoolId = cls.school?.id ?? cls.school_name ?? "";
+        const schoolName = cls.school?.name ?? cls.school_name ?? "";
         const matchesSchool =
-          filters.school === 'all' ||
+          filters.school === "all" ||
           schoolId === filters.school ||
           schoolName === filters.school;
 
+        const clsSchedule = buildScheduleFromClass(cls);
         const matchesWeekday =
-          filters.weekday === 'all' ||
-          cls.schedule?.some((item) => item.day_of_week?.toLowerCase() === filters.weekday);
+          filters.weekday === "all" ||
+          clsSchedule.some(
+            (item) => item.day_of_week?.toLowerCase() === filters.weekday,
+          );
 
         const matchesTime =
-          filters.timeOfDay === 'all' ||
-          getTimeOfDay(cls.schedule) === filters.timeOfDay;
+          filters.timeOfDay === "all" ||
+          getTimeOfDay(clsSchedule) === filters.timeOfDay;
 
         const matchesAge =
-          filters.ageRange === 'all' || matchesAgeRange(cls, filters.ageRange);
+          filters.ageRange === "all" || matchesAgeRange(cls, filters.ageRange);
 
         const totalCapacity = cls.capacity ?? cls.capacity_total ?? 0;
         const current = cls.current_enrollment ?? cls.capacity_filled ?? 0;
         const matchesCapacity =
-          filters.capacity === 'all' ||
-          (filters.capacity === 'available' ? current < totalCapacity : current >= totalCapacity);
+          filters.capacity === "all" ||
+          (filters.capacity === "available"
+            ? current < totalCapacity
+            : current >= totalCapacity);
 
         const offeringType = getOfferingType(cls);
         const matchesOffering =
-          filters.offeringType === 'all' || offeringType === filters.offeringType;
+          filters.offeringType === "all" ||
+          offeringType === filters.offeringType;
 
         return (
           matchesArea &&
@@ -164,7 +186,7 @@ export default function ProgramOverview() {
         );
       })
       .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
       )
       .map((cls) => {
         const capacityMeta = getCapacityMeta(cls);
@@ -177,16 +199,17 @@ export default function ProgramOverview() {
           program: cls.program_id,
           title: cls.name,
           description: cls.description,
-          school: cls.school?.name || cls.location || 'Location TBA',
-          programName: cls.program?.name || '',
+          school: cls.school?.name || cls.location || "Location TBA",
+          programName: cls.program?.name || "",
           dates: formatDateRange(cls.start_date, cls.end_date),
-          time: formatSchedule(cls.schedule),
-          ages: cls.min_age && cls.max_age
-            ? `Ages ${cls.min_age}–${cls.max_age}`
-            : 'All Ages',
+          time: formatSchedule(buildScheduleFromClass(cls)),
+          ages:
+            cls.min_age && cls.max_age
+              ? `Ages ${cls.min_age}–${cls.max_age}`
+              : "All Ages",
           capacity: {
             filled: capacityMeta.current,
-            total: capacityMeta.total
+            total: capacityMeta.total,
           },
           hasCapacity: capacityMeta.hasCapacity,
           spotsRemaining: capacityMeta.availableSpots,
@@ -194,9 +217,12 @@ export default function ProgramOverview() {
           badgeLabel,
           offeringType,
           priceModel: getPriceModelLabel(cls, offeringType),
-          priceLabel: cls.price_display || cls.price_text || (cls.base_price ? `$${cls.base_price}` : 'Contact for pricing'),
+          priceLabel:
+            cls.price_display ||
+            cls.price_text ||
+            (cls.base_price ? `$${cls.base_price}` : "Contact for pricing"),
           image: cls.cover_photo_url || cls.image_url || getClassImage(),
-          schedule: cls.schedule,
+          schedule: buildScheduleFromClass(cls),
           price: cls.base_price,
         };
       });
@@ -204,7 +230,6 @@ export default function ProgramOverview() {
 
   return (
     <div className="min-h-screen max-sm:h-fit bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 max-sm:pb-20">
-
       {/* Logo and Title Section */}
       <div className="w-full py-6">
         <div className="max-w-7xl xxl1:max-w-9xl mx-auto px-6">
@@ -227,107 +252,119 @@ export default function ProgramOverview() {
         </div>
       </div>
 
-       {/* ---------- HERO SECTION ---------- */}
-<div className="w-full bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 py-14 md:py-20">
-  <div className="max-w-7xl xxl1:max-w-9xl mx-auto px-6 flex flex-col md:flex-row items-center gap-10">
+      {/* ---------- HERO SECTION ---------- */}
+      <div className="w-full bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-8 py-14 md:py-20">
+        <div className="max-w-7xl xxl1:max-w-9xl mx-auto px-6 flex flex-col md:flex-row items-center gap-10">
+          {/* LEFT CONTENT */}
+          <div className="flex-1 text-[#173151] space-y-6">
+            <h1 className="font-kollektif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              Unlock Your Child's{" "}
+              <span className="text-[#F3BC48]">True Soccer Potential</span>
+            </h1>
 
-    {/* LEFT CONTENT */}
-    <div className="flex-1 text-[#173151] space-y-6">
-      <h1 className="font-kollektif text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-        Unlock Your Child's <span className="text-[#F3BC48]">True Soccer Potential</span>
-      </h1>
+            <p className="text-lg md:text-xl text-gray-800 max-w-md">
+              Join the Carolina Soccer Factory Academy where young athletes
+              train, grow, and dream big. Professional coaching. Competitive
+              programs. A future built on passion.
+            </p>
+          </div>
 
-      <p className="text-lg md:text-xl text-gray-800 max-w-md">
-        Join the Carolina Soccer Factory Academy where young athletes train, grow,
-        and dream big. Professional coaching. Competitive programs. A future built on passion.
-      </p>
-
-
-    </div>
-
-    {/* RIGHT IMAGE */}
-    <div className="flex-1 w-full">
-      <div className="relative w-full h-[280px] md:h-[380px] lg:h-[450px] rounded-3xl overflow-hidden shadow-lg">
-        <img
-          src={image7}
-          alt="Soccer Training"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/30"></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-{/* Loading State */}
-{(programsLoading || areasLoading) && (
-  <div className="max-w-7xl mx-auto px-4 py-10 text-center">
-    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#F3BC48] border-r-transparent"></div>
-    <p className="mt-4 text-gray-600">Loading programs...</p>
-  </div>
-)}
-
-{/* Error State */}
-{(programsError || areasError) && (
-  <div className="max-w-7xl mx-auto px-4 py-10">
-    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-      <p className="text-red-800 font-semibold">Failed to load programs</p>
-      <p className="text-red-600 text-sm mt-2">
-        {programsError?.message || areasError?.message || 'Please try again later'}
-      </p>
-    </div>
-  </div>
-)}
-
-{/* Only show programs if loaded and no error */}
-{!programsLoading && !programsError && PROGRAMS.length > 0 && (
-     <div className="max-w-7xl xxl1:max-w-8xl mx-auto px-4 py-10">
-        <h2 className="text-fluid-3xl text-center font-semibold mb-6 text-[#173151] font-kollektif drop-shadow-lg">Programs</h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {PROGRAMS.map((p) => (
-            <div
-              key={p.id}
-             onClick={() => {
-  setSelectedProgram(p.id);
-  setOpenArea(null);
-
-  setTimeout(() => {
-    areaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 200);
-}}
-              className={`relative h-40 rounded-2xl flex justify-center bg-[#FFFFFF50] overflow-hidden shadow cursor-pointer group border
-                ${selectedProgram === p.id ? "border-gray-800" : "border-gray-300"}
-              `}
-            >
-
-
-              <div className=" flex flex-col items-center justify-center p-4 text-gray-900">
-                <p className="text-xl xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] drop-shadow">{p.title}</p>
-                <p className="text-sm opacity-90 text-center drop-shadow">
-                  {p.desc}
-                </p>
-              </div>
+          {/* RIGHT IMAGE */}
+          <div className="flex-1 w-full">
+            <div className="relative w-full h-[280px] md:h-[380px] lg:h-[450px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src={image7}
+                alt="Soccer Training"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30"></div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
-)}
+
+      {/* Loading State */}
+      {(programsLoading || areasLoading) && (
+        <div className="max-w-7xl mx-auto px-4 py-10 text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#F3BC48] border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading programs...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {(programsError || areasError) && (
+        <div className="max-w-7xl mx-auto px-4 py-10">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-800 font-semibold">
+              Failed to load programs
+            </p>
+            <p className="text-red-600 text-sm mt-2">
+              {programsError?.message ||
+                areasError?.message ||
+                "Please try again later"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Only show programs if loaded and no error */}
+      {!programsLoading && !programsError && PROGRAMS.length > 0 && (
+        <div className="max-w-7xl xxl1:max-w-8xl mx-auto px-4 py-10">
+          <h2 className="text-fluid-3xl text-center font-semibold mb-6 text-[#173151] font-kollektif drop-shadow-lg">
+            Programs
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {PROGRAMS.map((p) => (
+              <div
+                key={p.id}
+                onClick={() => {
+                  setSelectedProgram(p.id);
+                  setOpenArea(null);
+
+                  setTimeout(() => {
+                    areaRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 200);
+                }}
+                className={`relative h-40 rounded-2xl flex justify-center bg-[#FFFFFF50] overflow-hidden shadow cursor-pointer group border
+                ${selectedProgram === p.id ? "border-gray-800" : "border-gray-300"}
+              `}
+              >
+                <div className=" flex flex-col items-center justify-center p-4 text-gray-900">
+                  <p className="text-xl xxl1:text-2xl font-semibold font-manrope text-[#1b1b1b] drop-shadow">
+                    {p.title}
+                  </p>
+                  <p className="text-sm opacity-90 text-center drop-shadow">
+                    {p.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ----------- AREAS (Only show when program is selected) ----------- */}
       {selectedProgram && (
         <div ref={areaRef} className="max-w-7xl mx-auto px-4 pb-10">
-             {(() => {
-      const selectedProgramData = PROGRAMS.find(p => p.id === selectedProgram);
-      return (
-        <div className="flex flex-col justify-center items-center">
-       <h2 className="text-[#173151] text-fluid-3xl font-semibold mb-2 font-kollektif">{selectedProgramData?.title}</h2>
-        <h2 className="text-xl font-semibold mb-6">Select your Area </h2>
-</div>
-             );
-    })()}
+          {(() => {
+            const selectedProgramData = PROGRAMS.find(
+              (p) => p.id === selectedProgram,
+            );
+            return (
+              <div className="flex flex-col justify-center items-center">
+                <h2 className="text-[#173151] text-fluid-3xl font-semibold mb-2 font-kollektif">
+                  {selectedProgramData?.title}
+                </h2>
+                <h2 className="text-xl font-semibold mb-6">
+                  Select your Area{" "}
+                </h2>
+              </div>
+            );
+          })()}
 
           <div className="flex flex-col gap-3 lg:flex-row">
             {AREAS.map((area) => (
@@ -339,7 +376,10 @@ export default function ProgramOverview() {
                   resetFilters();
                   if (nextArea) {
                     setTimeout(() => {
-                      areaContentRefs.current[nextArea]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      areaContentRefs.current[nextArea]?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
                     }, 200);
                   }
                 }}
@@ -384,7 +424,12 @@ export default function ProgramOverview() {
                     <select
                       className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.school}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, school: e.target.value }))}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          school: e.target.value,
+                        }))
+                      }
                     >
                       <option value="all">All Schools</option>
                       {schoolOptions.map((option) => (
@@ -397,11 +442,18 @@ export default function ProgramOverview() {
                     <select
                       className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.weekday}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, weekday: e.target.value }))}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          weekday: e.target.value,
+                        }))
+                      }
                     >
                       {weekdayOptions.map((day) => (
                         <option key={day} value={day}>
-                          {day === 'all' ? 'All Weekdays' : day.charAt(0).toUpperCase() + day.slice(1)}
+                          {day === "all"
+                            ? "All Weekdays"
+                            : day.charAt(0).toUpperCase() + day.slice(1)}
                         </option>
                       ))}
                     </select>
@@ -409,11 +461,18 @@ export default function ProgramOverview() {
                     <select
                       className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.timeOfDay}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, timeOfDay: e.target.value }))}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          timeOfDay: e.target.value,
+                        }))
+                      }
                     >
                       {timeOfDayOptions.map((slot) => (
                         <option key={slot} value={slot}>
-                          {slot === 'all' ? 'All Times' : slot.charAt(0).toUpperCase() + slot.slice(1)}
+                          {slot === "all"
+                            ? "All Times"
+                            : slot.charAt(0).toUpperCase() + slot.slice(1)}
                         </option>
                       ))}
                     </select>
@@ -421,7 +480,12 @@ export default function ProgramOverview() {
                     <select
                       className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.ageRange}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, ageRange: e.target.value }))}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          ageRange: e.target.value,
+                        }))
+                      }
                     >
                       <option value="all">All Ages</option>
                       <option value="under8">Under 8</option>
@@ -432,15 +496,20 @@ export default function ProgramOverview() {
                     <select
                       className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.capacity}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, capacity: e.target.value }))}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          capacity: e.target.value,
+                        }))
+                      }
                     >
                       {capacityOptions.map((option) => (
                         <option key={option} value={option}>
-                          {option === 'all'
-                            ? 'All Capacity'
-                            : option === 'available'
-                            ? 'Open Seats'
-                            : 'Waitlisted'}
+                          {option === "all"
+                            ? "All Capacity"
+                            : option === "available"
+                              ? "Open Seats"
+                              : "Waitlisted"}
                         </option>
                       ))}
                     </select>
@@ -448,7 +517,12 @@ export default function ProgramOverview() {
                     <select
                       className="rounded-lg border pl-3 pr-8 py-2 bg-white/80 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px] bg-[right_0.75rem_center] bg-no-repeat"
                       value={filters.offeringType}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, offeringType: e.target.value }))}
+                      onChange={(e) =>
+                        setFilters((prev) => ({
+                          ...prev,
+                          offeringType: e.target.value,
+                        }))
+                      }
                     >
                       {programTypeOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -470,7 +544,9 @@ export default function ProgramOverview() {
                 {/* Classes Error State */}
                 {classesError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-red-800 text-sm">Failed to load classes</p>
+                    <p className="text-red-800 text-sm">
+                      Failed to load classes
+                    </p>
                   </div>
                 )}
 
@@ -485,7 +561,9 @@ export default function ProgramOverview() {
                           key={cls.id}
                           cls={cls}
                           onClick={() => navigate(`/class/${cls.id}`)}
-                          onRegister={() => navigate(`/checkout?classId=${cls.id}`)}
+                          onRegister={() =>
+                            navigate(`/checkout?classId=${cls.id}`)
+                          }
                         />
                       ))
                     )}
@@ -504,18 +582,18 @@ export default function ProgramOverview() {
 
 const getTimeOfDay = (schedule) => {
   const start = schedule?.[0]?.start_time;
-  if (!start) return 'all';
-  const hour = parseInt(start.split(':')[0], 10);
-  if (hour < 12) return 'morning';
-  if (hour < 17) return 'afternoon';
-  return 'evening';
+  if (!start) return "all";
+  const hour = parseInt(start.split(":")[0], 10);
+  if (hour < 12) return "morning";
+  if (hour < 17) return "afternoon";
+  return "evening";
 };
 
 const matchesAgeRange = (cls, filter) => {
   const min = cls.min_age ?? 0;
   const max = cls.max_age ?? 99;
-  if (filter === 'under8') return max < 8;
-  if (filter === '8to12') return min <= 12 && max >= 8;
-  if (filter === '13plus') return min >= 13;
+  if (filter === "under8") return max < 8;
+  if (filter === "8to12") return min <= 12 && max >= 8;
+  if (filter === "13plus") return min >= 13;
   return true;
 };

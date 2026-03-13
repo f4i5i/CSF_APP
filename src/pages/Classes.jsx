@@ -10,7 +10,11 @@ import { useClasses } from "../api/hooks/classes/useClasses";
 import { useAreas } from "../api/hooks/classes/useAreas";
 import { usePrograms } from "../api/hooks/classes/usePrograms";
 import { useChildren } from "../hooks";
-import { formatDateRange, formatSchedule } from "../utils/formatters";
+import {
+  formatDateRange,
+  formatSchedule,
+  buildScheduleFromClass,
+} from "../utils/formatters";
 import {
   getCapacityMeta,
   getOfferingLabel,
@@ -27,7 +31,9 @@ export default function Classes() {
   const [selectedChildId, setSelectedChildId] = useState("");
 
   // Get children for logged-in parents
-  const { children, loading: loadingChildren } = useChildren({ autoFetch: !!user && user.role?.toUpperCase() === 'PARENT' });
+  const { children, loading: loadingChildren } = useChildren({
+    autoFetch: !!user && user.role?.toUpperCase() === "PARENT",
+  });
 
   // Get programs for filter
   const { data: programs = [] } = usePrograms();
@@ -48,43 +54,49 @@ export default function Classes() {
 
   const mappedClasses = useMemo(() => {
     return classes.map((cls) => {
-        const capacityMeta = getCapacityMeta(cls);
-        const offeringType = getOfferingType(cls);
+      const capacityMeta = getCapacityMeta(cls);
+      const offeringType = getOfferingType(cls);
 
-        return {
-          ...cls,
-          title: cls.name,
-          school: cls.school?.name || cls.location || "Location TBA",
-          dates: formatDateRange(cls.start_date, cls.end_date),
-          time: formatSchedule(cls.schedule),
-          ages: cls.min_age && cls.max_age ? `Ages ${cls.min_age}–${cls.max_age}` : "All Ages",
-          image: cls.cover_photo_url || cls.image_url,
-          capacity: {
-            filled: capacityMeta.current,
-            total: capacityMeta.total,
-          },
-          hasCapacity: capacityMeta.hasCapacity,
-          spotsRemaining: capacityMeta.availableSpots,
-          waitlistCount: capacityMeta.waitlistCount,
-          offeringType,
-          badgeLabel: getOfferingLabel(offeringType),
-          priceModel: getPriceModelLabel(cls, offeringType),
-          priceLabel: cls.price_display || cls.price_text || (cls.base_price ? `$${cls.base_price}` : "Contact for pricing"),
-        };
-      });
+      return {
+        ...cls,
+        title: cls.name,
+        school: cls.school?.name || cls.location || "Location TBA",
+        dates: formatDateRange(cls.start_date, cls.end_date),
+        time: formatSchedule(buildScheduleFromClass(cls)),
+        ages:
+          cls.min_age && cls.max_age
+            ? `Ages ${cls.min_age}–${cls.max_age}`
+            : "All Ages",
+        image: cls.cover_photo_url || cls.image_url,
+        capacity: {
+          filled: capacityMeta.current,
+          total: capacityMeta.total,
+        },
+        hasCapacity: capacityMeta.hasCapacity,
+        spotsRemaining: capacityMeta.availableSpots,
+        waitlistCount: capacityMeta.waitlistCount,
+        offeringType,
+        badgeLabel: getOfferingLabel(offeringType),
+        priceModel: getPriceModelLabel(cls, offeringType),
+        priceLabel:
+          cls.price_display ||
+          cls.price_text ||
+          (cls.base_price ? `$${cls.base_price}` : "Contact for pricing"),
+      };
+    });
   }, [classes]);
 
   const handleRegister = (classId) => {
     if (!user) {
-      sessionStorage.setItem('intendedClass', classId);
-      toast('Please log in to register for this class');
-      navigate('/login');
+      sessionStorage.setItem("intendedClass", classId);
+      toast("Please log in to register for this class");
+      navigate("/login");
       return;
     }
 
     const userRole = user?.role?.toUpperCase();
-    if (userRole !== 'PARENT') {
-      toast.error('Only parents can register for classes');
+    if (userRole !== "PARENT") {
+      toast.error("Only parents can register for classes");
       return;
     }
 
@@ -96,7 +108,7 @@ export default function Classes() {
   };
 
   // Check if user is a parent
-  const isParent = user?.role?.toUpperCase() === 'PARENT';
+  const isParent = user?.role?.toUpperCase() === "PARENT";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] pb-10">
@@ -194,9 +206,7 @@ export default function Classes() {
           </div>
         </div>
 
-        {isLoading && (
-          <p className="mt-6 text-gray-600">Loading classes...</p>
-        )}
+        {isLoading && <p className="mt-6 text-gray-600">Loading classes...</p>}
 
         {isError && (
           <p className="mt-6 text-red-600">Unable to load classes right now.</p>
