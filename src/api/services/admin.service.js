@@ -289,22 +289,15 @@ const adminService = {
   },
 
   /**
-   * Send bulk email to recipients
-   * @param {Object} emailData - Bulk email parameters
-   * @param {string} emailData.recipient_type - "all", "class", "program", "area", "custom"
-   * @param {string} [emailData.class_id] - Class ID (when recipient_type is "class")
-   * @param {string} [emailData.program_id] - Program ID (when recipient_type is "program")
-   * @param {string} [emailData.area_id] - Area ID (when recipient_type is "area")
-   * @param {Array<string>} [emailData.recipient_ids] - Custom recipient IDs
-   * @param {string} emailData.subject - Email subject
-   * @param {string} emailData.message - Email body
-   * @param {boolean} [emailData.include_parents] - Include parents (default true)
+   * Send bulk email to recipients with optional attachments
+   * @param {FormData} formData - FormData with email fields and file attachments
    * @returns {Promise<Object>} Results with total_recipients, successful, failed, details
    */
-  async sendBulkEmail(emailData) {
+  async sendBulkEmail(formData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.ADMIN.BULK_EMAIL,
-      emailData,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   },

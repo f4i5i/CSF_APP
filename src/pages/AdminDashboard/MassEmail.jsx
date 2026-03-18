@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   Mail,
   Send,
@@ -8,6 +14,9 @@ import {
   AlertCircle,
   Eye,
   X,
+  Paperclip,
+  Image,
+  Trash2,
 } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -44,6 +53,25 @@ const RECIPIENT_TYPES = [
   },
 ];
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_TOTAL_SIZE = 30 * 1024 * 1024; // 30 MB
+const MAX_FILE_COUNT = 5;
+const ALLOWED_ATTACHMENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+];
+const ALLOWED_INLINE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif"];
+
+const formatFileSize = (bytes) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export default function MassEmail() {
   const [recipientType, setRecipientType] = useState("all");
   const [selectedClassId, setSelectedClassId] = useState("");
@@ -62,21 +90,80 @@ export default function MassEmail() {
 
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false });
   const [showPreview, setShowPreview] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [inlineImages, setInlineImages] = useState([]);
+  const quillRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Quill image handler for inline images
+  const handleQuillImage = useCallback(() => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/gif";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!ALLOWED_INLINE_IMAGE_TYPES.includes(file.type)) {
+        toast.error("Only JPG, PNG, and GIF images are allowed");
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`Image exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`);
+        return;
+      }
+      const newTotalSize = totalFileSize + file.size;
+      if (newTotalSize > MAX_TOTAL_SIZE) {
+        toast.error(
+          `Total file size would exceed ${MAX_TOTAL_SIZE / (1024 * 1024)}MB limit`,
+        );
+        return;
+      }
+      if (totalFileCount + 1 > MAX_FILE_COUNT) {
+        toast.error(`Maximum ${MAX_FILE_COUNT} files allowed`);
+        return;
+      }
+
+      const contentId = `img-${crypto.randomUUID()}`;
+      const newImage = {
+        id: contentId,
+        file,
+        name: file.name,
+        size: file.size,
+        previewUrl: URL.createObjectURL(file),
+      };
+      setInlineImages((prev) => [...prev, newImage]);
+
+      // Insert CID image tag into editor
+      const quill = quillRef.current?.getEditor();
+      if (quill) {
+        const range = quill.getSelection(true);
+        quill.insertEmbed(range.index, "image", `cid:${contentId}`);
+        quill.setSelection(range.index + 1);
+      }
+    };
+    input.click();
+  }, [totalFileSize, totalFileCount]);
 
   // Quill editor toolbar configuration
   const quillModules = useMemo(
     () => ({
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline", "strike"],
-        [{ color: [] }, { background: [] }],
-        [{ list: "ordered" }, { list: "bullet" }],
-        [{ align: [] }],
-        ["link"],
-        ["clean"],
-      ],
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          ["bold", "italic", "underline", "strike"],
+          [{ color: [] }, { background: [] }],
+          [{ list: "ordered" }, { list: "bullet" }],
+          [{ align: [] }],
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image: handleQuillImage,
+        },
+      },
     }),
-    [],
+    [handleQuillImage],
   );
 
   const quillFormats = [
@@ -91,7 +178,51 @@ export default function MassEmail() {
     "bullet",
     "align",
     "link",
+    "image",
   ];
+
+  const handleAttachmentAdd = (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      if (!ALLOWED_ATTACHMENT_TYPES.includes(file.type)) {
+        toast.error(`"${file.name}" — file type not allowed`);
+        continue;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(
+          `"${file.name}" exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`,
+        );
+        continue;
+      }
+      if (totalFileSize + file.size > MAX_TOTAL_SIZE) {
+        toast.error(
+          `Adding "${file.name}" would exceed ${MAX_TOTAL_SIZE / (1024 * 1024)}MB total limit`,
+        );
+        continue;
+      }
+      if (totalFileCount + 1 > MAX_FILE_COUNT) {
+        toast.error(`Maximum ${MAX_FILE_COUNT} files allowed`);
+        break;
+      }
+      setAttachments((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), file, name: file.name, size: file.size },
+      ]);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (id) => {
+    setAttachments((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const removeInlineImage = (id) => {
+    setInlineImages((prev) => {
+      const img = prev.find((i) => i.id === id);
+      if (img?.previewUrl) URL.revokeObjectURL(img.previewUrl);
+      return prev.filter((i) => i.id !== id);
+    });
+  };
 
   // Check if message has actual content (not just empty tags)
   const hasMessageContent = useMemo(() => {
@@ -99,6 +230,14 @@ export default function MassEmail() {
     const stripped = message.replace(/<[^>]*>/g, "").trim();
     return stripped.length > 0;
   }, [message]);
+
+  const totalFileSize = useMemo(() => {
+    const attSize = attachments.reduce((sum, f) => sum + f.size, 0);
+    const imgSize = inlineImages.reduce((sum, f) => sum + f.size, 0);
+    return attSize + imgSize;
+  }, [attachments, inlineImages]);
+
+  const totalFileCount = attachments.length + inlineImages.length;
 
   // Fetch classes, programs, areas for dropdown selection
   useEffect(() => {
@@ -176,18 +315,32 @@ export default function MassEmail() {
     setSendResult(null);
 
     try {
-      const payload = {
-        recipient_type: recipientType,
-        subject: subject.trim(),
-        message: message,
-        include_parents: true,
-      };
+      const formData = new FormData();
+      formData.append("recipient_type", recipientType);
+      formData.append("subject", subject.trim());
+      formData.append("message", message);
+      formData.append("include_parents", "true");
 
-      if (recipientType === "class") payload.class_id = selectedClassId;
-      if (recipientType === "program") payload.program_id = selectedProgramId;
-      if (recipientType === "area") payload.area_id = selectedAreaId;
+      if (recipientType === "class")
+        formData.append("class_id", selectedClassId);
+      if (recipientType === "program")
+        formData.append("program_id", selectedProgramId);
+      if (recipientType === "area") formData.append("area_id", selectedAreaId);
 
-      const result = await adminService.sendBulkEmail(payload);
+      for (const att of attachments) {
+        formData.append("attachments", att.file);
+      }
+
+      const cidIds = [];
+      for (const img of inlineImages) {
+        formData.append("inline_images", img.file);
+        cidIds.push(img.id);
+      }
+      if (cidIds.length > 0) {
+        formData.append("inline_image_ids", JSON.stringify(cidIds));
+      }
+
+      const result = await adminService.sendBulkEmail(formData);
       setSendResult(result);
 
       if (result.successful > 0) {
@@ -239,6 +392,11 @@ export default function MassEmail() {
     setSelectedClassId("");
     setSelectedProgramId("");
     setSelectedAreaId("");
+    inlineImages.forEach((img) => {
+      if (img.previewUrl) URL.revokeObjectURL(img.previewUrl);
+    });
+    setAttachments([]);
+    setInlineImages([]);
   };
 
   const inputStyle =
@@ -436,6 +594,7 @@ export default function MassEmail() {
                   </label>
                   <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#F3BC48] focus-within:border-transparent">
                     <ReactQuill
+                      ref={quillRef}
                       theme="snow"
                       value={message}
                       onChange={setMessage}
@@ -445,6 +604,91 @@ export default function MassEmail() {
                       className="mass-email-editor"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700 font-manrope flex items-center gap-1.5">
+                      <Paperclip className="w-4 h-4" />
+                      Attachments
+                      <span className="text-xs text-text-muted font-normal">
+                        ({totalFileCount}/{MAX_FILE_COUNT} files,{" "}
+                        {formatFileSize(totalFileSize)}/
+                        {formatFileSize(MAX_TOTAL_SIZE)})
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={
+                        totalFileCount >= MAX_FILE_COUNT ||
+                        totalFileSize >= MAX_TOTAL_SIZE
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#173151] bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-manrope disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                      Add File
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept=".jpg,.jpeg,.png,.gif,.pdf,.docx,.xlsx"
+                      onChange={handleAttachmentAdd}
+                      multiple
+                    />
+                  </div>
+
+                  {(attachments.length > 0 || inlineImages.length > 0) && (
+                    <div className="space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {attachments.map((att) => (
+                        <div
+                          key={att.id}
+                          className="flex items-center justify-between text-sm font-manrope"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Paperclip className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span className="truncate text-text-primary">
+                              {att.name}
+                            </span>
+                            <span className="text-text-muted shrink-0">
+                              ({formatFileSize(att.size)})
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(att.id)}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors shrink-0"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                      {inlineImages.map((img) => (
+                        <div
+                          key={img.id}
+                          className="flex items-center justify-between text-sm font-manrope"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Image className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                            <span className="truncate text-text-primary">
+                              {img.name}
+                            </span>
+                            <span className="text-text-muted shrink-0">
+                              (inline, {formatFileSize(img.size)})
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeInlineImage(img.id)}
+                            className="p-1 hover:bg-gray-200 rounded transition-colors shrink-0"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -495,6 +739,17 @@ export default function MassEmail() {
             recipientType === "class"
               ? classes.find((c) => c.id === selectedClassId)?.name
               : null;
+
+          // Replace cid: references with local preview URLs for the preview
+          let previewMessage = message;
+          for (const img of inlineImages) {
+            if (img.previewUrl) {
+              previewMessage = previewMessage.replace(
+                `src="cid:${img.id}"`,
+                `src="${img.previewUrl}"`,
+              );
+            }
+          }
 
           return (
             <div
@@ -583,7 +838,9 @@ export default function MassEmail() {
                         Hi <strong>Parent Name</strong>,
                       </p>
 
-                      <div dangerouslySetInnerHTML={{ __html: message }} />
+                      <div
+                        dangerouslySetInnerHTML={{ __html: previewMessage }}
+                      />
 
                       {selectedClassName && (
                         <div
@@ -659,12 +916,21 @@ export default function MassEmail() {
 
                 {/* Preview Footer */}
                 <div className="p-3 sm:p-4 border-t bg-white flex items-center justify-between">
-                  <p className="text-xs text-text-muted font-manrope">
-                    Sending to:{" "}
-                    <strong className="text-text-primary">
-                      {getRecipientLabel()}
-                    </strong>
-                  </p>
+                  <div>
+                    <p className="text-xs text-text-muted font-manrope">
+                      Sending to:{" "}
+                      <strong className="text-text-primary">
+                        {getRecipientLabel()}
+                      </strong>
+                    </p>
+                    {(attachments.length > 0 || inlineImages.length > 0) && (
+                      <p className="text-xs text-text-muted font-manrope mt-1">
+                        <Paperclip className="w-3 h-3 inline mr-1" />
+                        {attachments.length + inlineImages.length} file(s)
+                        attached ({formatFileSize(totalFileSize)})
+                      </p>
+                    )}
+                  </div>
                   <button
                     onClick={() => setShowPreview(false)}
                     className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-manrope"

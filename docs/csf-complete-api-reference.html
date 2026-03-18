@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSF App - Complete API Reference for Mobile Development</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333; background: #fafbfc; }
+  h1 { color: #1a1a2e; border-bottom: 3px solid #f4b728; padding-bottom: 10px; font-size: 1.8em; }
+  h2 { color: #16213e; margin-top: 50px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 1.5em; }
+  h3 { color: #0f3460; margin-top: 30px; }
+  h4 { color: #1e40af; margin-top: 20px; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.85em; }
+  pre code { background: none; color: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+  th { background: #f8fafc; font-weight: 600; }
+  tr:hover { background: #f8fafc; }
+  .endpoint { background: #dbeafe; border-left: 4px solid #3b82f6; padding: 6px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-family: monospace; font-size: 0.95em; }
+  .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 0.9em; }
+  .important { background: #fee2e2; border-left: 4px solid #ef4444; padding: 8px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 0.9em; }
+  .success { background: #dcfce7; border-left: 4px solid #22c55e; padding: 8px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 0.9em; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; font-weight: 700; font-family: monospace; }
+  .get { background: #dcfce7; color: #166534; }
+  .post { background: #dbeafe; color: #1e40af; }
+  .put { background: #fef3c7; color: #854d0e; }
+  .delete { background: #fee2e2; color: #991b1b; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 30px 0; }
+  .section-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 15px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .toc { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 20px 0; }
+  .toc a { text-decoration: none; color: #1e40af; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ul { list-style: none; padding-left: 20px; }
+  .toc > ul { padding-left: 0; }
+  .page-apis { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px 16px; margin: 8px 0; }
+  .page-apis code { background: #e0f2fe; }
+  .role-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 600; margin-left: 8px; }
+  .role-parent { background: #dbeafe; color: #1e40af; }
+  .role-admin { background: #fce7f3; color: #be185d; }
+  .role-coach { background: #d1fae5; color: #065f46; }
+  .role-public { background: #f3f4f6; color: #374151; }
+  .role-auth { background: #fef3c7; color: #92400e; }
+</style>
+</head>
+<body>
+
+<h1>CSF App - Complete API Reference</h1>
+
+<p>
+  <strong>For:</strong> Mobile Developer<br>
+  <strong>Backend Base URL:</strong> <code>{API_BASE_URL}/api/v1</code><br>
+  <strong>Auth:</strong> Bearer JWT token in <code>Authorization</code> header<br>
+  <strong>Content-Type:</strong> <code>application/json</code> (unless file upload)<br>
+  <strong>Date:</strong> March 2026
+</p>
+
+<div class="note"><strong>Response Format Note:</strong> Some list endpoints return a plain array <code>[...]</code>, others return <code>{ items: [...], total: N }</code>. Handle both formats in the mobile app.</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+<h3 style="margin-top:0">Table of Contents</h3>
+<ul>
+  <li><a href="#global">1. Global: Auth, Errors, Pagination</a></li>
+  <li><a href="#public">2. Public Pages (No Auth)</a></li>
+  <li><a href="#auth-pages">3. Auth Pages (Login, Register, Password)</a></li>
+  <li><a href="#parent">4. Parent Pages</a>
+    <ul>
+      <li><a href="#parent-dashboard">4.1 Dashboard</a></li>
+      <li><a href="#parent-classes">4.2 Browse Classes</a></li>
+      <li><a href="#parent-checkout">4.3 Checkout &amp; Payment</a></li>
+      <li><a href="#parent-payment-billing">4.4 Payments &amp; Billing</a></li>
+      <li><a href="#parent-children">4.5 My Children</a></li>
+      <li><a href="#parent-waivers">4.6 Waivers</a></li>
+      <li><a href="#parent-badges">4.7 Badges</a></li>
+      <li><a href="#parent-attendance">4.8 Attendance</a></li>
+      <li><a href="#parent-events">4.9 Events</a></li>
+      <li><a href="#parent-calendar">4.10 Calendar</a></li>
+      <li><a href="#parent-gallery">4.11 Photo Gallery</a></li>
+      <li><a href="#parent-settings">4.12 Settings</a></li>
+      <li><a href="#parent-registerchild">4.13 Register Child</a></li>
+      <li><a href="#parent-contact">4.14 Contact Us</a></li>
+    </ul>
+  </li>
+  <li><a href="#coach">5. Coach Pages</a></li>
+  <li><a href="#admin">6. Admin Pages</a></li>
+  <li><a href="#api-catalog">7. Complete API Endpoint Catalog</a></li>
+  <li><a href="#stripe">8. Stripe Integration</a></li>
+  <li><a href="#data-models">9. Key Data Models</a></li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="global">1. Global: Authentication, Errors &amp; Pagination</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<h3>Authentication</h3>
+<p>All protected endpoints require a JWT Bearer token:</p>
+<pre><code>Authorization: Bearer {access_token}
+Content-Type: application/json</code></pre>
+
+<p>Tokens are obtained via login and stored locally. On 401 response, redirect to login. Tokens can be refreshed:</p>
+
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Body</th><th>Response</th></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/login</code></td><td><code>{ email, password }</code></td><td><code>{ access_token, refresh_token, token_type, user, must_change_password }</code></td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/register</code></td><td><code>{ email, password, first_name, last_name, phone }</code></td><td><code>{ access_token, refresh_token, user }</code></td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/refresh</code></td><td><code>{ refresh_token }</code></td><td><code>{ access_token, refresh_token }</code></td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/google</code></td><td><code>{ token }</code> (Google OAuth token)</td><td><code>{ access_token, refresh_token, user }</code></td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/logout</code></td><td>None</td><td>Confirmation</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/forgot-password</code></td><td><code>{ email }</code></td><td>Confirmation message</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/reset-password</code></td><td><code>{ token, new_password }</code></td><td>Confirmation</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/change-password</code></td><td><code>{ current_password, new_password }</code></td><td>Confirmation</td></tr>
+</table>
+
+<div class="note"><strong>Force Password Change:</strong> If <code>must_change_password: true</code> in login response, redirect user to force password change screen before allowing any other action.</div>
+
+<div class="note"><strong>Role Mapping:</strong> Login response has a <code>user.role</code> field. Both <code>OWNER</code> and <code>ADMIN</code> roles are stored as <code>"admin"</code> locally. Other roles: <code>"parent"</code>, <code>"coach"</code>.</div>
+</div>
+
+<div class="section-card">
+<h3>Error Handling</h3>
+<pre><code>// Standard error response
+{
+  "detail": "Error message string"
+}
+
+// Validation error response
+{
+  "detail": [
+    { "loc": ["body", "field_name"], "msg": "error message", "type": "error_type" }
+  ]
+}</code></pre>
+
+<table>
+<tr><th>Status</th><th>Meaning</th><th>Action</th></tr>
+<tr><td>400</td><td>Validation error / bad request</td><td>Show error message</td></tr>
+<tr><td>401</td><td>Not authenticated / token expired</td><td>Try refresh token, then redirect to login</td></tr>
+<tr><td>403</td><td>Not authorized (wrong role)</td><td>Show access denied</td></tr>
+<tr><td>404</td><td>Resource not found</td><td>Show not found</td></tr>
+<tr><td>409</td><td>Conflict (duplicate)</td><td>Show conflict message</td></tr>
+<tr><td>422</td><td>Unprocessable entity</td><td>Show validation errors</td></tr>
+<tr><td>500</td><td>Server error</td><td>Show generic error, retry</td></tr>
+</table>
+</div>
+
+<div class="section-card">
+<h3>Pagination &amp; Filtering</h3>
+<p>List endpoints support these common query parameters:</p>
+<table>
+<tr><th>Param</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>skip</code></td><td>int</td><td>Number of records to skip (offset)</td></tr>
+<tr><td><code>limit</code></td><td>int</td><td>Max records to return (page size)</td></tr>
+<tr><td><code>status</code></td><td>string</td><td>Filter by status</td></tr>
+<tr><td><code>program_id</code></td><td>UUID</td><td>Filter by program</td></tr>
+<tr><td><code>area_id</code></td><td>UUID</td><td>Filter by area</td></tr>
+<tr><td><code>school_id</code></td><td>UUID</td><td>Filter by school</td></tr>
+<tr><td><code>class_id</code></td><td>UUID</td><td>Filter by class</td></tr>
+<tr><td><code>start_date</code></td><td>YYYY-MM-DD</td><td>Date range start</td></tr>
+<tr><td><code>end_date</code></td><td>YYYY-MM-DD</td><td>Date range end</td></tr>
+<tr><td><code>has_capacity</code></td><td>bool</td><td>Only classes with open spots</td></tr>
+<tr><td><code>min_age</code> / <code>max_age</code></td><td>int</td><td>Age range filter</td></tr>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="public">2. Public Pages (No Auth Required)</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<h3>2.1 Landing / Area Selection <span class="role-badge role-public">PUBLIC</span></h3>
+<p><strong>Route:</strong> <code>/</code></p>
+<div class="page-apis">
+  <strong>APIs on load:</strong><br>
+  <code>GET /areas/</code> - List all service areas
+</div>
+
+<h3>2.2 Class Browsing <span class="role-badge role-public">PUBLIC</span></h3>
+<p><strong>Route:</strong> <code>/class-list</code></p>
+<div class="page-apis">
+  <strong>APIs on load:</strong><br>
+  <code>GET /programs/</code> - List all programs (for filter dropdown)<br>
+  <code>GET /classes</code> - List classes with filters
+</div>
+
+<h3>2.3 Class Detail <span class="role-badge role-public">PUBLIC</span></h3>
+<p><strong>Route:</strong> <code>/class-detail</code> or <code>/class/:id</code></p>
+<div class="page-apis">
+  <strong>APIs on load:</strong><br>
+  <code>GET /classes/{id}</code> - Get class details (schedule, capacity, pricing, coach info)
+</div>
+
+<h3>2.4 Custom Registration Link <span class="role-badge role-public">PUBLIC</span></h3>
+<p><strong>Route:</strong> <code>/register/:slug</code></p>
+<div class="page-apis">
+  <strong>APIs on load:</strong><br>
+  <code>GET /classes/slug/{slug}</code> - Get class by URL slug
+</div>
+
+<h3>2.5 Public Roster <span class="role-badge role-public">PUBLIC</span></h3>
+<p><strong>Route:</strong> <code>/public/roster/:shareToken</code></p>
+<div class="page-apis">
+  <strong>APIs on load:</strong><br>
+  <code>GET /public/roster/{shareToken}</code> - Get public roster by share token (no auth)
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="auth-pages">3. Auth Pages</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<table>
+<tr><th>Page</th><th>Route</th><th>API Calls</th></tr>
+<tr><td>Login</td><td><code>/login</code></td><td><code>POST /auth/login</code>, <code>POST /auth/google</code></td></tr>
+<tr><td>Register</td><td><code>/register</code></td><td><code>POST /auth/register</code></td></tr>
+<tr><td>Forgot Password</td><td><code>/forgot-password</code></td><td><code>POST /auth/forgot-password</code></td></tr>
+<tr><td>Reset Password</td><td><code>/reset-password</code></td><td><code>POST /auth/reset-password</code></td></tr>
+<tr><td>Force Password Change</td><td><code>/force-password-change</code></td><td><code>POST /auth/change-password</code>, <code>GET /users/me</code></td></tr>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="parent">4. Parent Pages</h2>
+<!-- ============================================================ -->
+
+<!-- 4.1 DASHBOARD -->
+<div class="section-card" id="parent-dashboard">
+<h3>4.1 Parent Dashboard <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Route:</strong> <code>/dashboard</code></p>
+<p>Main parent landing page showing overview of all children's activities.</p>
+
+<p><strong>UI Layout:</strong> Welcome header with child+class dropdown selector at top. Below that: a waiver alert banner (if unsigned waivers exist), two stat cards (Attendance Streak, Badges Earned), an announcements list on the left, and a widgets panel on the right (mini calendar, next event, recent photo, badge showcase).</p>
+
+<div class="page-apis">
+<strong>APIs on page load (parallel):</strong><br>
+<code>GET /enrollments/my?child_id={id}&amp;status=active</code> - <em>Populates the child+class dropdown selector at top. Groups enrollments by child. Each enrollment provides <code>class_id</code> used to fetch all subsequent data. Also used to calculate "Total Active Enrollments" stat.</em><br>
+<code>GET /waivers/pending</code> - <em>Yellow alert banner at top of page: "You have X unsigned waivers". Shows count and links to /waivers page. Hidden if no pending waivers.</em><br>
+</div>
+
+<div class="page-apis">
+<strong>APIs after enrollment loads (depend on selected child+class):</strong><br>
+<code>GET /announcements?class_id={id}</code> - <em>Left panel: "Announcements" card showing coach announcements for the selected class. Displays title, content preview, author name, and timestamp. Limited to most recent ~5.</em><br>
+<code>GET /badges/enrollment/{enrollmentId}</code> - <em>Right panel: "Badges" widget showing the 4 most recently earned badges with icons, names, and earned dates. Also used for "Badges Earned" stat counter at the top.</em><br>
+<code>GET /attendance/enrollment/{enrollmentId}/streak</code> - <em>Top stat card: "Attendance Streak" showing <code>current_streak</code> number (e.g., "5 day streak"). No detailed breakdown on dashboard - just the number.</em><br>
+<code>GET /photos/class/{classId}?limit=6</code> - <em>Right panel: "Recent Photo" widget showing the first photo thumbnail from the class gallery. Tapping navigates to full gallery page.</em><br>
+<code>GET /events/class/{classId}</code> - <em>Right panel: Mini calendar with event dots + "Next Event" card showing the soonest upcoming event with title, date, time, and location.</em><br>
+<code>GET /events?upcoming=true&amp;limit=5</code> - <em>Fallback only: loaded instead of class events when no enrollment/class is selected. Shows general upcoming events.</em>
+</div>
+
+<h4>GET /enrollments/my</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/enrollments/my</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "child_id": "uuid",
+    "child_name": "John Doe",
+    "class_id": "uuid",
+    "class_name": "Soccer Basics",
+    "status": "ACTIVE",  // ACTIVE, PENDING, COMPLETED, CANCELLED, WAITLISTED, PAUSED
+    "final_price": 120.00,
+    "discount_amount": 10.00,
+    "payment_completed": true,
+    "enrolled_at": "2026-01-15T10:00:00Z",
+    "created_at": "2026-01-14T08:00:00Z",
+    "weekdays": ["Monday", "Wednesday"]
+  }
+]</code></pre>
+
+<h4>GET /announcements</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/announcements?class_id={id}&amp;limit=5</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "title": "Class Schedule Update",
+    "content": "Next week's class moved to Thursday...",
+    "author_name": "Coach Smith",
+    "class_ids": ["uuid1", "uuid2"],
+    "priority": "normal",
+    "created_at": "2026-03-10T14:00:00Z",
+    "attachments": [{ "id": "uuid", "filename": "schedule.pdf", "url": "/attachments/..." }]
+  }
+]</code></pre>
+
+<h4>GET /waivers/pending</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/waivers/pending</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "title": "Liability Waiver",
+    "content": "Full waiver text...",
+    "version": 2,
+    "required": true,
+    "class_id": "uuid"
+  }
+]</code></pre>
+
+<h4>GET /badges/enrollment/{enrollmentId}</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/badges/enrollment/{enrollmentId}</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "name": "Perfect Attendance",
+    "description": "Attended all classes this month",
+    "icon_url": "https://...",
+    "awarded_at": "2026-03-01T10:00:00Z",
+    "category": "attendance"
+  }
+]</code></pre>
+
+<h4>GET /attendance/enrollment/{enrollmentId}/streak</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/attendance/enrollment/{enrollmentId}/streak</code></div>
+<pre><code>{
+  "current_streak": 5,
+  "longest_streak": 12,
+  "total_attended": 20,
+  "total_classes": 24
+}</code></pre>
+</div>
+
+<!-- 4.2 BROWSE CLASSES -->
+<div class="section-card" id="parent-classes">
+<h3>4.2 Browse Classes <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Routes:</strong> <code>/class</code> (browse), <code>/class/:id</code> (detail), <code>/overview</code> (program overview)</p>
+
+<p><strong>UI Layout:</strong> <code>/class</code> shows a grid of class cards with filter bar at top (program dropdown, area dropdown, age range). <code>/class/:id</code> shows full class details with schedule, pricing, coach info, and "Enroll Now" button. <code>/overview</code> shows program categories with class listings grouped by program.</p>
+
+<div class="page-apis">
+<strong>Browse page APIs (parallel on load):</strong><br>
+<code>GET /classes</code> - <em>Main content: grid of class cards. Each card shows class name, coach, schedule days/times, price, enrolled count vs capacity, age range, and school location. Filters are applied as query params.</em><br>
+<code>GET /areas/</code> - <em>Filter bar: "Area" dropdown to filter classes by geographic service area.</em><br>
+<code>GET /programs/</code> - <em>Filter bar: "Program" dropdown to filter classes by sport/activity type (Soccer, Basketball, etc.).</em>
+</div>
+
+<h4>GET /classes</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/classes?program_id={id}&amp;area_id={id}&amp;has_capacity=true&amp;min_age=5&amp;max_age=12</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "name": "Soccer Basics",
+    "description": "Introduction to soccer for kids aged 5-8",
+    "program_id": "uuid",
+    "program_name": "Soccer",
+    "school_id": "uuid",
+    "school_name": "Lincoln Elementary",
+    "area_id": "uuid",
+    "area_name": "Downtown",
+    "coach_id": "uuid",
+    "coach_name": "Coach Smith",
+    "base_price": 120.00,
+    "capacity": 20,
+    "enrolled_count": 15,
+    "min_age": 5,
+    "max_age": 8,
+    "start_date": "2026-03-01",
+    "end_date": "2026-06-30",
+    "registration_open": true,
+    "schedule": [
+      { "day_of_week": "Monday", "start_time": "15:00", "end_time": "16:00" }
+    ],
+    "image_url": "/uploads/classes/...",
+    "slug": "soccer-basics-spring-2026",
+    "billing_type": "monthly",
+    "status": "active"
+  }
+]</code></pre>
+
+<h4>GET /classes/{id}</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/classes/{id}</code></div>
+<p>Returns the same structure as above with full details.</p>
+
+<h4>GET /programs/</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/programs/</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "name": "Soccer",
+    "description": "Youth soccer program",
+    "image_url": "/uploads/programs/...",
+    "is_active": true
+  }
+]</code></pre>
+
+<h4>GET /areas/</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/areas/</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "name": "Downtown",
+    "description": "Downtown service area",
+    "is_active": true
+  }
+]</code></pre>
+
+<h4>GET /schools/</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/schools/</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "name": "Lincoln Elementary",
+    "address": "123 Main St",
+    "area_id": "uuid",
+    "is_active": true
+  }
+]</code></pre>
+</div>
+
+<!-- 4.3 CHECKOUT -->
+<div class="section-card" id="parent-checkout">
+<h3>4.3 Checkout &amp; Payment Flow <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Routes:</strong> <code>/checkout</code>, <code>/payment/success</code>, <code>/payment/cancel</code></p>
+<p><strong>UI Layout:</strong> Multi-step checkout page with: class details summary at top, child selector (supports multi-child enrollment), optional custom fees checkboxes, discount code input, payment method selector (saved cards or new card), optional installment plan toggle, order summary with line items, and a "Pay Now" button. A waiver modal may appear before payment if unsigned waivers exist.</p>
+
+<p>The checkout flow involves multiple sequential API calls driven by the <code>useCheckoutFlow</code> hook:</p>
+
+<div class="page-apis">
+<strong>Step 1 - Page initialization (parallel):</strong><br>
+<code>GET /classes/{classId}</code> - <em>Top section: "Class Details Summary" card showing class name, schedule, coach, school, price, age range. The <code>classId</code> comes from URL query param <code>?classId=xxx</code>.</em><br>
+<code>GET /children/my</code> - <em>"Select Child" section: shows parent's children as selectable cards. Supports multi-child selection for enrolling siblings. Each card shows child name, age, grade.</em><br>
+<code>GET /classes/{classId}/capacity</code> - <em>If class is full (<code>hasCapacity: false</code>), shows "Join Waitlist" button instead of checkout form. Capacity check happens silently.</em>
+</div>
+
+<div class="page-apis">
+<strong>Step 2 - User applies discount (optional, on button click):</strong><br>
+<code>POST /discounts/validate</code> - <em>"Discount Code" input field with "Apply" button. On success, shows green badge with discount amount/percentage and updates order total in real-time. "Remove" button clears the discount.</em>
+</div>
+
+<div class="page-apis">
+<strong>Step 3 - Before payment (on "Pay Now" click):</strong><br>
+<code>GET /waivers/pending</code> - <em>Checks for unsigned waivers. If found, a modal overlay ("WaiverCheckModal") appears listing each waiver with checkbox and signature field. Parent must sign all waivers before payment proceeds.</em><br>
+<code>POST /waivers/accept</code> - <em>Called for each waiver signed in the modal (looped sequentially).</em>
+</div>
+
+<div class="page-apis">
+<strong>Step 4 - Payment processing (sequential):</strong><br>
+<code>POST /orders</code> - <em>Creates the order with selected children, class, discount code, and custom fees. Returns order total, line items breakdown, and order ID.</em><br>
+<code>POST /orders/{orderId}/pay</code> - <em>Creates Stripe PaymentIntent. Returns <code>client_secret</code> for Stripe SDK. If user has a saved card, <code>payment_method_id</code> is sent.</em><br>
+<em>[Stripe SDK handles card input on client side]</em><br>
+<code>POST /payments/{paymentIntentId}/confirm</code> - <em>Called after Stripe confirms payment. Finalizes the enrollment. On success, shows "Order Confirmation" screen with receipt download button.</em>
+</div>
+
+<h4>POST /discounts/validate</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/discounts/validate</code></div>
+<pre><code>// Request
+{ "code": "SUMMER25" }
+
+// Response
+{
+  "valid": true,
+  "discount_type": "percentage",  // "percentage" or "fixed"
+  "discount_value": 25,
+  "max_uses": 100,
+  "current_uses": 42,
+  "expires_at": "2026-06-30T23:59:59Z"
+}</code></pre>
+
+<h4>POST /orders</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/orders</code></div>
+<pre><code>// Request
+{
+  "items": [
+    {
+      "class_id": "uuid",
+      "child_id": "uuid",
+      "discount_code": "SUMMER25"
+    }
+  ]
+}
+
+// Response
+{
+  "id": "uuid",
+  "status": "draft",
+  "total": 90.00,
+  "subtotal": 120.00,
+  "discount": 30.00,
+  "items": [
+    {
+      "class_id": "uuid",
+      "class_name": "Soccer Basics",
+      "child_id": "uuid",
+      "child_name": "John Doe",
+      "base_price": 120.00,
+      "discount_amount": 30.00,
+      "line_total": 90.00
+    }
+  ]
+}</code></pre>
+
+<h4>POST /orders/{orderId}/pay</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/orders/{orderId}/pay</code></div>
+<pre><code>// Request
+{
+  "payment_method_id": "pm_xxx",  // optional, use saved card
+  "success_url": "https://app.example.com/payment/success",
+  "cancel_url": "https://app.example.com/payment/cancel"
+}
+
+// Response
+{
+  "client_secret": "pi_xxx_secret_xxx",
+  "payment_intent_id": "pi_xxx",
+  "amount": 9000,  // in cents
+  "status": "requires_payment_method"
+}</code></pre>
+
+<h4>POST /orders/calculate</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/orders/calculate</code></div>
+<pre><code>// Request - preview pricing without creating order
+{
+  "items": [
+    { "class_id": "uuid", "child_id": "uuid", "discount_code": "SUMMER25" }
+  ]
+}
+
+// Response
+{
+  "subtotal": 120.00,
+  "discount": 30.00,
+  "total": 90.00,
+  "items": [...]
+}</code></pre>
+
+<p><strong>Payment Success:</strong> <code>/payment/success</code> - No API calls, reads URL params from Stripe redirect</p>
+<p><strong>Payment Cancel:</strong> <code>/payment/cancel</code> - No API calls, shows cancellation message</p>
+</div>
+
+<!-- 4.4 PAYMENTS & BILLING -->
+<div class="section-card" id="parent-payment-billing">
+<h3>4.4 Payments &amp; Billing <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Route:</strong> <code>/paymentbilling</code></p>
+<p><strong>UI Layout:</strong> Settings-style page with left sidebar navigation and 4 vertically stacked content sections on the right: Payment Methods, Billing, Memberships, and Invoices. On mobile, sections stack with section headers between them.</p>
+
+<div class="page-apis">
+<strong>APIs on page load (4 parallel, independent calls):</strong><br>
+<code>GET /payments/methods</code> - <em>Section 1 "Payment Methods": shows saved credit/debit cards in a list. Each card shows brand logo (Visa/MC/Amex), last 4 digits, expiry date, and "Default" badge. Includes "Add Card" button and per-card "Set Default" / "Remove" actions.</em><br>
+<code>GET /invoices/billing-summary</code> - <em>Section 2 "Billing": shows billing period dates, "Next Payment Due" card with amount and date (highlighted yellow), active enrollments count, and pending payments warning banner.</em><br>
+<code>GET /enrollments/my</code> - <em>Section 3 "Memberships": shows all enrollments grouped by child (collapsible child headers). Each enrollment row shows class name, status badge, weekdays, enrolled date, price, and action buttons (Pause/Resume/Cancel). Bottom summary shows total active count and total monthly cost.</em><br>
+<code>GET /invoices/my</code> - <em>Section 4 "Invoices": sortable table with columns: Invoice #, Date, Description, Amount, Status badge, Download button. Filter buttons at top (All/Paid/Pending/Overdue). "Sync from Stripe" refresh button.</em>
+</div>
+
+<h4 id="payment-methods-section">Payment Methods</h4>
+<table>
+<tr><th>Action</th><th>Method</th><th>Endpoint</th><th>Body</th></tr>
+<tr><td>List cards</td><td><span class="badge get">GET</span></td><td><code>/payments/methods</code></td><td>-</td></tr>
+<tr><td>Create SetupIntent</td><td><span class="badge post">POST</span></td><td><code>/payments/setup-intent</code></td><td>-</td></tr>
+<tr><td>Set default</td><td><span class="badge post">POST</span></td><td><code>/payments/methods/{id}/default</code></td><td>-</td></tr>
+<tr><td>Remove card</td><td><span class="badge delete">DELETE</span></td><td><code>/payments/methods/{id}</code></td><td>-</td></tr>
+</table>
+
+<h4>Billing Summary</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/invoices/billing-summary</code></div>
+<pre><code>{
+  "billing_period_start": "2026-03-01",
+  "billing_period_end": "2026-03-31",
+  "next_due_date": "2026-04-01",
+  "next_payment_amount": 150.00,
+  "active_enrollments_count": 3,
+  "pending_payments_count": 1
+}</code></pre>
+
+<h4>Memberships (Enrollment Actions)</h4>
+<table>
+<tr><th>Action</th><th>Method</th><th>Endpoint</th><th>Body</th></tr>
+<tr><td>List enrollments</td><td><span class="badge get">GET</span></td><td><code>/enrollments/my</code></td><td>-</td></tr>
+<tr><td>Cancel preview</td><td><span class="badge get">GET</span></td><td><code>/enrollments/{id}/cancellation-preview</code></td><td>-</td></tr>
+<tr><td>Cancel</td><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/cancel</code></td><td><code>{ reason, refund_requested }</code></td></tr>
+<tr><td>Pause</td><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/pause</code></td><td><code>{ reason }</code> (optional)</td></tr>
+<tr><td>Resume</td><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/resume</code></td><td>-</td></tr>
+</table>
+
+<h4>Cancellation Preview Response</h4>
+<pre><code>{
+  "refund_amount": 120.00,
+  "cancellation_fee": 15.00,
+  "net_refund": 105.00,
+  "refund_policy": "Prorated refund based on remaining classes"
+}</code></pre>
+
+<h4>Invoices</h4>
+<table>
+<tr><th>Action</th><th>Method</th><th>Endpoint</th><th>Params/Body</th></tr>
+<tr><td>List invoices</td><td><span class="badge get">GET</span></td><td><code>/invoices/my</code></td><td><code>?status=paid&amp;skip=0&amp;limit=20</code></td></tr>
+<tr><td>Download PDF</td><td><span class="badge get">GET</span></td><td><code>/invoices/{id}/download</code></td><td>Returns PDF blob</td></tr>
+<tr><td>Sync from Stripe</td><td><span class="badge post">POST</span></td><td><code>/invoices/sync</code></td><td>-</td></tr>
+</table>
+
+<h4>Invoice Response</h4>
+<pre><code>{
+  "items": [
+    {
+      "id": "uuid",
+      "invoice_number": "INV-2026-001",
+      "invoice_date": "2026-03-01",
+      "description": "Class Registration",
+      "total": 150.00,
+      "discount": 10.00,
+      "status": "paid",  // paid, sent, draft, overdue, partially_paid, cancelled, refunded
+      "billing_period_start": "2026-03-01",
+      "billing_period_end": "2026-03-31"
+    }
+  ],
+  "total": 15
+}</code></pre>
+</div>
+
+<!-- 4.5 MY CHILDREN -->
+<div class="section-card" id="parent-children">
+<h3>4.5 My Children <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Routes:</strong> <code>/mychildren</code>, <code>/editchild/:childId</code>, <code>/addchild</code></p>
+<p><strong>UI Layout:</strong> <code>/mychildren</code> shows a list/grid of child profile cards. Each card displays child name, age, grade, school, profile photo, and action buttons (Edit, Delete). <code>/editchild/:childId</code> shows a full form pre-filled with the child's data. <code>/addchild</code> is a simple form for quick child creation.</p>
+
+<div class="page-apis">
+<strong>APIs:</strong><br>
+<code>GET /children/my</code> - <em>Main content: loads all parent's children as profile cards. Each card shows: profile photo (or avatar placeholder), full name, date of birth/age, grade level, school, and emergency contact summary.</em><br>
+<code>POST /children</code> - <em>"Add Child" button opens form. Sends child profile data including emergency contacts array (required, min 1). On success, refreshes the children list.</em><br>
+<code>GET /children/{id}</code> - <em>Edit Child page: pre-fills the edit form with all child data (name, DOB, grade, medical info, emergency contacts).</em><br>
+<code>PUT /children/{id}</code> - <em>"Save" button on edit form. Sends updated child data. Note: emergency contacts are NOT updated via this endpoint (they have separate endpoints).</em><br>
+<code>GET /children/{id}/delete-check</code> - <em>Called when user taps "Delete" button. Returns whether deletion is safe. If child has active enrollments, shows warning: "Child has X active enrollments that must be cancelled first" and blocks deletion.</em><br>
+<code>DELETE /children/{id}</code> - <em>Called after delete-check passes and user confirms. Soft-deletes the child. Refreshes children list.</em>
+</div>
+
+<h4>GET /children/my</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/children/my</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "first_name": "John",
+    "last_name": "Doe",
+    "date_of_birth": "2018-05-15",
+    "gender": "male",
+    "grade": "2",  // pre_k, k, 1-12
+    "school_name": "Lincoln Elementary",
+    "allergies": "Peanuts",
+    "medical_conditions": "Asthma",
+    "medications": "Inhaler",
+    "special_needs": null,
+    "notes": "Shy at first",
+    "profile_image_url": null,
+    "emergency_contacts": [
+      {
+        "id": "uuid",
+        "name": "Jane Doe",
+        "phone": "+1234567890",
+        "relationship": "Mother"
+      }
+    ]
+  }
+]</code></pre>
+
+<h4>POST /children</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/children</code></div>
+<pre><code>// Request
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "date_of_birth": "2018-05-15",
+  "gender": "male",
+  "grade": "2",
+  "school_name": "Lincoln Elementary",
+  "allergies": "Peanuts",
+  "medical_conditions": "Asthma",
+  "medications": "Inhaler",
+  "special_needs": null,
+  "notes": "Shy at first",
+  "emergency_contacts": [
+    { "name": "Jane Doe", "phone": "+1234567890", "relationship": "Mother" }
+  ]
+}</code></pre>
+<div class="important"><strong>Important:</strong> <code>emergency_contacts</code> array is REQUIRED (at least 1). Always include it. Grade values must be lowercase: <code>pre_k</code>, <code>k</code>, <code>1</code>-<code>12</code>.</div>
+
+<h4>GET /children/{id}/delete-check</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/children/{id}/delete-check</code></div>
+<pre><code>{
+  "can_delete": true,
+  "active_enrollments": 0,
+  "warnings": []
+}
+// or
+{
+  "can_delete": false,
+  "active_enrollments": 2,
+  "warnings": ["Child has 2 active enrollments that must be cancelled first"]
+}</code></pre>
+
+<h4>Emergency Contacts</h4>
+<table>
+<tr><th>Action</th><th>Method</th><th>Endpoint</th></tr>
+<tr><td>List</td><td><span class="badge get">GET</span></td><td><code>/children/{childId}/emergency-contacts</code></td></tr>
+<tr><td>Add</td><td><span class="badge post">POST</span></td><td><code>/children/{childId}/emergency-contacts</code></td></tr>
+<tr><td>Update</td><td><span class="badge put">PUT</span></td><td><code>/children/emergency-contacts/{contactId}</code></td></tr>
+<tr><td>Delete</td><td><span class="badge delete">DELETE</span></td><td><code>/children/emergency-contacts/{contactId}</code></td></tr>
+</table>
+</div>
+
+<!-- 4.6 WAIVERS -->
+<div class="section-card" id="parent-waivers">
+<h3>4.6 Waivers <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Route:</strong> <code>/waivers</code></p>
+<p><strong>UI Layout:</strong> Full-screen waiver signing page with CSF branding. Shows a card with: logo + "Registration Waiver" title, then a scrollable list of each pending waiver (title, full legal text, checkbox "I agree"), a typed signature input field at the bottom, and Submit/Cancel buttons.</p>
+
+<div class="page-apis">
+<strong>APIs:</strong><br>
+<code>GET /waivers/pending</code> - <em>Page load: fetches all unsigned waivers. Each waiver is rendered as a bordered section with the waiver name as header, full content/legal text below, and a checkbox "I agree to the [name] terms". If response returns empty array, shows blue info box: "No pending waivers found - All required waivers have been signed".</em><br>
+<code>POST /waivers/accept</code> - <em>"Submit Waiver" button: loops through all checked waivers and calls this endpoint for each one sequentially. Sends <code>template_id</code>, <code>signature</code> (typed name), and <code>agreed: true</code>. On success, shows toast and redirects to /dashboard after 1.5s.</em>
+</div>
+
+<h4>POST /waivers/accept</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/waivers/accept</code></div>
+<pre><code>// Request
+{
+  "waiver_template_id": "uuid",
+  "child_id": "uuid",
+  "signature": "John Doe",  // typed signature
+  "accepted": true
+}
+
+// Response
+{
+  "id": "uuid",
+  "waiver_template_id": "uuid",
+  "child_id": "uuid",
+  "signed_at": "2026-03-14T10:00:00Z",
+  "signature": "John Doe"
+}</code></pre>
+<div class="note">To sign multiple waivers at once, the frontend loops and calls <code>POST /waivers/accept</code> for each waiver sequentially.</div>
+</div>
+
+<!-- 4.7 BADGES -->
+<div class="section-card" id="parent-badges">
+<h3>4.7 Badges <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Route:</strong> <code>/badges</code></p>
+<p><strong>UI Layout:</strong> "Achievements" page with two sections. Top section: grid of earned badge cards (each ~200x200px with icon, name, and "Achieved: [date]"). Bottom section: "Locked Badges" showing greyed-out cards with lock icon, badge name, and description of how to earn it (hardcoded/static).</p>
+
+<div class="page-apis">
+<strong>APIs on page load (sequential - second depends on first):</strong><br>
+<code>GET /enrollments/my?child_id={id}&amp;status=active</code> - <em>Fetches enrollments for the currently selected child (from global ChildrenContext). Needed to get the <code>enrollment_id</code> for badge lookup. Uses the first active enrollment found.</em><br>
+<code>GET /badges/enrollment/{enrollmentId}</code> - <em>After enrollment loads: fetches all earned badges. Each badge is rendered as a card with icon image, badge name, and earned date formatted as "Achieved: Mar 1, 2026". If empty, shows "No badges earned yet. Keep up the good work!".</em>
+</div>
+
+<h4>GET /badges/enrollment/{enrollmentId}/progress</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/badges/enrollment/{enrollmentId}/progress</code></div>
+<pre><code>[
+  {
+    "badge_id": "uuid",
+    "badge_name": "Star Player",
+    "progress": 75,
+    "total_required": 10,
+    "current_count": 7,
+    "earned": false
+  }
+]</code></pre>
+</div>
+
+<!-- 4.8 ATTENDANCE -->
+<div class="section-card" id="parent-attendance">
+<h3>4.8 Attendance <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Route:</strong> <code>/attendance</code></p>
+<p><strong>UI Layout (Parent view):</strong> Badge carousel at top showing earned badges as horizontally scrollable cards. Below: attendance history table with date rows showing status icons (present/absent/late/excused) and date navigation (prev/next week arrows).</p>
+<p><strong>UI Layout (Coach view):</strong> Class selector dropdown + date picker at top. Below: list of enrolled students with toggle buttons to mark each student as present/absent/late. Bulk mark functionality.</p>
+
+<div class="page-apis">
+<strong>Parent APIs on page load (sequential):</strong><br>
+<code>GET /enrollments/my?child_id={id}&amp;status=active</code> - <em>Gets enrollment ID and class ID for the selected child. Needed before any attendance data can be fetched.</em><br>
+<code>GET /badges/enrollment/{enrollmentId}</code> - <em>Top section: badge carousel showing earned badges as scrollable cards with icons. Decorative/motivational element.</em><br>
+<code>GET /attendance/enrollment/{enrollmentId}/history</code> - <em>Main content: attendance history table. Each row shows a date and status (present=green check, absent=red X, late=yellow clock, excused=blue note). Rows are navigable by week with prev/next arrows.</em>
+</div>
+
+<div class="page-apis">
+<strong>Coach APIs on page load:</strong><br>
+<code>GET /classes?coach_id={userId}</code> - <em>Class selector dropdown: lists only the coach's assigned classes.</em><br>
+<code>GET /attendance/class/{classId}?date={date}</code> - <em>Main content: student list for the selected class and date. Shows each enrolled student with their attendance status and toggle buttons.</em><br>
+<code>POST /attendance</code> - <em>Called when coach marks a student's attendance. Sends enrollment_id, status, date, and optional notes.</em>
+</div>
+
+<h4>GET /attendance/class/{classId}</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/attendance/class/{classId}?date=2026-03-14</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "enrollment_id": "uuid",
+    "child_id": "uuid",
+    "child_name": "John Doe",
+    "class_id": "uuid",
+    "date": "2026-03-14",
+    "status": "present",  // present, absent, late, excused
+    "notes": null,
+    "marked_by": "uuid",
+    "created_at": "2026-03-14T16:00:00Z"
+  }
+]</code></pre>
+
+<h4>GET /attendance/child/{childId}/stats</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/attendance/child/{childId}/stats</code></div>
+<pre><code>{
+  "total_classes": 24,
+  "attended": 20,
+  "absent": 3,
+  "late": 1,
+  "attendance_percentage": 83.3
+}</code></pre>
+</div>
+
+<!-- 4.9 EVENTS -->
+<div class="section-card" id="parent-events">
+<h3>4.9 Events <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Route:</strong> <code>/events</code></p>
+<p><strong>UI Layout:</strong> "Events" page header with selected child indicator. Filter bar below with: search input (by title/description/location), time filter dropdown (Upcoming/Past/All), type filter dropdown (Tournament/Practice/Social/Showcase/Meeting/Other), and Clear filters button. Below: responsive grid (1-3 columns) of EventRsvpCards, each showing event title, date/time, location, type badge, RSVP count, and RSVP action button.</p>
+
+<div class="page-apis">
+<strong>APIs on page load (sequential):</strong><br>
+<code>GET /enrollments/my?child_id={id}&amp;status=active</code> - <em>Gets all enrolled class IDs for the selected child. These class IDs are used to fetch events from each class.</em><br>
+<code>GET /events/class/{classId}</code> - <em>Called in parallel for EACH enrolled class (Promise.all). Results are merged and deduplicated by event ID. This gives a combined event feed across all the child's classes. Events are then filtered/sorted on the client side by the filter bar.</em>
+</div>
+<div class="page-apis">
+<strong>RSVP actions (on EventRsvpCard button clicks):</strong><br>
+<code>POST /events/{eventId}/rsvp</code> - <em>"RSVP" button on each event card. Sends <code>{ status: "attending", notes: "..." }</code>. Button changes to "Attending" green state after success.</em><br>
+<code>GET /events/{eventId}/my-rsvp</code> - <em>Loaded per card to check if user already RSVP'd. If already attending, shows "Attending" badge and "Cancel RSVP" option.</em><br>
+<code>PUT /events/{eventId}/rsvps/{rsvpId}</code> - <em>"Change RSVP" action: updates existing RSVP status (e.g., attending → declined).</em><br>
+<code>DELETE /events/{eventId}/rsvps/{rsvpId}</code> - <em>"Cancel RSVP" button: removes the RSVP. Button reverts to "RSVP" state.</em>
+</div>
+
+<h4>GET /events/class/{classId}</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/events/class/{classId}</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "title": "End of Season Party",
+    "description": "Celebration at the park",
+    "event_type": "social",  // social, competition, practice, meeting, other
+    "start_datetime": "2026-06-15T14:00:00Z",
+    "end_datetime": "2026-06-15T17:00:00Z",
+    "location": "Central Park Pavilion",
+    "class_ids": ["uuid1"],
+    "is_all_day": false,
+    "rsvp_required": true,
+    "max_attendees": 50,
+    "current_rsvps": 32,
+    "created_at": "2026-03-01T10:00:00Z"
+  }
+]</code></pre>
+
+<h4>RSVP to Event</h4>
+<table>
+<tr><th>Action</th><th>Method</th><th>Endpoint</th><th>Body</th></tr>
+<tr><td>Submit RSVP</td><td><span class="badge post">POST</span></td><td><code>/events/{eventId}/rsvp</code></td><td><code>{ status: "attending", notes: "Bringing snacks" }</code></td></tr>
+<tr><td>Get my RSVP</td><td><span class="badge get">GET</span></td><td><code>/events/{eventId}/my-rsvp</code></td><td>-</td></tr>
+<tr><td>Update RSVP</td><td><span class="badge put">PUT</span></td><td><code>/events/{eventId}/rsvps/{rsvpId}</code></td><td><code>{ status: "declined" }</code></td></tr>
+<tr><td>Cancel RSVP</td><td><span class="badge delete">DELETE</span></td><td><code>/events/{eventId}/rsvps/{rsvpId}</code></td><td>-</td></tr>
+</table>
+</div>
+
+<!-- 4.10 CALENDAR -->
+<div class="section-card" id="parent-calendar">
+<h3>4.10 Calendar <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Route:</strong> <code>/calendar</code></p>
+<p><strong>UI Layout (Parent):</strong> Two-panel layout. Left: mini monthly calendar with colored dots on days that have events. Right: "Next Event" detail card showing the soonest upcoming event. Below: full calendar view with event details. Child-class context comes from global selector.</p>
+<p><strong>UI Layout (Coach):</strong> Same layout but with class selector dropdown at top to switch between assigned classes.</p>
+
+<div class="page-apis">
+<strong>Parent APIs on page load (sequential):</strong><br>
+<code>GET /enrollments/my?child_id={id}&amp;status=active</code> - <em>Gets the class ID for the selected child's enrollment. Determines which class's events to show on the calendar.</em><br>
+<code>GET /events/class/{classId}</code> - <em>Main data: loads all events for the class. Events are plotted as dots on the mini calendar and listed in the full calendar view. Also used to determine the "Next Event" card.</em><br>
+<code>GET /events?upcoming=true&amp;limit=10</code> - <em>Fallback: loaded only when no class is selected. Shows general upcoming events.</em>
+</div>
+<div class="page-apis">
+<strong>Coach APIs:</strong><br>
+<code>GET /classes?coach_id={userId}</code> - <em>Class selector dropdown at top. Lists coach's assigned classes.</em><br>
+<code>GET /events/class/{classId}</code> - <em>Events for the selected class, same as parent view.</em>
+</div>
+
+<h4>GET /events/calendar</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/events/calendar?month=3&amp;year=2026&amp;class_id={id}</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "title": "Practice",
+    "start_datetime": "2026-03-15T15:00:00Z",
+    "end_datetime": "2026-03-15T16:00:00Z",
+    "event_type": "practice",
+    "class_id": "uuid"
+  }
+]</code></pre>
+</div>
+
+<!-- 4.11 GALLERY -->
+<div class="section-card" id="parent-gallery">
+<h3>4.11 Photo Gallery <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Route:</strong> <code>/photos</code></p>
+<p><strong>UI Layout:</strong> "Photo Gallery" title with child selector dropdown at top-right (to switch between children). Below: 3-column masonry grid layout of photos (single column on mobile). Photos use lazy loading with placeholder shimmer animation. Each photo uses thumbnail URL for the grid (faster loading) with full-size URL available for detail view.</p>
+
+<div class="page-apis">
+<strong>APIs on page load (sequential):</strong><br>
+<code>GET /enrollments/my?child_id={id}&amp;status=active</code> - <em>Gets the class ID from the selected child's enrollment. Child selector dropdown at top lets parent switch between children to see different class photos.</em><br>
+<code>GET /photos/class/{classId}?limit=20</code> - <em>Main content: fetches photos uploaded by coaches for the class. Response includes <code>thumbnail_url</code> (used for grid), <code>url</code>/<code>image_url</code> (full size), caption, uploaded_by_name, and taken_at date. Photos are distributed across 3 columns for masonry layout.</em>
+</div>
+
+<h4>GET /photos/class/{classId}</h4>
+<div class="endpoint"><span class="badge get">GET</span> <code>/photos/class/{classId}?skip=0&amp;limit=20</code></div>
+<pre><code>[
+  {
+    "id": "uuid",
+    "url": "/uploads/photos/...",
+    "thumbnail_url": "/uploads/photos/thumb_...",
+    "caption": "Great game today!",
+    "class_id": "uuid",
+    "uploaded_by": "uuid",
+    "uploaded_by_name": "Coach Smith",
+    "taken_at": "2026-03-10T15:30:00Z",
+    "tagged_children": ["uuid1", "uuid2"],
+    "created_at": "2026-03-10T16:00:00Z"
+  }
+]</code></pre>
+</div>
+
+<!-- 4.12 SETTINGS -->
+<div class="section-card" id="parent-settings">
+<h3>4.12 Account Settings <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Routes:</strong> <code>/settings</code>, <code>/account</code>, <code>/settings/password</code></p>
+<p><strong>UI Layout:</strong> Settings-style page (same layout as Payments &amp; Billing) with left sidebar navigation and content area. Two sections: Profile section with first name, last name, email (read-only), and phone fields. Password section with current password, new password, and confirm password fields (with show/hide toggles). "Save Changes" and "Cancel" buttons at the top.</p>
+
+<div class="page-apis">
+<strong>APIs (no page-load calls - form is pre-filled from auth context):</strong><br>
+<code>PUT /users/me</code> - <em>"Save Changes" button in Profile section. Sends updated first_name, last_name, phone. Email is displayed but not editable. Updates the auth context on success so the header name updates immediately.</em><br>
+<code>POST /auth/change-password</code> - <em>"Save Changes" button in Password section. Sends current_password and new_password. Shows success toast on completion. Fields clear after successful change.</em>
+</div>
+
+<h4>PUT /users/me</h4>
+<div class="endpoint"><span class="badge put">PUT</span> <code>/users/me</code></div>
+<pre><code>// Request
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "+1234567890",
+  "address": "123 Main St",
+  "city": "Springfield",
+  "state": "IL",
+  "zip_code": "62701"
+}</code></pre>
+
+<h4>POST /auth/change-password</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/auth/change-password</code></div>
+<pre><code>// Request
+{
+  "current_password": "old_password",
+  "new_password": "new_secure_password"
+}</code></pre>
+</div>
+
+<!-- 4.13 REGISTER CHILD -->
+<div class="section-card" id="parent-registerchild">
+<h3>4.13 Register Child <span class="role-badge role-parent">PARENT</span></h3>
+<p><strong>Route:</strong> <code>/registerchild</code></p>
+<p>Full child registration form with class selection, profile image upload, and waiver signing.</p>
+
+<div class="page-apis">
+<strong>APIs on page load:</strong><br>
+<code>GET /classes</code> - List active classes (for classroom dropdown via <code>useClasses</code> hook)
+</div>
+
+<div class="page-apis">
+<strong>APIs on form submit (sequential):</strong><br>
+<code>POST /children</code> - Create child profile<br>
+<code>POST /children/{id}/upload-image</code> - Upload profile image (if provided)<br>
+<code>GET /waivers/pending</code> - Check for unsigned waivers<br>
+<code>POST /waivers/accept</code> - Sign each pending waiver (called per waiver in modal)
+</div>
+
+<div class="note"><strong>Note:</strong> This page includes a <code>WaiverCheckModal</code> component that shows unsigned waivers after child creation and allows the parent to sign them before proceeding.</div>
+</div>
+
+<!-- 4.14 CONTACT US -->
+<div class="section-card" id="parent-contact">
+<h3>4.14 Contact Us <span class="role-badge role-auth">ANY AUTH</span></h3>
+<p><strong>Route:</strong> <code>/contactus</code></p>
+<p>Static contact form page. Currently has <strong>no API calls</strong> — the form is not wired to a backend endpoint. It displays hardcoded contact information (phone, email, location).</p>
+
+<div class="note"><strong>Mobile Note:</strong> This page is purely presentational. You may want to wire the "Send Message" button to a support/contact endpoint when building the mobile version, or use native email/phone intents.</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="coach">5. Coach Pages</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<h3>5.1 Coach Dashboard <span class="role-badge role-coach">COACH</span></h3>
+<p><strong>Route:</strong> <code>/coachdashboard</code></p>
+<p><strong>UI Layout:</strong> Overview dashboard for coaches showing their assigned classes. Top: class selector or summary cards. Below: announcements list (with delete capability), upcoming events for the class, recent photos gallery, and attendance summary stats. Coaches can manage announcements they created.</p>
+
+<div class="page-apis">
+<strong>APIs on load:</strong><br>
+<code>GET /classes?coach_id={userId}</code> - <em>Top section: loads the coach's assigned classes. Used as the primary selector to scope all other data. Shows class name, schedule, enrolled count.</em><br>
+<code>GET /announcements?class_id={id}</code> - <em>"Announcements" section: shows announcements the coach has posted for the selected class. Each has title, content, date. Coach can delete their own announcements.</em><br>
+<code>GET /events/class/{classId}</code> - <em>"Upcoming Events" section: shows events for the selected class with date, time, location, and type.</em><br>
+<code>GET /photos/class/{classId}</code> - <em>"Recent Photos" section: shows recently uploaded photos for the class as a thumbnail grid.</em><br>
+<code>GET /attendance/summary/</code> - <em>"Attendance" stats: shows summary numbers like total present, absent, attendance percentage for recent classes.</em>
+</div>
+<div class="page-apis">
+<strong>Actions:</strong><br>
+<code>DELETE /announcements/{id}</code> - <em>Delete button (trash icon) on each announcement card. Confirms before deleting. Refreshes the announcements list after deletion.</em>
+</div>
+
+<h3>5.2 Coach Photo Upload <span class="role-badge role-coach">COACH</span></h3>
+<p><strong>Route:</strong> <code>/Gallery</code></p>
+<p><strong>UI Layout:</strong> Photo management page for coaches. Class selector dropdown at top. Below: existing photos grid for the selected class. Upload area/button to add new photos with optional caption and child tagging.</p>
+
+<div class="page-apis">
+<code>GET /classes?coach_id={userId}</code> - <em>Class selector dropdown: lists coach's assigned classes to scope the photo gallery.</em><br>
+<code>GET /photos/class/{classId}</code> - <em>Photo grid: shows all existing photos for the selected class. Each photo shows thumbnail, caption, and upload date.</em><br>
+<code>POST /photos/upload</code> - <em>Upload button: sends photo as multipart/form-data with class_id, optional caption, optional child_ids (for tagging), and optional taken_at date.</em>
+</div>
+
+<h4>POST /photos/upload</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/photos/upload</code> (multipart/form-data)</div>
+<pre><code>// FormData fields:
+file: [binary image file]
+class_id: "uuid"
+caption: "Great practice today!"
+child_ids: ["uuid1", "uuid2"]  // optional: tag children
+taken_at: "2026-03-14T15:00:00Z"  // optional</code></pre>
+
+<h3>5.3 Student Check-In <span class="role-badge role-coach">COACH</span></h3>
+<p><strong>Route:</strong> <code>/checkin</code></p>
+<p><strong>UI Layout:</strong> Quick check-in screen for coaches to mark student arrivals. Class selector dropdown + date at top. Below: list of all enrolled students for the selected class with toggle buttons (check-in / check-out). Supports both individual and bulk check-in operations. Designed for quick, tap-friendly use during class start.</p>
+
+<div class="page-apis">
+<code>GET /classes?coach_id={userId}</code> - <em>Class selector dropdown at top: lists coach's assigned classes.</em><br>
+<code>GET /check-in/class/{classId}/status?date={date}</code> - <em>Student list: loads all enrolled students with their current check-in status (checked-in or not) for the selected date. Shows student name, enrollment info, and toggle state.</em><br>
+<code>POST /check-in</code> - <em>Individual toggle: when coach taps a student's check-in button. Sends <code>enrollment_id</code>, <code>class_id</code>, <code>date</code>. Toggles the student's status.</em><br>
+<code>PUT /check-in/{checkInId}/checkout</code> - <em>Check-out: when coach taps an already-checked-in student to check them out. Records the departure.</em><br>
+<code>POST /check-in/bulk</code> - <em>"Check All" button: marks multiple students as checked-in at once. Sends <code>class_id</code>, <code>date</code>, and array of <code>enrollment_ids</code>.</em>
+</div>
+
+<h4>Check-In Endpoints</h4>
+<table>
+<tr><th>Action</th><th>Method</th><th>Endpoint</th><th>Body</th></tr>
+<tr><td>Get class status</td><td><span class="badge get">GET</span></td><td><code>/check-in/class/{classId}/status?date=2026-03-14</code></td><td>-</td></tr>
+<tr><td>Single check-in</td><td><span class="badge post">POST</span></td><td><code>/check-in</code></td><td><code>{ enrollment_id, class_id, date }</code></td></tr>
+<tr><td>Check-out</td><td><span class="badge put">PUT</span></td><td><code>/check-in/{checkInId}/checkout</code></td><td>-</td></tr>
+<tr><td>Bulk check-in</td><td><span class="badge post">POST</span></td><td><code>/check-in/bulk</code></td><td><code>{ class_id, date, enrollment_ids: [...] }</code></td></tr>
+</table>
+
+<h3>5.4 Attendance Marking <span class="role-badge role-coach">COACH</span></h3>
+<p>Coaches use the <code>/attendance</code> page (same route as parents, but with coach-specific UI) for formal attendance marking. This is more detailed than Check-In — it tracks present/absent/late/excused with notes.</p>
+<div class="page-apis">
+<code>GET /attendance/class/{classId}?date={date}</code> - <em>Student attendance list: loads all enrolled students with their attendance status for the selected class and date. Each row shows student name and status dropdown.</em><br>
+<code>POST /attendance</code> - <em>Individual mark: creates a single attendance record when coach changes a student's status. Sends enrollment_id, status (present/absent/late/excused), date, and optional notes.</em><br>
+<code>POST /attendance/bulk</code> - <em>Bulk create: marks attendance for multiple students at once. Used when marking an entire class at end of session.</em><br>
+<code>POST /attendance/mark</code> - <em>Alternative bulk endpoint: sends class_id, date, and an array of records [{enrollment_id, status, notes}]. Used by the bulk marking UI.</em>
+</div>
+
+<h4>POST /attendance/mark</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/attendance/mark</code></div>
+<pre><code>// Request
+{
+  "class_id": "uuid",
+  "date": "2026-03-14",
+  "records": [
+    { "enrollment_id": "uuid", "status": "present" },
+    { "enrollment_id": "uuid", "status": "absent" },
+    { "enrollment_id": "uuid", "status": "late", "notes": "Arrived 10 min late" }
+  ]
+}</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="admin">6. Admin Pages</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<h3>6.1 Admin Dashboard <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin</code></p>
+<div class="page-apis">
+<code>GET /admin/dashboard/metrics</code> - Dashboard KPIs
+</div>
+<pre><code>{
+  "total_students": 450,
+  "active_enrollments": 380,
+  "total_revenue": 45000.00,
+  "monthly_revenue": 12000.00,
+  "pending_payments": 5,
+  "classes_count": 25,
+  "programs_count": 8,
+  "coaches_count": 12
+}</code></pre>
+
+<h3>6.2 Class Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/classes</code></p>
+<div class="page-apis">
+<code>GET /classes</code> - List all classes<br>
+<code>POST /classes</code> - Create class (multipart for image)<br>
+<code>PUT /classes/{id}</code> - Update class<br>
+<code>DELETE /classes/{id}</code> - Delete class<br>
+<code>POST /classes/{id}/image</code> - Upload class image<br>
+<code>GET /classes/{id}/practices</code> - Get practice dates<br>
+<code>POST /classes/{id}/practices/cancel</code> - Cancel/restore practice<br>
+<code>GET /programs/</code> - For program dropdown<br>
+<code>GET /areas/</code> - For area dropdown
+</div>
+
+<h3>6.3 User Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/users</code></p>
+<div class="page-apis">
+<code>GET /users</code> - List all users<br>
+<code>POST /users</code> - Create user (admin/coach)<br>
+<code>PUT /users/{id}</code> - Update user<br>
+<code>DELETE /users/{id}</code> - Delete user
+</div>
+
+<h3>6.4 Programs Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/programs</code></p>
+<div class="page-apis">
+<code>GET /programs/</code> - List programs<br>
+<code>POST /programs/</code> - Create program<br>
+<code>PUT /programs/{id}/</code> - Update program<br>
+<code>DELETE /programs/{id}/</code> - Delete program
+</div>
+
+<h3>6.5 Areas Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/areas</code></p>
+<div class="page-apis">
+<code>GET /areas/</code> - List areas<br>
+<code>POST /areas/</code> - Create area<br>
+<code>PUT /areas/{id}/</code> - Update area<br>
+<code>DELETE /areas/{id}/</code> - Delete area
+</div>
+
+<h3>6.6 Schools Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/schools</code></p>
+<div class="page-apis">
+<code>GET /schools/</code> - List schools<br>
+<code>GET /areas/</code> - Areas for dropdown<br>
+<code>POST /schools/</code> - Create school<br>
+<code>PUT /schools/{id}/</code> - Update school<br>
+<code>DELETE /schools/{id}/</code> - Delete school
+</div>
+
+<h3>6.7 Client Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/clients</code></p>
+<div class="page-apis">
+<code>GET /admin/clients</code> - List clients with filters<br>
+<code>GET /admin/clients/{id}</code> - Client detail with children &amp; enrollments<br>
+<code>DELETE /admin/clients/{id}</code> - Delete client<br>
+<code>GET /children/{id}/delete-check</code> - Pre-check before child delete<br>
+<code>DELETE /children/{id}</code> - Delete child<br>
+<code>GET /programs/</code> - For filter dropdown
+</div>
+
+<h3>6.8 Financials <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/financials</code></p>
+<div class="page-apis">
+<code>GET /admin/dashboard/metrics</code> - Financial KPIs<br>
+<code>GET /admin/finance/revenue</code> - Revenue report with filters<br>
+<code>GET /programs/</code> - For filter<br>
+<code>GET /classes</code> - For filter
+</div>
+
+<h3>6.9 Enrollment Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/enrollments</code></p>
+<div class="page-apis">
+<code>GET /enrollments</code> - List all enrollments<br>
+<code>GET /enrollments/{id}</code> - Enrollment detail<br>
+<code>POST /enrollments/{id}/activate</code> - Activate pending enrollment<br>
+<code>POST /enrollments/{id}/cancel</code> - Cancel enrollment<br>
+<code>DELETE /enrollments/{id}</code> - Delete enrollment<br>
+<code>GET /classes</code> - For filter
+</div>
+
+<h3>6.10 Waitlist Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/waitlist</code></p>
+<div class="page-apis">
+<code>GET /waitlist</code> - List all waitlist entries<br>
+<code>POST /waitlist/{id}/enroll</code> - Move to enrolled<br>
+<code>DELETE /waitlist/{id}</code> - Remove from waitlist<br>
+<code>POST /waitlist/{id}/notify</code> - Notify of available spot
+</div>
+
+<h3>6.11 Installments <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/installments</code></p>
+<div class="page-apis">
+<code>GET /installments</code> - List all installment plans<br>
+<code>POST /installments/{id}/mark-paid</code> - Mark installment as paid<br>
+<code>DELETE /installments/{id}</code> or <code>POST /installments/{id}/cancel-admin</code> - Cancel plan<br>
+<code>POST /installments/{id}/send-reminder</code> - Send payment reminder
+</div>
+
+<h3>6.12 Invoice Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/invoices</code></p>
+<div class="page-apis">
+<code>GET /invoices</code> - List all invoices<br>
+<code>GET /invoices/{id}/download</code> - Download PDF<br>
+<code>POST /invoices/sync-all</code> - Sync all from Stripe
+</div>
+
+<h3>6.13 Refunds Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/refunds</code></p>
+<div class="page-apis">
+<code>GET /admin/refunds/search</code> - Search refunded invoices<br>
+<code>GET /admin/refunds/pending</code> - Pending refunds<br>
+<code>POST /admin/refunds/{paymentId}/approve</code> - Approve refund<br>
+<code>POST /admin/refunds/{paymentId}/reject</code> - Reject refund
+</div>
+
+<h3>6.14 Cancellation Requests <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/cancellations</code></p>
+<div class="page-apis">
+<code>GET /cancellation-requests/stats/summary</code> - Stats<br>
+<code>GET /cancellation-requests/pending</code> - Pending requests<br>
+<code>GET /cancellation-requests</code> - All requests<br>
+<code>POST /cancellation-requests/{id}/approve</code> - Approve<br>
+<code>POST /cancellation-requests/{id}/reject</code> - Reject
+</div>
+
+<h3>6.15 Events Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/events</code></p>
+<div class="page-apis">
+<code>GET /events</code> - List all events<br>
+<code>POST /events</code> - Create event<br>
+<code>PUT /events/{id}</code> - Update event<br>
+<code>DELETE /events/{id}</code> - Delete event<br>
+<code>GET /events/{id}/attendee-summary</code> - RSVP summary<br>
+<code>GET /classes</code> - For class dropdown<br>
+<code>GET /areas/</code> - For area dropdown
+</div>
+
+<h3>6.16 Badges Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/badges</code></p>
+<div class="page-apis">
+<code>GET /badges</code> - List all badges<br>
+<code>POST /badges</code> - Create badge<br>
+<code>PUT /badges/{id}</code> - Update badge<br>
+<code>DELETE /badges/{id}</code> - Delete badge<br>
+<code>POST /badges/award</code> - Award badge to student<br>
+<code>GET /enrollments</code> - For student selection<br>
+<code>GET /classes</code> - For class filter
+</div>
+
+<h4>POST /badges/award</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/badges/award</code></div>
+<pre><code>{
+  "badge_id": "uuid",
+  "enrollment_id": "uuid",
+  "notes": "Outstanding performance in practice"
+}</code></pre>
+
+<h3>6.17 Photos Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/photos</code></p>
+<div class="page-apis">
+<code>GET /photos/class/{classId}</code> - List photos by class<br>
+<code>POST /photos/upload</code> - Upload photo<br>
+<code>POST /photos/bulk</code> - Bulk upload<br>
+<code>DELETE /photos/{id}</code> - Delete photo<br>
+<code>GET /classes</code> - For class dropdown
+</div>
+
+<h3>6.18 Announcements Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/announcements</code></p>
+<div class="page-apis">
+<code>GET /announcements</code> - List all announcements<br>
+<code>POST /announcements</code> - Create announcement<br>
+<code>PUT /announcements/{id}</code> - Update<br>
+<code>DELETE /announcements/{id}</code> - Delete<br>
+<code>POST /announcements/{id}/attachments</code> - Upload attachment<br>
+<code>GET /classes</code> - For class targeting
+</div>
+
+<h3>6.19 Admin Calendar <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/calendar</code></p>
+<div class="page-apis">
+<code>GET /classes</code> - All classes with schedules<br>
+<code>GET /classes/{id}/practices</code> - Practice dates per class<br>
+<code>GET /events/class/{classId}</code> - Events per class<br>
+<code>GET /events?upcoming=true</code> - Upcoming events
+</div>
+
+<h3>6.20 Discount Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/discounts</code></p>
+<div class="page-apis">
+<code>GET /discounts/codes</code> - List discount codes<br>
+<code>POST /discounts/codes</code> - Create discount code<br>
+<code>PUT /discounts/codes/{id}</code> - Update<br>
+<code>DELETE /discounts/codes/{id}</code> - Delete<br>
+<code>POST /discounts/codes/{id}/activate</code> - Activate<br>
+<code>POST /discounts/codes/{id}/deactivate</code> - Deactivate<br>
+<code>GET /discounts/codes/{id}/usage</code> - Usage stats<br>
+<code>GET /programs/</code> - For scope dropdown<br>
+<code>GET /classes</code> - For scope dropdown
+</div>
+
+<h3>6.21 Waiver Management <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Routes:</strong> <code>/admin/waivers</code>, <code>/admin/waiver-reports</code></p>
+<div class="page-apis">
+<code>GET /waivers/templates</code> - List waiver templates<br>
+<code>POST /waivers/templates</code> - Create template<br>
+<code>PUT /waivers/templates/{id}</code> - Update template<br>
+<code>DELETE /waivers/templates/{id}</code> - Delete template<br>
+<code>GET /waivers/admin/acceptances</code> - List all acceptances (reports)
+</div>
+
+<h3>6.22 Mass Email <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/admin/mass-email</code></p>
+<div class="page-apis">
+<code>POST /admin/bulk/email</code> - Send bulk email<br>
+<code>GET /classes</code> - For recipient targeting<br>
+<code>GET /programs/</code> - For recipient targeting<br>
+<code>GET /areas/</code> - For recipient targeting
+</div>
+
+<h4>POST /admin/bulk/email</h4>
+<div class="endpoint"><span class="badge post">POST</span> <code>/admin/bulk/email</code></div>
+<pre><code>{
+  "subject": "Important Update",
+  "body": "HTML or plain text content...",
+  "recipient_filter": {
+    "class_ids": ["uuid1", "uuid2"],
+    "program_ids": ["uuid"],
+    "area_ids": ["uuid"],
+    "roles": ["parent"]
+  }
+}</code></pre>
+
+<h3>6.23 Class Roster <span class="role-badge role-admin">ADMIN</span></h3>
+<p><strong>Route:</strong> <code>/roster/:classId</code></p>
+<div class="page-apis">
+<code>GET /admin/classes/{classId}/roster</code> - Get class roster<br>
+<code>POST /public/roster/{classId}/generate-token</code> - Generate shareable link
+</div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="api-catalog">7. Complete API Endpoint Catalog</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<h3>Authentication (8 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/login</code></td><td>No</td><td>Login</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/register</code></td><td>No</td><td>Register new parent</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/refresh</code></td><td>No</td><td>Refresh JWT token</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/google</code></td><td>No</td><td>Google OAuth login</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/logout</code></td><td>Yes</td><td>Logout</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/change-password</code></td><td>Yes</td><td>Change password</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/forgot-password</code></td><td>No</td><td>Request password reset</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/auth/reset-password</code></td><td>No</td><td>Reset password with token</td></tr>
+</table>
+
+<h3>Users (6 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/users/me</code></td><td>Yes</td><td>Get current user profile</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/users/me</code></td><td>Yes</td><td>Update current user profile</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/users</code></td><td>Admin</td><td>List all users</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/users</code></td><td>Admin</td><td>Create user</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/users/{id}</code></td><td>Admin</td><td>Update user</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/users/{id}</code></td><td>Admin</td><td>Delete user</td></tr>
+</table>
+
+<h3>Children (9 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/children/my</code></td><td>Parent</td><td>List my children</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/children</code></td><td>Admin</td><td>List all children</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/children</code></td><td>Yes</td><td>Create child</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/children/{id}</code></td><td>Yes</td><td>Get child detail</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/children/{id}</code></td><td>Yes</td><td>Update child</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/children/{id}/delete-check</code></td><td>Yes</td><td>Pre-delete check</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/children/{id}</code></td><td>Yes</td><td>Delete child</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/children/{id}/emergency-contacts</code></td><td>Yes</td><td>List emergency contacts</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/children/{id}/emergency-contacts</code></td><td>Yes</td><td>Add emergency contact</td></tr>
+</table>
+
+<h3>Programs (5), Areas (5), Schools (5)</h3>
+<table>
+<tr><th>Method</th><th>Endpoints Pattern</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/{resource}/</code></td><td>Public</td><td>List all</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/{resource}/{id}/</code></td><td>Public</td><td>Get by ID</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/{resource}/</code></td><td>Admin</td><td>Create</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/{resource}/{id}/</code></td><td>Admin</td><td>Update</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/{resource}/{id}/</code></td><td>Admin</td><td>Delete</td></tr>
+</table>
+<p><em>Applies to: <code>/programs</code>, <code>/areas</code>, <code>/schools</code></em></p>
+
+<h3>Classes (8 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/classes</code></td><td>Public</td><td>List with filters</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/classes/{id}</code></td><td>Public</td><td>Get detail</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/classes</code></td><td>Admin</td><td>Create</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/classes/{id}</code></td><td>Admin</td><td>Update</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/classes/{id}</code></td><td>Admin</td><td>Delete</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/classes/{id}/image</code></td><td>Admin</td><td>Upload image</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/classes/{id}/practices</code></td><td>Admin</td><td>Get practice dates</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/classes/{id}/practices/cancel</code></td><td>Admin</td><td>Cancel/restore practice</td></tr>
+</table>
+
+<h3>Enrollments (11 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/enrollments/my</code></td><td>Parent</td><td>My enrollments</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/enrollments</code></td><td>Admin</td><td>All enrollments</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/enrollments</code></td><td>Yes</td><td>Create enrollment</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/enrollments/{id}</code></td><td>Yes</td><td>Get detail</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/enrollments/{id}</code></td><td>Admin</td><td>Update</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/enrollments/{id}/cancellation-preview</code></td><td>Yes</td><td>Preview refund</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/cancel</code></td><td>Yes</td><td>Cancel enrollment</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/activate</code></td><td>Admin</td><td>Activate pending</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/pause</code></td><td>Yes</td><td>Pause</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/resume</code></td><td>Yes</td><td>Resume</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/transfer</code></td><td>Admin</td><td>Transfer class</td></tr>
+</table>
+
+<h3>Orders (7 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/orders/my</code></td><td>Parent</td><td>My orders</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/orders</code></td><td>Admin</td><td>All orders</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/orders</code></td><td>Yes</td><td>Create order</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/orders/{id}</code></td><td>Yes</td><td>Get detail</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/orders/calculate</code></td><td>Yes</td><td>Calculate pricing</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/orders/{id}/pay</code></td><td>Yes</td><td>Create payment intent</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/orders/{id}/cancel</code></td><td>Yes</td><td>Cancel order</td></tr>
+</table>
+
+<h3>Payments (11 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/payments/methods</code></td><td>Yes</td><td>List saved cards</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/payments/setup-intent</code></td><td>Yes</td><td>Create SetupIntent</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/payments/methods</code></td><td>Yes</td><td>Add payment method</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/payments/methods/{id}/default</code></td><td>Yes</td><td>Set default card</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/payments/methods/{id}</code></td><td>Yes</td><td>Remove card</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/payments/{id}/confirm</code></td><td>Yes</td><td>Confirm payment</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/payments/{id}/refund</code></td><td>Admin</td><td>Create refund</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/payments/{id}/receipt</code></td><td>Yes</td><td>Get receipt</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/payments/{id}/invoice/download</code></td><td>Yes</td><td>Download receipt PDF</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/payments/stats</code></td><td>Admin</td><td>Payment statistics</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/payments/{id}/verify</code></td><td>Yes</td><td>Verify payment status</td></tr>
+</table>
+
+<h3>Invoices (6 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/invoices/my</code></td><td>Parent</td><td>My invoices</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/invoices</code></td><td>Admin</td><td>All invoices</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/invoices/{id}</code></td><td>Yes</td><td>Invoice detail</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/invoices/{id}/download</code></td><td>Yes</td><td>Download PDF</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/invoices/billing-summary</code></td><td>Parent</td><td>Billing summary</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/invoices/sync</code></td><td>Yes</td><td>Sync from Stripe</td></tr>
+</table>
+
+<h3>Installments (9 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/installments/my</code></td><td>Parent</td><td>My installment plans</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/installments</code></td><td>Admin</td><td>All plans</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/installments/{id}</code></td><td>Yes</td><td>Plan detail</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/installments</code></td><td>Yes</td><td>Create plan</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/installments/preview</code></td><td>Yes</td><td>Preview schedule</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/installments/{id}/schedule</code></td><td>Yes</td><td>Get schedule</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/installments/upcoming/due</code></td><td>Yes</td><td>Upcoming due</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/installments/{id}/cancel</code></td><td>Parent</td><td>Cancel own plan</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/installments/{id}/cancel-admin</code></td><td>Admin</td><td>Cancel any plan</td></tr>
+</table>
+
+<h3>Discounts (13 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/discounts/validate</code></td><td>Yes</td><td>Validate discount code</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/discounts/available</code></td><td>Yes</td><td>Available discounts</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/discounts/my-usage</code></td><td>Yes</td><td>My usage</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/discounts/sibling-eligibility/{childId}</code></td><td>Yes</td><td>Check sibling discount</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/discounts/codes</code></td><td>Admin</td><td>List codes</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/discounts/codes</code></td><td>Admin</td><td>Create code</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/discounts/codes/{id}</code></td><td>Admin</td><td>Update code</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/discounts/codes/{id}</code></td><td>Admin</td><td>Delete code</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/discounts/codes/{id}/activate</code></td><td>Admin</td><td>Activate</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/discounts/codes/{id}/deactivate</code></td><td>Admin</td><td>Deactivate</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/discounts/codes/{id}/usage</code></td><td>Admin</td><td>Usage stats</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/discounts/codes/bulk</code></td><td>Admin</td><td>Generate bulk codes</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/discounts/codes/export</code></td><td>Admin</td><td>Export codes</td></tr>
+</table>
+
+<h3>Waivers (8 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/waivers/required</code></td><td>Yes</td><td>Required waivers</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/waivers/pending</code></td><td>Yes</td><td>Unsigned waivers</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/waivers/accept</code></td><td>Yes</td><td>Sign waiver</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/waivers/my-acceptances</code></td><td>Yes</td><td>My signed waivers</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/waivers/templates</code></td><td>Admin</td><td>List templates</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/waivers/templates</code></td><td>Admin</td><td>Create template</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/waivers/templates/{id}</code></td><td>Admin</td><td>Update template</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/waivers/templates/{id}</code></td><td>Admin</td><td>Delete template</td></tr>
+</table>
+
+<h3>Announcements (6 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/announcements</code></td><td>Yes</td><td>List (filter by class_id)</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/announcements/{id}</code></td><td>Yes</td><td>Get detail</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/announcements</code></td><td>Coach/Admin</td><td>Create</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/announcements/{id}</code></td><td>Coach/Admin</td><td>Update</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/announcements/{id}</code></td><td>Coach/Admin</td><td>Delete</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/announcements/{id}/attachments</code></td><td>Coach/Admin</td><td>Upload attachment</td></tr>
+</table>
+
+<h3>Attendance (9 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/attendance</code></td><td>Yes</td><td>List records</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/attendance</code></td><td>Coach</td><td>Create record</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/attendance/mark</code></td><td>Coach</td><td>Bulk mark</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/attendance/bulk</code></td><td>Coach</td><td>Bulk create</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/attendance/summary/</code></td><td>Yes</td><td>Summary stats</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/attendance/class/{classId}</code></td><td>Yes</td><td>Class attendance</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/attendance/child/{childId}/stats</code></td><td>Yes</td><td>Child stats</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/attendance/enrollment/{id}/streak</code></td><td>Yes</td><td>Attendance streak</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/attendance/enrollment/{id}/history</code></td><td>Yes</td><td>Attendance history</td></tr>
+</table>
+
+<h3>Events (11 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events</code></td><td>Yes</td><td>List events</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events/{id}</code></td><td>Yes</td><td>Event detail</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/events</code></td><td>Coach/Admin</td><td>Create event</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/events/{id}</code></td><td>Coach/Admin</td><td>Update event</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/events/{id}</code></td><td>Coach/Admin</td><td>Delete event</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events/class/{classId}</code></td><td>Yes</td><td>Events by class</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events/calendar</code></td><td>Yes</td><td>Calendar view</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/events/{id}/rsvp</code></td><td>Yes</td><td>Submit RSVP</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events/{id}/my-rsvp</code></td><td>Yes</td><td>My RSVP</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events/{id}/rsvps</code></td><td>Admin</td><td>All RSVPs</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/events/{id}/attendee-summary</code></td><td>Admin</td><td>Attendee stats</td></tr>
+</table>
+
+<h3>Photos (8 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/photos/class/{classId}</code></td><td>Yes</td><td>Photos by class</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/photos/{id}</code></td><td>Yes</td><td>Photo detail</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/photos/upload</code></td><td>Coach/Admin</td><td>Upload photo (multipart)</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/photos/bulk</code></td><td>Coach/Admin</td><td>Bulk upload</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/photos/{id}</code></td><td>Coach/Admin</td><td>Delete photo</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/photos/{id}/tag</code></td><td>Coach/Admin</td><td>Tag child in photo</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/photos/{id}/tag/{childId}</code></td><td>Coach/Admin</td><td>Untag child</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/photos/categories</code></td><td>Yes</td><td>Photo categories</td></tr>
+</table>
+
+<h3>Badges (5 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/badges</code></td><td>Public</td><td>List badges</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/badges/{id}</code></td><td>Yes</td><td>Badge detail</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/badges/enrollment/{id}</code></td><td>Yes</td><td>Badges by enrollment</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/badges/enrollment/{id}/progress</code></td><td>Yes</td><td>Badge progress</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/badges/award</code></td><td>Coach/Admin</td><td>Award badge</td></tr>
+</table>
+
+<h3>Check-In (4 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/check-in/class/{classId}/status</code></td><td>Coach</td><td>Class check-in status</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/check-in</code></td><td>Coach</td><td>Single check-in</td></tr>
+<tr><td><span class="badge put">PUT</span></td><td><code>/check-in/{id}/checkout</code></td><td>Coach</td><td>Check-out</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/check-in/bulk</code></td><td>Coach</td><td>Bulk check-in</td></tr>
+</table>
+
+<h3>Waitlist (5 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/waitlist</code></td><td>Admin</td><td>List all waitlist</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/waitlist</code></td><td>Yes</td><td>Join waitlist</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/waitlist/{id}/enroll</code></td><td>Admin</td><td>Move to enrolled</td></tr>
+<tr><td><span class="badge delete">DELETE</span></td><td><code>/waitlist/{id}</code></td><td>Admin</td><td>Remove</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/waitlist/{id}/notify</code></td><td>Admin</td><td>Notify available</td></tr>
+</table>
+
+<h3>Admin (12 endpoints)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/admin/dashboard/metrics</code></td><td>Admin</td><td>Dashboard KPIs</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/admin/finance/revenue</code></td><td>Admin</td><td>Revenue report</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/admin/clients</code></td><td>Admin</td><td>List clients</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/admin/clients/{id}</code></td><td>Admin</td><td>Client detail</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/admin/classes/{classId}/roster</code></td><td>Admin</td><td>Class roster</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/admin/refunds/search</code></td><td>Admin</td><td>Search refunds</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/admin/refunds/{id}/approve</code></td><td>Admin</td><td>Approve refund</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/admin/refunds/{id}/reject</code></td><td>Admin</td><td>Reject refund</td></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/cancellation-requests</code></td><td>Admin</td><td>List cancellations</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/cancellation-requests/{id}/approve</code></td><td>Admin</td><td>Approve</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/cancellation-requests/{id}/reject</code></td><td>Admin</td><td>Reject</td></tr>
+<tr><td><span class="badge post">POST</span></td><td><code>/admin/bulk/email</code></td><td>Admin</td><td>Send bulk email</td></tr>
+</table>
+
+<h3>Public (1 endpoint)</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Purpose</th></tr>
+<tr><td><span class="badge get">GET</span></td><td><code>/public/roster/{shareToken}</code></td><td>No</td><td>Public roster view</td></tr>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="stripe">8. Stripe Integration Notes</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<ul>
+  <li><strong>Adding cards</strong> uses Stripe's <code>SetupIntent</code> flow (PCI compliant)</li>
+  <li>Mobile apps must use the <strong>Stripe Mobile SDK</strong> (iOS: <code>stripe-ios</code>, Android: <code>stripe-android</code>) instead of Stripe.js</li>
+  <li>The <code>client_secret</code> from <code>POST /payments/setup-intent</code> is passed to the Stripe SDK to collect card details</li>
+  <li>Card details <strong>NEVER</strong> pass through the CSF backend - they go directly to Stripe</li>
+  <li>The Stripe publishable key is: <code>REACT_APP_STRIPE_PUBLISHABLE_KEY</code> (get from env config)</li>
+  <li>Payment flow: <code>POST /orders/{id}/pay</code> returns a <code>client_secret</code> for Stripe <code>PaymentIntent</code></li>
+  <li>After Stripe confirms payment on client side, call <code>POST /payments/{paymentIntentId}/confirm</code></li>
+  <li>Webhooks: Stripe sends events to <code>POST /webhooks/stripe</code> (server-side only)</li>
+</ul>
+
+<h4>Payment Flow Diagram</h4>
+<pre><code>Mobile App                    CSF Backend                   Stripe
+    |                              |                           |
+    |-- POST /orders -------->     |                           |
+    |<--- order created -----      |                           |
+    |                              |                           |
+    |-- POST /orders/{id}/pay ->   |                           |
+    |<--- client_secret ------     |--- PaymentIntent -------> |
+    |                              |                           |
+    |--- Stripe SDK (card) --------|-------------------------> |
+    |<--- payment confirmed -------|<--- webhook --------------|
+    |                              |                           |
+    |-- POST /payments/{id}/confirm ->                         |
+    |<--- enrollment activated --  |                           |</code></pre>
+
+<h4>Add Card Flow</h4>
+<pre><code>Mobile App                    CSF Backend                   Stripe
+    |                              |                           |
+    |-- POST /payments/setup-intent ->                         |
+    |<--- client_secret ------     |--- SetupIntent ---------> |
+    |                              |                           |
+    |--- Stripe SDK (card) --------|-------------------------> |
+    |<--- card saved --------------|<--- webhook --------------|
+    |                              |                           |
+    |-- GET /payments/methods ->   |                           |
+    |<--- updated card list ---    |                           |</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="data-models">9. Key Data Models</h2>
+<!-- ============================================================ -->
+
+<div class="section-card">
+<h3>User Roles</h3>
+<table>
+<tr><th>Role</th><th>Access</th><th>Description</th></tr>
+<tr><td><code>parent</code></td><td>Parent pages</td><td>Parents who enroll children in classes</td></tr>
+<tr><td><code>coach</code></td><td>Coach pages + some parent pages</td><td>Class instructors who manage attendance, photos, check-in</td></tr>
+<tr><td><code>admin</code></td><td>Admin pages + all pages</td><td>System administrators (both ADMIN and OWNER roles map to "admin")</td></tr>
+</table>
+
+<h3>Enrollment Statuses</h3>
+<table>
+<tr><th>Status</th><th>Description</th><th>Transitions To</th></tr>
+<tr><td><code>PENDING</code></td><td>Created, awaiting payment</td><td>ACTIVE, CANCELLED</td></tr>
+<tr><td><code>ACTIVE</code></td><td>Paid and attending</td><td>COMPLETED, CANCELLED, PAUSED</td></tr>
+<tr><td><code>PAUSED</code></td><td>Temporarily paused</td><td>ACTIVE (resume), CANCELLED</td></tr>
+<tr><td><code>COMPLETED</code></td><td>Class session finished</td><td>-</td></tr>
+<tr><td><code>CANCELLED</code></td><td>Cancelled by user/admin</td><td>-</td></tr>
+<tr><td><code>WAITLISTED</code></td><td>On waitlist for full class</td><td>PENDING (claimed), CANCELLED</td></tr>
+</table>
+
+<h3>Invoice Statuses</h3>
+<table>
+<tr><th>Status</th><th>Description</th></tr>
+<tr><td><code>draft</code></td><td>Not yet sent</td></tr>
+<tr><td><code>sent</code></td><td>Sent to parent, pending payment</td></tr>
+<tr><td><code>paid</code></td><td>Fully paid</td></tr>
+<tr><td><code>overdue</code></td><td>Past due date</td></tr>
+<tr><td><code>partially_paid</code></td><td>Partial payment received</td></tr>
+<tr><td><code>cancelled</code></td><td>Cancelled</td></tr>
+<tr><td><code>refunded</code></td><td>Refund processed</td></tr>
+</table>
+
+<h3>Attendance Statuses</h3>
+<table>
+<tr><th>Status</th><th>Description</th></tr>
+<tr><td><code>present</code></td><td>Attended class</td></tr>
+<tr><td><code>absent</code></td><td>Did not attend</td></tr>
+<tr><td><code>late</code></td><td>Arrived late</td></tr>
+<tr><td><code>excused</code></td><td>Excused absence</td></tr>
+</table>
+
+<h3>Event Types</h3>
+<table>
+<tr><th>Type</th><th>Description</th></tr>
+<tr><td><code>social</code></td><td>Social gatherings</td></tr>
+<tr><td><code>competition</code></td><td>Competitions/tournaments</td></tr>
+<tr><td><code>practice</code></td><td>Extra practice sessions</td></tr>
+<tr><td><code>meeting</code></td><td>Parent/coach meetings</td></tr>
+<tr><td><code>other</code></td><td>Other events</td></tr>
+</table>
+
+<h3>Grade Values</h3>
+<p>Backend expects lowercase: <code>pre_k</code>, <code>k</code>, <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, <code>5</code>, <code>6</code>, <code>7</code>, <code>8</code>, <code>9</code>, <code>10</code>, <code>11</code>, <code>12</code></p>
+</div>
+
+<hr>
+<p style="text-align:center; color:#666; font-size:0.85em;">
+  CSF App API Reference | Generated March 2026 | Total: ~140+ endpoints across 17 resource categories
+</p>
+
+</body>
+</html>

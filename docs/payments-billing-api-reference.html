@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Dashboard - Payments & Billing Page: API Reference</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333; }
+  h1 { color: #1a1a2e; border-bottom: 3px solid #f4b728; padding-bottom: 10px; }
+  h2 { color: #16213e; margin-top: 40px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+  h3 { color: #0f3460; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; overflow-x: auto; }
+  pre code { background: none; color: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th, td { border: 1px solid #e2e8f0; padding: 10px 14px; text-align: left; }
+  th { background: #f8fafc; font-weight: 600; }
+  .endpoint { background: #dbeafe; border-left: 4px solid #3b82f6; padding: 8px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; font-family: monospace; }
+  .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .important { background: #fee2e2; border-left: 4px solid #ef4444; padding: 10px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
+  .get { background: #dcfce7; color: #166534; }
+  .post { background: #dbeafe; color: #1e40af; }
+  .delete { background: #fee2e2; color: #991b1b; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 30px 0; }
+</style>
+</head>
+<body>
+
+<h1>Parent Dashboard - Payments &amp; Billing Page: API Reference</h1>
+
+<p>
+  <strong>For:</strong> Mobile Developer<br>
+  <strong>Route:</strong> <code>/paymentbilling</code> (protected, <code>parent</code> role only)<br>
+  <strong>Base URL:</strong> <code>{API_BASE_URL}</code> (all endpoints are relative to this)<br>
+  <strong>Auth:</strong> Bearer token (JWT) in <code>Authorization</code> header
+</p>
+
+<hr>
+
+<h2>Page Overview</h2>
+
+<p>The Payments &amp; Billing page has <strong>4 sections</strong>, each powered by different API endpoints:</p>
+
+<table>
+  <tr><th>#</th><th>Section</th><th>Component</th><th>Description</th></tr>
+  <tr><td>1</td><td><strong>Payment Methods</strong></td><td>PaymentCard</td><td>Saved cards (Stripe) - add, remove, set default</td></tr>
+  <tr><td>2</td><td><strong>Billing Summary</strong></td><td>BillingInfo</td><td>Next due date, active enrollments count, pending payments</td></tr>
+  <tr><td>3</td><td><strong>Memberships</strong></td><td>MembershipList</td><td>Active enrollments with cancel/pause/resume actions</td></tr>
+  <tr><td>4</td><td><strong>Invoices</strong></td><td>InvoiceTable</td><td>Invoice list with filtering, download PDF, Stripe sync</td></tr>
+</table>
+
+<hr>
+
+<h2>Section 1: Payment Methods (Stripe Integration)</h2>
+
+<h3>1.1 Get Saved Payment Methods</h3>
+<div class="endpoint"><span class="badge get">GET</span> <code>/payments/methods</code></div>
+<p><strong>Response:</strong> Array of payment methods</p>
+<pre><code>[
+  {
+    "id": "pm_1234567890",
+    "brand": "visa",
+    "last4": "4242",
+    "exp_month": 12,
+    "exp_year": 2027,
+    "is_default": true
+  }
+]</code></pre>
+<div class="note"><strong>Note:</strong> Response may be <code>{ items: [...] }</code> or a plain array. Handle both formats.</div>
+
+<h3>1.2 Create Setup Intent (for adding new card)</h3>
+<div class="endpoint"><span class="badge post">POST</span> <code>/payments/setup-intent</code></div>
+<p><strong>Request Body:</strong> None</p>
+<p><strong>Response:</strong></p>
+<pre><code>{
+  "client_secret": "seti_xxx_secret_xxx"
+}</code></pre>
+<div class="note"><strong>Stripe Flow:</strong> Use the <code>client_secret</code> with Stripe SDK's <code>confirmCardSetup()</code> to securely collect card details. After Stripe confirms, the card is automatically saved. Mobile apps should use the <strong>Stripe Mobile SDK</strong> (iOS/Android) instead of Stripe.js.</div>
+
+<h3>1.3 Set Default Payment Method</h3>
+<div class="endpoint"><span class="badge post">POST</span> <code>/payments/methods/{methodId}/default</code></div>
+<p><strong>Path Params:</strong> <code>methodId</code> - Stripe payment method ID (e.g., <code>pm_xxx</code>)</p>
+<p><strong>Request Body:</strong> None</p>
+<p><strong>Response:</strong> Confirmation object</p>
+
+<h3>1.4 Remove Payment Method</h3>
+<div class="endpoint"><span class="badge delete">DELETE</span> <code>/payments/methods/{methodId}</code></div>
+<p><strong>Path Params:</strong> <code>methodId</code> - Stripe payment method ID</p>
+<p><strong>Response:</strong> Confirmation object</p>
+
+<hr>
+
+<h2>Section 2: Billing Summary</h2>
+
+<h3>2.1 Get Billing Summary</h3>
+<div class="endpoint"><span class="badge get">GET</span> <code>/invoices/billing-summary</code></div>
+<p><strong>Response:</strong></p>
+<pre><code>{
+  "billing_period_start": "2026-03-01",
+  "billing_period_end": "2026-03-31",
+  "next_due_date": "2026-04-01",
+  "next_payment_amount": 150.00,
+  "active_enrollments_count": 3,
+  "pending_payments_count": 1
+}</code></pre>
+
+<p><strong>UI Logic:</strong></p>
+<ul>
+  <li>Show "Next Payment Due" card only if both <code>next_due_date</code> AND <code>next_payment_amount</code> exist</li>
+  <li>Show "Active Enrollments" count (default to 0 if null)</li>
+  <li>Show pending payments warning banner if <code>pending_payments_count &gt; 0</code></li>
+</ul>
+
+<hr>
+
+<h2>Section 3: Memberships (Enrollments)</h2>
+
+<h3>3.1 Get My Enrollments</h3>
+<div class="endpoint"><span class="badge get">GET</span> <code>/enrollments/my</code></div>
+
+<p><strong>Optional Query Params:</strong></p>
+<table>
+  <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>status</code></td><td>string</td><td>Filter: <code>ACTIVE</code>, <code>PENDING</code>, <code>COMPLETED</code>, <code>CANCELLED</code>, <code>WAITLISTED</code>, <code>PAUSED</code></td></tr>
+  <tr><td><code>child_id</code></td><td>string (UUID)</td><td>Filter by child</td></tr>
+  <tr><td><code>class_id</code></td><td>string (UUID)</td><td>Filter by class</td></tr>
+</table>
+
+<p><strong>Response:</strong> Array of enrollments (may also be <code>{ items: [...] }</code>)</p>
+<pre><code>[
+  {
+    "id": "uuid",
+    "child_id": "uuid",
+    "child_name": "John Doe",
+    "class_name": "Soccer Basics",
+    "status": "ACTIVE",
+    "final_price": 120.00,
+    "discount_amount": 10.00,
+    "payment_completed": true,
+    "enrolled_at": "2026-01-15T10:00:00Z",
+    "created_at": "2026-01-14T08:00:00Z",
+    "weekdays": ["Monday", "Wednesday"]
+  }
+]</code></pre>
+
+<p><strong>UI Logic:</strong></p>
+<ul>
+  <li>Group enrollments by <code>child_id</code> to show per-child sections</li>
+  <li>Use <code>child_name</code> (flat string) or fallback to <code>child.first_name</code> + <code>child.last_name</code></li>
+  <li>Use <code>class_name</code> or fallback to <code>class.name</code></li>
+  <li>Show "Pause" button only for <code>ACTIVE</code> status</li>
+  <li>Show "Resume" button only for <code>PAUSED</code> status</li>
+  <li>Show "Cancel" button for: <code>ACTIVE</code>, <code>PENDING</code>, <code>WAITLIST</code>, <code>PAUSED</code>, <code>WAITLISTED</code></li>
+  <li>Calculate total monthly cost from all ACTIVE enrollments' <code>final_price</code></li>
+</ul>
+
+<p><strong>Status badge colors:</strong></p>
+<table>
+  <tr><th>Status</th><th>Color</th></tr>
+  <tr><td>ACTIVE</td><td style="background:#dcfce7;color:#166534">Green</td></tr>
+  <tr><td>PENDING</td><td style="background:#fef9c3;color:#854d0e">Yellow</td></tr>
+  <tr><td>COMPLETED</td><td style="background:#dbeafe;color:#1e40af">Blue</td></tr>
+  <tr><td>CANCELLED</td><td style="background:#f3f4f6;color:#6b7280">Gray</td></tr>
+  <tr><td>WAITLISTED</td><td style="background:#f3e8ff;color:#7e22ce">Purple</td></tr>
+  <tr><td>PAUSED</td><td style="background:#fef3c7;color:#92400e">Amber</td></tr>
+</table>
+
+<h3>3.2 Get Cancellation Preview</h3>
+<div class="endpoint"><span class="badge get">GET</span> <code>/enrollments/{enrollmentId}/cancellation-preview</code></div>
+<p><strong>Path Params:</strong> <code>enrollmentId</code> - UUID</p>
+<p><strong>Response:</strong></p>
+<pre><code>{
+  "refund_amount": 120.00,
+  "cancellation_fee": 15.00,
+  "net_refund": 105.00,
+  "refund_policy": "Prorated refund based on remaining classes"
+}</code></pre>
+<div class="note"><strong>Usage:</strong> Call this when user taps "Cancel" to show refund details in a confirmation dialog BEFORE actually cancelling.</div>
+
+<h3>3.3 Cancel Enrollment</h3>
+<div class="endpoint"><span class="badge post">POST</span> <code>/enrollments/{enrollmentId}/cancel</code></div>
+<p><strong>Request Body:</strong></p>
+<pre><code>{
+  "reason": "Schedule conflict",
+  "refund_requested": true
+}</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code>{
+  "message": "Enrollment cancelled successfully",
+  "refund_amount": 105.00
+}</code></pre>
+
+<h3>3.4 Pause Enrollment</h3>
+<div class="endpoint"><span class="badge post">POST</span> <code>/enrollments/{enrollmentId}/pause</code></div>
+<p><strong>Request Body:</strong></p>
+<pre><code>{
+  "reason": "Family vacation"
+}</code></pre>
+<div class="note"><code>reason</code> is optional.</div>
+<p><strong>Response:</strong> Updated enrollment object with <code>status: "PAUSED"</code></p>
+
+<h3>3.5 Resume Enrollment</h3>
+<div class="endpoint"><span class="badge post">POST</span> <code>/enrollments/{enrollmentId}/resume</code></div>
+<p><strong>Request Body:</strong> None</p>
+<p><strong>Response:</strong> Updated enrollment object with <code>status: "ACTIVE"</code></p>
+
+<hr>
+
+<h2>Section 4: Invoices</h2>
+
+<h3>4.1 Get My Invoices</h3>
+<div class="endpoint"><span class="badge get">GET</span> <code>/invoices/my</code></div>
+
+<p><strong>Optional Query Params:</strong></p>
+<table>
+  <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>status</code></td><td>string</td><td>Filter: <code>paid</code>, <code>sent</code>, <code>draft</code>, <code>overdue</code>, <code>partially_paid</code>, <code>cancelled</code>, <code>refunded</code></td></tr>
+  <tr><td><code>skip</code></td><td>number</td><td>Pagination offset</td></tr>
+  <tr><td><code>limit</code></td><td>number</td><td>Max results per page</td></tr>
+</table>
+
+<p><strong>Response:</strong></p>
+<pre><code>{
+  "items": [
+    {
+      "id": "uuid",
+      "invoice_number": "INV-2026-001",
+      "invoice_date": "2026-03-01",
+      "description": "Class Registration",
+      "total": 150.00,
+      "discount": 10.00,
+      "status": "paid",
+      "billing_period_start": "2026-03-01",
+      "billing_period_end": "2026-03-31"
+    }
+  ],
+  "total": 15
+}</code></pre>
+
+<p><strong>Status badge colors:</strong></p>
+<table>
+  <tr><th>Status</th><th>Color</th></tr>
+  <tr><td><code>paid</code></td><td style="background:#dcfce7;color:#166534">Green</td></tr>
+  <tr><td><code>sent</code></td><td style="background:#dbeafe;color:#1e40af">Blue</td></tr>
+  <tr><td><code>draft</code></td><td style="background:#f3f4f6;color:#374151">Gray</td></tr>
+  <tr><td><code>overdue</code></td><td style="background:#fee2e2;color:#991b1b">Red</td></tr>
+  <tr><td><code>partially_paid</code></td><td style="background:#fef9c3;color:#854d0e">Yellow</td></tr>
+  <tr><td><code>cancelled</code></td><td style="background:#f3f4f6;color:#6b7280">Gray</td></tr>
+  <tr><td><code>refunded</code></td><td style="background:#ffedd5;color:#9a3412">Orange</td></tr>
+</table>
+
+<h3>4.2 Download Invoice PDF</h3>
+<div class="endpoint"><span class="badge get">GET</span> <code>/invoices/{invoiceId}/download</code></div>
+<p><strong>Path Params:</strong> <code>invoiceId</code> - UUID</p>
+<p><strong>Response:</strong> Binary PDF blob (<code>Content-Type: application/pdf</code>)</p>
+<div class="note">Save/share the PDF file using the platform's native file handling.</div>
+
+<h3>4.3 Sync Invoices from Stripe</h3>
+<div class="endpoint"><span class="badge post">POST</span> <code>/invoices/sync</code></div>
+<p><strong>Request Body:</strong> None</p>
+<p><strong>Response:</strong></p>
+<pre><code>{
+  "summary": {
+    "created": 2,
+    "updated": 5
+  }
+}</code></pre>
+<div class="note">Fetches latest invoices from Stripe and syncs to database. Call this when user taps a "Refresh" button.</div>
+
+<hr>
+
+<h2>API Calls on Page Load</h2>
+
+<p>When the page loads, these 4 APIs are called <strong>simultaneously</strong> (all independent, can be parallel):</p>
+
+<pre><code>1. GET /payments/methods          → Payment Methods section
+2. GET /invoices/billing-summary  → Billing Summary section
+3. GET /enrollments/my            → Memberships section
+4. GET /invoices/my               → Invoices section</code></pre>
+
+<hr>
+
+<h2>Authentication</h2>
+
+<p>All requests require:</p>
+<pre><code>Headers:
+  Authorization: Bearer {jwt_token}
+  Content-Type: application/json</code></pre>
+
+<p>The JWT token is obtained from the login endpoint and stored locally. If a request returns <code>401 Unauthorized</code>, redirect to login.</p>
+
+<hr>
+
+<h2>Error Handling</h2>
+
+<p>Standard error response format:</p>
+<pre><code>{
+  "detail": "Error message describing what went wrong"
+}</code></pre>
+
+<table>
+  <tr><th>HTTP Status</th><th>Meaning</th></tr>
+  <tr><td>400</td><td>Bad request / validation error</td></tr>
+  <tr><td>401</td><td>Not authenticated (redirect to login)</td></tr>
+  <tr><td>403</td><td>Not authorized for this action</td></tr>
+  <tr><td>404</td><td>Resource not found</td></tr>
+  <tr><td>409</td><td>Conflict (e.g., duplicate enrollment)</td></tr>
+  <tr><td>500</td><td>Server error</td></tr>
+</table>
+
+<hr>
+
+<h2>Stripe Integration Notes</h2>
+
+<ul>
+  <li><strong>Adding cards</strong> uses Stripe's <code>SetupIntent</code> flow (PCI compliant)</li>
+  <li>Mobile apps should use the <strong>Stripe Mobile SDK</strong> (iOS/Android) instead of Stripe.js</li>
+  <li>The <code>client_secret</code> from <code>/payments/setup-intent</code> is used with Stripe SDK to collect card details</li>
+  <li>Card details <strong>NEVER</strong> pass through the backend - they go directly to Stripe</li>
+  <li>The Stripe publishable key is configured via environment variable: <code>REACT_APP_STRIPE_PUBLISHABLE_KEY</code></li>
+</ul>
+
+<hr>
+
+<h2>Complete Endpoint Summary</h2>
+
+<table>
+  <tr><th>Method</th><th>Endpoint</th><th>Section</th><th>Purpose</th></tr>
+  <tr><td><span class="badge get">GET</span></td><td><code>/payments/methods</code></td><td>Payment</td><td>List saved cards</td></tr>
+  <tr><td><span class="badge post">POST</span></td><td><code>/payments/setup-intent</code></td><td>Payment</td><td>Create Stripe SetupIntent for adding card</td></tr>
+  <tr><td><span class="badge post">POST</span></td><td><code>/payments/methods/{id}/default</code></td><td>Payment</td><td>Set card as default</td></tr>
+  <tr><td><span class="badge delete">DELETE</span></td><td><code>/payments/methods/{id}</code></td><td>Payment</td><td>Remove saved card</td></tr>
+  <tr><td><span class="badge get">GET</span></td><td><code>/invoices/billing-summary</code></td><td>Billing</td><td>Get billing summary</td></tr>
+  <tr><td><span class="badge get">GET</span></td><td><code>/enrollments/my</code></td><td>Memberships</td><td>Get user's enrollments</td></tr>
+  <tr><td><span class="badge get">GET</span></td><td><code>/enrollments/{id}/cancellation-preview</code></td><td>Memberships</td><td>Preview refund before cancel</td></tr>
+  <tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/cancel</code></td><td>Memberships</td><td>Cancel enrollment</td></tr>
+  <tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/pause</code></td><td>Memberships</td><td>Pause enrollment</td></tr>
+  <tr><td><span class="badge post">POST</span></td><td><code>/enrollments/{id}/resume</code></td><td>Memberships</td><td>Resume paused enrollment</td></tr>
+  <tr><td><span class="badge get">GET</span></td><td><code>/invoices/my</code></td><td>Invoices</td><td>List user's invoices</td></tr>
+  <tr><td><span class="badge get">GET</span></td><td><code>/invoices/{id}/download</code></td><td>Invoices</td><td>Download invoice PDF</td></tr>
+  <tr><td><span class="badge post">POST</span></td><td><code>/invoices/sync</code></td><td>Invoices</td><td>Sync invoices from Stripe</td></tr>
+</table>
+
+</body>
+</html>
+</code></pre>

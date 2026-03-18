@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSF Image &amp; File Upload API Reference — Mobile Developer Guide</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #f1f5f9;
+            --code-border: #cbd5e1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: var(--primary-dark); }
+        h2 { font-size: 1.5rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary-dark); }
+        h3 { font-size: 1.2rem; margin: 24px 0 12px; color: var(--text); }
+        h4 { font-size: 1rem; margin: 16px 0 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        p { margin: 8px 0; }
+        .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .card.highlight { border-left: 4px solid var(--primary); }
+        .card.warning { border-left: 4px solid var(--warning); background: #fffbeb; }
+        .card.danger { border-left: 4px solid var(--danger); background: #fef2f2; }
+        .card.success { border-left: 4px solid var(--success); background: #f0fdf4; }
+        .card.info { border-left: 4px solid var(--info); background: #ecfeff; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-post { background: #dbeafe; color: #1d4ed8; }
+        .badge-get { background: #d1fae5; color: #065f46; }
+        .badge-delete { background: #fee2e2; color: #991b1b; }
+        .badge-binary { background: #fef3c7; color: #92400e; }
+        .badge-multipart { background: #e0e7ff; color: #3730a3; }
+        .method-url { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.95rem; background: var(--code-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--code-border); margin: 12px 0; display: flex; align-items: center; gap: 10px; word-break: break-all; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--code-bg); font-weight: 600; white-space: nowrap; }
+        td code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+        .required { color: var(--danger); font-weight: 600; }
+        .optional { color: var(--text-muted); }
+        pre { background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 12px 0; }
+        pre .comment { color: #94a3b8; }
+        pre .keyword { color: #93c5fd; }
+        pre .string { color: #86efac; }
+        pre .key { color: #fbbf24; }
+        pre .url { color: #f9a8d4; }
+        .toc { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; margin: 20px 0; }
+        .toc h3 { margin: 0 0 12px; }
+        .toc ul { list-style: none; }
+        .toc li { padding: 4px 0; }
+        .toc a { color: var(--primary); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .flow-diagram { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; padding: 20px; margin: 12px 0; font-family: monospace; font-size: 0.85rem; text-align: center; line-height: 2; }
+        .flow-arrow { color: var(--primary); font-weight: bold; }
+        .response-field { display: flex; gap: 8px; padding: 4px 0; }
+        .response-field .field-name { font-family: monospace; color: var(--primary-dark); min-width: 180px; }
+        .response-field .field-type { color: var(--text-muted); min-width: 100px; }
+        .important { font-weight: 600; color: var(--danger); }
+        .separator { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+        .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin: 0 2px; }
+        .tag-coach { background: #ddd6fe; color: #5b21b6; }
+        .tag-admin { background: #fee2e2; color: #991b1b; }
+        .tag-owner { background: #fecaca; color: #7f1d1d; }
+        .tag-parent { background: #d1fae5; color: #065f46; }
+        .tag-public { background: #e0e7ff; color: #3730a3; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+        .comparison-grid .card { margin: 0; }
+        @media (max-width: 768px) { .comparison-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>CSF Image &amp; File Upload API Reference</h1>
+    <p class="subtitle">Complete guide for mobile developers — React Native, Flutter, Swift, Kotlin<br>
+    <strong>Base URL:</strong> <code>https://your-domain.com/api/v1</code> &nbsp;|&nbsp; <strong>Last Updated:</strong> March 2026</p>
+
+    <!-- ======================== TABLE OF CONTENTS ======================== -->
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#overview">1. Overview — Binary vs Base64, Content-Type Rules</a></li>
+            <li><a href="#global">2. Global Constraints &amp; Authentication</a></li>
+            <li><a href="#child-profile">3. API 1: Child Profile Image Upload</a></li>
+            <li><a href="#gallery-upload">4. API 2: Gallery Photo Upload (Single)</a></li>
+            <li><a href="#announcement-attachment">5. API 3: Announcement Attachment Upload</a></li>
+            <li><a href="#retrieval">6. Image &amp; File Retrieval Endpoints</a></li>
+            <li><a href="#react-native">7. React Native Complete Examples</a></li>
+            <li><a href="#flutter">8. Flutter / Dart Examples</a></li>
+            <li><a href="#swift">9. Swift (iOS) Examples</a></li>
+            <li><a href="#kotlin">10. Kotlin (Android) Examples</a></li>
+            <li><a href="#error-handling">11. Error Responses &amp; Handling</a></li>
+            <li><a href="#troubleshooting">12. Common Pitfalls &amp; Troubleshooting</a></li>
+        </ul>
+    </div>
+
+    <!-- ======================== SECTION 1: OVERVIEW ======================== -->
+    <h2 id="overview">1. Overview — How Uploads Work</h2>
+
+    <div class="card danger">
+        <h3>Critical: All Uploads Use <code>multipart/form-data</code> with Raw Binary</h3>
+        <p>The CSF backend accepts image uploads <strong>only as raw binary files</strong> via <code>multipart/form-data</code> encoding.</p>
+        <p><strong class="important">Do NOT send images as Base64-encoded strings.</strong> The server expects the actual file bytes in a multipart form field named <code>file</code>.</p>
+    </div>
+
+    <div class="comparison-grid">
+        <div class="card success">
+            <h4>✅ Correct — Raw Binary via multipart/form-data</h4>
+            <pre><span class="comment">// The file bytes are sent directly in the form body</span>
+POST /api/v1/photos/upload
+Content-Type: multipart/form-data; boundary=----abc123
+
+------abc123
+Content-Disposition: form-data; name="file"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+<span class="string">[RAW JPEG BINARY BYTES]</span>
+------abc123
+Content-Disposition: form-data; name="class_id"
+
+<span class="string">cls_abc123</span>
+------abc123--</pre>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--danger);">
+            <h4>❌ Wrong — Base64 in JSON Body</h4>
+            <pre><span class="comment">// This will be REJECTED by the server</span>
+POST /api/v1/photos/upload
+Content-Type: application/json
+
+{
+  <span class="key">"file"</span>: <span class="string">"data:image/jpeg;base64,/9j/4AAQ..."</span>,
+  <span class="key">"class_id"</span>: <span class="string">"cls_abc123"</span>
+}
+
+<span class="comment">// Server expects UploadFile, not JSON</span>
+<span class="comment">// Response: 422 Unprocessable Entity</span></pre>
+        </div>
+    </div>
+
+    <div class="card info">
+        <h4>How the Server Processes Your Upload</h4>
+        <div class="flow-diagram">
+            Mobile sends <code>multipart/form-data</code> with raw file
+            <br><span class="flow-arrow">→</span> FastAPI parses into <code>UploadFile</code> object
+            <br><span class="flow-arrow">→</span> Server reads bytes: <code>await file.read()</code>
+            <br><span class="flow-arrow">→</span> Validates content type &amp; file size
+            <br><span class="flow-arrow">→</span> (For photos) Creates 300×300 thumbnail via Pillow
+            <br><span class="flow-arrow">→</span> Stores raw bytes directly in PostgreSQL <code>BYTEA</code> column
+            <br><span class="flow-arrow">→</span> Returns JSON response with image URL paths
+        </div>
+        <p><strong>Key point:</strong> Images are stored as binary blobs in the database — there is no S3, CDN, or filesystem storage. Retrieval endpoints serve the bytes back directly.</p>
+    </div>
+
+    <!-- ======================== SECTION 2: GLOBAL CONSTRAINTS ======================== -->
+    <h2 id="global">2. Global Constraints &amp; Authentication</h2>
+
+    <div class="card">
+        <table>
+            <tr><th>Setting</th><th>Value</th><th>Notes</th></tr>
+            <tr><td><strong>Max File Size</strong></td><td><code>10 MB</code> (10,485,760 bytes)</td><td>Server returns 422 if exceeded</td></tr>
+            <tr><td><strong>Allowed Image Types</strong></td><td><code>image/jpeg</code>, <code>image/png</code>, <code>image/jpg</code></td><td>Validated via <code>Content-Type</code> header in multipart part</td></tr>
+            <tr><td><strong>Allowed Attachment Types</strong></td><td><code>image/jpeg</code>, <code>image/png</code>, <code>image/jpg</code>, <code>application/pdf</code></td><td>Announcements only — PDFs allowed here</td></tr>
+            <tr><td><strong>Encoding</strong></td><td><code>multipart/form-data</code></td><td>Raw binary — NOT base64, NOT JSON body</td></tr>
+            <tr><td><strong>Form Field Name</strong></td><td><code>file</code></td><td>Must be exactly <code>file</code> — case-sensitive</td></tr>
+            <tr><td><strong>Authentication</strong></td><td>JWT Bearer Token</td><td>Required on all upload endpoints</td></tr>
+        </table>
+    </div>
+
+    <div class="card highlight">
+        <h4>Authentication Header (Required on ALL upload endpoints)</h4>
+        <pre>Authorization: Bearer eyJhbGciOiJIUzI1NiIs...your_jwt_token</pre>
+        <p>Obtain the token via <code>POST /api/v1/auth/login</code>. Token is returned in the <code>access_token</code> field of the login response.</p>
+    </div>
+
+    <div class="card warning">
+        <h4>⚠️ Do NOT Manually Set Content-Type Header</h4>
+        <p>When sending <code>multipart/form-data</code>, you <strong>must let the HTTP client set the <code>Content-Type</code> header automatically</strong>.
+        The header must include a <code>boundary</code> parameter that matches the actual form data boundaries.</p>
+        <pre><span class="comment">// ❌ WRONG — will cause 422 error</span>
+headers: {
+  <span class="string">'Content-Type'</span>: <span class="string">'multipart/form-data'</span>,  <span class="comment">// Missing boundary!</span>
+  <span class="string">'Authorization'</span>: <span class="string">'Bearer ...'</span>
+}
+
+<span class="comment">// ✅ CORRECT — only set Authorization, let client handle Content-Type</span>
+headers: {
+  <span class="string">'Authorization'</span>: <span class="string">'Bearer ...'</span>
+}</pre>
+    </div>
+
+    <!-- ======================== SECTION 3: CHILD PROFILE IMAGE ======================== -->
+    <h2 id="child-profile">3. API 1: Child Profile Image Upload</h2>
+
+    <div class="card highlight">
+        <div class="method-url">
+            <span class="badge badge-post">POST</span>
+            <span class="badge badge-multipart">multipart/form-data</span>
+            <code>/api/v1/children/{child_id}/profile-image</code>
+        </div>
+
+        <p>Upload or replace a child's profile picture. The previous image is overwritten — no versioning.</p>
+
+        <h4>Who Can Use This</h4>
+        <p>
+            <span class="tag tag-parent">Parent</span> Own children only &nbsp;|&nbsp;
+            <span class="tag tag-admin">Admin</span> <span class="tag tag-owner">Owner</span> Any child
+        </p>
+
+        <h4>URL Parameters</h4>
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>child_id</code></td><td>string (UUID)</td><td class="required">Yes</td><td>The child's unique ID</td></tr>
+        </table>
+
+        <h4>Form Fields</h4>
+        <table>
+            <tr><th>Field Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr>
+                <td><code>file</code></td>
+                <td><span class="badge badge-binary">Binary File</span></td>
+                <td class="required">Yes</td>
+                <td>The image file. Must be <code>image/jpeg</code>, <code>image/png</code>, or <code>image/jpg</code>. Max 10 MB.</td>
+            </tr>
+        </table>
+
+        <h4>What the Server Does</h4>
+        <ol style="margin: 8px 0 8px 20px;">
+            <li>Validates the user has access to this child (parent must own the child)</li>
+            <li>Validates file content type is in allowed list</li>
+            <li>Reads the binary content and checks size ≤ 10 MB</li>
+            <li>Stores raw bytes in <code>child.profile_image_data</code> column (PostgreSQL BYTEA)</li>
+            <li>Sets <code>child.profile_image_content_type</code> to the uploaded MIME type</li>
+            <li>Sets <code>child.profile_image</code> to <code>"db://{child_id}"</code> (internal marker)</li>
+            <li>Returns the full <code>ChildResponse</code> with <code>profile_image</code> set to the retrieval URL</li>
+        </ol>
+
+        <h4>Success Response — <code>200 OK</code></h4>
+        <pre>{
+  <span class="key">"id"</span>: <span class="string">"a1b2c3d4-..."</span>,
+  <span class="key">"user_id"</span>: <span class="string">"parent-uuid"</span>,
+  <span class="key">"first_name"</span>: <span class="string">"Emma"</span>,
+  <span class="key">"last_name"</span>: <span class="string">"Smith"</span>,
+  <span class="key">"full_name"</span>: <span class="string">"Emma Smith"</span>,
+  <span class="key">"date_of_birth"</span>: <span class="string">"2018-05-15"</span>,
+  <span class="key">"age"</span>: 7,
+  <span class="key">"grade"</span>: <span class="string">"2"</span>,
+  <span class="key">"profile_image"</span>: <span class="string">"/api/v1/children/a1b2c3d4-.../profile-image"</span>,
+  <span class="comment">// ... all other child fields</span>
+}</pre>
+        <p>The <code>profile_image</code> field in the response is the <strong>relative URL</strong> to retrieve the image. Prepend your base URL to use it.</p>
+    </div>
+
+    <!-- ======================== SECTION 4: GALLERY PHOTO UPLOAD ======================== -->
+    <h2 id="gallery-upload">4. API 2: Gallery Photo Upload</h2>
+
+    <div class="card highlight">
+        <div class="method-url">
+            <span class="badge badge-post">POST</span>
+            <span class="badge badge-multipart">multipart/form-data</span>
+            <code>/api/v1/photos/upload</code>
+        </div>
+
+        <p>Upload a photo to one or more class galleries. The server auto-generates a 300×300 thumbnail.</p>
+
+        <h4>Who Can Use This</h4>
+        <p>
+            <span class="tag tag-coach">Coach</span>
+            <span class="tag tag-admin">Admin</span>
+            <span class="tag tag-owner">Owner</span>
+            &nbsp; Parents cannot upload gallery photos.
+        </p>
+
+        <h4>Form Fields</h4>
+        <table>
+            <tr><th>Field Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr>
+                <td><code>file</code></td>
+                <td><span class="badge badge-binary">Binary File</span></td>
+                <td class="required">Yes</td>
+                <td>The image file. Must be <code>image/jpeg</code>, <code>image/png</code>, or <code>image/jpg</code>. Max 10 MB.</td>
+            </tr>
+            <tr>
+                <td><code>class_id</code></td>
+                <td>string</td>
+                <td>Conditional*</td>
+                <td>Single class UUID to associate the photo with.</td>
+            </tr>
+            <tr>
+                <td><code>class_ids</code></td>
+                <td>string (JSON array)</td>
+                <td>Conditional*</td>
+                <td>JSON-encoded array of class UUIDs for multi-class upload. Example: <code>'["id1","id2"]'</code></td>
+            </tr>
+            <tr>
+                <td><code>category_id</code></td>
+                <td>string</td>
+                <td class="optional">No</td>
+                <td>Photo category UUID (created via <code>POST /photos/categories</code>)</td>
+            </tr>
+        </table>
+        <p><em>* At least one of <code>class_id</code> or <code>class_ids</code> must be provided. You can provide both — they are merged.</em></p>
+
+        <div class="card warning" style="margin-top: 16px;">
+            <h4>⚠️ Important: <code>class_ids</code> is a JSON String, Not an Array</h4>
+            <p>Because the request is <code>multipart/form-data</code> (not JSON), the <code>class_ids</code> field must be a <strong>JSON-encoded string</strong> sent as a plain text form field.</p>
+            <pre><span class="comment">// ✅ Correct — JSON string in a form field</span>
+formData.append(<span class="string">'class_ids'</span>, <span class="string">JSON.stringify(["cls_1", "cls_2"])</span>);
+
+<span class="comment">// ❌ Wrong — cannot send arrays in multipart/form-data</span>
+formData.append(<span class="string">'class_ids'</span>, [<span class="string">"cls_1"</span>, <span class="string">"cls_2"</span>]);</pre>
+        </div>
+
+        <h4>What the Server Does</h4>
+        <ol style="margin: 8px 0 8px 20px;">
+            <li>Validates user role is Coach, Admin, or Owner</li>
+            <li>Parses <code>class_ids</code> JSON string (or uses <code>class_id</code>). Merges both if provided</li>
+            <li>Validates file content type and size</li>
+            <li>Opens image with Pillow (PIL) and extracts width/height dimensions</li>
+            <li>Converts RGBA → RGB if needed (handles transparent PNGs)</li>
+            <li>Creates a 300×300 max thumbnail (maintains aspect ratio, JPEG format, 85% quality)</li>
+            <li>Stores both full image and thumbnail as binary in database</li>
+            <li>Creates <code>PhotoTarget</code> records for each class (multi-class support)</li>
+            <li>Returns <code>PhotoResponse</code> with computed URL fields</li>
+        </ol>
+
+        <h4>Success Response — <code>201 Created</code></h4>
+        <pre>{
+  <span class="key">"id"</span>: <span class="string">"photo-uuid-123"</span>,
+  <span class="key">"class_id"</span>: <span class="keyword">null</span>,                          <span class="comment">// null for multi-class photos</span>
+  <span class="key">"category_id"</span>: <span class="string">"cat-uuid-456"</span>,              <span class="comment">// or null</span>
+  <span class="key">"uploaded_by"</span>: <span class="string">"user-uuid-789"</span>,
+  <span class="key">"file_name"</span>: <span class="string">"IMG_2024.jpg"</span>,
+  <span class="key">"file_path"</span>: <span class="keyword">null</span>,                          <span class="comment">// always null (DB storage)</span>
+  <span class="key">"thumbnail_path"</span>: <span class="keyword">null</span>,                     <span class="comment">// always null (DB storage)</span>
+  <span class="key">"file_size"</span>: 2458624,                        <span class="comment">// bytes</span>
+  <span class="key">"width"</span>: 3024,                               <span class="comment">// original pixel width</span>
+  <span class="key">"height"</span>: 4032,                              <span class="comment">// original pixel height</span>
+  <span class="key">"content_type"</span>: <span class="string">"image/jpeg"</span>,
+  <span class="key">"created_at"</span>: <span class="string">"2026-03-16T10:30:00Z"</span>,
+  <span class="key">"targets"</span>: [                                 <span class="comment">// which classes this photo belongs to</span>
+    { <span class="key">"id"</span>: <span class="string">"target-1"</span>, <span class="key">"photo_id"</span>: <span class="string">"photo-uuid-123"</span>, <span class="key">"class_id"</span>: <span class="string">"cls_1"</span> },
+    { <span class="key">"id"</span>: <span class="string">"target-2"</span>, <span class="key">"photo_id"</span>: <span class="string">"photo-uuid-123"</span>, <span class="key">"class_id"</span>: <span class="string">"cls_2"</span> }
+  ],
+  <span class="key">"mime_type"</span>: <span class="string">"image/jpeg"</span>,                  <span class="comment">// computed, same as content_type</span>
+  <span class="key">"image_url"</span>: <span class="string">"/api/v1/photos/photo-uuid-123/image"</span>,         <span class="comment">// full-size URL</span>
+  <span class="key">"thumbnail_url"</span>: <span class="string">"/api/v1/photos/photo-uuid-123/thumbnail"</span>   <span class="comment">// 300×300 thumbnail URL</span>
+}</pre>
+        <p><strong>Note:</strong> <code>image_base64</code> and <code>thumbnail_base64</code> fields exist in the schema but are excluded from the JSON response for performance (the binary data fields are marked <code>exclude=True</code>). Always use the URL endpoints to fetch images.</p>
+    </div>
+
+    <!-- ======================== SECTION 5: ANNOUNCEMENT ATTACHMENT ======================== -->
+    <h2 id="announcement-attachment">5. API 3: Announcement Attachment Upload</h2>
+
+    <div class="card highlight">
+        <div class="method-url">
+            <span class="badge badge-post">POST</span>
+            <span class="badge badge-multipart">multipart/form-data</span>
+            <code>/api/v1/announcements/{announcement_id}/attachments</code>
+        </div>
+
+        <p>Upload a file attachment (image or PDF) to an existing announcement.</p>
+
+        <h4>Who Can Use This</h4>
+        <p>
+            <span class="tag tag-coach">Coach</span> Author of the announcement only &nbsp;|&nbsp;
+            <span class="tag tag-admin">Admin</span> <span class="tag tag-owner">Owner</span> Any announcement
+        </p>
+
+        <h4>URL Parameters</h4>
+        <table>
+            <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+            <tr><td><code>announcement_id</code></td><td>string (UUID)</td><td class="required">Yes</td><td>The announcement to attach the file to</td></tr>
+        </table>
+
+        <h4>Form Fields</h4>
+        <table>
+            <tr><th>Field Name</th><th>Type</th><th>Required</th><th>Accepted Content Types</th></tr>
+            <tr>
+                <td><code>file</code></td>
+                <td><span class="badge badge-binary">Binary File</span></td>
+                <td class="required">Yes</td>
+                <td><code>image/jpeg</code>, <code>image/png</code>, <code>image/jpg</code>, <code>application/pdf</code></td>
+            </tr>
+        </table>
+
+        <h4>What the Server Does</h4>
+        <ol style="margin: 8px 0 8px 20px;">
+            <li>Validates the announcement exists and is not deleted</li>
+            <li>Checks user is the author OR an admin/owner</li>
+            <li>Validates file content type (images + PDF allowed)</li>
+            <li>Reads binary content and checks size ≤ 10 MB</li>
+            <li>Determines attachment type: <code>IMAGE</code> or <code>PDF</code></li>
+            <li>Stores raw bytes in <code>AnnouncementAttachment.file_data</code> (BYTEA)</li>
+            <li>Returns attachment metadata with computed <code>file_url</code></li>
+        </ol>
+
+        <h4>Success Response — <code>201 Created</code></h4>
+        <pre>{
+  <span class="key">"id"</span>: <span class="string">"attach-uuid-456"</span>,
+  <span class="key">"file_name"</span>: <span class="string">"schedule.pdf"</span>,
+  <span class="key">"file_path"</span>: <span class="keyword">null</span>,                          <span class="comment">// always null (DB storage)</span>
+  <span class="key">"file_size"</span>: 524288,                         <span class="comment">// bytes</span>
+  <span class="key">"file_type"</span>: <span class="string">"PDF"</span>,                          <span class="comment">// "PDF" or "IMAGE"</span>
+  <span class="key">"mime_type"</span>: <span class="string">"application/pdf"</span>,
+  <span class="key">"created_at"</span>: <span class="string">"2026-03-16T10:30:00Z"</span>,
+  <span class="key">"file_url"</span>: <span class="string">"/api/v1/announcements/attachments/attach-uuid-456/file"</span>
+}</pre>
+    </div>
+
+    <!-- ======================== SECTION 6: RETRIEVAL ENDPOINTS ======================== -->
+    <h2 id="retrieval">6. Image &amp; File Retrieval Endpoints</h2>
+
+    <p>All retrieval endpoints return <strong>raw binary data</strong> (not JSON). Use the URL directly as an image source.</p>
+
+    <div class="card">
+        <h3>6.1 Child Profile Image</h3>
+        <div class="method-url">
+            <span class="badge badge-get">GET</span>
+            <span class="tag tag-public">Public — No Auth Required</span>
+            <code>/api/v1/children/{child_id}/profile-image</code>
+        </div>
+        <table>
+            <tr><th>Header</th><th>Value</th></tr>
+            <tr><td>Response Content-Type</td><td>Original MIME type (e.g., <code>image/jpeg</code>)</td></tr>
+            <tr><td>Cache-Control</td><td><code>public, max-age=3600</code> (1 hour)</td></tr>
+            <tr><td>Content-Disposition</td><td><code>inline; filename="{child_id}.jpg"</code></td></tr>
+        </table>
+        <p><strong>Usage in mobile:</strong> Use the full URL directly as an image source. No need to download + convert.</p>
+        <pre><span class="comment">// React Native</span>
+&lt;Image source={{ uri: `${BASE_URL}/api/v1/children/${childId}/profile-image` }} /&gt;
+
+<span class="comment">// Flutter</span>
+Image.network(<span class="string">'$baseUrl/api/v1/children/$childId/profile-image'</span>)
+
+<span class="comment">// SwiftUI</span>
+AsyncImage(url: URL(string: <span class="string">"\(baseUrl)/api/v1/children/\(childId)/profile-image"</span>))</pre>
+    </div>
+
+    <div class="card">
+        <h3>6.2 Gallery Photo — Full Size</h3>
+        <div class="method-url">
+            <span class="badge badge-get">GET</span>
+            <span class="tag tag-public">Public — No Auth Required</span>
+            <code>/api/v1/photos/{photo_id}/image</code>
+        </div>
+        <table>
+            <tr><th>Header</th><th>Value</th></tr>
+            <tr><td>Cache-Control</td><td><code>public, max-age=31536000</code> (1 year)</td></tr>
+        </table>
+        <p><strong>Use for:</strong> Detail view, full-screen image viewer, downloads.</p>
+    </div>
+
+    <div class="card">
+        <h3>6.3 Gallery Photo — Thumbnail (300×300)</h3>
+        <div class="method-url">
+            <span class="badge badge-get">GET</span>
+            <span class="tag tag-public">Public — No Auth Required</span>
+            <code>/api/v1/photos/{photo_id}/thumbnail</code>
+        </div>
+        <table>
+            <tr><th>Header</th><th>Value</th></tr>
+            <tr><td>Cache-Control</td><td><code>public, max-age=31536000</code> (1 year)</td></tr>
+        </table>
+        <p><strong>Use for:</strong> Grid views, list items, gallery thumbnails. Significantly smaller than full image — better for mobile performance.</p>
+        <p><em>Falls back to full image if no thumbnail is available.</em></p>
+    </div>
+
+    <div class="card">
+        <h3>6.4 Announcement Attachment File</h3>
+        <div class="method-url">
+            <span class="badge badge-get">GET</span>
+            <span class="tag tag-public">Public — No Auth Required</span>
+            <code>/api/v1/announcements/attachments/{attachment_id}/file</code>
+        </div>
+        <table>
+            <tr><th>Header</th><th>Value</th></tr>
+            <tr><td>Cache-Control</td><td><code>public, max-age=3600</code> (1 hour)</td></tr>
+            <tr><td>Content-Disposition</td><td><code>inline</code> for images, <code>attachment</code> for PDFs</td></tr>
+        </table>
+        <p><strong>For PDFs:</strong> Open in an in-app PDF viewer or use the URL with a WebView.</p>
+    </div>
+
+    <div class="card info">
+        <h4>Listing Photos for a Class</h4>
+        <div class="method-url">
+            <span class="badge badge-get">GET</span>
+            <code>/api/v1/photos/class/{class_id}?skip=0&amp;limit=50&amp;category_id=xxx</code>
+        </div>
+        <p><strong>Auth Required:</strong> Yes (Bearer token)</p>
+        <pre><span class="comment">// Response</span>
+{
+  <span class="key">"items"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="string">"photo-uuid"</span>,
+      <span class="key">"image_url"</span>: <span class="string">"/api/v1/photos/photo-uuid/image"</span>,
+      <span class="key">"thumbnail_url"</span>: <span class="string">"/api/v1/photos/photo-uuid/thumbnail"</span>,
+      <span class="key">"file_name"</span>: <span class="string">"IMG_001.jpg"</span>,
+      <span class="key">"file_size"</span>: 2458624,
+      <span class="key">"width"</span>: 3024,
+      <span class="key">"height"</span>: 4032,
+      <span class="comment">// ...</span>
+    }
+  ],
+  <span class="key">"total"</span>: 47,
+  <span class="key">"skip"</span>: 0,
+  <span class="key">"limit"</span>: 50
+}</pre>
+        <p>Use <code>thumbnail_url</code> for grid/list views, <code>image_url</code> when user taps for full-size.</p>
+    </div>
+
+    <!-- ======================== SECTION 7: REACT NATIVE ======================== -->
+    <h2 id="react-native">7. React Native — Complete Examples</h2>
+
+    <div class="card">
+        <h3>7.1 Image Picker + Upload Helper</h3>
+        <pre><span class="keyword">import</span> * <span class="keyword">as</span> ImagePicker <span class="keyword">from</span> <span class="string">'expo-image-picker'</span>;
+<span class="keyword">import</span> { Platform } <span class="keyword">from</span> <span class="string">'react-native'</span>;
+
+<span class="comment">/**
+ * Pick an image from camera or gallery.
+ * Returns the local URI, MIME type, and filename.
+ */</span>
+<span class="keyword">async function</span> pickImage(fromCamera = <span class="keyword">false</span>) {
+  <span class="keyword">const</span> options = {
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: <span class="keyword">true</span>,
+    quality: 0.8,          <span class="comment">// compress to ~80% quality to stay under 10MB</span>
+  };
+
+  <span class="keyword">const</span> result = fromCamera
+    ? <span class="keyword">await</span> ImagePicker.launchCameraAsync(options)
+    : <span class="keyword">await</span> ImagePicker.launchImageLibraryAsync(options);
+
+  <span class="keyword">if</span> (result.canceled) <span class="keyword">return null</span>;
+
+  <span class="keyword">const</span> asset = result.assets[0];
+  <span class="keyword">return</span> {
+    uri: asset.uri,
+    type: asset.mimeType || <span class="string">'image/jpeg'</span>,
+    name: asset.fileName || <span class="string">`photo_${Date.now()}.jpg`</span>,
+    fileSize: asset.fileSize,
+  };
+}
+
+<span class="comment">/**
+ * Upload a file using multipart/form-data.
+ *
+ * @param url      Full endpoint URL
+ * @param token    JWT Bearer token
+ * @param fileObj  { uri, type, name } from image picker
+ * @param extras   Additional form fields: { class_id: "...", category_id: "..." }
+ * @returns        Parsed JSON response
+ */</span>
+<span class="keyword">async function</span> uploadFile(url, token, fileObj, extras = {}) {
+  <span class="keyword">const</span> formData = <span class="keyword">new</span> FormData();
+
+  <span class="comment">// ─── THE FILE ───────────────────────────────────────────
+  // React Native's FormData expects an object with { uri, type, name }
+  // This is NOT a Web File/Blob — it's React Native-specific.
+  // The RN networking layer reads the file from the URI and streams
+  // the raw bytes into the multipart body automatically.</span>
+  formData.append(<span class="string">'file'</span>, {
+    uri: Platform.OS === <span class="string">'ios'</span>
+      ? fileObj.uri.replace(<span class="string">'file://'</span>, <span class="string">''</span>)  <span class="comment">// iOS sometimes needs file:// stripped</span>
+      : fileObj.uri,
+    type: fileObj.type,     <span class="comment">// e.g. 'image/jpeg' — server validates this</span>
+    name: fileObj.name,     <span class="comment">// e.g. 'photo.jpg' — server stores this</span>
+  });
+
+  <span class="comment">// ─── ADDITIONAL FORM FIELDS ─────────────────────────────</span>
+  Object.entries(extras).forEach(([key, value]) => {
+    <span class="keyword">if</span> (value !== <span class="keyword">undefined</span> && value !== <span class="keyword">null</span>) {
+      formData.append(key, <span class="keyword">typeof</span> value === <span class="string">'object'</span>
+        ? JSON.stringify(value)  <span class="comment">// for arrays like class_ids</span>
+        : String(value)
+      );
+    }
+  });
+
+  <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(url, {
+    method: <span class="string">'POST'</span>,
+    headers: {
+      <span class="comment">// ⚠️ ONLY set Authorization. Do NOT set Content-Type.</span>
+      <span class="comment">// fetch() automatically sets:</span>
+      <span class="comment">//   Content-Type: multipart/form-data; boundary=----RNFormBoundary...</span>
+      <span class="string">'Authorization'</span>: <span class="string">`Bearer ${token}`</span>,
+    },
+    body: formData,
+  });
+
+  <span class="keyword">if</span> (!response.ok) {
+    <span class="keyword">const</span> error = <span class="keyword">await</span> response.json();
+    <span class="keyword">throw new</span> Error(error.detail || error.message || <span class="string">`Upload failed: ${response.status}`</span>);
+  }
+
+  <span class="keyword">return await</span> response.json();
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>7.2 Upload Child Profile Image</h3>
+        <pre><span class="keyword">async function</span> uploadChildProfileImage(childId, token) {
+  <span class="keyword">const</span> image = <span class="keyword">await</span> pickImage();
+  <span class="keyword">if</span> (!image) <span class="keyword">return</span>;
+
+  <span class="comment">// Check file size before uploading</span>
+  <span class="keyword">if</span> (image.fileSize && image.fileSize > 10 * 1024 * 1024) {
+    Alert.alert(<span class="string">'Error'</span>, <span class="string">'Image must be under 10 MB'</span>);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="keyword">const</span> result = <span class="keyword">await</span> uploadFile(
+    <span class="string">`${BASE_URL}/api/v1/children/${childId}/profile-image`</span>,
+    token,
+    image,
+    <span class="comment">// No extra fields needed for profile image</span>
+  );
+
+  <span class="comment">// result is a ChildResponse — use result.profile_image for the image URL</span>
+  console.log(<span class="string">'Profile image URL:'</span>, <span class="string">`${BASE_URL}${result.profile_image}`</span>);
+  <span class="keyword">return</span> result;
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>7.3 Upload Gallery Photo (Single Class)</h3>
+        <pre><span class="keyword">async function</span> uploadGalleryPhoto(classId, token, categoryId = <span class="keyword">null</span>) {
+  <span class="keyword">const</span> image = <span class="keyword">await</span> pickImage(<span class="keyword">true</span>);  <span class="comment">// from camera</span>
+  <span class="keyword">if</span> (!image) <span class="keyword">return</span>;
+
+  <span class="keyword">const</span> result = <span class="keyword">await</span> uploadFile(
+    <span class="string">`${BASE_URL}/api/v1/photos/upload`</span>,
+    token,
+    image,
+    {
+      class_id: classId,
+      category_id: categoryId,  <span class="comment">// optional — pass null to skip</span>
+    }
+  );
+
+  <span class="comment">// result.image_url     → "/api/v1/photos/{id}/image"     (full size)</span>
+  <span class="comment">// result.thumbnail_url → "/api/v1/photos/{id}/thumbnail" (300×300)</span>
+  <span class="keyword">return</span> result;
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>7.4 Upload Gallery Photo (Multiple Classes)</h3>
+        <pre><span class="keyword">async function</span> uploadToMultipleClasses(classIds, token) {
+  <span class="keyword">const</span> image = <span class="keyword">await</span> pickImage();
+  <span class="keyword">if</span> (!image) <span class="keyword">return</span>;
+
+  <span class="keyword">const</span> result = <span class="keyword">await</span> uploadFile(
+    <span class="string">`${BASE_URL}/api/v1/photos/upload`</span>,
+    token,
+    image,
+    {
+      <span class="comment">// class_ids MUST be a JSON string, not an array</span>
+      class_ids: classIds,  <span class="comment">// uploadFile() will JSON.stringify this</span>
+    }
+  );
+
+  <span class="comment">// result.targets will contain one entry per class</span>
+  console.log(<span class="string">'Uploaded to classes:'</span>, result.targets.map(t => t.class_id));
+  <span class="keyword">return</span> result;
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>7.5 Upload Announcement Attachment</h3>
+        <pre><span class="keyword">import</span> * <span class="keyword">as</span> DocumentPicker <span class="keyword">from</span> <span class="string">'expo-document-picker'</span>;
+
+<span class="keyword">async function</span> uploadAnnouncementAttachment(announcementId, token) {
+  <span class="comment">// Allow picking images OR PDFs</span>
+  <span class="keyword">const</span> result = <span class="keyword">await</span> DocumentPicker.getDocumentAsync({
+    type: [<span class="string">'image/jpeg'</span>, <span class="string">'image/png'</span>, <span class="string">'application/pdf'</span>],
+    copyToCacheDirectory: <span class="keyword">true</span>,
+  });
+
+  <span class="keyword">if</span> (result.canceled) <span class="keyword">return</span>;
+
+  <span class="keyword">const</span> file = result.assets[0];
+  <span class="keyword">const</span> uploadResult = <span class="keyword">await</span> uploadFile(
+    <span class="string">`${BASE_URL}/api/v1/announcements/${announcementId}/attachments`</span>,
+    token,
+    {
+      uri: file.uri,
+      type: file.mimeType || <span class="string">'application/pdf'</span>,
+      name: file.name || <span class="string">'attachment'</span>,
+    },
+    <span class="comment">// No extra fields needed</span>
+  );
+
+  <span class="comment">// uploadResult.file_url → "/api/v1/announcements/attachments/{id}/file"</span>
+  <span class="keyword">return</span> uploadResult;
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>7.6 Displaying Images in React Native</h3>
+        <pre><span class="keyword">import</span> { Image } <span class="keyword">from</span> <span class="string">'react-native'</span>;
+<span class="keyword">import</span> FastImage <span class="keyword">from</span> <span class="string">'react-native-fast-image'</span>;  <span class="comment">// recommended for caching</span>
+
+<span class="comment">// ─── Child Profile Image ─────────────────────────────────</span>
+<span class="comment">// profile_image field from ChildResponse is a relative URL</span>
+&lt;Image
+  source={{ uri: <span class="string">`${BASE_URL}${child.profile_image}`</span> }}
+  style={{ width: 80, height: 80, borderRadius: 40 }}
+  defaultSource={require(<span class="string">'./default-avatar.png'</span>)}
+/&gt;
+
+<span class="comment">// ─── Gallery Thumbnail (use in grid/list) ────────────────</span>
+<span class="comment">// thumbnail_url from PhotoResponse is a relative URL</span>
+&lt;FastImage
+  source={{ uri: <span class="string">`${BASE_URL}${photo.thumbnail_url}`</span> }}
+  style={{ width: 120, height: 120 }}
+  resizeMode={FastImage.resizeMode.cover}
+/&gt;
+
+<span class="comment">// ─── Gallery Full Image (use in detail/zoom view) ────────</span>
+&lt;FastImage
+  source={{ uri: <span class="string">`${BASE_URL}${photo.image_url}`</span> }}
+  style={{ width: <span class="string">'100%'</span>, aspectRatio: photo.width / photo.height }}
+  resizeMode={FastImage.resizeMode.contain}
+/&gt;
+
+<span class="comment">// ─── Announcement Attachment ─────────────────────────────</span>
+<span class="comment">// For images: display inline</span>
+{attachment.file_type === <span class="string">'IMAGE'</span> && (
+  &lt;Image source={{ uri: <span class="string">`${BASE_URL}${attachment.file_url}`</span> }} /&gt;
+)}
+<span class="comment">// For PDFs: open in WebView or external viewer</span>
+{attachment.file_type === <span class="string">'PDF'</span> && (
+  &lt;WebView source={{ uri: <span class="string">`${BASE_URL}${attachment.file_url}`</span> }} /&gt;
+)}</pre>
+    </div>
+
+    <!-- ======================== SECTION 8: FLUTTER ======================== -->
+    <h2 id="flutter">8. Flutter / Dart Examples</h2>
+
+    <div class="card">
+        <h3>8.1 Upload Helper Using <code>http</code> Package</h3>
+        <pre><span class="keyword">import</span> <span class="string">'package:http/http.dart'</span> <span class="keyword">as</span> http;
+<span class="keyword">import</span> <span class="string">'package:http_parser/http_parser.dart'</span>;
+<span class="keyword">import</span> <span class="string">'dart:convert'</span>;
+
+<span class="comment">/// Upload a file using multipart/form-data.
+///
+/// [filePath] - Local file path (from image_picker or file_picker)
+/// [mimeType] - e.g. 'image/jpeg', 'application/pdf'
+/// [fileName] - Display name for the file
+/// [extras]   - Additional form fields</span>
+Future&lt;Map&lt;String, dynamic&gt;&gt; uploadFile({
+  required String url,
+  required String token,
+  required String filePath,
+  required String mimeType,
+  required String fileName,
+  Map&lt;String, String&gt; extras = <span class="keyword">const</span> {},
+}) <span class="keyword">async</span> {
+  <span class="keyword">final</span> request = http.MultipartRequest(<span class="string">'POST'</span>, Uri.parse(url));
+
+  <span class="comment">// ─── Auth header ───────────────────────────────────────</span>
+  request.headers[<span class="string">'Authorization'</span>] = <span class="string">'Bearer $token'</span>;
+  <span class="comment">// Do NOT set Content-Type — MultipartRequest handles it</span>
+
+  <span class="comment">// ─── The file (raw binary, read from disk) ─────────────</span>
+  request.files.add(
+    <span class="keyword">await</span> http.MultipartFile.fromPath(
+      <span class="string">'file'</span>,              <span class="comment">// field name — must be exactly 'file'</span>
+      filePath,
+      filename: fileName,
+      contentType: MediaType.parse(mimeType),
+    ),
+  );
+
+  <span class="comment">// ─── Additional text fields ────────────────────────────</span>
+  extras.forEach((key, value) {
+    request.fields[key] = value;
+  });
+
+  <span class="keyword">final</span> streamedResponse = <span class="keyword">await</span> request.send();
+  <span class="keyword">final</span> response = <span class="keyword">await</span> http.Response.fromStream(streamedResponse);
+
+  <span class="keyword">if</span> (response.statusCode != 200 && response.statusCode != 201) {
+    <span class="keyword">throw</span> Exception(<span class="string">'Upload failed (${response.statusCode}): ${response.body}'</span>);
+  }
+
+  <span class="keyword">return</span> jsonDecode(response.body);
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>8.2 Upload Child Profile Image (Flutter)</h3>
+        <pre><span class="keyword">import</span> <span class="string">'package:image_picker/image_picker.dart'</span>;
+
+Future&lt;void&gt; uploadChildProfile(String childId, String token) <span class="keyword">async</span> {
+  <span class="keyword">final</span> picker = ImagePicker();
+  <span class="keyword">final</span> picked = <span class="keyword">await</span> picker.pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 80,       <span class="comment">// compress to stay under 10MB</span>
+    maxWidth: 2000,
+  );
+  <span class="keyword">if</span> (picked == <span class="keyword">null</span>) <span class="keyword">return</span>;
+
+  <span class="keyword">final</span> result = <span class="keyword">await</span> uploadFile(
+    url: <span class="string">'$baseUrl/api/v1/children/$childId/profile-image'</span>,
+    token: token,
+    filePath: picked.path,
+    mimeType: <span class="string">'image/jpeg'</span>,
+    fileName: <span class="string">'profile_${childId}.jpg'</span>,
+  );
+
+  <span class="comment">// result['profile_image'] → relative URL for display</span>
+  print(<span class="string">'Image URL: $baseUrl${result["profile_image"]}'</span>);
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>8.3 Upload Gallery Photo to Multiple Classes (Flutter)</h3>
+        <pre>Future&lt;void&gt; uploadGalleryMultiClass(
+  List&lt;String&gt; classIds,
+  String token,
+) <span class="keyword">async</span> {
+  <span class="keyword">final</span> picker = ImagePicker();
+  <span class="keyword">final</span> picked = <span class="keyword">await</span> picker.pickImage(source: ImageSource.camera);
+  <span class="keyword">if</span> (picked == <span class="keyword">null</span>) <span class="keyword">return</span>;
+
+  <span class="keyword">final</span> result = <span class="keyword">await</span> uploadFile(
+    url: <span class="string">'$baseUrl/api/v1/photos/upload'</span>,
+    token: token,
+    filePath: picked.path,
+    mimeType: <span class="string">'image/jpeg'</span>,
+    fileName: <span class="string">'gallery_${DateTime.now().millisecondsSinceEpoch}.jpg'</span>,
+    extras: {
+      <span class="comment">// class_ids must be a JSON-encoded string</span>
+      <span class="string">'class_ids'</span>: jsonEncode(classIds),
+    },
+  );
+
+  print(<span class="string">'Thumbnail: $baseUrl${result["thumbnail_url"]}'</span>);
+}</pre>
+    </div>
+
+    <!-- ======================== SECTION 9: SWIFT ======================== -->
+    <h2 id="swift">9. Swift (iOS) Examples</h2>
+
+    <div class="card">
+        <h3>9.1 Upload Helper Using URLSession</h3>
+        <pre><span class="keyword">import</span> Foundation
+
+<span class="keyword">struct</span> UploadResult: Codable {
+    <span class="keyword">let</span> id: String
+    <span class="comment">// Add other fields as needed</span>
+}
+
+<span class="keyword">func</span> uploadImage(
+    url: URL,
+    token: String,
+    imageData: Data,
+    mimeType: String,          <span class="comment">// "image/jpeg" or "image/png"</span>
+    fileName: String,
+    extraFields: [String: String] = [:]
+) <span class="keyword">async throws</span> -> Data {
+    <span class="keyword">let</span> boundary = <span class="string">"Boundary-\(UUID().uuidString)"</span>
+
+    <span class="keyword">var</span> request = URLRequest(url: url)
+    request.httpMethod = <span class="string">"POST"</span>
+    request.setValue(<span class="string">"Bearer \(token)"</span>, forHTTPHeaderField: <span class="string">"Authorization"</span>)
+    <span class="comment">// Set Content-Type WITH boundary (required for multipart)</span>
+    request.setValue(
+        <span class="string">"multipart/form-data; boundary=\(boundary)"</span>,
+        forHTTPHeaderField: <span class="string">"Content-Type"</span>
+    )
+
+    <span class="keyword">var</span> body = Data()
+
+    <span class="comment">// ─── The file field ─────────────────────────────────</span>
+    body.append(<span class="string">"--\(boundary)\r\n"</span>.data(using: .utf8)!)
+    body.append(
+        <span class="string">"Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n"</span>
+            .data(using: .utf8)!
+    )
+    body.append(<span class="string">"Content-Type: \(mimeType)\r\n\r\n"</span>.data(using: .utf8)!)
+    body.append(imageData)     <span class="comment">// raw bytes — NOT base64</span>
+    body.append(<span class="string">"\r\n"</span>.data(using: .utf8)!)
+
+    <span class="comment">// ─── Extra text fields ─────────────────────────────</span>
+    <span class="keyword">for</span> (key, value) <span class="keyword">in</span> extraFields {
+        body.append(<span class="string">"--\(boundary)\r\n"</span>.data(using: .utf8)!)
+        body.append(
+            <span class="string">"Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n"</span>
+                .data(using: .utf8)!
+        )
+        body.append(<span class="string">"\(value)\r\n"</span>.data(using: .utf8)!)
+    }
+
+    <span class="comment">// ─── Close boundary ────────────────────────────────</span>
+    body.append(<span class="string">"--\(boundary)--\r\n"</span>.data(using: .utf8)!)
+
+    request.httpBody = body
+
+    <span class="keyword">let</span> (data, response) = <span class="keyword">try await</span> URLSession.shared.data(<span class="keyword">for</span>: request)
+    <span class="keyword">guard let</span> httpResponse = response <span class="keyword">as</span>? HTTPURLResponse,
+          (200...201).contains(httpResponse.statusCode) <span class="keyword">else</span> {
+        <span class="keyword">throw</span> URLError(.badServerResponse)
+    }
+    <span class="keyword">return</span> data
+}
+
+<span class="comment">// ─── Usage: Upload child profile image ─────────────────</span>
+<span class="keyword">let</span> imageData = selectedUIImage.jpegData(compressionQuality: 0.8)!
+<span class="keyword">let</span> url = URL(string: <span class="string">"\(baseUrl)/api/v1/children/\(childId)/profile-image"</span>)!
+<span class="keyword">let</span> result = <span class="keyword">try await</span> uploadImage(
+    url: url, token: jwtToken,
+    imageData: imageData, mimeType: <span class="string">"image/jpeg"</span>, fileName: <span class="string">"profile.jpg"</span>
+)
+
+<span class="comment">// ─── Usage: Upload gallery photo to class ──────────────</span>
+<span class="keyword">let</span> url = URL(string: <span class="string">"\(baseUrl)/api/v1/photos/upload"</span>)!
+<span class="keyword">let</span> result = <span class="keyword">try await</span> uploadImage(
+    url: url, token: jwtToken,
+    imageData: imageData, mimeType: <span class="string">"image/jpeg"</span>, fileName: <span class="string">"gallery.jpg"</span>,
+    extraFields: [<span class="string">"class_id"</span>: classId]
+)</pre>
+    </div>
+
+    <!-- ======================== SECTION 10: KOTLIN ======================== -->
+    <h2 id="kotlin">10. Kotlin (Android) Examples</h2>
+
+    <div class="card">
+        <h3>10.1 Upload Helper Using OkHttp</h3>
+        <pre><span class="keyword">import</span> okhttp3.*
+<span class="keyword">import</span> okhttp3.MediaType.Companion.toMediaType
+<span class="keyword">import</span> okhttp3.RequestBody.Companion.asRequestBody
+<span class="keyword">import</span> java.io.File
+
+<span class="keyword">suspend fun</span> uploadFile(
+    url: String,
+    token: String,
+    file: File,
+    mimeType: String,           <span class="comment">// "image/jpeg" or "image/png"</span>
+    extraFields: Map&lt;String, String&gt; = emptyMap()
+): String {
+    <span class="keyword">val</span> client = OkHttpClient()
+
+    <span class="keyword">val</span> bodyBuilder = MultipartBody.Builder()
+        .setType(MultipartBody.FORM)
+        .addFormDataPart(
+            <span class="string">"file"</span>,                  <span class="comment">// field name — must be "file"</span>
+            file.name,
+            file.asRequestBody(mimeType.toMediaType())  <span class="comment">// raw binary</span>
+        )
+
+    <span class="comment">// Add extra text fields</span>
+    extraFields.forEach { (key, value) ->
+        bodyBuilder.addFormDataPart(key, value)
+    }
+
+    <span class="keyword">val</span> request = Request.Builder()
+        .url(url)
+        .addHeader(<span class="string">"Authorization"</span>, <span class="string">"Bearer $token"</span>)
+        <span class="comment">// Do NOT set Content-Type — OkHttp sets it with boundary</span>
+        .post(bodyBuilder.build())
+        .build()
+
+    <span class="keyword">val</span> response = client.newCall(request).execute()
+    <span class="keyword">if</span> (!response.isSuccessful) {
+        <span class="keyword">throw</span> Exception(<span class="string">"Upload failed: ${response.code} ${response.body?.string()}"</span>)
+    }
+    <span class="keyword">return</span> response.body?.string() ?: <span class="string">""</span>
+}
+
+<span class="comment">// ─── Usage: Upload child profile image ─────────────────</span>
+<span class="keyword">val</span> imageFile = File(imageUri.path!!)  <span class="comment">// convert content:// URI first</span>
+<span class="keyword">val</span> result = uploadFile(
+    url = <span class="string">"$baseUrl/api/v1/children/$childId/profile-image"</span>,
+    token = jwtToken,
+    file = imageFile,
+    mimeType = <span class="string">"image/jpeg"</span>
+)
+
+<span class="comment">// ─── Usage: Upload gallery photo ────────────────────────</span>
+<span class="keyword">val</span> result = uploadFile(
+    url = <span class="string">"$baseUrl/api/v1/photos/upload"</span>,
+    token = jwtToken,
+    file = imageFile,
+    mimeType = <span class="string">"image/jpeg"</span>,
+    extraFields = mapOf(
+        <span class="string">"class_ids"</span> to <span class="string">"""["$classId1","$classId2"]"""</span>  <span class="comment">// JSON string</span>
+    )
+)</pre>
+    </div>
+
+    <div class="card warning">
+        <h4>⚠️ Android: Converting content:// URI to File</h4>
+        <p>Android image pickers return <code>content://</code> URIs, not file paths. You must copy to a temp file first:</p>
+        <pre><span class="keyword">fun</span> uriToFile(context: Context, uri: Uri): File {
+    <span class="keyword">val</span> inputStream = context.contentResolver.openInputStream(uri)!!
+    <span class="keyword">val</span> tempFile = File.createTempFile(<span class="string">"upload_"</span>, <span class="string">".jpg"</span>, context.cacheDir)
+    tempFile.outputStream().use { output ->
+        inputStream.copyTo(output)
+    }
+    inputStream.close()
+    <span class="keyword">return</span> tempFile
+}</pre>
+    </div>
+
+    <!-- ======================== SECTION 11: ERROR HANDLING ======================== -->
+    <h2 id="error-handling">11. Error Responses &amp; Handling</h2>
+
+    <div class="card">
+        <table>
+            <tr><th>Status</th><th>Scenario</th><th>Response Body</th></tr>
+            <tr>
+                <td><code>401</code></td>
+                <td>Missing or expired JWT token</td>
+                <td><code>{ "detail": "Not authenticated" }</code></td>
+            </tr>
+            <tr>
+                <td><code>403</code></td>
+                <td>Wrong role (e.g., parent trying to upload gallery photo)</td>
+                <td><code>{ "detail": "Only coaches can upload photos" }</code></td>
+            </tr>
+            <tr>
+                <td><code>403</code></td>
+                <td>Parent trying to upload to another parent's child</td>
+                <td><code>{ "detail": "Not authorized to access this child" }</code></td>
+            </tr>
+            <tr>
+                <td><code>404</code></td>
+                <td>Child or announcement not found</td>
+                <td><code>{ "detail": "Child not found" }</code></td>
+            </tr>
+            <tr>
+                <td><code>404</code></td>
+                <td>Retrieving image that doesn't exist</td>
+                <td><code>{ "detail": "No profile image found" }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>Invalid file type</td>
+                <td><code>{ "detail": "Invalid file type. Allowed: image/jpeg, image/png, image/jpg" }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>File too large</td>
+                <td><code>{ "detail": "File too large (max 10MB)" }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>Missing class_id/class_ids for gallery upload</td>
+                <td><code>{ "detail": "At least one class must be specified" }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>Corrupt image file (can't be processed by Pillow)</td>
+                <td><code>{ "detail": "Failed to process image file" }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>Missing <code>file</code> field or wrong field name</td>
+                <td><code>{ "detail": [{"loc": ["body", "file"], "msg": "field required"}] }</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ======================== SECTION 12: TROUBLESHOOTING ======================== -->
+    <h2 id="troubleshooting">12. Common Pitfalls &amp; Troubleshooting</h2>
+
+    <div class="card danger">
+        <h3>Pitfall 1: Sending Base64 Instead of Binary</h3>
+        <p><strong>Symptom:</strong> <code>422 Unprocessable Entity</code> — "field required" for <code>file</code></p>
+        <p><strong>Cause:</strong> Sending <code>{"file": "data:image/jpeg;base64,..."}</code> as JSON body</p>
+        <p><strong>Fix:</strong> Use <code>multipart/form-data</code> with raw binary file data. The server uses FastAPI's <code>UploadFile = File(...)</code> which only accepts multipart uploads.</p>
+    </div>
+
+    <div class="card danger">
+        <h3>Pitfall 2: Manually Setting Content-Type Header</h3>
+        <p><strong>Symptom:</strong> <code>422</code> error even though you're using FormData</p>
+        <p><strong>Cause:</strong> Setting <code>Content-Type: multipart/form-data</code> manually without the boundary</p>
+        <p><strong>Fix:</strong> Remove the <code>Content-Type</code> header entirely. Let your HTTP client generate it with the correct boundary string.</p>
+        <p><strong>Exception:</strong> In Swift/Kotlin where you build the multipart body manually, you MUST set the Content-Type with the boundary you used: <code>multipart/form-data; boundary=YourBoundary</code></p>
+    </div>
+
+    <div class="card danger">
+        <h3>Pitfall 3: Wrong Form Field Name</h3>
+        <p><strong>Symptom:</strong> <code>422</code> — <code>[{"loc": ["body", "file"], "msg": "field required"}]</code></p>
+        <p><strong>Cause:</strong> Using field name <code>"image"</code>, <code>"photo"</code>, or <code>"attachment"</code> instead of <code>"file"</code></p>
+        <p><strong>Fix:</strong> All three upload endpoints expect the field name to be exactly <code>"file"</code>:</p>
+        <pre>formData.append(<span class="string">'file'</span>, ...)   <span class="comment">// ✅ correct</span>
+formData.append(<span class="string">'image'</span>, ...)  <span class="comment">// ❌ wrong</span>
+formData.append(<span class="string">'photo'</span>, ...)  <span class="comment">// ❌ wrong</span></pre>
+    </div>
+
+    <div class="card warning">
+        <h3>Pitfall 4: Android content:// URI</h3>
+        <p><strong>Symptom:</strong> File not found or empty upload on Android</p>
+        <p><strong>Cause:</strong> Android image pickers return <code>content://</code> URIs which can't be read directly as file paths</p>
+        <p><strong>Fix:</strong> Copy the content to a temporary file first (see Kotlin section above), then upload the temp file.</p>
+    </div>
+
+    <div class="card warning">
+        <h3>Pitfall 5: iOS file:// Prefix</h3>
+        <p><strong>Symptom:</strong> Upload works on Android but fails on iOS</p>
+        <p><strong>Cause:</strong> Some iOS image pickers include the <code>file://</code> prefix, others don't</p>
+        <p><strong>Fix:</strong> Normalize the URI before uploading:</p>
+        <pre><span class="keyword">const</span> normalizedUri = Platform.OS === <span class="string">'ios'</span>
+  ? uri.replace(<span class="string">'file://'</span>, <span class="string">''</span>)
+  : uri;</pre>
+    </div>
+
+    <div class="card warning">
+        <h3>Pitfall 6: Camera Photos Exceeding 10 MB</h3>
+        <p><strong>Symptom:</strong> <code>422</code> — "File too large (max 10MB)"</p>
+        <p><strong>Cause:</strong> Modern phone cameras produce 5-15 MB JPEG files</p>
+        <p><strong>Fix:</strong> Compress before uploading:</p>
+        <ul style="margin: 8px 0 0 20px;">
+            <li><strong>React Native (expo-image-picker):</strong> <code>quality: 0.8</code></li>
+            <li><strong>Flutter (image_picker):</strong> <code>imageQuality: 80, maxWidth: 2000</code></li>
+            <li><strong>Swift:</strong> <code>image.jpegData(compressionQuality: 0.8)</code></li>
+            <li><strong>Kotlin:</strong> <code>Bitmap.compress(JPEG, 80, outputStream)</code></li>
+        </ul>
+    </div>
+
+    <div class="card info">
+        <h3>Pitfall 7: Image Retrieval Returns 404</h3>
+        <p><strong>Symptom:</strong> Image URL from response returns 404</p>
+        <p><strong>Cause:</strong> The response contains a <em>relative</em> URL like <code>/api/v1/photos/xyz/image</code></p>
+        <p><strong>Fix:</strong> Always prepend your base URL:</p>
+        <pre><span class="keyword">const</span> fullUrl = <span class="string">`${BASE_URL}${photo.image_url}`</span>;
+<span class="comment">// e.g. "https://your-domain.com/api/v1/photos/xyz/image"</span></pre>
+    </div>
+
+    <hr class="separator">
+
+    <div class="card" style="text-align: center; background: var(--code-bg);">
+        <h3>Quick Reference Summary</h3>
+        <table>
+            <tr><th>API</th><th>Endpoint</th><th>File Field</th><th>Extra Fields</th><th>Auth Roles</th></tr>
+            <tr>
+                <td>Child Profile Image</td>
+                <td><code>POST /children/{id}/profile-image</code></td>
+                <td><code>file</code> (image)</td>
+                <td>None</td>
+                <td>Parent (own), Admin, Owner</td>
+            </tr>
+            <tr>
+                <td>Gallery Photo</td>
+                <td><code>POST /photos/upload</code></td>
+                <td><code>file</code> (image)</td>
+                <td><code>class_id</code>, <code>class_ids</code>, <code>category_id</code></td>
+                <td>Coach, Admin, Owner</td>
+            </tr>
+            <tr>
+                <td>Announcement Attachment</td>
+                <td><code>POST /announcements/{id}/attachments</code></td>
+                <td><code>file</code> (image/PDF)</td>
+                <td>None</td>
+                <td>Author, Admin, Owner</td>
+            </tr>
+        </table>
+        <p style="margin-top: 16px; color: var(--text-muted); font-size: 0.85rem;">
+            All uploads: <code>multipart/form-data</code> &bull; Raw binary (NOT base64) &bull; Field name: <code>file</code> &bull; Max: 10 MB &bull; JWT required
+        </p>
+    </div>
+
+</div>
+</body>
+</html>

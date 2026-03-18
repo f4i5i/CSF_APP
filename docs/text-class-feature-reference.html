@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSF "Text Class" Feature — Detailed Reference</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #f1f5f9;
+            --code-border: #cbd5e1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: var(--primary-dark); }
+        h2 { font-size: 1.5rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); color: var(--primary-dark); }
+        h3 { font-size: 1.15rem; margin: 24px 0 12px; color: var(--text); }
+        h4 { font-size: 0.95rem; margin: 16px 0 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        p { margin: 8px 0; }
+        .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .card.highlight { border-left: 4px solid var(--primary); }
+        .card.warning { border-left: 4px solid var(--warning); background: #fffbeb; }
+        .card.danger { border-left: 4px solid var(--danger); background: #fef2f2; }
+        .card.success { border-left: 4px solid var(--success); background: #f0fdf4; }
+        .card.info { border-left: 4px solid var(--info); background: #ecfeff; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-post { background: #dbeafe; color: #1d4ed8; }
+        .badge-get { background: #d1fae5; color: #065f46; }
+        .badge-working { background: #d1fae5; color: #065f46; }
+        .badge-not-working { background: #fee2e2; color: #991b1b; }
+        .badge-partial { background: #fef3c7; color: #92400e; }
+        .method-url { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.95rem; background: var(--code-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--code-border); margin: 12px 0; display: flex; align-items: center; gap: 10px; word-break: break-all; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--code-bg); font-weight: 600; white-space: nowrap; }
+        td code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+        .required { color: var(--danger); font-weight: 600; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 12px 0; }
+        pre .comment { color: #94a3b8; }
+        pre .keyword { color: #93c5fd; }
+        pre .string { color: #86efac; }
+        pre .key { color: #fbbf24; }
+        .toc { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 28px; margin: 20px 0; }
+        .toc h3 { margin: 0 0 12px; }
+        .toc ul { list-style: none; }
+        .toc li { padding: 4px 0; }
+        .toc a { color: var(--primary); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .flow-diagram { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; padding: 20px; margin: 12px 0; font-family: monospace; font-size: 0.85rem; text-align: center; line-height: 2.2; }
+        .flow-arrow { color: var(--primary); font-weight: bold; }
+        .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin: 0 2px; }
+        .tag-coach { background: #ddd6fe; color: #5b21b6; }
+        .tag-admin { background: #fee2e2; color: #991b1b; }
+        .tag-owner { background: #fecaca; color: #7f1d1d; }
+        .separator { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0; }
+        .status-grid .card { margin: 0; text-align: center; }
+        @media (max-width: 768px) { .status-grid { grid-template-columns: 1fr; } }
+        ol, ul { margin: 8px 0 8px 20px; }
+        li { margin: 4px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>"Text Class" Feature — Complete Reference</h1>
+    <p class="subtitle">Coach Dashboard &rarr; Check-In Page &rarr; Text Class Button<br>
+    <strong>Feature Purpose:</strong> Send bulk SMS messages to all parents of students enrolled in a selected class<br>
+    <strong>Last Updated:</strong> March 2026</p>
+
+    <!-- ======================== CURRENT STATUS ======================== -->
+    <div class="card danger">
+        <h3>Current Implementation Status</h3>
+        <div class="status-grid">
+            <div class="card success" style="padding: 16px;">
+                <span class="badge badge-working">WORKING</span>
+                <p style="margin-top: 8px; font-weight: 600;">Backend API</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Endpoint fully implemented with Twilio SMS integration</p>
+            </div>
+            <div class="card" style="padding: 16px; border-left: 4px solid var(--danger);">
+                <span class="badge badge-not-working">NOT WORKING</span>
+                <p style="margin-top: 8px; font-weight: 600;">Frontend Web</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Button is visible but has NO click handler — it does nothing when clicked</p>
+            </div>
+            <div class="card" style="padding: 16px; border-left: 4px solid var(--danger);">
+                <span class="badge badge-not-working">NOT BUILT</span>
+                <p style="margin-top: 8px; font-weight: 600;">Mobile App</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">No mobile implementation exists yet</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================== TABLE OF CONTENTS ======================== -->
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#what-is-it">1. What Is "Text Class"?</a></li>
+            <li><a href="#where-is-it">2. Where Does It Appear in the UI?</a></li>
+            <li><a href="#how-it-works">3. How It Works End-to-End (Backend)</a></li>
+            <li><a href="#api-reference">4. API Endpoint Reference</a></li>
+            <li><a href="#sms-service">5. SMS Service (Twilio) Details</a></li>
+            <li><a href="#frontend-status">6. Frontend Web Status — What's Missing</a></li>
+            <li><a href="#frontend-fix">7. What Needs to Be Built (Frontend)</a></li>
+            <li><a href="#mobile-guide">8. Mobile App Implementation Guide</a></li>
+            <li><a href="#config">9. Twilio Configuration Requirements</a></li>
+            <li><a href="#error-handling">10. Error Responses &amp; Edge Cases</a></li>
+        </ul>
+    </div>
+
+    <!-- ======================== SECTION 1 ======================== -->
+    <h2 id="what-is-it">1. What Is "Text Class"?</h2>
+
+    <div class="card highlight">
+        <p><strong>"Text Class"</strong> is a feature on the Coach Dashboard's Check-In page that allows coaches to send a <strong>bulk SMS text message</strong> to <strong>all parents of students enrolled in the currently selected class</strong>.</p>
+
+        <h4>Purpose &amp; Use Cases</h4>
+        <ul>
+            <li><strong>Class announcements:</strong> "Practice cancelled today due to weather"</li>
+            <li><strong>Schedule changes:</strong> "Tomorrow's practice moved to Field B at 4:30 PM"</li>
+            <li><strong>Reminders:</strong> "Don't forget to bring water bottles for Saturday's game"</li>
+            <li><strong>Check-in reminders:</strong> "Please check in your child when you arrive"</li>
+            <li><strong>Urgent notifications:</strong> "Practice ending early today — pickup at 5 PM"</li>
+        </ul>
+
+        <h4>Who Can Use It</h4>
+        <p>
+            <span class="tag tag-coach">Coach</span>
+            <span class="tag tag-admin">Admin</span>
+            <span class="tag tag-owner">Owner</span>
+        </p>
+        <p>Parents <strong>cannot</strong> use this feature. It is exclusively for staff members.</p>
+    </div>
+
+    <!-- ======================== SECTION 2 ======================== -->
+    <h2 id="where-is-it">2. Where Does It Appear in the UI?</h2>
+
+    <div class="card">
+        <h4>Page Location</h4>
+        <p><code>Coach Dashboard</code> &rarr; <code>Check-In</code> page &rarr; Top filter bar</p>
+        <p><strong>File:</strong> <code>src/pages/CoachDashboard/CheckIn.jsx</code></p>
+
+        <h4>Button Locations (Two Instances)</h4>
+        <p>The "Text Class" button appears in <strong>two places</strong> on the Check-In page, designed for responsive layout:</p>
+
+        <table>
+            <tr><th>Instance</th><th>Visibility</th><th>Location</th><th>Code Line</th></tr>
+            <tr>
+                <td><strong>Mobile Button</strong></td>
+                <td>Visible on <code>sm</code> screens only<br>(shown below 640px)</td>
+                <td>Top-right corner, next to "Check-In" heading</td>
+                <td>Line 209–212</td>
+            </tr>
+            <tr>
+                <td><strong>Desktop Button</strong></td>
+                <td>Hidden on <code>sm</code> screens<br>(shown above 640px)</td>
+                <td>Inside the filter bar, right of the class selector dropdown</td>
+                <td>Line 283–286</td>
+            </tr>
+        </table>
+
+        <h4>Button Appearance</h4>
+        <ul>
+            <li><strong>Icon:</strong> <code>MessageSquare</code> from lucide-react (chat bubble icon)</li>
+            <li><strong>Label:</strong> "Text Class"</li>
+            <li><strong>Style (mobile):</strong> Gray button (<code>#7d97b5</code>), white text, rounded pill shape</li>
+            <li><strong>Style (desktop):</strong> Blue/teal button (<code>bg-btn-secondary</code>), white text, 150px wide, rounded pill</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h4>UI Layout Context — Check-In Page Structure</h4>
+        <pre><span class="comment">┌───────────────────────────────────────────────────────────┐</span>
+<span class="comment">│  Header (Navigation Bar)                                  │</span>
+<span class="comment">├───────────────────────────────────────────────────────────┤</span>
+<span class="comment">│                                                           │</span>
+<span class="comment">│  ┌─ Page Title ──────────────────────────────────────┐    │</span>
+<span class="comment">│  │  "Check-In"                    [Text Class] (mob) │    │</span>
+<span class="comment">│  └───────────────────────────────────────────────────┘    │</span>
+<span class="comment">│                                                           │</span>
+<span class="comment">│  ┌─ Filter Bar (rounded white card) ─────────────────┐    │</span>
+<span class="comment">│  │                                                   │    │</span>
+<span class="comment">│  │  [🔍 Search students...]                          │    │</span>
+<span class="comment">│  │                                                   │    │</span>
+<span class="comment">│  │  [▼ Select a class    ]     [💬 Text Class] (desk)│    │</span>
+<span class="comment">│  │                                                   │    │</span>
+<span class="comment">│  └───────────────────────────────────────────────────┘    │</span>
+<span class="comment">│                                                           │</span>
+<span class="comment">│  ┌─ Student List ────────────────────────────────────┐    │</span>
+<span class="comment">│  │  [Sort: Alphabetical ▼]     X of Y students       │    │</span>
+<span class="comment">│  │  ┌──────────────────────────────────────────────┐ │    │</span>
+<span class="comment">│  │  │ [👤 Avatar]  Student Name   Grade   [✓/✗]   │ │    │</span>
+<span class="comment">│  │  │ [👤 Avatar]  Student Name   Grade   [✓/✗]   │ │    │</span>
+<span class="comment">│  │  │ [👤 Avatar]  Student Name   Grade   [✓/✗]   │ │    │</span>
+<span class="comment">│  │  │ ...                                          │ │    │</span>
+<span class="comment">│  │  └──────────────────────────────────────────────┘ │    │</span>
+<span class="comment">│  └───────────────────────────────────────────────────┘    │</span>
+<span class="comment">│                                                           │</span>
+<span class="comment">│  Footer                                                   │</span>
+<span class="comment">└───────────────────────────────────────────────────────────┘</span></pre>
+    </div>
+
+    <!-- ======================== SECTION 3 ======================== -->
+    <h2 id="how-it-works">3. How It Works End-to-End (Backend)</h2>
+
+    <div class="card">
+        <h4>Complete Flow Diagram</h4>
+        <div class="flow-diagram">
+            <strong>Coach clicks "Text Class" button</strong>
+            <br><span class="flow-arrow">→</span> Modal opens (NOT YET BUILT) with message input textarea
+            <br><span class="flow-arrow">→</span> Coach types message (max 160 characters = 1 SMS)
+            <br><span class="flow-arrow">→</span> Coach clicks "Send"
+            <br><span class="flow-arrow">→</span> Frontend sends <code>POST /api/v1/check-in/text-class</code>
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;with <code>{ class_id, message }</code>
+            <br>
+            <br><span class="flow-arrow">↓</span> <strong>Backend Processing:</strong>
+            <br>1. Verify user is Coach/Admin/Owner
+            <br>2. Verify class exists
+            <br>3. Load all <strong>active enrollments</strong> for that class
+            <br>4. For each enrollment → load child → load parent (user)
+            <br>5. Collect all parent phone numbers
+            <br>
+            <br><span class="flow-arrow">↓</span> <strong>SMS Sending:</strong>
+            <br>6. Format message: <code>"CSF - {Class Name}\nCoach {Name}: {message}"</code>
+            <br>7. Call Twilio API for each phone number individually
+            <br>8. Track sent/failed counts
+            <br>
+            <br><span class="flow-arrow">↓</span> <strong>Response to Frontend:</strong>
+            <br><code>{ sent_count: 15, failed_count: 2, total: 17, message: "..." }</code>
+        </div>
+    </div>
+
+    <div class="card info">
+        <h4>SMS Message Format</h4>
+        <p>The backend formats every SMS with a standard header:</p>
+        <pre><span class="string">CSF - Soccer Stars (Mon/Wed 4-5 PM)
+Coach John Smith: Practice cancelled tomorrow due to rain. See you Wednesday!</span></pre>
+        <p>This format is hardcoded in <code>SMSService.send_class_announcement()</code> — the coach only types the message body, and the server prepends the class name and coach name automatically.</p>
+
+        <h4>Character Limit</h4>
+        <p>The message field has a <strong>max length of 160 characters</strong> (validated by the schema). This is the standard single SMS segment length. Note that the formatted message (with header) may exceed 160 chars, in which case Twilio automatically splits it into multi-segment SMS and the <code>send_sms()</code> method truncates to 160 chars total. This means the coach's actual message may be truncated if the header is long.</p>
+    </div>
+
+    <!-- ======================== SECTION 4 ======================== -->
+    <h2 id="api-reference">4. API Endpoint Reference</h2>
+
+    <div class="card highlight">
+        <div class="method-url">
+            <span class="badge badge-post">POST</span>
+            <code>/api/v1/check-in/text-class</code>
+        </div>
+
+        <p>Send an SMS text message to all parents of students enrolled in a specific class.</p>
+
+        <h4>Who Can Use This</h4>
+        <p>
+            <span class="tag tag-coach">Coach</span>
+            <span class="tag tag-admin">Admin</span>
+            <span class="tag tag-owner">Owner</span>
+        </p>
+
+        <h4>Authentication</h4>
+        <p><code>Authorization: Bearer &lt;jwt_token&gt;</code> — Required</p>
+
+        <h4>Request Body — <code>application/json</code></h4>
+        <table>
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Validation</th><th>Description</th></tr>
+            <tr>
+                <td><code>class_id</code></td>
+                <td>string (UUID)</td>
+                <td class="required">Yes</td>
+                <td>Must be valid class UUID</td>
+                <td>The class whose parents will receive the SMS</td>
+            </tr>
+            <tr>
+                <td><code>message</code></td>
+                <td>string</td>
+                <td class="required">Yes</td>
+                <td>1–160 characters</td>
+                <td>The message content. Server prepends class name + coach name automatically.</td>
+            </tr>
+        </table>
+
+        <h4>Example Request</h4>
+        <pre>{
+  <span class="key">"class_id"</span>: <span class="string">"a1b2c3d4-e5f6-7890-abcd-ef1234567890"</span>,
+  <span class="key">"message"</span>: <span class="string">"Practice cancelled tomorrow due to weather. Stay safe!"</span>
+}</pre>
+
+        <h4>Success Response — <code>200 OK</code></h4>
+        <pre>{
+  <span class="key">"sent_count"</span>: 15,       <span class="comment">// number of SMS successfully sent</span>
+  <span class="key">"failed_count"</span>: 2,      <span class="comment">// number of SMS that failed (bad phone numbers, etc.)</span>
+  <span class="key">"total"</span>: 17,             <span class="comment">// total parents with phone numbers</span>
+  <span class="key">"message"</span>: <span class="string">"Message sent to 15 out of 17 parents"</span>
+}</pre>
+
+        <h4>Response Field Details</h4>
+        <table>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>sent_count</code></td><td>int</td><td>Number of SMS messages successfully delivered to Twilio</td></tr>
+            <tr><td><code>failed_count</code></td><td>int</td><td>Number of SMS that failed (invalid phone, Twilio error, etc.)</td></tr>
+            <tr><td><code>total</code></td><td>int</td><td>Total number of unique parent phone numbers found for the class</td></tr>
+            <tr><td><code>message</code></td><td>string</td><td>Human-readable summary message for display in UI</td></tr>
+        </table>
+
+        <h4>Special Case: No Phone Numbers</h4>
+        <p>If no parents in the class have phone numbers on file, the response will be:</p>
+        <pre>{
+  <span class="key">"sent_count"</span>: 0,
+  <span class="key">"failed_count"</span>: 0,
+  <span class="key">"total"</span>: 0,
+  <span class="key">"message"</span>: <span class="string">"No parent phone numbers available"</span>
+}</pre>
+    </div>
+
+    <!-- ======================== SECTION 5 ======================== -->
+    <h2 id="sms-service">5. SMS Service (Twilio) Details</h2>
+
+    <div class="card">
+        <h4>Architecture</h4>
+        <p><strong>File:</strong> <code>csf_backend/app/services/sms_service.py</code></p>
+        <p>The SMS service is a <strong>singleton class</strong> (<code>SMSService</code>) that wraps the Twilio REST API.</p>
+
+        <table>
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>SMS Provider</td><td><strong>Twilio</strong> (<code>twilio.rest.Client</code>)</td></tr>
+            <tr><td>Initialization</td><td>Singleton via <code>get_sms_service()</code></td></tr>
+            <tr><td>Graceful Degradation</td><td>If Twilio credentials are missing, <code>self.enabled = False</code> and all send methods raise <code>ValueError</code></td></tr>
+            <tr><td>Phone Format</td><td>E.164 required (e.g., <code>+12125551234</code>). Auto-prepends <code>+1</code> (US) if missing.</td></tr>
+            <tr><td>Max Message Length</td><td>160 characters per SMS segment (truncated with "..." if exceeded)</td></tr>
+            <tr><td>Sending Method</td><td>Sequential — one API call per phone number (no batch/queue)</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h4>How <code>send_class_announcement()</code> Works</h4>
+        <pre><span class="keyword">def</span> send_class_announcement(self, class_name, coach_name, phone_numbers, message):
+    <span class="comment"># Step 1: Format message with header</span>
+    formatted_message = (
+        f<span class="string">"CSF - {class_name}\n"</span>
+        f<span class="string">"Coach {coach_name}: {message}"</span>
+    )
+
+    <span class="comment"># Step 2: Send to all parents (one by one)</span>
+    <span class="keyword">return</span> self.send_bulk_sms(phone_numbers, formatted_message)</pre>
+
+        <h4>Important: Message Truncation Issue</h4>
+        <div class="card warning" style="margin: 12px 0 0;">
+            <p>The coach's message is limited to 160 chars, but the <strong>formatted</strong> message (with "CSF - {class}\nCoach {name}: " prefix) can easily exceed 160 chars total. The <code>send_sms()</code> method truncates the entire formatted message to 160 chars, which means part of the coach's actual message may be cut off.</p>
+            <p><strong>Example:</strong> If class name is "Soccer Stars (Mon/Wed 4-5 PM)" (30 chars) and coach name is "John Smith" (10 chars), the header alone is ~50 chars, leaving only ~110 chars for the coach's message before truncation.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>Other SMS Methods Available in the Service</h4>
+        <p>The SMS service has several other methods that can be called from other parts of the system:</p>
+        <table>
+            <tr><th>Method</th><th>Purpose</th><th>Currently Used?</th></tr>
+            <tr><td><code>send_sms()</code></td><td>Send single SMS to one number</td><td>Internal (called by others)</td></tr>
+            <tr><td><code>send_bulk_sms()</code></td><td>Send same message to multiple numbers</td><td>Internal (called by class announcement)</td></tr>
+            <tr><td><code>send_class_announcement()</code></td><td>Bulk SMS with class/coach header</td><td>Yes — by <code>text-class</code> endpoint</td></tr>
+            <tr><td><code>send_check_in_reminder()</code></td><td>Remind parent to check in child</td><td>Not called from any endpoint</td></tr>
+            <tr><td><code>send_attendance_alert()</code></td><td>Notify parent of child's absence</td><td>Not called from any endpoint</td></tr>
+            <tr><td><code>send_badge_earned_notification()</code></td><td>Notify parent of badge earned</td><td>Not called from any endpoint</td></tr>
+            <tr><td><code>send_event_reminder()</code></td><td>Bulk event reminders</td><td>Not called from any endpoint</td></tr>
+        </table>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Only <code>send_class_announcement()</code> is actively used. The other methods are available but not wired to any API endpoint yet.</p>
+    </div>
+
+    <!-- ======================== SECTION 6 ======================== -->
+    <h2 id="frontend-status">6. Frontend Web Status — What's Missing</h2>
+
+    <div class="card danger">
+        <h3>The "Text Class" Button Is NOT Functional on the Web</h3>
+
+        <p>The button is <strong>visible</strong> in the UI on both mobile and desktop layouts, but it is a <strong>dead button</strong> — clicking it does absolutely nothing.</p>
+
+        <h4>What Exists (Frontend)</h4>
+        <table>
+            <tr><th>Component</th><th>Status</th><th>Details</th></tr>
+            <tr>
+                <td>Button (mobile) — Line 209</td>
+                <td><span class="badge badge-partial">UI ONLY</span></td>
+                <td>Renders <code>&lt;button&gt;</code> with icon + "Text Class" text. <strong>No <code>onClick</code> handler.</strong></td>
+            </tr>
+            <tr>
+                <td>Button (desktop) — Line 283</td>
+                <td><span class="badge badge-partial">UI ONLY</span></td>
+                <td>Same — renders visual button with <strong>no <code>onClick</code> handler.</strong></td>
+            </tr>
+            <tr>
+                <td>Modal / Dialog</td>
+                <td><span class="badge badge-not-working">MISSING</span></td>
+                <td>No modal component exists for entering the message text</td>
+            </tr>
+            <tr>
+                <td>API Endpoint Constant</td>
+                <td><span class="badge badge-not-working">MISSING</span></td>
+                <td><code>api.constants.js</code> has no <code>TEXT_CLASS</code> entry under <code>CHECKIN</code></td>
+            </tr>
+            <tr>
+                <td>Service Method</td>
+                <td><span class="badge badge-not-working">MISSING</span></td>
+                <td><code>checkin.service.js</code> has no <code>textClass()</code> method</td>
+            </tr>
+            <tr>
+                <td>Loading/Success Toast</td>
+                <td><span class="badge badge-not-working">MISSING</span></td>
+                <td>No feedback for sending state, success count, or errors</td>
+            </tr>
+        </table>
+
+        <h4>Current Button Code (Both are identical in behavior)</h4>
+        <pre><span class="comment">{/* Desktop button — Line 283-286 */}</span>
+&lt;button <span class="keyword">className</span>=<span class="string">"flex max-sm:hidden items-center w-[150px] h-12 ..."</span>&gt;
+  &lt;MessageSquare size={18} /&gt;
+  &lt;span&gt;Text Class&lt;/span&gt;
+&lt;/button&gt;
+
+<span class="comment">// ⚠️ Notice: NO onClick prop. This button does nothing when clicked.</span></pre>
+    </div>
+
+    <!-- ======================== SECTION 7 ======================== -->
+    <h2 id="frontend-fix">7. What Needs to Be Built (Frontend Web)</h2>
+
+    <div class="card highlight">
+        <p>To make "Text Class" functional on the web, the following items need to be implemented:</p>
+
+        <h4>Step 1: Add API Endpoint Constant</h4>
+        <p><strong>File:</strong> <code>src/constants/api.constants.js</code></p>
+        <pre><span class="comment">// Add inside the CHECKIN object:</span>
+CHECKIN: {
+  SINGLE: <span class="string">"/check-in"</span>,
+  BULK: <span class="string">"/check-in/bulk"</span>,
+  BY_CLASS: (classId) => <span class="string">`/check-in/class/${classId}`</span>,
+  STATUS: (classId) => <span class="string">`/check-in/class/${classId}/status`</span>,
+  <span class="key">TEXT_CLASS: "/check-in/text-class"</span>,    <span class="comment">// ← ADD THIS</span>
+},</pre>
+
+        <h4>Step 2: Add Service Method</h4>
+        <p><strong>File:</strong> <code>src/api/services/checkin.service.js</code></p>
+        <pre><span class="comment">// Add new method to checkinService:</span>
+
+<span class="comment">/**
+ * Send SMS to all parents in a class
+ * @param {Object} params
+ * @param {string} params.class_id - Class ID
+ * @param {string} params.message - Message text (1-160 chars)
+ * @returns {Promise&lt;Object&gt;} { sent_count, failed_count, total, message }
+ */</span>
+<span class="keyword">async</span> textClass({ class_id, message }) {
+  <span class="keyword">const</span> { data } = <span class="keyword">await</span> apiClient.post(API_ENDPOINTS.CHECKIN.TEXT_CLASS, {
+    class_id,
+    message,
+  });
+  <span class="keyword">return</span> data;
+},</pre>
+
+        <h4>Step 3: Create Text Class Modal Component</h4>
+        <p>A new modal component is needed with:</p>
+        <ul>
+            <li>Textarea input (max 160 chars with character counter)</li>
+            <li>Display: class name and student count</li>
+            <li>Send button with loading state</li>
+            <li>Success/error toast with sent/failed counts</li>
+        </ul>
+
+        <h4>Step 4: Wire onClick Handlers</h4>
+        <p>Both button instances in <code>CheckIn.jsx</code> need <code>onClick</code> handlers to open the modal.</p>
+    </div>
+
+    <!-- ======================== SECTION 8 ======================== -->
+    <h2 id="mobile-guide">8. Mobile App Implementation Guide</h2>
+
+    <div class="card highlight">
+        <h3>8.1 API Call — React Native Example</h3>
+        <pre><span class="comment">/**
+ * Send SMS to all parents in a class.
+ * This is a JSON POST (NOT multipart/form-data).
+ */</span>
+<span class="keyword">async function</span> textClass(classId, message, token) {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">`${BASE_URL}/api/v1/check-in/text-class`</span>, {
+    method: <span class="string">'POST'</span>,
+    headers: {
+      <span class="string">'Authorization'</span>: <span class="string">`Bearer ${token}`</span>,
+      <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,
+    },
+    body: JSON.stringify({
+      class_id: classId,
+      message: message,     <span class="comment">// max 160 chars</span>
+    }),
+  });
+
+  <span class="keyword">if</span> (!response.ok) {
+    <span class="keyword">const</span> error = <span class="keyword">await</span> response.json();
+    <span class="keyword">throw new</span> Error(error.detail || <span class="string">'Failed to send message'</span>);
+  }
+
+  <span class="keyword">return await</span> response.json();
+  <span class="comment">// Returns: { sent_count, failed_count, total, message }</span>
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>8.2 Flutter / Dart Example</h3>
+        <pre><span class="keyword">import</span> <span class="string">'dart:convert'</span>;
+<span class="keyword">import</span> <span class="string">'package:http/http.dart'</span> <span class="keyword">as</span> http;
+
+Future&lt;Map&lt;String, dynamic&gt;&gt; textClass({
+  required String classId,
+  required String message,
+  required String token,
+}) <span class="keyword">async</span> {
+  <span class="keyword">final</span> response = <span class="keyword">await</span> http.post(
+    Uri.parse(<span class="string">'$baseUrl/api/v1/check-in/text-class'</span>),
+    headers: {
+      <span class="string">'Authorization'</span>: <span class="string">'Bearer $token'</span>,
+      <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,
+    },
+    body: jsonEncode({
+      <span class="string">'class_id'</span>: classId,
+      <span class="string">'message'</span>: message,
+    }),
+  );
+
+  <span class="keyword">if</span> (response.statusCode != 200) {
+    <span class="keyword">throw</span> Exception(<span class="string">'Failed: ${response.body}'</span>);
+  }
+  <span class="keyword">return</span> jsonDecode(response.body);
+}</pre>
+    </div>
+
+    <div class="card">
+        <h3>8.3 Suggested Mobile UI Flow</h3>
+        <div class="flow-diagram" style="text-align: left;">
+            <strong>1. Coach selects a class</strong> on the Check-In screen
+            <br>
+            <br><strong>2. Coach taps "Text Class" button</strong>
+            <br>
+            <br><strong>3. Modal/Bottom Sheet opens with:</strong>
+            <br>&nbsp;&nbsp;&nbsp;• Header: "Message to {Class Name}"
+            <br>&nbsp;&nbsp;&nbsp;• Subtext: "This will text {X} parents"
+            <br>&nbsp;&nbsp;&nbsp;• Textarea: placeholder "Type your message..."
+            <br>&nbsp;&nbsp;&nbsp;• Character counter: "42/160"
+            <br>&nbsp;&nbsp;&nbsp;• [Cancel] button &nbsp;&nbsp; [Send] button
+            <br>
+            <br><strong>4. Coach types message and taps "Send"</strong>
+            <br>&nbsp;&nbsp;&nbsp;• Show loading spinner on Send button
+            <br>&nbsp;&nbsp;&nbsp;• Disable textarea and Cancel button
+            <br>
+            <br><strong>5. On Success:</strong>
+            <br>&nbsp;&nbsp;&nbsp;• Close modal
+            <br>&nbsp;&nbsp;&nbsp;• Show toast: "Message sent to 15 out of 17 parents"
+            <br>
+            <br><strong>6. On Partial Failure (some sent, some failed):</strong>
+            <br>&nbsp;&nbsp;&nbsp;• Show warning toast: "Sent to 15 parents. 2 failed (invalid phone numbers)."
+            <br>
+            <br><strong>7. On Error (403, 404, etc.):</strong>
+            <br>&nbsp;&nbsp;&nbsp;• Show error toast with message from server
+        </div>
+    </div>
+
+    <!-- ======================== SECTION 9 ======================== -->
+    <h2 id="config">9. Twilio Configuration Requirements</h2>
+
+    <div class="card warning">
+        <h4>Required Environment Variables (Backend)</h4>
+        <table>
+            <tr><th>Variable</th><th>Description</th><th>Example</th></tr>
+            <tr>
+                <td><code>TWILIO_ACCOUNT_SID</code></td>
+                <td>Twilio Account SID</td>
+                <td><code>ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></td>
+            </tr>
+            <tr>
+                <td><code>TWILIO_AUTH_TOKEN</code></td>
+                <td>Twilio Auth Token</td>
+                <td><code>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></td>
+            </tr>
+            <tr>
+                <td><code>TWILIO_PHONE_NUMBER</code></td>
+                <td>Your Twilio phone number (E.164)</td>
+                <td><code>+12125551234</code></td>
+            </tr>
+        </table>
+        <p><strong>If any of these are empty or missing:</strong> The SMS service initializes with <code>enabled = False</code> and all send operations raise <code>ValueError: SMS service is not enabled</code>.</p>
+        <p><strong>Currently configured:</strong> All three default to empty string (<code>""</code>) in <code>core/config.py</code>. The Twilio credentials must be set in the environment (or <code>.env</code> file) for SMS to work.</p>
+    </div>
+
+    <div class="card info">
+        <h4>Parent Phone Number Requirements</h4>
+        <ul>
+            <li>Phone numbers are stored in the <code>User</code> (parent) model's <code>phone</code> field</li>
+            <li>The SMS service auto-prepends <code>+1</code> (US country code) if the number doesn't start with <code>+</code></li>
+            <li>Parents without a phone number on file are <strong>silently skipped</strong> (not counted in <code>total</code>)</li>
+            <li>The feature only texts parents of <strong>actively enrolled</strong> students (enrollment status = "active", not deleted)</li>
+        </ul>
+    </div>
+
+    <!-- ======================== SECTION 10 ======================== -->
+    <h2 id="error-handling">10. Error Responses &amp; Edge Cases</h2>
+
+    <div class="card">
+        <table>
+            <tr><th>Status</th><th>Scenario</th><th>Response</th></tr>
+            <tr>
+                <td><code>401</code></td>
+                <td>Missing or expired JWT token</td>
+                <td><code>{ "detail": "Not authenticated" }</code></td>
+            </tr>
+            <tr>
+                <td><code>403</code></td>
+                <td>Parent or non-staff user tries to send</td>
+                <td><code>{ "detail": "Only coaches can send class messages" }</code></td>
+            </tr>
+            <tr>
+                <td><code>404</code></td>
+                <td>Invalid <code>class_id</code></td>
+                <td><code>{ "detail": "Class not found" }</code></td>
+            </tr>
+            <tr>
+                <td><code>404</code></td>
+                <td>Class exists but has zero active enrollments</td>
+                <td><code>{ "detail": "No active enrollments found for this class" }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>Empty message or exceeds 160 chars</td>
+                <td><code>{ "detail": [{"loc": ["body","message"], "msg": "..."}] }</code></td>
+            </tr>
+            <tr>
+                <td><code>422</code></td>
+                <td>Missing <code>class_id</code> field</td>
+                <td><code>{ "detail": [{"loc": ["body","class_id"], "msg": "field required"}] }</code></td>
+            </tr>
+            <tr>
+                <td><code>500</code></td>
+                <td>Twilio credentials not configured</td>
+                <td><code>ValueError: "SMS service is not enabled..."</code></td>
+            </tr>
+            <tr>
+                <td><code>200</code></td>
+                <td>All parents have phone numbers but all Twilio sends fail</td>
+                <td><code>{ "sent_count": 0, "failed_count": 17, "total": 17, "message": "..." }</code></td>
+            </tr>
+            <tr>
+                <td><code>200</code></td>
+                <td>No parents have phone numbers</td>
+                <td><code>{ "sent_count": 0, "failed_count": 0, "total": 0, "message": "No parent phone numbers available" }</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <hr class="separator">
+
+    <div class="card" style="text-align: center; background: var(--code-bg);">
+        <h3>Quick Reference Summary</h3>
+        <table>
+            <tr><th>Aspect</th><th>Detail</th></tr>
+            <tr><td>Endpoint</td><td><code>POST /api/v1/check-in/text-class</code></td></tr>
+            <tr><td>Content-Type</td><td><code>application/json</code> (NOT multipart)</td></tr>
+            <tr><td>Auth</td><td>JWT Bearer — Coach, Admin, or Owner</td></tr>
+            <tr><td>Request Body</td><td><code>{ "class_id": "uuid", "message": "text (1-160 chars)" }</code></td></tr>
+            <tr><td>Response</td><td><code>{ sent_count, failed_count, total, message }</code></td></tr>
+            <tr><td>SMS Provider</td><td>Twilio (sequential per-number sends)</td></tr>
+            <tr><td>Message Format</td><td><code>CSF - {Class}\nCoach {Name}: {message}</code></td></tr>
+            <tr><td>Recipients</td><td>All parents with phone numbers of actively enrolled students</td></tr>
+            <tr><td>Frontend Web</td><td><strong>Button visible but NOT functional</strong> — needs onClick, modal, service method, API constant</td></tr>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>
