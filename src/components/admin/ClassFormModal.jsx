@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { X, ChevronDown, Plus, Link, Copy, CheckCircle, Loader2 } from "lucide-react";
+import {
+  X,
+  ChevronDown,
+  Plus,
+  Link,
+  Copy,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import useClassForm from "../../hooks/useClassForm";
 import programsService from "../../api/services/programs.service";
@@ -43,7 +51,14 @@ const REPEAT_EVERY_WEEKS = [
 ];
 
 // Custom Dropdown Component
-function CustomDropdown({ value, onChange, options, placeholder, error, renderOption }) {
+function CustomDropdown({
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+  renderOption,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -71,7 +86,9 @@ function CustomDropdown({ value, onChange, options, placeholder, error, renderOp
         }`}
         style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
       >
-        <span className={`text-xs sm:text-base ${selectedOption ? "text-gray-900 font-manrope" : "text-gray-400 font-manrope"}`}>
+        <span
+          className={`text-xs sm:text-base ${selectedOption ? "text-gray-900 font-manrope" : "text-gray-400 font-manrope"}`}
+        >
           {displayText}
         </span>
         <motion.div
@@ -157,23 +174,57 @@ export default function ClassFormModal({
 
   // US States for dropdown
   const US_STATES = [
-    { id: "AL", name: "Alabama" }, { id: "AK", name: "Alaska" }, { id: "AZ", name: "Arizona" },
-    { id: "AR", name: "Arkansas" }, { id: "CA", name: "California" }, { id: "CO", name: "Colorado" },
-    { id: "CT", name: "Connecticut" }, { id: "DE", name: "Delaware" }, { id: "FL", name: "Florida" },
-    { id: "GA", name: "Georgia" }, { id: "HI", name: "Hawaii" }, { id: "ID", name: "Idaho" },
-    { id: "IL", name: "Illinois" }, { id: "IN", name: "Indiana" }, { id: "IA", name: "Iowa" },
-    { id: "KS", name: "Kansas" }, { id: "KY", name: "Kentucky" }, { id: "LA", name: "Louisiana" },
-    { id: "ME", name: "Maine" }, { id: "MD", name: "Maryland" }, { id: "MA", name: "Massachusetts" },
-    { id: "MI", name: "Michigan" }, { id: "MN", name: "Minnesota" }, { id: "MS", name: "Mississippi" },
-    { id: "MO", name: "Missouri" }, { id: "MT", name: "Montana" }, { id: "NE", name: "Nebraska" },
-    { id: "NV", name: "Nevada" }, { id: "NH", name: "New Hampshire" }, { id: "NJ", name: "New Jersey" },
-    { id: "NM", name: "New Mexico" }, { id: "NY", name: "New York" }, { id: "NC", name: "North Carolina" },
-    { id: "ND", name: "North Dakota" }, { id: "OH", name: "Ohio" }, { id: "OK", name: "Oklahoma" },
-    { id: "OR", name: "Oregon" }, { id: "PA", name: "Pennsylvania" }, { id: "RI", name: "Rhode Island" },
-    { id: "SC", name: "South Carolina" }, { id: "SD", name: "South Dakota" }, { id: "TN", name: "Tennessee" },
-    { id: "TX", name: "Texas" }, { id: "UT", name: "Utah" }, { id: "VT", name: "Vermont" },
-    { id: "VA", name: "Virginia" }, { id: "WA", name: "Washington" }, { id: "WV", name: "West Virginia" },
-    { id: "WI", name: "Wisconsin" }, { id: "WY", name: "Wyoming" }, { id: "DC", name: "Washington DC" },
+    { id: "AL", name: "Alabama" },
+    { id: "AK", name: "Alaska" },
+    { id: "AZ", name: "Arizona" },
+    { id: "AR", name: "Arkansas" },
+    { id: "CA", name: "California" },
+    { id: "CO", name: "Colorado" },
+    { id: "CT", name: "Connecticut" },
+    { id: "DE", name: "Delaware" },
+    { id: "FL", name: "Florida" },
+    { id: "GA", name: "Georgia" },
+    { id: "HI", name: "Hawaii" },
+    { id: "ID", name: "Idaho" },
+    { id: "IL", name: "Illinois" },
+    { id: "IN", name: "Indiana" },
+    { id: "IA", name: "Iowa" },
+    { id: "KS", name: "Kansas" },
+    { id: "KY", name: "Kentucky" },
+    { id: "LA", name: "Louisiana" },
+    { id: "ME", name: "Maine" },
+    { id: "MD", name: "Maryland" },
+    { id: "MA", name: "Massachusetts" },
+    { id: "MI", name: "Michigan" },
+    { id: "MN", name: "Minnesota" },
+    { id: "MS", name: "Mississippi" },
+    { id: "MO", name: "Missouri" },
+    { id: "MT", name: "Montana" },
+    { id: "NE", name: "Nebraska" },
+    { id: "NV", name: "Nevada" },
+    { id: "NH", name: "New Hampshire" },
+    { id: "NJ", name: "New Jersey" },
+    { id: "NM", name: "New Mexico" },
+    { id: "NY", name: "New York" },
+    { id: "NC", name: "North Carolina" },
+    { id: "ND", name: "North Dakota" },
+    { id: "OH", name: "Ohio" },
+    { id: "OK", name: "Oklahoma" },
+    { id: "OR", name: "Oregon" },
+    { id: "PA", name: "Pennsylvania" },
+    { id: "RI", name: "Rhode Island" },
+    { id: "SC", name: "South Carolina" },
+    { id: "SD", name: "South Dakota" },
+    { id: "TN", name: "Tennessee" },
+    { id: "TX", name: "Texas" },
+    { id: "UT", name: "Utah" },
+    { id: "VT", name: "Vermont" },
+    { id: "VA", name: "Virginia" },
+    { id: "WA", name: "Washington" },
+    { id: "WV", name: "West Virginia" },
+    { id: "WI", name: "Wisconsin" },
+    { id: "WY", name: "Wyoming" },
+    { id: "DC", name: "Washington DC" },
   ];
 
   // Registration link state
@@ -186,7 +237,7 @@ export default function ClassFormModal({
   useEffect(() => {
     // If editing an existing class with a slug, consider it manually set
     // If creating new or cloning, allow auto-generation
-    if (mode === 'edit' && initialData?.slug) {
+    if (mode === "edit" && initialData?.slug) {
       setSlugManuallyEdited(true);
     } else {
       setSlugManuallyEdited(false);
@@ -210,8 +261,8 @@ export default function ClassFormModal({
   const generateSlug = (name) => {
     return name
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
       .slice(0, 50);
   };
 
@@ -225,7 +276,7 @@ export default function ClassFormModal({
 
   // Handle manual slug input - sets the flag to stop auto-generation
   const handleSlugChange = (value) => {
-    const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const sanitizedValue = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
     updateField("slug", sanitizedValue);
     // Mark as manually edited once user types in the slug field
     if (!slugManuallyEdited) {
@@ -288,7 +339,9 @@ export default function ClassFormModal({
       return;
     }
     if (!formData.area_id) {
-      toast.error("Please select an Area/Location first before creating a site");
+      toast.error(
+        "Please select an Area/Location first before creating a site",
+      );
       return;
     }
 
@@ -305,7 +358,7 @@ export default function ClassFormModal({
       });
 
       // Add to schools list and select it
-      setSchools(prev => [...prev, newSite]);
+      setSchools((prev) => [...prev, newSite]);
       updateField("school_id", newSite.id);
       updateField("school_code", newSite.code || "");
 
@@ -332,28 +385,29 @@ export default function ClassFormModal({
     const fetchDropdownData = async () => {
       setDropdownsLoading(true);
       try {
-        const [programsData, areasData, schoolsData, coachesData] = await Promise.all([
-          programsService.getAll(),
-          areasService.getAll(),
-          schoolsService.getAll(),
-          adminService.getCoaches().catch((err) => {
-            console.error('Failed to fetch coaches:', err);
-            return { items: [] };
-          }),
-        ]);
+        const [programsData, areasData, schoolsData, coachesData] =
+          await Promise.all([
+            programsService.getAll(),
+            areasService.getAll(),
+            schoolsService.getAll(),
+            adminService.getCoaches().catch((err) => {
+              console.error("Failed to fetch coaches:", err);
+              return { items: [] };
+            }),
+          ]);
 
         // Handle different response structures
         const programsList = Array.isArray(programsData)
           ? programsData
-          : (programsData.items || programsData.data || []);
+          : programsData.items || programsData.data || [];
 
         const areasList = Array.isArray(areasData)
           ? areasData
-          : (areasData.items || areasData.data || []);
+          : areasData.items || areasData.data || [];
 
         const schoolsList = Array.isArray(schoolsData)
           ? schoolsData
-          : (schoolsData.items || schoolsData.data || []);
+          : schoolsData.items || schoolsData.data || [];
 
         const coachesList = coachesData.items || [];
 
@@ -362,8 +416,8 @@ export default function ClassFormModal({
         setSchools(schoolsList);
         setCoaches(coachesList);
       } catch (error) {
-        console.error('Failed to fetch dropdown data:', error);
-        toast.error('Failed to load dropdown data');
+        console.error("Failed to fetch dropdown data:", error);
+        toast.error("Failed to load dropdown data");
         setPrograms([]);
         setAreas([]);
         setSchools([]);
@@ -453,7 +507,7 @@ export default function ClassFormModal({
                     </span>
                     <input
                       type="text"
-                      value={formData.slug || ''}
+                      value={formData.slug || ""}
                       onChange={(e) => handleSlugChange(e.target.value)}
                       className="flex-1 px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light font-mono text-sm"
                       style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
@@ -461,7 +515,8 @@ export default function ClassFormModal({
                     />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Short, memorable URL for sharing. Only lowercase letters, numbers, and hyphens.
+                    Short, memorable URL for sharing. Only lowercase letters,
+                    numbers, and hyphens.
                   </p>
                 </div>
 
@@ -490,14 +545,19 @@ export default function ClassFormModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                      Registration Start Date <span className="text-btn-gold">*</span>
+                      Registration Start Date{" "}
+                      <span className="text-btn-gold">*</span>
                     </label>
                     <input
                       type="date"
                       value={formData.registration_start_date}
-                      onChange={(e) => updateField("registration_start_date", e.target.value)}
+                      onChange={(e) =>
+                        updateField("registration_start_date", e.target.value)
+                      }
                       className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
-                        errors.registration_start_date ? "border-btn-gold" : "border-border-light"
+                        errors.registration_start_date
+                          ? "border-btn-gold"
+                          : "border-border-light"
                       }`}
                       style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
                     />
@@ -510,14 +570,19 @@ export default function ClassFormModal({
 
                   <div>
                     <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                      Registration End Date <span className="text-btn-gold">*</span>
+                      Registration End Date{" "}
+                      <span className="text-btn-gold">*</span>
                     </label>
                     <input
                       type="date"
                       value={formData.registration_end_date}
-                      onChange={(e) => updateField("registration_end_date", e.target.value)}
+                      onChange={(e) =>
+                        updateField("registration_end_date", e.target.value)
+                      }
                       className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
-                        errors.registration_end_date ? "border-btn-gold" : "border-border-light"
+                        errors.registration_end_date
+                          ? "border-btn-gold"
+                          : "border-border-light"
                       }`}
                       style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
                     />
@@ -545,7 +610,11 @@ export default function ClassFormModal({
                     value={formData.program_id}
                     onChange={(value) => updateField("program_id", value)}
                     options={programs}
-                    placeholder={dropdownsLoading ? "Loading programs..." : "Select Program"}
+                    placeholder={
+                      dropdownsLoading
+                        ? "Loading programs..."
+                        : "Select Program"
+                    }
                     error={errors.program_id}
                   />
                   {errors.program_id && (
@@ -564,7 +633,9 @@ export default function ClassFormModal({
                     value={formData.area_id}
                     onChange={(value) => updateField("area_id", value)}
                     options={areas}
-                    placeholder={dropdownsLoading ? "Loading areas..." : "Select Area"}
+                    placeholder={
+                      dropdownsLoading ? "Loading areas..." : "Select Area"
+                    }
                     error={errors.area_id}
                   />
                   {errors.area_id && (
@@ -577,14 +648,14 @@ export default function ClassFormModal({
                 {/* School/Site with Code */}
                 <div>
                   <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                   Site / Ledger Code <span className="text-btn-gold">*</span>
+                    Site / Ledger Code <span className="text-btn-gold">*</span>
                   </label>
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <CustomDropdown
                         value={formData.school_id}
                         onChange={(value) => {
-                          const school = schools.find(s => s.id === value);
+                          const school = schools.find((s) => s.id === value);
                           updateField("school_id", value);
                           updateField("school_code", school?.code || "");
                         }}
@@ -594,7 +665,9 @@ export default function ClassFormModal({
                         renderOption={(option) => (
                           <div>
                             <div className="font-semibold">{option.name}</div>
-                            <div className="text-xs text-gray-500">{option.code}</div>
+                            <div className="text-xs text-gray-500">
+                              {option.code}
+                            </div>
                           </div>
                         )}
                       />
@@ -610,7 +683,9 @@ export default function ClassFormModal({
                     </button>
                   </div>
                   {formData.school_code && (
-                    <p className="text-xs text-gray-600 mt-1">Code: {formData.school_code}</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Code: {formData.school_code}
+                    </p>
                   )}
                   {errors.school_id && (
                     <p className="text-error-darker font-manrope text-xs mt-1">
@@ -622,7 +697,9 @@ export default function ClassFormModal({
                   {showInlineSiteForm && (
                     <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-sm text-heading-dark">Add New Site</h4>
+                        <h4 className="font-semibold text-sm text-heading-dark">
+                          Add New Site
+                        </h4>
                         <button
                           type="button"
                           onClick={() => setShowInlineSiteForm(false)}
@@ -634,7 +711,8 @@ export default function ClassFormModal({
 
                       {!formData.area_id && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 text-xs text-yellow-800">
-                          Please select an Area/Location above first to create a new site.
+                          Please select an Area/Location above first to create a
+                          new site.
                         </div>
                       )}
 
@@ -653,7 +731,9 @@ export default function ClassFormModal({
 
                         {/* Ledger Code */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Ledger Code</label>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Ledger Code
+                          </label>
                           <input
                             type="text"
                             value={newSiteCode}
@@ -665,7 +745,9 @@ export default function ClassFormModal({
 
                         {/* Street Address */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Street Address</label>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Street Address
+                          </label>
                           <input
                             type="text"
                             value={newSiteAddress}
@@ -677,7 +759,9 @@ export default function ClassFormModal({
 
                         {/* City */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">City *</label>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            City *
+                          </label>
                           <input
                             type="text"
                             value={newSiteCity}
@@ -689,7 +773,9 @@ export default function ClassFormModal({
 
                         {/* State Dropdown */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">State *</label>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            State *
+                          </label>
                           <select
                             value={newSiteState}
                             onChange={(e) => setNewSiteState(e.target.value)}
@@ -706,7 +792,9 @@ export default function ClassFormModal({
 
                         {/* Zip Code */}
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Zip Code *</label>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Zip Code *
+                          </label>
                           <input
                             type="text"
                             value={newSiteZipCode}
@@ -721,7 +809,14 @@ export default function ClassFormModal({
                       <button
                         type="button"
                         onClick={handleCreateSite}
-                        disabled={creatingSite || !newSiteName.trim() || !newSiteCity.trim() || !newSiteState || !newSiteZipCode.trim() || !formData.area_id}
+                        disabled={
+                          creatingSite ||
+                          !newSiteName.trim() ||
+                          !newSiteCity.trim() ||
+                          !newSiteState ||
+                          !newSiteZipCode.trim() ||
+                          !formData.area_id
+                        }
                         className="w-full px-4 py-2 bg-btn-gold hover:bg-[#e5ad35] text-heading-dark font-semibold rounded-lg text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                       >
                         {creatingSite ? (
@@ -744,7 +839,10 @@ export default function ClassFormModal({
                 <div className="col-span-2">
                   <MultiCoachSelector
                     coaches={coaches}
-                    selectedIds={formData.coach_ids || (formData.coach_id ? [formData.coach_id] : [])}
+                    selectedIds={
+                      formData.coach_ids ||
+                      (formData.coach_id ? [formData.coach_id] : [])
+                    }
                     onChange={(ids) => {
                       updateField("coach_ids", ids);
                       // Also set legacy coach_id to first selected coach for backwards compatibility
@@ -917,16 +1015,18 @@ export default function ClassFormModal({
                 >
                   <div className="flex-1 grid sm:grid-cols-3 grid-cols-1 gap-3">
                     <div>
-                        <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
-                          Day of Week
-                        </label>
-                        <CustomDropdown
-                          value={sched.day_of_week}
-                          onChange={(val) => updateSchedule(index, "day_of_week", val)}
-                          options={DAYS}
-                          placeholder="Select Day"
-                          error={null}
-                        />
+                      <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
+                        Day of Week
+                      </label>
+                      <CustomDropdown
+                        value={sched.day_of_week}
+                        onChange={(val) =>
+                          updateSchedule(index, "day_of_week", val)
+                        }
+                        options={DAYS}
+                        placeholder="Select Day"
+                        error={null}
+                      />
                     </div>
                     <div>
                       <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
@@ -982,7 +1082,9 @@ export default function ClassFormModal({
                   </label>
                   <CustomDropdown
                     value={formData.recurrence_pattern}
-                    onChange={(value) => updateField("recurrence_pattern", value)}
+                    onChange={(value) =>
+                      updateField("recurrence_pattern", value)
+                    }
                     options={RECURRENCE_PATTERNS}
                     placeholder="Select Pattern"
                     error={errors.recurrence_pattern}
@@ -1002,14 +1104,18 @@ export default function ClassFormModal({
                     <div className="flex-1">
                       <CustomDropdown
                         value={formData.repeat_every_weeks}
-                        onChange={(value) => updateField("repeat_every_weeks", value)}
+                        onChange={(value) =>
+                          updateField("repeat_every_weeks", value)
+                        }
                         options={REPEAT_EVERY_WEEKS}
                         placeholder="Select"
                         error={errors.repeat_every_weeks}
                       />
                     </div>
                     <span className="text-sm font-manrope text-heading-dark">
-                      {formData.recurrence_pattern === 'monthly' ? 'months' : 'weeks'}
+                      {formData.recurrence_pattern === "monthly"
+                        ? "months"
+                        : "weeks"}
                     </span>
                   </div>
                   {errors.repeat_every_weeks && (
@@ -1021,9 +1127,12 @@ export default function ClassFormModal({
               </div>
 
               <p className="text-xs text-gray-600">
-                {formData.recurrence_pattern === 'weekly' && `Class repeats every ${formData.repeat_every_weeks} ${parseInt(formData.repeat_every_weeks) === 1 ? 'week' : 'weeks'} on the selected days`}
-                {formData.recurrence_pattern === 'monthly' && 'Class repeats monthly on the same dates'}
-                {formData.recurrence_pattern === 'one-time' && 'Class occurs only once'}
+                {formData.recurrence_pattern === "weekly" &&
+                  `Class repeats every ${formData.repeat_every_weeks} ${parseInt(formData.repeat_every_weeks) === 1 ? "week" : "weeks"} on the selected days`}
+                {formData.recurrence_pattern === "monthly" &&
+                  "Class repeats monthly on the same dates"}
+                {formData.recurrence_pattern === "one-time" &&
+                  "Class occurs only once"}
               </p>
             </div>
 
@@ -1065,7 +1174,8 @@ export default function ClassFormModal({
               )}
 
               <p className="text-sm text-gray-600">
-                Select ONE payment option for this class. You can customize the display name shown to parents.
+                Select ONE payment option for this class. You can customize the
+                display name shown to parents.
               </p>
 
               <div className="space-y-3">
@@ -1095,19 +1205,27 @@ export default function ClassFormModal({
                       <div className="flex-1 space-y-2">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Display Name</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Display Name
+                            </label>
                             <input
                               type="text"
                               value={formData.payment_options[0].custom_name}
                               onChange={(e) =>
-                                updatePaymentOption(0, "custom_name", e.target.value)
+                                updatePaymentOption(
+                                  0,
+                                  "custom_name",
+                                  e.target.value,
+                                )
                               }
                               className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
                               placeholder="Pay in Full"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Price ($)</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Price ($)
+                            </label>
                             <input
                               type="number"
                               min="0"
@@ -1157,19 +1275,27 @@ export default function ClassFormModal({
                       <div className="flex-1 space-y-2">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Display Name</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Display Name
+                            </label>
                             <input
                               type="text"
                               value={formData.payment_options[1].custom_name}
                               onChange={(e) =>
-                                updatePaymentOption(1, "custom_name", e.target.value)
+                                updatePaymentOption(
+                                  1,
+                                  "custom_name",
+                                  e.target.value,
+                                )
                               }
                               className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
                               placeholder="Monthly Subscription"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Monthly Price ($)</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Monthly Price ($)
+                            </label>
                             <input
                               type="number"
                               min="0"
@@ -1200,10 +1326,30 @@ export default function ClassFormModal({
                   </h4>
                   <div className="space-y-4">
                     {[
-                      { index: 2, label: "2 Months", type: "installment_2", defaultName: "2 Month Installment" },
-                      { index: 3, label: "3 Months", type: "installment_3", defaultName: "3 Month Installment" },
-                      { index: 4, label: "4 Months", type: "installment_4", defaultName: "4 Month Installment" },
-                      { index: 5, label: "6 Months", type: "installment_6", defaultName: "6 Month Installment" },
+                      {
+                        index: 2,
+                        label: "2 Months",
+                        type: "installment_2",
+                        defaultName: "2 Month Installment",
+                      },
+                      {
+                        index: 3,
+                        label: "3 Months",
+                        type: "installment_3",
+                        defaultName: "3 Month Installment",
+                      },
+                      {
+                        index: 4,
+                        label: "4 Months",
+                        type: "installment_4",
+                        defaultName: "4 Month Installment",
+                      },
+                      {
+                        index: 5,
+                        label: "6 Months",
+                        type: "installment_6",
+                        defaultName: "6 Month Installment",
+                      },
                     ].map(({ index, label, type, defaultName }) => (
                       <div key={index} className="flex items-start gap-4">
                         <label className="flex items-center space-x-2 w-36 pt-2">
@@ -1231,19 +1377,29 @@ export default function ClassFormModal({
                           <div className="flex-1 space-y-2">
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">Display Name</label>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">
+                                  Display Name
+                                </label>
                                 <input
                                   type="text"
-                                  value={formData.payment_options[index].custom_name}
+                                  value={
+                                    formData.payment_options[index].custom_name
+                                  }
                                   onChange={(e) =>
-                                    updatePaymentOption(index, "custom_name", e.target.value)
+                                    updatePaymentOption(
+                                      index,
+                                      "custom_name",
+                                      e.target.value,
+                                    )
                                   }
                                   className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
                                   placeholder={defaultName}
                                 />
                               </div>
                               <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">Monthly Payment ($)</label>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">
+                                  Monthly Payment ($)
+                                </label>
                                 <input
                                   type="number"
                                   min="0"
@@ -1253,7 +1409,7 @@ export default function ClassFormModal({
                                     updatePaymentOption(
                                       index,
                                       "price",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
@@ -1292,7 +1448,8 @@ export default function ClassFormModal({
               </div>
 
               <p className="text-sm text-gray-600">
-                Add optional fees like Jersey Fee, Equipment Fee, etc. Parents can choose whether to include these during checkout.
+                Add optional fees like Jersey Fee, Equipment Fee, etc. Parents
+                can choose whether to include these during checkout.
               </p>
 
               {formData.custom_fees.length === 0 ? (
@@ -1321,7 +1478,9 @@ export default function ClassFormModal({
                           <input
                             type="text"
                             value={fee.name}
-                            onChange={(e) => updateCustomFee(index, "name", e.target.value)}
+                            onChange={(e) =>
+                              updateCustomFee(index, "name", e.target.value)
+                            }
                             className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
                             placeholder="e.g., Jersey Fee"
                           />
@@ -1335,21 +1494,50 @@ export default function ClassFormModal({
                             min="0"
                             step="0.01"
                             value={fee.amount}
-                            onChange={(e) => updateCustomFee(index, "amount", e.target.value)}
+                            onChange={(e) =>
+                              updateCustomFee(index, "amount", e.target.value)
+                            }
                             className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
                             placeholder="25.00"
                           />
                         </div>
-                        <div className="flex items-end pb-2">
+                        <div className="flex flex-col items-start gap-2 pb-2">
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
                               checked={fee.is_optional}
-                              onChange={(e) => updateCustomFee(index, "is_optional", e.target.checked)}
+                              onChange={(e) =>
+                                updateCustomFee(
+                                  index,
+                                  "is_optional",
+                                  e.target.checked,
+                                )
+                              }
                               className="w-4 h-4 text-btn-gold border-gray-300 rounded focus:ring-btn-gold"
                             />
-                            <span className="text-sm font-manrope text-gray-700">Optional</span>
+                            <span className="text-sm font-manrope text-gray-700">
+                              Optional
+                            </span>
                           </label>
+                          {formData.is_subscription_based && (
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={fee.is_recurring || false}
+                                onChange={(e) =>
+                                  updateCustomFee(
+                                    index,
+                                    "is_recurring",
+                                    e.target.checked,
+                                  )
+                                }
+                                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                              />
+                              <span className="text-sm font-manrope text-purple-700">
+                                Monthly
+                              </span>
+                            </label>
+                          )}
                         </div>
                       </div>
                       <button
@@ -1393,10 +1581,18 @@ export default function ClassFormModal({
                 {formData.class_image && (
                   <div className="mt-2 flex items-center gap-2">
                     <div className="h-16 w-16 rounded-lg border border-border-light overflow-hidden">
-                      {typeof formData.class_image === 'string' ? (
-                        <img src={formData.class_image} alt="Class" className="h-full w-full object-cover" />
+                      {typeof formData.class_image === "string" ? (
+                        <img
+                          src={formData.class_image}
+                          alt="Class"
+                          className="h-full w-full object-cover"
+                        />
                       ) : (
-                        <img src={URL.createObjectURL(formData.class_image)} alt="Class preview" className="h-full w-full object-cover" />
+                        <img
+                          src={URL.createObjectURL(formData.class_image)}
+                          alt="Class preview"
+                          className="h-full w-full object-cover"
+                        />
                       )}
                     </div>
                     <button
@@ -1430,7 +1626,9 @@ export default function ClassFormModal({
                   value={formData.website_link}
                   onChange={(e) => updateField("website_link", e.target.value)}
                   className={`w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold ${
-                    errors.website_link ? "border-btn-gold" : "border-border-light"
+                    errors.website_link
+                      ? "border-btn-gold"
+                      : "border-border-light"
                   }`}
                   style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
                   placeholder="https://example.com/class-info"
@@ -1497,13 +1695,17 @@ export default function ClassFormModal({
                       )}
                     </button>
                   </div>
-                  {(formData?.slug || initialData?.slug) ? (
+                  {formData?.slug || initialData?.slug ? (
                     <p className="text-xs text-green-700 mt-2">
-                      Using custom URL: <span className="font-mono font-semibold">/register/{formData?.slug || initialData?.slug}</span>
+                      Using custom URL:{" "}
+                      <span className="font-mono font-semibold">
+                        /register/{formData?.slug || initialData?.slug}
+                      </span>
                     </p>
                   ) : (
                     <p className="text-xs text-gray-500 mt-2">
-                      Tip: Add a custom URL slug above for a shorter, memorable registration link.
+                      Tip: Add a custom URL slug above for a shorter, memorable
+                      registration link.
                     </p>
                   )}
                 </div>
@@ -1520,11 +1722,14 @@ export default function ClassFormModal({
                   onClick={async (e) => {
                     e.preventDefault();
                     // Pass is_active: false as override to save as draft
-                    await handleSubmit(() => {
-                      toast.success("Class saved as draft!");
-                      if (onSuccess) onSuccess();
-                      onClose();
-                    }, { is_active: false });
+                    await handleSubmit(
+                      () => {
+                        toast.success("Class saved as draft!");
+                        if (onSuccess) onSuccess();
+                        onClose();
+                      },
+                      { is_active: false },
+                    );
                   }}
                   disabled={isSubmitting}
                   className="px-6 py-2 border border-gray-400 rounded-lg text-gray-600 font-manrope font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -1557,8 +1762,8 @@ export default function ClassFormModal({
                 {isSubmitting
                   ? "Saving..."
                   : mode === "create"
-                  ? "Create Class"
-                  : "Update Class"}
+                    ? "Create Class"
+                    : "Update Class"}
               </button>
             </div>
           </div>

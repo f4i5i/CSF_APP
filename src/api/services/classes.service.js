@@ -127,6 +127,7 @@ const transformClassDataToBackend = (classData) => {
         name: fee.name.trim(),
         amount: parseFloat(fee.amount) || 0,
         is_optional: fee.is_optional ?? true,
+        is_recurring: fee.is_recurring ?? false,
         description: fee.description?.trim() || "",
       })) || [];
 
