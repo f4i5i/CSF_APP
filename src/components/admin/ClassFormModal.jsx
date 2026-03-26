@@ -1519,7 +1519,7 @@ export default function ClassFormModal({
                               Optional
                             </span>
                           </label>
-                          {formData.is_subscription_based && (
+                          {formData.class_type === "membership" && (
                             <label className="flex items-center gap-2 cursor-pointer">
                               <input
                                 type="checkbox"

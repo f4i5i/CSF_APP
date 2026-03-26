@@ -95,6 +95,14 @@ export default function MassEmail() {
   const quillRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  const totalFileSize = useMemo(() => {
+    const attSize = attachments.reduce((sum, f) => sum + f.size, 0);
+    const imgSize = inlineImages.reduce((sum, f) => sum + f.size, 0);
+    return attSize + imgSize;
+  }, [attachments, inlineImages]);
+
+  const totalFileCount = attachments.length + inlineImages.length;
+
   // Quill image handler for inline images
   const handleQuillImage = useCallback(() => {
     const input = document.createElement("input");
@@ -230,14 +238,6 @@ export default function MassEmail() {
     const stripped = message.replace(/<[^>]*>/g, "").trim();
     return stripped.length > 0;
   }, [message]);
-
-  const totalFileSize = useMemo(() => {
-    const attSize = attachments.reduce((sum, f) => sum + f.size, 0);
-    const imgSize = inlineImages.reduce((sum, f) => sum + f.size, 0);
-    return attSize + imgSize;
-  }, [attachments, inlineImages]);
-
-  const totalFileCount = attachments.length + inlineImages.length;
 
   // Fetch classes, programs, areas for dropdown selection
   useEffect(() => {
