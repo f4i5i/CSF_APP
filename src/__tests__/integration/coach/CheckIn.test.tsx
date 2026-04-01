@@ -1,18 +1,24 @@
 /**
  * Coach Check-In Integration Tests
- * Tests for the student check-in functionality
+ *
+ * Tests the complete check-in page composition: class loading, student display,
+ * check-in toggling, search, sort, pagination, error handling, and API data flow.
+ *
+ * Mocks service layer directly for reliable testing (MSW+axios has
+ * compatibility issues in jsdom). Service-level logic is tested separately
+ * in checkin.service.legacy.test.ts.
  */
 
-import { render, screen, waitFor } from '../../utils/test-utils';
-import userEvent from '@testing-library/user-event';
-import CheckIn from '../../../pages/CoachDashboard/CheckIn';
-import { server } from '../../../mocks/server';
-import { http, HttpResponse } from 'msw';
+import React from "react";
+import { render, screen, waitFor, act } from "../../utils/test-utils";
+import userEvent from "@testing-library/user-event";
+import CheckIn from "../../../pages/CoachDashboard/CheckIn";
+import { mockClasses, mockChildren } from "../../../mocks/handlers";
 
 // Mock useNavigate
 const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
@@ -20,381 +26,445 @@ jest.mock('react-router-dom', () => ({
 }));
 
 // Mock toast
-jest.mock('react-hot-toast', () => ({
+jest.mock("react-hot-toast", () => ({
   success: jest.fn(),
   error: jest.fn(),
 }));
 
-describe('Coach Check-In Page', () => {
-  const user = userEvent;
+// Mock auth context to provide coach user directly (avoids MSW+axios /users/me issue)
+jest.mock("../../../context/auth", () => ({
+  useAuth: () => ({
+    user: {
+      id: "user-coach-1",
+      email: "coach@test.com",
+      first_name: "Test",
+      last_name: "Coach",
+      role: "COACH",
+    },
+    loading: false,
+    login: jest.fn(),
+    logout: jest.fn(),
+  }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 
+// Build check-in statuses from mock children
+const buildStatuses = (
+  overrides: Record<number, Record<string, unknown>> = {},
+) =>
+  mockChildren.map((child, index) => ({
+    enrollment_id: `enroll-${index + 1}`,
+    is_checked_in: index === 0,
+    checked_in_at: index === 0 ? "2024-01-15T09:00:00Z" : null,
+    child_name: `${child.first_name} ${child.last_name}`,
+    child_first_name: child.first_name,
+    child_last_name: child.last_name,
+    grade: child.grade?.toString() || null,
+    child_dob: child.date_of_birth,
+    profile_image: null,
+    parent_name: "Test Parent",
+    parent_phone: "+1234567890",
+    parent_email: "parent@test.com",
+    ...overrides[index],
+  }));
+
+// Mock services
+const mockGetAll = jest.fn();
+const mockGetClassStatus = jest.fn();
+const mockCheckIn = jest.fn();
+
+jest.mock("../../../api/services", () => ({
+  classesService: { getAll: (...args: unknown[]) => mockGetAll(...args) },
+  checkinService: {
+    getClassStatus: (...args: unknown[]) => mockGetClassStatus(...args),
+    checkIn: (...args: unknown[]) => mockCheckIn(...args),
+  },
+}));
+
+// Mock getFileUrl
+jest.mock("../../../api/config", () => ({
+  getFileUrl: (path: string) => (path ? `http://localhost:8000${path}` : null),
+}));
+
+describe("Coach Check-In Page", () => {
   beforeEach(() => {
-    // Mock coach authentication
-    localStorage.setItem('csf_access_token', 'mock-access-token-coach');
-    localStorage.setItem('csf_refresh_token', 'mock-refresh-token-coach');
+    localStorage.setItem("csf_access_token", "mock-access-token-coach");
+    localStorage.setItem("csf_refresh_token", "mock-refresh-token-coach");
+
+    // Default mocks: return classes and student statuses
+    mockGetAll.mockResolvedValue({
+      items: mockClasses,
+      total: mockClasses.length,
+      skip: 0,
+      limit: 20,
+    });
+
+    mockGetClassStatus.mockResolvedValue(buildStatuses());
+
+    mockCheckIn.mockResolvedValue({
+      id: "checkin-new",
+      enrollment_id: "enroll-2",
+      class_id: "class-1",
+      checked_in_at: new Date().toISOString(),
+      check_in_date: new Date().toISOString().split("T")[0],
+      is_late: false,
+      created_at: new Date().toISOString(),
+    });
   });
 
   afterEach(() => {
     localStorage.clear();
     mockNavigate.mockClear();
+    mockGetAll.mockClear();
+    mockGetClassStatus.mockClear();
+    mockCheckIn.mockClear();
   });
 
-  describe('Rendering', () => {
-    it('should render the check-in page', () => {
-      render(<CheckIn />);
+  // Helper: render and wait for students to load
+  const renderAndWaitForStudents = async () => {
+    render(<CheckIn />);
+    await waitFor(() => {
+      expect(screen.getByText("Johnny Parent")).toBeInTheDocument();
+    });
+  };
 
-      expect(screen.getByText(/Check-In/i)).toBeInTheDocument();
+  // ==========================================================================
+  // RENDERING & LAYOUT
+  // ==========================================================================
+  describe("Rendering", () => {
+    it("should render the check-in page with title", () => {
+      render(<CheckIn />);
+      expect(screen.getByText("Check-In")).toBeInTheDocument();
     });
 
-    it('should display search input', () => {
+    it("should display search input", () => {
       render(<CheckIn />);
-
-      const searchInput = screen.getByPlaceholderText(/Search/i);
-      expect(searchInput).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/Search students/i),
+      ).toBeInTheDocument();
     });
 
-    it('should display class selector dropdown', () => {
+    it("should display Text Class buttons for mobile and desktop", () => {
       render(<CheckIn />);
-
-      expect(screen.getByText(/Davidson Elementary/i)).toBeInTheDocument();
+      const textButtons = screen.getAllByRole("button", {
+        name: /Text Class/i,
+      });
+      expect(textButtons.length).toBe(2);
     });
 
-    it('should display Text Class button', () => {
+    it("should auto-select first class on load", async () => {
       render(<CheckIn />);
-
-      const textButtons = screen.getAllByRole('button', { name: /Text Class/i });
-      expect(textButtons.length).toBeGreaterThan(0);
-    });
-
-    it('should display student list', () => {
-      render(<CheckIn />);
-
-      // Should show student count
-      expect(screen.getByText(/Students/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Search Functionality', () => {
-    it('should allow typing in search input', async () => {
-      render(<CheckIn />);
-
-      const searchInput = screen.getByPlaceholderText(/Search/i);
-      await user.type(searchInput, 'Alex');
-
-      expect(searchInput).toHaveValue('Alex');
-    });
-
-    it('should filter students based on search term', async () => {
-      render(<CheckIn />);
-
-      const searchInput = screen.getByPlaceholderText(/Search/i);
-
-      // Type a search term
-      await user.type(searchInput, 'Alex');
-
-      // Wait for filtering to occur
       await waitFor(() => {
-        expect(searchInput).toHaveValue('Alex');
+        expect(screen.getByText(mockClasses[0].name)).toBeInTheDocument();
       });
     });
 
-    it('should show "No students found" when search has no results', async () => {
+    it("should fetch classes with coach_id filter", async () => {
       render(<CheckIn />);
-
-      const searchInput = screen.getByPlaceholderText(/Search/i);
-
-      // Type a search term that won't match any students
-      await user.type(searchInput, 'NonExistentStudent12345');
-
       await waitFor(() => {
-        expect(screen.getByText(/No students found/i)).toBeInTheDocument();
+        expect(mockGetAll).toHaveBeenCalledWith(
+          expect.objectContaining({ coach_id: "user-coach-1" }),
+        );
       });
     });
   });
 
-  describe('Class Selection Dropdown', () => {
-    it('should open dropdown when clicked', async () => {
-      render(<CheckIn />);
-
-      const dropdownButton = screen.getByRole('button', { name: /Davidson Elementary/i });
-      await user.click(dropdownButton);
-
-      // Dropdown menu should be visible with options
-      await waitFor(() => {
-        expect(screen.getByText(/Science - 5A/i)).toBeInTheDocument();
-        expect(screen.getByText(/Math - 3B/i)).toBeInTheDocument();
-      });
+  // ==========================================================================
+  // STUDENT LIST LOADING
+  // ==========================================================================
+  describe("Student List Loading", () => {
+    it("should display enrolled students after data loads", async () => {
+      await renderAndWaitForStudents();
+      expect(screen.getByText("Jenny Parent")).toBeInTheDocument();
     });
 
-    it('should change selected class when option is clicked', async () => {
-      render(<CheckIn />);
-
-      // Open dropdown
-      const dropdownButton = screen.getByRole('button', { name: /Davidson Elementary/i });
-      await user.click(dropdownButton);
-
-      // Click on a different option
-      await waitFor(() => {
-        expect(screen.getByText(/Science - 5A/i)).toBeInTheDocument();
-      });
-
-      const scienceOption = screen.getByRole('button', { name: /Science - 5A/i });
-      await user.click(scienceOption);
-
-      // Selected value should update
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Science - 5A/i })).toBeInTheDocument();
-      });
+    it("should show student count header (checked/total)", async () => {
+      await renderAndWaitForStudents();
+      // Johnny checked in, Jenny not → "Students (1/2)"
+      expect(screen.getByText(/Students \(1\/2\)/)).toBeInTheDocument();
     });
 
-    it('should close dropdown after selecting an option', async () => {
+    it("should display student grades", async () => {
+      await renderAndWaitForStudents();
+      expect(screen.getByText("Grade 3")).toBeInTheDocument();
+      expect(screen.getByText("Grade 1")).toBeInTheDocument();
+    });
+
+    it("should fetch check-in status for selected class", async () => {
       render(<CheckIn />);
-
-      // Open dropdown
-      const dropdownButton = screen.getByRole('button', { name: /Davidson Elementary/i });
-      await user.click(dropdownButton);
-
-      // Wait for dropdown to open
       await waitFor(() => {
-        expect(screen.getByText(/Math - 3B/i)).toBeInTheDocument();
-      });
-
-      // Click on an option
-      const mathOption = screen.getByRole('button', { name: /Math - 3B/i });
-      await user.click(mathOption);
-
-      // Dropdown options should no longer be visible (except the selected one)
-      await waitFor(() => {
-        expect(screen.queryByText(/Science - 5A/i)).not.toBeInTheDocument();
+        expect(mockGetClassStatus).toHaveBeenCalledWith("class-1");
       });
     });
   });
 
-  describe('Student List Display', () => {
-    it('should display students with their information', () => {
+  // ==========================================================================
+  // SEARCH FUNCTIONALITY
+  // ==========================================================================
+  describe("Search Functionality", () => {
+    it("should allow typing in search input", async () => {
       render(<CheckIn />);
-
-      // Students should be displayed with names
-      expect(screen.getByText(/Alex T\./i)).toBeInTheDocument();
-      expect(screen.getByText(/Olivia C\./i)).toBeInTheDocument();
+      const searchInput = screen.getByPlaceholderText(/Search students/i);
+      await userEvent.type(searchInput, "Johnny");
+      expect(searchInput).toHaveValue("Johnny");
     });
 
-    it('should show checked in count', () => {
-      render(<CheckIn />);
+    it("should filter students based on search term", async () => {
+      await renderAndWaitForStudents();
 
-      // Should show count like "Students (3/6)"
-      const studentCountText = screen.getByText(/Students/i);
-      expect(studentCountText).toBeInTheDocument();
-    });
-
-    it('should display student grades', () => {
-      render(<CheckIn />);
-
-      // Grade information should be visible
-      // The student list should show grade info
-      expect(screen.getByText(/Alex T\./i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Student Check-In Interaction', () => {
-    it('should open student details modal when clicking on a student', async () => {
-      render(<CheckIn />);
-
-      // Find and click on a student card
-      const studentCard = screen.getByText(/Alex T\./i).closest('div');
-      if (studentCard) {
-        await user.click(studentCard);
-
-        // Modal should open
-        await waitFor(() => {
-          const modal = document.querySelector('[role="dialog"]') ||
-                       document.querySelector('.modal') ||
-                       document.querySelector('[data-testid="student-details-modal"]');
-          expect(modal).toBeTruthy();
-        });
-      }
-    });
-  });
-
-  describe('Student Details Modal', () => {
-    it('should close modal when clicking close button', async () => {
-      render(<CheckIn />);
-
-      // Click on a student to open modal
-      const studentCard = screen.getByText(/Alex T\./i).closest('div');
-      if (studentCard) {
-        await user.click(studentCard);
-
-        // Wait for modal to appear
-        await waitFor(() => {
-          const modal = document.querySelector('[role="dialog"]');
-          expect(modal).toBeTruthy();
-        });
-
-        // Find and click close button
-        const closeButtons = screen.queryAllByRole('button', { name: /close|cancel/i });
-        if (closeButtons.length > 0) {
-          await user.click(closeButtons[0]);
-
-          // Modal should be closed
-          await waitFor(() => {
-            const modal = document.querySelector('[role="dialog"]');
-            expect(modal).toBeFalsy();
-          });
-        }
-      }
-    });
-  });
-
-  describe('Pagination', () => {
-    it('should display pagination when there are more than 5 students', () => {
-      render(<CheckIn />);
-
-      // With 6 students, pagination should appear
-      const paginationButtons = screen.queryAllByRole('button', { name: /^[0-9]$/ });
-      expect(paginationButtons.length).toBeGreaterThan(0);
-    });
-
-    it('should navigate to next page when clicking next button', async () => {
-      render(<CheckIn />);
-
-      // Find next button (ChevronRight)
-      const buttons = screen.getAllByRole('button');
-      const nextButton = buttons.find(btn =>
-        btn.querySelector('svg') && !btn.disabled
-      );
-
-      if (nextButton && !nextButton.disabled) {
-        await user.click(nextButton);
-
-        // Page should change
-        await waitFor(() => {
-          // The student list should update to show different students
-          expect(screen.getByText(/Students/i)).toBeInTheDocument();
-        });
-      }
-    });
-
-    it('should disable previous button on first page', () => {
-      render(<CheckIn />);
-
-      // Find all buttons and look for disabled state
-      const buttons = screen.getAllByRole('button');
-      const disabledButtons = buttons.filter(btn => btn.disabled);
-
-      // At least the previous button should be disabled on page 1
-      expect(disabledButtons.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('Sort Functionality', () => {
-    it('should display sort button with current sort method', () => {
-      render(<CheckIn />);
-
-      expect(screen.getByText(/Alphabetical/i)).toBeInTheDocument();
-    });
-
-    it('should show sort options when clicking sort button', async () => {
-      render(<CheckIn />);
-
-      const sortButton = screen.getByRole('button', { name: /Alphabetical/i });
-      await user.click(sortButton);
-
-      // Sort dropdown should appear (if implemented)
-      // This depends on the actual implementation
-      expect(sortButton).toBeInTheDocument();
-    });
-  });
-
-  describe('Text Class Button', () => {
-    it('should display Text Class button in desktop view', () => {
-      render(<CheckIn />);
-
-      const textButtons = screen.getAllByRole('button', { name: /Text Class/i });
-      expect(textButtons.length).toBeGreaterThan(0);
-    });
-
-    it('should be clickable', async () => {
-      render(<CheckIn />);
-
-      const textButton = screen.getAllByRole('button', { name: /Text Class/i })[0];
-      await user.click(textButton);
-
-      // Button should remain in document (functionality depends on implementation)
-      expect(textButton).toBeInTheDocument();
-    });
-  });
-
-  describe('Responsive Layout', () => {
-    it('should have both mobile and desktop Text Class buttons in DOM', () => {
-      render(<CheckIn />);
-
-      const textButtons = screen.getAllByRole('button', { name: /Text Class/i });
-      // Should have at least one button (possibly 2 for desktop/mobile)
-      expect(textButtons.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe('API Integration', () => {
-    it('should handle check-in API call', async () => {
-      let checkInCalled = false;
-
-      server.use(
-        http.post('http://localhost:8000/api/v1/check-in', async () => {
-          checkInCalled = true;
-          return HttpResponse.json({ success: true });
-        })
-      );
-
-      render(<CheckIn />);
-
-      // The component should be rendered
-      expect(screen.getByText(/Check-In/i)).toBeInTheDocument();
-    });
-
-    it('should handle loading class data', async () => {
-      server.use(
-        http.get('http://localhost:8000/api/v1/check-in/class/:classId/status', () => {
-          return HttpResponse.json([
-            { child_id: 'child-1', child: { first_name: 'Test', last_name: 'Student' }, checked_in: false }
-          ]);
-        })
-      );
-
-      render(<CheckIn />);
+      const searchInput = screen.getByPlaceholderText(/Search students/i);
+      await userEvent.type(searchInput, "Johnny");
 
       await waitFor(() => {
-        expect(screen.getByText(/Check-In/i)).toBeInTheDocument();
+        expect(screen.getByText("Johnny Parent")).toBeInTheDocument();
+        expect(screen.queryByText("Jenny Parent")).not.toBeInTheDocument();
       });
     });
 
-    it('should handle API errors gracefully', async () => {
-      server.use(
-        http.get('http://localhost:8000/api/v1/check-in/class/:classId/status', () => {
-          return HttpResponse.json(
-            { message: 'Internal server error' },
-            { status: 500 }
-          );
-        })
-      );
+    it('should show "No students found" when no match', async () => {
+      await renderAndWaitForStudents();
 
-      render(<CheckIn />);
-
-      // Should still render the page
-      expect(screen.getByText(/Check-In/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Empty States', () => {
-    it('should show empty state when no students match search', async () => {
-      render(<CheckIn />);
-
-      const searchInput = screen.getByPlaceholderText(/Search/i);
-      await user.type(searchInput, 'XYZ123NonExistent');
+      const searchInput = screen.getByPlaceholderText(/Search students/i);
+      await userEvent.type(searchInput, "NonExistentStudent");
 
       await waitFor(() => {
         expect(screen.getByText(/No students found/i)).toBeInTheDocument();
       });
+    });
+
+    it("should be case-insensitive", async () => {
+      await renderAndWaitForStudents();
+
+      const searchInput = screen.getByPlaceholderText(/Search students/i);
+      await userEvent.type(searchInput, "johnny");
+
+      await waitFor(() => {
+        expect(screen.getByText("Johnny Parent")).toBeInTheDocument();
+      });
+    });
+  });
+
+  // ==========================================================================
+  // CLASS SELECTION DROPDOWN
+  // ==========================================================================
+  describe("Class Selection Dropdown", () => {
+    it("should open dropdown when clicked", async () => {
+      await renderAndWaitForStudents();
+
+      const dropdownButton = screen.getByRole("button", {
+        name: new RegExp(mockClasses[0].name),
+      });
+      await userEvent.click(dropdownButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(mockClasses[1].name)).toBeInTheDocument();
+      });
+    });
+
+    it("should change selected class when option is clicked", async () => {
+      await renderAndWaitForStudents();
+
+      // Open dropdown
+      const dropdownButton = screen.getByRole("button", {
+        name: new RegExp(mockClasses[0].name),
+      });
+      await userEvent.click(dropdownButton);
+
+      // Click second class
+      await waitFor(() => {
+        expect(screen.getByText(mockClasses[1].name)).toBeInTheDocument();
+      });
+      const option = screen.getByRole("button", {
+        name: new RegExp(mockClasses[1].name),
+      });
+      await userEvent.click(option);
+
+      // Should refetch check-in status for new class
+      await waitFor(() => {
+        expect(mockGetClassStatus).toHaveBeenCalledWith("class-2");
+      });
+    });
+
+    it("should close dropdown after selecting an option", async () => {
+      await renderAndWaitForStudents();
+
+      // Open dropdown
+      const dropdownButton = screen.getByRole("button", {
+        name: new RegExp(mockClasses[0].name),
+      });
+      await userEvent.click(dropdownButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(mockClasses[1].name)).toBeInTheDocument();
+      });
+
+      // Click option
+      const option = screen.getByRole("button", {
+        name: new RegExp(mockClasses[1].name),
+      });
+      await userEvent.click(option);
+
+      // Dropdown menu should close
+      await waitFor(() => {
+        const dropdownMenu = document.querySelector(".absolute.mt-0");
+        expect(dropdownMenu).toBeFalsy();
+      });
+    });
+  });
+
+  // ==========================================================================
+  // CHECK-IN TOGGLE
+  // ==========================================================================
+  describe("Student Check-In Interaction", () => {
+    it("should call check-in API when clicking check circle", async () => {
+      await renderAndWaitForStudents();
+
+      // Find Jenny's card and click her check circle
+      const jennyCard = screen
+        .getByText("Jenny Parent")
+        .closest('[class*="rounded-[14px]"]');
+      const checkCircles = jennyCard!.querySelectorAll(
+        '[class*="rounded-full"]',
+      );
+      await userEvent.click(checkCircles[0] as HTMLElement);
+
+      await waitFor(() => {
+        expect(mockCheckIn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            enrollment_id: "enroll-2",
+            class_id: "class-1",
+          }),
+        );
+      });
+    });
+
+    it("should open student details modal when clicking card", async () => {
+      await renderAndWaitForStudents();
+
+      // Click the notes icon
+      const fileIcons = document.querySelectorAll(".lucide-file-text");
+      if (fileIcons.length > 0) {
+        await userEvent.click(fileIcons[0] as HTMLElement);
+
+        await waitFor(() => {
+          expect(screen.getByText(/Contact Information/i)).toBeInTheDocument();
+        });
+      }
+    });
+  });
+
+  // ==========================================================================
+  // SORT FUNCTIONALITY
+  // ==========================================================================
+  describe("Sort Functionality", () => {
+    it("should display sort button with default Alphabetical", async () => {
+      await renderAndWaitForStudents();
+      expect(screen.getByText("Alphabetical")).toBeInTheDocument();
+    });
+
+    it("should show sort options when clicking sort button", async () => {
+      await renderAndWaitForStudents();
+
+      const sortButton = screen.getByRole("button", { name: /Alphabetical/i });
+      await userEvent.click(sortButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("Grade")).toBeInTheDocument();
+        expect(screen.getByText("Age")).toBeInTheDocument();
+        expect(screen.getByText("Check-In Status")).toBeInTheDocument();
+      });
+    });
+  });
+
+  // ==========================================================================
+  // ERROR HANDLING
+  // ==========================================================================
+  describe("Error Handling", () => {
+    it("should show empty state when check-in status API returns error", async () => {
+      mockGetClassStatus.mockRejectedValue(new Error("Server error"));
+
+      render(<CheckIn />);
+
+      await waitFor(() => {
+        const emptyState =
+          screen.queryByText(/No Students Enrolled/i) ||
+          screen.queryByText(/error loading/i);
+        expect(emptyState).toBeTruthy();
+      });
+    });
+
+    it('should show "No Class Selected" when no classes returned', async () => {
+      mockGetAll.mockResolvedValue({ items: [], total: 0 });
+
+      render(<CheckIn />);
+
+      await waitFor(() => {
+        expect(screen.getByText("No Class Selected")).toBeInTheDocument();
+      });
+    });
+
+    it("should show empty state when class has no enrolled students", async () => {
+      mockGetClassStatus.mockResolvedValue([]);
+
+      render(<CheckIn />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/No Students Enrolled/i)).toBeInTheDocument();
+      });
+    });
+
+    it("should show Refresh button on empty state", async () => {
+      mockGetClassStatus.mockResolvedValue([]);
+
+      render(<CheckIn />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Refresh/i }),
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
+  // ==========================================================================
+  // PAGINATION
+  // ==========================================================================
+  describe("Pagination", () => {
+    it("should not show pagination with 2 students", async () => {
+      await renderAndWaitForStudents();
+
+      const pageButtons = screen.queryAllByRole("button", { name: /^[0-9]+$/ });
+      expect(pageButtons.length).toBe(0);
+    });
+
+    it("should show pagination when more than 5 students", async () => {
+      const manyStatuses = Array.from({ length: 6 }, (_, i) => ({
+        enrollment_id: `enroll-${i + 1}`,
+        is_checked_in: false,
+        checked_in_at: null,
+        child_name: `Student ${i + 1}`,
+        child_first_name: "Student",
+        child_last_name: `${i + 1}`,
+        grade: `${i + 1}`,
+        child_dob: "2015-01-01",
+        profile_image: null,
+        parent_name: `Parent ${i + 1}`,
+        parent_phone: "+1234567890",
+        parent_email: `parent${i + 1}@test.com`,
+      }));
+
+      mockGetClassStatus.mockResolvedValue(manyStatuses);
+
+      render(<CheckIn />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Student 1")).toBeInTheDocument();
+      });
+
+      const pageButtons = screen.queryAllByRole("button", { name: /^[12]$/ });
+      expect(pageButtons.length).toBeGreaterThan(0);
     });
   });
 });

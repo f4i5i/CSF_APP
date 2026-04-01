@@ -1,108 +1,293 @@
 /**
- * Check-In Service Legacy (JS) Unit Tests
+ * Check-In Service Unit Tests
+ *
+ * Tests the checkin.service.js module by mocking the apiClient module directly.
+ * This avoids MSW/axios interception compatibility issues while testing
+ * the service logic (data transformation, endpoint routing, etc).
  */
 
-import MockAdapter from 'axios-mock-adapter';
-import apiClient from '../../../api/client/axios-client';
+// Mock the API client module before any imports
+const mockGet = jest.fn();
+const mockPost = jest.fn();
+const mockPut = jest.fn();
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const mod = require('../../../api/services/checkin.service.js');
-const service = mod.default || mod;
+jest.mock('../../../api/client', () => ({
+  __esModule: true,
+  default: {
+    get: (...args: unknown[]) => mockGet(...args),
+    post: (...args: unknown[]) => mockPost(...args),
+    put: (...args: unknown[]) => mockPut(...args),
+  },
+}));
 
-const mock = new MockAdapter(apiClient);
+// Import the service after mocking
+import checkinService from '../../../api/services/checkin.service';
 
-const mockCheckIn = { id: 'ci-1', enrollment_id: 'enr-1', check_in_time: '2024-01-15T09:00:00Z' };
+const mockCheckInResponse = {
+  id: 'ci-1',
+  enrollment_id: 'enr-1',
+  class_id: 'cls-1',
+  checked_in_at: '2024-01-15T09:00:00Z',
+  check_in_date: '2024-01-15',
+  is_late: false,
+  created_at: '2024-01-15T09:00:00Z',
+};
 
-describe('checkinService (legacy JS)', () => {
-  beforeEach(() => { localStorage.clear(); localStorage.setItem('csf_access_token', 'tok'); mock.reset(); });
-  afterAll(() => { mock.restore(); });
+describe('checkinService', () => {
+  beforeEach(() => {
+    mockGet.mockReset();
+    mockPost.mockReset();
+    mockPut.mockReset();
+  });
 
+  // ========================================================================
+  // MODULE LOADING
+  // ========================================================================
   describe('module loading', () => {
     it('should export all methods', () => {
-      expect(typeof service.getClassStatus).toBe('function');
-      expect(typeof service.getByClass).toBe('function');
-      expect(typeof service.checkIn).toBe('function');
-      expect(typeof service.checkOut).toBe('function');
-      expect(typeof service.bulkCheckIn).toBe('function');
-      expect(typeof service.toggleCheckIn).toBe('function');
+      expect(typeof checkinService.getClassStatus).toBe('function');
+      expect(typeof checkinService.getByClass).toBe('function');
+      expect(typeof checkinService.checkIn).toBe('function');
+      expect(typeof checkinService.checkOut).toBe('function');
+      expect(typeof checkinService.bulkCheckIn).toBe('function');
+      expect(typeof checkinService.toggleCheckIn).toBe('function');
     });
   });
 
+  // ========================================================================
+  // getClassStatus
+  // ========================================================================
   describe('getClassStatus', () => {
-    it('should fetch class check-in status', async () => {
-      mock.onGet('/check-in/class/cls-1/status').reply(200, {
-        class_id: 'cls-1',
-        statuses: [{ enrollment_id: 'enr-1', checked_in: true }],
+    it('should fetch class check-in status and extract statuses array', async () => {
+      const statuses = [
+        { enrollment_id: 'enr-1', is_checked_in: true, child_name: 'Johnny' },
+        { enrollment_id: 'enr-2', is_checked_in: false, child_name: 'Jenny' },
+      ];
+
+      mockGet.mockResolvedValue({
+        data: { class_id: 'cls-1', check_in_date: '2024-06-15', statuses },
       });
-      const result = await service.getClassStatus('cls-1');
+
+      const result = await checkinService.getClassStatus('cls-1');
+
       expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(2);
+      expect(result[0].enrollment_id).toBe('enr-1');
+      expect(result[0].is_checked_in).toBe(true);
+      expect(result[1].child_name).toBe('Jenny');
     });
 
-    it('should use provided date', async () => {
-      mock.onGet('/check-in/class/cls-1/status').reply((config) => {
-        expect(config.params.check_in_date).toBe('2024-06-15');
-        return [200, { statuses: [] }];
-      });
-      await service.getClassStatus('cls-1', '2024-06-15');
+    it('should call the correct endpoint with class ID', async () => {
+      mockGet.mockResolvedValue({ data: { statuses: [] } });
+
+      await checkinService.getClassStatus('cls-abc');
+
+      expect(mockGet).toHaveBeenCalledWith(
+        '/check-in/class/cls-abc/status',
+        expect.objectContaining({ params: expect.any(Object) })
+      );
     });
 
-    it('should handle raw data response (no statuses key)', async () => {
-      mock.onGet('/check-in/class/cls-1/status').reply(200, [
-        { enrollment_id: 'enr-1', checked_in: false },
-      ]);
-      const result = await service.getClassStatus('cls-1');
+    it("should use today's date by default", async () => {
+      mockGet.mockResolvedValue({ data: { statuses: [] } });
+
+      await checkinService.getClassStatus('cls-1');
+
+      const today = new Date().toISOString().split('T')[0];
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ params: { check_in_date: today } })
+      );
+    });
+
+    it('should use provided date when specified', async () => {
+      mockGet.mockResolvedValue({ data: { statuses: [] } });
+
+      await checkinService.getClassStatus('cls-1', '2024-06-15');
+
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ params: { check_in_date: '2024-06-15' } })
+      );
+    });
+
+    it('should handle raw data response (no statuses key - fallback)', async () => {
+      // API returns a raw array instead of { statuses: [...] }
+      const rawArray = [{ enrollment_id: 'enr-1', is_checked_in: false }];
+      mockGet.mockResolvedValue({ data: rawArray });
+
+      const result = await checkinService.getClassStatus('cls-1');
+
       expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(1);
+    });
+
+    it('should return empty array when statuses is empty', async () => {
+      mockGet.mockResolvedValue({
+        data: { class_id: 'cls-1', check_in_date: '2024-06-15', statuses: [] },
+      });
+
+      const result = await checkinService.getClassStatus('cls-1');
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(0);
+    });
+
+    it('should return empty array when data is null', async () => {
+      mockGet.mockResolvedValue({ data: null });
+
+      const result = await checkinService.getClassStatus('cls-1');
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(0);
     });
   });
 
+  // ========================================================================
+  // getByClass
+  // ========================================================================
   describe('getByClass', () => {
     it('should return class check-ins', async () => {
-      mock.onGet('/check-in/class/cls-1').reply(200, [mockCheckIn]);
-      const result = await service.getByClass('cls-1');
-      expect(result[0].id).toBe('ci-1');
+      mockGet.mockResolvedValue({
+        data: { items: [mockCheckInResponse], total: 1 },
+      });
+
+      const result = await checkinService.getByClass('cls-1');
+
+      expect(result.items[0].id).toBe('ci-1');
+      expect(mockGet).toHaveBeenCalledWith('/check-in/class/cls-1');
     });
   });
 
+  // ========================================================================
+  // checkIn
+  // ========================================================================
   describe('checkIn', () => {
     it('should check in student', async () => {
-      mock.onPost('/check-in').reply(201, mockCheckIn);
-      const result = await service.checkIn({ enrollment_id: 'enr-1' });
+      mockPost.mockResolvedValue({ data: mockCheckInResponse });
+
+      const result = await checkinService.checkIn({
+        enrollment_id: 'enr-1',
+        class_id: 'cls-1',
+        check_in_date: '2024-01-15',
+      });
+
       expect(result.enrollment_id).toBe('enr-1');
+      expect(result.id).toBe('ci-1');
     });
 
-    it('should throw on 400', async () => {
-      mock.onPost('/check-in').reply(400, { message: 'Already checked in' });
-      await expect(service.checkIn({ enrollment_id: 'enr-1' })).rejects.toThrow();
+    it('should send check-in data to API', async () => {
+      mockPost.mockResolvedValue({ data: mockCheckInResponse });
+
+      const payload = {
+        enrollment_id: 'enr-1',
+        class_id: 'cls-1',
+        check_in_date: '2024-01-15',
+      };
+      await checkinService.checkIn(payload);
+
+      expect(mockPost).toHaveBeenCalledWith('/check-in', payload);
+    });
+
+    it('should throw on API error', async () => {
+      mockPost.mockRejectedValue(new Error('Already checked in'));
+
+      await expect(
+        checkinService.checkIn({ enrollment_id: 'enr-1' })
+      ).rejects.toThrow('Already checked in');
     });
   });
 
+  // ========================================================================
+  // checkOut
+  // ========================================================================
   describe('checkOut', () => {
     it('should check out student', async () => {
-      mock.onPut('/check-in/ci-1/checkout').reply(200, { ...mockCheckIn, check_out_time: '2024-01-15T12:00:00Z' });
-      const result = await service.checkOut('ci-1');
-      expect(result.check_out_time).toBeDefined();
+      mockPut.mockResolvedValue({
+        data: { ...mockCheckInResponse, check_out_time: '2024-01-15T12:00:00Z' },
+      });
+
+      const result = await checkinService.checkOut('ci-1');
+
+      expect(result.check_out_time).toBe('2024-01-15T12:00:00Z');
+      expect(mockPut).toHaveBeenCalledWith('/check-in/ci-1/checkout');
     });
   });
 
+  // ========================================================================
+  // bulkCheckIn
+  // ========================================================================
   describe('bulkCheckIn', () => {
-    it('should bulk check in', async () => {
-      mock.onPost('/check-in/bulk').reply(200, { checked_in: 5, failed: 0 });
-      const result = await service.bulkCheckIn({ class_id: 'cls-1', enrollment_ids: ['enr-1', 'enr-2'] });
-      expect(result.checked_in).toBe(5);
+    it('should bulk check in multiple students', async () => {
+      mockPost.mockResolvedValue({
+        data: { items: [mockCheckInResponse], total: 1 },
+      });
+
+      const result = await checkinService.bulkCheckIn({
+        class_id: 'cls-1',
+        enrollment_ids: ['enr-1', 'enr-2'],
+        check_in_date: '2024-01-15',
+      });
+
+      expect(result.items).toHaveLength(1);
+    });
+
+    it('should send correct bulk data', async () => {
+      mockPost.mockResolvedValue({ data: { items: [], total: 0 } });
+
+      const payload = {
+        class_id: 'cls-1',
+        enrollment_ids: ['enr-1', 'enr-2', 'enr-3'],
+        check_in_date: '2024-01-15',
+      };
+      await checkinService.bulkCheckIn(payload);
+
+      expect(mockPost).toHaveBeenCalledWith('/check-in/bulk', payload);
     });
   });
 
+  // ========================================================================
+  // toggleCheckIn
+  // ========================================================================
   describe('toggleCheckIn', () => {
-    it('should check out when already checked in', async () => {
-      mock.onPut('/check-in/ci-1/checkout').reply(200, { ...mockCheckIn, check_out_time: '2024-01-15T12:00:00Z' });
-      const result = await service.toggleCheckIn({ enrollment_id: 'enr-1', isCheckedIn: true, checkInId: 'ci-1' });
+    it('should check out when already checked in and has checkInId', async () => {
+      mockPut.mockResolvedValue({
+        data: { ...mockCheckInResponse, check_out_time: '2024-01-15T12:00:00Z' },
+      });
+
+      const result = await checkinService.toggleCheckIn({
+        enrollment_id: 'enr-1',
+        isCheckedIn: true,
+        checkInId: 'ci-1',
+      });
+
       expect(result.check_out_time).toBeDefined();
+      expect(mockPut).toHaveBeenCalledWith('/check-in/ci-1/checkout');
     });
 
     it('should check in when not checked in', async () => {
-      mock.onPost('/check-in').reply(201, mockCheckIn);
-      const result = await service.toggleCheckIn({ enrollment_id: 'enr-1', isCheckedIn: false });
+      mockPost.mockResolvedValue({ data: mockCheckInResponse });
+
+      const result = await checkinService.toggleCheckIn({
+        enrollment_id: 'enr-1',
+        isCheckedIn: false,
+      });
+
       expect(result.enrollment_id).toBe('enr-1');
+      expect(mockPost).toHaveBeenCalledWith('/check-in', { enrollment_id: 'enr-1' });
+    });
+
+    it('should call checkIn when isCheckedIn=true but no checkInId', async () => {
+      mockPost.mockResolvedValue({ data: mockCheckInResponse });
+
+      await checkinService.toggleCheckIn({
+        enrollment_id: 'enr-1',
+        isCheckedIn: true,
+        checkInId: undefined,
+      });
+
+      // Falls through to checkIn since !checkInId
+      expect(mockPost).toHaveBeenCalledWith('/check-in', { enrollment_id: 'enr-1' });
     });
   });
 });
