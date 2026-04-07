@@ -156,6 +156,13 @@ export const API_ENDPOINTS = {
   },
 
   // ===================
+  // SUBSCRIPTIONS
+  // ===================
+  SUBSCRIPTIONS: {
+    BILLING_PORTAL: "/subscriptions/billing-portal", // Create billing portal session
+  },
+
+  // ===================
   // INSTALLMENTS
   // ===================
   INSTALLMENTS: {

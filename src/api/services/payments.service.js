@@ -3,8 +3,8 @@
  * Handles payment processing and transaction management
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 const paymentsService = {
   /**
@@ -54,7 +54,7 @@ const paymentsService = {
         ...(payment_method_id ? { payment_method_id } : {}),
         success_url: `${appBaseUrl}/payment/success`,
         cancel_url: `${appBaseUrl}/payment/cancel`,
-      }
+      },
     );
     return data;
   },
@@ -69,7 +69,7 @@ const paymentsService = {
   async confirm(paymentIntentId, confirmData = {}) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.PAYMENTS.CONFIRM(paymentIntentId),
-      confirmData
+      confirmData,
     );
     return data;
   },
@@ -86,7 +86,7 @@ const paymentsService = {
   async process(paymentData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.PAYMENTS.PROCESS,
-      paymentData
+      paymentData,
     );
     return data;
   },
@@ -102,7 +102,7 @@ const paymentsService = {
   async refund(paymentId, refundData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.PAYMENTS.REFUND(paymentId),
-      refundData
+      refundData,
     );
     return data;
   },
@@ -114,7 +114,7 @@ const paymentsService = {
    */
   async getReceipt(paymentId) {
     const { data } = await apiClient.get(
-      API_ENDPOINTS.PAYMENTS.RECEIPT(paymentId)
+      API_ENDPOINTS.PAYMENTS.RECEIPT(paymentId),
     );
     return data;
   },
@@ -127,7 +127,7 @@ const paymentsService = {
   async downloadReceipt(paymentId) {
     const { data } = await apiClient.get(
       API_ENDPOINTS.PAYMENTS.RECEIPT_PDF(paymentId),
-      { responseType: 'blob' }
+      { responseType: "blob" },
     );
     return data;
   },
@@ -160,7 +160,7 @@ const paymentsService = {
   async addPaymentMethod(methodData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.PAYMENTS.ADD_METHOD,
-      methodData
+      methodData,
     );
     return data;
   },
@@ -172,7 +172,7 @@ const paymentsService = {
    */
   async removePaymentMethod(methodId) {
     const { data } = await apiClient.delete(
-      API_ENDPOINTS.PAYMENTS.REMOVE_METHOD(methodId)
+      API_ENDPOINTS.PAYMENTS.REMOVE_METHOD(methodId),
     );
     return data;
   },
@@ -184,7 +184,7 @@ const paymentsService = {
    */
   async setDefaultPaymentMethod(methodId) {
     const { data } = await apiClient.post(
-      API_ENDPOINTS.PAYMENTS.SET_DEFAULT_METHOD(methodId)
+      API_ENDPOINTS.PAYMENTS.SET_DEFAULT_METHOD(methodId),
     );
     return data;
   },
@@ -203,7 +203,7 @@ const paymentsService = {
    * @returns {Promise<Array>} Completed payments
    */
   async getCompleted() {
-    return this.getAll({ status: 'completed' });
+    return this.getAll({ status: "completed" });
   },
 
   /**
@@ -211,7 +211,7 @@ const paymentsService = {
    * @returns {Promise<Array>} Pending payments
    */
   async getPending() {
-    return this.getAll({ status: 'pending' });
+    return this.getAll({ status: "pending" });
   },
 
   /**
@@ -219,7 +219,7 @@ const paymentsService = {
    * @returns {Promise<Array>} Failed payments
    */
   async getFailed() {
-    return this.getAll({ status: 'failed' });
+    return this.getAll({ status: "failed" });
   },
 
   /**
@@ -243,7 +243,18 @@ const paymentsService = {
    */
   async verifyStatus(paymentId) {
     const { data } = await apiClient.get(
-      API_ENDPOINTS.PAYMENTS.VERIFY_STATUS(paymentId)
+      API_ENDPOINTS.PAYMENTS.VERIFY_STATUS(paymentId),
+    );
+    return data;
+  },
+
+  /**
+   * Create a Stripe Billing Portal session
+   * @returns {Promise<Object>} Object with portal URL
+   */
+  async createBillingPortalSession() {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.SUBSCRIPTIONS.BILLING_PORTAL,
     );
     return data;
   },
