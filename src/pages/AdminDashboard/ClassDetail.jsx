@@ -34,7 +34,12 @@
 import React, { useState, useEffect } from "react";
 
 // Routing
-import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
 
 // Icons
 import { ArrowLeft, Clock, User } from "lucide-react";
@@ -89,17 +94,17 @@ export default function ClassDetail() {
   const { user } = useAuth(); // Get current authenticated user
 
   // Extract class ID from URL query parameters
-  const classId = searchParams.get('id');
+  const classId = searchParams.get("id");
 
   // Get area ID from location state (passed from ClassList)
   const _areaId = location.state?.areaId;
 
   // Back button always goes to class list (with area if available)
-  const backToClassListUrl = '/class-list';
+  const backToClassListUrl = "/class-list";
 
   // Component state
   const [classData, setClassData] = useState(null); // Stores fetched class details
-  const [loading, setLoading] = useState(true);     // Loading state for API call
+  const [loading, setLoading] = useState(true); // Loading state for API call
 
   // --------------------------------------------------------------------------
   // LIFECYCLE - Load class data on mount
@@ -110,7 +115,7 @@ export default function ClassDetail() {
       loadClassDetails();
     } else {
       // No class ID in URL - redirect to class list
-      toast.error('No class ID provided');
+      toast.error("No class ID provided");
       navigate(backToClassListUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,17 +139,17 @@ export default function ClassDetail() {
       if (data.school_name && !data.school) {
         data.school = {
           name: data.school_name,
-          address: data.school_address || '',
-          city: data.school_city || '',
-          state: data.school_state || '',
-          zip_code: data.school_zip_code || '',
+          address: data.school_address || "",
+          city: data.school_city || "",
+          state: data.school_state || "",
+          zip_code: data.school_zip_code || "",
         };
       }
 
       setClassData(data);
     } catch (error) {
-      console.error('Failed to fetch class details:', error);
-      toast.error('Failed to load class details');
+      console.error("Failed to fetch class details:", error);
+      toast.error("Failed to load class details");
       navigate(backToClassListUrl); // Redirect on error
     } finally {
       setLoading(false);
@@ -166,16 +171,16 @@ export default function ClassDetail() {
     // Step 1: Authentication check
     if (!user) {
       // Save intended class for post-login redirect
-      sessionStorage.setItem('intendedClass', classId);
-      toast('Please log in to register for this class');
-      navigate('/login');
+      sessionStorage.setItem("intendedClass", classId);
+      toast("Please log in to register for this class");
+      navigate("/login");
       return;
     }
 
     // Step 2: Role authorization check
     const userRole = user?.role?.toUpperCase();
-    if (userRole !== 'PARENT') {
-      toast.error('Only parents can register for classes');
+    if (userRole !== "PARENT") {
+      toast.error("Only parents can register for classes");
       return;
     }
 
@@ -197,18 +202,19 @@ export default function ClassDetail() {
    */
   const formatSchedule = (cls) => {
     if (!cls.weekdays || cls.weekdays.length === 0) {
-      return 'Schedule TBD';
+      return "Schedule TBD";
     }
 
     // Backend now sends full day names (Monday, Wednesday) - no processing needed
-    const days = cls.weekdays.join(', ');
+    const days = cls.weekdays.join(", ");
 
     // Backend sends times in 12-hour format (9:00 AM, 10:00 AM)
-    const time = cls.start_time && cls.end_time
-      ? `${cls.start_time} - ${cls.end_time}`
-      : '';
+    const time =
+      cls.start_time && cls.end_time
+        ? `${cls.start_time} - ${cls.end_time}`
+        : "";
 
-    return `${days}${time ? ', ' + time : ''}`;
+    return `${days}${time ? " @ " + time : ""}`;
   };
 
   /**
@@ -221,17 +227,68 @@ export default function ClassDetail() {
    */
   const formatDates = (cls) => {
     if (!cls.start_date || !cls.end_date) {
-      return 'Dates TBD';
+      return "Dates TBD";
     }
 
-    const start = new Date(cls.start_date).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
+    const start = new Date(cls.start_date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
-    const end = new Date(cls.end_date).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
+    const end = new Date(cls.end_date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
 
     return `${start} - ${end}`;
+  };
+
+  /**
+   * Calculate the number of practice sessions between start_date and end_date
+   * based on the class weekdays array.
+   *
+   * @param {Object} cls - Class object with start_date, end_date, weekdays
+   * @returns {number} Number of practice sessions
+   */
+  const calculatePracticeSessions = (cls) => {
+    if (
+      !cls.start_date ||
+      !cls.end_date ||
+      !cls.weekdays ||
+      cls.weekdays.length === 0
+    ) {
+      return 0;
+    }
+
+    const dayNameToIndex = {
+      Sunday: 0,
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+    };
+
+    const targetDays = cls.weekdays
+      .map((d) => dayNameToIndex[d])
+      .filter((d) => d !== undefined);
+
+    if (targetDays.length === 0) return 0;
+
+    let count = 0;
+    const current = new Date(cls.start_date + "T00:00:00");
+    const end = new Date(cls.end_date + "T00:00:00");
+
+    while (current <= end) {
+      if (targetDays.includes(current.getDay())) {
+        count++;
+      }
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
   };
 
   // --------------------------------------------------------------------------
@@ -262,16 +319,13 @@ export default function ClassDetail() {
     <div className="h-full flex flex-col w-full items-center justify-center md:px-6 md:p-0 p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
       {/* Outer container for vertical centering */}
       <div className="flex flex-1 items-center justify-center sm:pt-6 p-0">
-
         {/* Background dotted overlay pattern */}
         <DottedOverlay className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0" />
 
         {/* Main content wrapper */}
         <div className="w-full flex items-center justify-center">
-
           {/* Content card - max width 900px with semi-transparent background */}
           <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-4 md:p-8 shadow-lg z-50">
-
             {/* ================================================================
                 HEADER SECTION - Back button and logo
                 ================================================================ */}
@@ -280,7 +334,7 @@ export default function ClassDetail() {
               <div className="flex items-center gap-4">
                 <Link
                   to={backToClassListUrl}
-                  state={{ from: '/' }}
+                  state={{ from: "/" }}
                   className="rounded-full p-2 hover:bg-white/60"
                 >
                   <ArrowLeft className="text-[#00000099]" />
@@ -297,8 +351,8 @@ export default function ClassDetail() {
                   alt="logo"
                   className="size-[80px] object-contain"
                   style={{
-                    filter: 'brightness(0.2) contrast(1.5)',
-                    mixBlendMode: 'normal'
+                    filter: "brightness(0.2) contrast(1.5)",
+                    mixBlendMode: "normal",
                   }}
                 />
               </div>
@@ -308,14 +362,17 @@ export default function ClassDetail() {
                 CLASS INFORMATION SECTION
                 ================================================================ */}
             <div className="col-span-2 rounded-lg py-6">
-
               {/* --------------------------------------------------------
                   CLASS HEADER - Image and description
                   -------------------------------------------------------- */}
               <div className="flex flex-col md:flex-row items-start justify-between gap-4">
                 {/* Class image */}
                 <img
-                  src={classData.image_url || "/images/detail_page.png"}
+                  src={
+                    classData.class_image_url ||
+                    classData.image_url ||
+                    "/images/detail_page.png"
+                  }
                   alt={classData.name}
                   className="w-full sm:max-w-[327px] h-56 object-cover rounded-lg"
                 />
@@ -326,7 +383,7 @@ export default function ClassDetail() {
                     {classData.name}
                   </h2>
                   <p className="mt-3 text-base leading-[28px] font-manrope text-text-muted">
-                    {classData.description || 'No description available'}
+                    {classData.description || "No description available"}
                   </p>
                 </div>
               </div>
@@ -335,10 +392,8 @@ export default function ClassDetail() {
                   MAIN CONTENT - Split into left (details) and right (pricing)
                   -------------------------------------------------------- */}
               <div className="flex flex-col md:flex-row items-start gap-6 mt-6 w-full">
-
                 {/* LEFT COLUMN - Class details (65% width) */}
                 <div className="flex flex-1 flex-col items-start gap-2 sm:gap-4 w-full sm:max-w-[65%]">
-
                   {/* ============================================
                       LOCATION CARD - Map and address
                       ============================================ */}
@@ -353,7 +408,7 @@ export default function ClassDetail() {
                           <div className="sm:w-[190px] w-[130px] sm:h-[140px] h-[100px] rounded-lg overflow-hidden flex-shrink-0 relative">
                             <iframe
                               title="location-map"
-                              src={`https://www.google.com/maps?q=${encodeURIComponent(classData.school.address || '')}&output=embed`}
+                              src={`https://www.google.com/maps?q=${encodeURIComponent(classData.school.address || "")}&output=embed`}
                               className="w-full h-[140%] border-0 absolute top-0 left-0"
                               loading="lazy"
                             />
@@ -389,7 +444,9 @@ export default function ClassDetail() {
                               {classData.school.address && (
                                 <>
                                   <br />
-                                 <span className="mt-2">{classData.school.address}</span> 
+                                  <span className="mt-2">
+                                    {classData.school.address}
+                                  </span>
                                 </>
                               )}
                             </p>
@@ -403,7 +460,6 @@ export default function ClassDetail() {
                       SCHEDULE CARD - Days, times, dates, age, coordinator
                       ============================================ */}
                   <div className="bg-[#FFFFFF80] rounded-[20px] w-full p-4 shadow-sm flex flex-col justify-evenly sm:flex-row  gap-4 sm:gap-8">
-
                     {/* Left section - Day & Time, Age Group */}
                     <div>
                       {/* Day & Time */}
@@ -424,7 +480,8 @@ export default function ClassDetail() {
                       <div className="flex items-center gap-2 mt-2">
                         <User className="w-4 h-4 text-text-muted" />
                         <span className="text-text-muted text-[14px] font-manrope">
-                          {classData.min_age || 0} - {classData.max_age || 18} Years Old
+                          {classData.min_age || 0} - {classData.max_age || 18}{" "}
+                          Years Old
                         </span>
                       </div>
                     </div>
@@ -450,7 +507,7 @@ export default function ClassDetail() {
                           </h5>
                           <div className="flex items-center gap-2 mt-2">
                             <span className="text-text-muted text-[14px] font-manrope">
-                              {classData.coach.first_name || 'TBD'}
+                              {classData.coach.first_name || "TBD"}
                             </span>
                           </div>
                         </>
@@ -470,7 +527,7 @@ export default function ClassDetail() {
                         Total Price
                       </h4>
                       <div className="text-[32px] font-semibold font-manrope">
-                        ${classData.price || '0'}
+                        ${classData.price || "0"}
                       </div>
                     </div>
 
@@ -481,7 +538,10 @@ export default function ClassDetail() {
                     <ul className="mt-6 space-y-4 font-manrope text-sm text-text-muted">
                       <li className="font-manrope flex items-center gap-2">
                         <img src="/images/price_info.png" alt="" />
-                        <span>15 weeks of training</span>
+                        <span>
+                          {calculatePracticeSessions(classData)} practices of
+                          training
+                        </span>
                       </li>
                       <li className="font-manrope flex items-center gap-2">
                         <img src="/images/price_info.png" alt="" />
