@@ -67,7 +67,8 @@ export default function Classes() {
           cls.min_age && cls.max_age
             ? `Ages ${cls.min_age}–${cls.max_age}`
             : "All Ages",
-        image: cls.cover_photo_url || cls.image_url,
+        image:
+          cls.class_image_url || cls.cover_photo_url || cls.image_url || null,
         capacity: {
           filled: capacityMeta.current,
           total: capacityMeta.total,

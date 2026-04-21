@@ -1219,7 +1219,8 @@ export default function Classes() {
         viewModal.classData &&
         (() => {
           const cls = viewModal.classData;
-          const image = cls.cover_photo_url || cls.image_url;
+          const image =
+            cls.class_image_url || cls.cover_photo_url || cls.image_url;
           const programName = cls.program?.name || cls.program_name;
           const areaName = cls.area?.name || cls.area_name;
           const schoolName = cls.school?.name || cls.school_name;

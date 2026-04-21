@@ -51,10 +51,10 @@ export default function ClassList() {
   const [query, setQuery] = useState("");
 
   // Get area from URL params
-  const areaId = searchParams.get('area');
+  const areaId = searchParams.get("area");
 
   // Back button always goes to registration/landing page
-  const backPath = '/';
+  const backPath = "/";
 
   // Fetch programs and classes on mount
   useEffect(() => {
@@ -74,11 +74,11 @@ export default function ClassList() {
       const response = await programsService.getAll();
       const programsList = Array.isArray(response)
         ? response
-        : (response.items || response.data || []);
+        : response.items || response.data || [];
       setPrograms(programsList);
     } catch (error) {
-      console.error('Failed to fetch programs:', error);
-      toast.error('Failed to load programs');
+      console.error("Failed to fetch programs:", error);
+      toast.error("Failed to load programs");
     }
   };
 
@@ -101,8 +101,8 @@ export default function ClassList() {
       const classList = response.items || response.data || [];
       setClasses(classList);
     } catch (error) {
-      console.error('Failed to fetch classes:', error);
-      toast.error('Failed to load classes');
+      console.error("Failed to fetch classes:", error);
+      toast.error("Failed to load classes");
       setClasses([]);
     } finally {
       setLoading(false);
@@ -113,7 +113,10 @@ export default function ClassList() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return classes.filter((c) =>
-      q ? c.name.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q) : true
+      q
+        ? c.name.toLowerCase().includes(q) ||
+          c.description?.toLowerCase().includes(q)
+        : true,
     );
   }, [query, classes]);
 
@@ -122,16 +125,16 @@ export default function ClassList() {
     // Check if user is logged in
     if (!user) {
       // Not logged in - save intended class and redirect to login
-      sessionStorage.setItem('intendedClass', classId);
-      toast('Please log in to register for this class');
-      navigate('/login');
+      sessionStorage.setItem("intendedClass", classId);
+      toast("Please log in to register for this class");
+      navigate("/login");
       return;
     }
 
     // Check if user is a parent
     const userRole = user?.role?.toUpperCase();
-    if (userRole !== 'PARENT') {
-      toast.error('Only parents can register for classes');
+    if (userRole !== "PARENT") {
+      toast.error("Only parents can register for classes");
       return;
     }
 
@@ -142,30 +145,35 @@ export default function ClassList() {
   // Format schedule display
   const formatSchedule = (cls) => {
     if (!cls.weekdays || cls.weekdays.length === 0) {
-      return 'Schedule TBD';
+      return "Schedule TBD";
     }
 
     // Backend now sends full day names (Monday, Wednesday) and times in 12-hour format
-    const days = cls.weekdays.join(', ');
+    const days = cls.weekdays.join(", ");
 
-    const time = cls.start_time && cls.end_time
-      ? `${cls.start_time} - ${cls.end_time}`
-      : '';
+    const time =
+      cls.start_time && cls.end_time
+        ? `${cls.start_time} - ${cls.end_time}`
+        : "";
 
-    return `${days}${time ? ' @ ' + time : ''}`;
+    return `${days}${time ? " @ " + time : ""}`;
   };
 
   // Format dates display
   const formatDates = (cls) => {
     if (!cls.start_date || !cls.end_date) {
-      return 'Dates TBD';
+      return "Dates TBD";
     }
 
-    const start = new Date(cls.start_date).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
+    const start = new Date(cls.start_date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
-    const end = new Date(cls.end_date).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
+    const end = new Date(cls.end_date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
 
     return `${start} - ${end}`;
@@ -173,155 +181,160 @@ export default function ClassList() {
 
   return (
     <div className="h-full flex flex-col items-center justify-between p-6 md:p-0 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
-      <DottedOverlay
-        className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0"
-      />
+      <DottedOverlay className="inset-x-6 inset-y-10 sm:inset-x-0 sm:inset-y-0" />
       <div className="w-full flex-grow flex items-center justify-center">
-      <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 md:mt-8 shadow-lg z-50">
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigate(backPath)}>
-            <ArrowLeft  className="text-[#00000099] size-[16px]" />
-          </button>
-          <div>
-            <img
-              src="/images/logo.png"
-              alt="logo"
-              className="size-[90px] object-contain "
-              style={{
-                filter: 'brightness(0.2) contrast(1.5)',
-                mixBlendMode: 'normal'
-              }}
-            />
-          </div>
-
-          <div>
-            <h2 className="text-xl md:text-[28px] font-kollektif text-text-primary">
-              Available Classes
-            </h2>
-            <p className="text-base text-text-muted font-manrope">
-              Select a class to continue registration
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col  items-start w-full justify-center gap-4">
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveProgram("")}
-              className={`px-4 py-1 sm:py-2 rounded-full text-[8px] sm:text-sm font-semibold font-manrope transition-colors border ${
-                activeProgram === ""
-                  ? "bg-[#101D2E] text-white border-transparent"
-                  : "bg-white text-neutral-dark border-gray-200"
-              }`}
-            >
-              All Programs
+        <div className="w-full max-w-[900px] bg-[#FFFFFF80] rounded-2xl p-6 md:p-8 md:mt-8 shadow-lg z-50">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(backPath)}>
+              <ArrowLeft className="text-[#00000099] size-[16px]" />
             </button>
-            {programs.map((program) => (
+            <div>
+              <img
+                src="/images/logo.png"
+                alt="logo"
+                className="size-[90px] object-contain "
+                style={{
+                  filter: "brightness(0.2) contrast(1.5)",
+                  mixBlendMode: "normal",
+                }}
+              />
+            </div>
+
+            <div>
+              <h2 className="text-xl md:text-[28px] font-kollektif text-text-primary">
+                Available Classes
+              </h2>
+              <p className="text-base text-text-muted font-manrope">
+                Select a class to continue registration
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col  items-start w-full justify-center gap-4">
+            <div className="flex flex-wrap gap-2">
               <button
-                key={program.id}
-                onClick={() => setActiveProgram(program.id)}
+                onClick={() => setActiveProgram("")}
                 className={`px-4 py-1 sm:py-2 rounded-full text-[8px] sm:text-sm font-semibold font-manrope transition-colors border ${
-                  activeProgram === program.id
+                  activeProgram === ""
                     ? "bg-[#101D2E] text-white border-transparent"
                     : "bg-white text-neutral-dark border-gray-200"
                 }`}
               >
-                {program.name}
+                All Programs
               </button>
-            ))}
-          </div>
+              {programs.map((program) => (
+                <button
+                  key={program.id}
+                  onClick={() => setActiveProgram(program.id)}
+                  className={`px-4 py-1 sm:py-2 rounded-full text-[8px] sm:text-sm font-semibold font-manrope transition-colors border ${
+                    activeProgram === program.id
+                      ? "bg-[#101D2E] text-white border-transparent"
+                      : "bg-white text-neutral-dark border-gray-200"
+                  }`}
+                >
+                  {program.name}
+                </button>
+              ))}
+            </div>
 
-          <div className="flex items-center gap-3 w-full ">
-            <div className="relative w-full  ">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search classes..."
-                className="w-full pl-10 pr-4 py-3 bg-[#FFFFFF66] outline-none rounded-full border font-manrope border-gray-200 text-base placeholder:font-medium placeholder:text-gray-600"
-              />
-              <svg
-                className="w-5 h-5 text-gray-600 absolute left-3 top-[15px]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
+            <div className="flex items-center gap-3 w-full ">
+              <div className="relative w-full  ">
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search classes..."
+                  className="w-full pl-10 pr-4 py-3 bg-[#FFFFFF66] outline-none rounded-full border font-manrope border-gray-200 text-base placeholder:font-medium placeholder:text-gray-600"
                 />
-              </svg>
+                <svg
+                  className="w-5 h-5 text-gray-600 absolute left-3 top-[15px]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 space-y-4">
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">
-              Loading classes...
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              No classes found.
-            </div>
-          ) : (
-            filtered.map((cls) => (
-              <div
-                key={cls.id}
-                className="flex flex-col md:flex-row items-stretch gap-4 bg-[#FFFFFF80] rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
-              >
-                <div className="w-full md:w-44 flex-shrink-0">
-                  <Link
-                    to={`/class-detail?id=${cls.id}`}
-                    state={{ areaId: areaId, from: '/class-list' }}
-                    className="block w-full h-full"
-                  >
-                    <img
-                      src={cls.image_url || "/images/class_list1.png"}
-                      alt={cls.name}
-                      className="w-full h-32 md:h-full object-cover"
-                    />
-                  </Link>
-                </div>
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              <div className="text-center py-8 text-gray-500">
+                Loading classes...
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                No classes found.
+              </div>
+            ) : (
+              filtered.map((cls) => (
+                <div
+                  key={cls.id}
+                  className="flex flex-col md:flex-row items-stretch gap-4 bg-[#FFFFFF80] rounded-[20px] border border-gray-100 shadow-sm overflow-hidden"
+                >
+                  <div className="w-full md:w-44 flex-shrink-0">
+                    <Link
+                      to={`/class-detail?id=${cls.id}`}
+                      state={{ areaId: areaId, from: "/class-list" }}
+                      className="block w-full h-full"
+                    >
+                      <img
+                        src={
+                          cls.class_image_url ||
+                          cls.cover_photo_url ||
+                          cls.image_url ||
+                          "/images/class_list1.png"
+                        }
+                        alt={cls.name}
+                        className="w-full h-32 md:h-full object-cover"
+                      />
+                    </Link>
+                  </div>
 
-                <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                     <Link
-                       to={`/class-detail?id=${cls.id}`}
-                       state={{ areaId: areaId, from: '/class-list' }}
-                       className="hover:underline text-[23px] font-kollektif  text-text-primary"
-                     >{cls.name}</Link>
-                    <div className="sm:mt-2 mt-1 flex  flex-col items-start gap-2 sm:gap-3 text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <IconClock />
-                        <span className="text-text-muted font-manrope">
-                          {formatSchedule(cls)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2  mt-1 sm:mt-0">
-                        <IconCalendar />
-                        <span className="text-text-muted font-manrope">
-                          {formatDates(cls)}
-                        </span>
+                  <div className="flex-1 p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <Link
+                        to={`/class-detail?id=${cls.id}`}
+                        state={{ areaId: areaId, from: "/class-list" }}
+                        className="hover:underline text-[23px] font-kollektif  text-text-primary"
+                      >
+                        {cls.name}
+                      </Link>
+                      <div className="sm:mt-2 mt-1 flex  flex-col items-start gap-2 sm:gap-3 text-sm text-gray-500">
+                        <div className="flex items-center gap-2">
+                          <IconClock />
+                          <span className="text-text-muted font-manrope">
+                            {formatSchedule(cls)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2  mt-1 sm:mt-0">
+                          <IconCalendar />
+                          <span className="text-text-muted font-manrope">
+                            {formatDates(cls)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-4 md:ml-6">
-                    <button
-                      onClick={() => handleRegister(cls.id)}
-                      className="inline-block font-manrope px-8 py-2 bg-[#f1b500] hover:bg-[#e0a400] text-sm font-semibold rounded-[8px] shadow-sm"
-                    >
-                      Register
-                    </button>
+                    <div className="flex items-center gap-4 md:ml-6">
+                      <button
+                        onClick={() => handleRegister(cls.id)}
+                        className="inline-block font-manrope px-8 py-2 bg-[#f1b500] hover:bg-[#e0a400] text-sm font-semibold rounded-[8px] shadow-sm"
+                      >
+                        Register
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       <Footer isFixed={false} />

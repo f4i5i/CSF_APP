@@ -245,13 +245,14 @@ export default function ClassDetail() {
   };
 
   /**
-   * Calculate the number of practice sessions between start_date and end_date
-   * based on the class weekdays array.
+   * Calculate the number of training weeks between start_date and end_date
+   * based on the class weekdays array. Counts distinct calendar weeks that
+   * contain at least one scheduled practice day.
    *
    * @param {Object} cls - Class object with start_date, end_date, weekdays
-   * @returns {number} Number of practice sessions
+   * @returns {number} Number of training weeks
    */
-  const calculatePracticeSessions = (cls) => {
+  const calculateTrainingWeeks = (cls) => {
     if (
       !cls.start_date ||
       !cls.end_date ||
@@ -277,18 +278,21 @@ export default function ClassDetail() {
 
     if (targetDays.length === 0) return 0;
 
-    let count = 0;
+    const weekKeys = new Set();
     const current = new Date(cls.start_date + "T00:00:00");
     const end = new Date(cls.end_date + "T00:00:00");
 
     while (current <= end) {
       if (targetDays.includes(current.getDay())) {
-        count++;
+        // Use the Sunday-anchored week start as the unique key for each week
+        const weekStart = new Date(current);
+        weekStart.setDate(current.getDate() - current.getDay());
+        weekKeys.add(weekStart.toISOString().slice(0, 10));
       }
       current.setDate(current.getDate() + 1);
     }
 
-    return count;
+    return weekKeys.size;
   };
 
   // --------------------------------------------------------------------------
@@ -370,6 +374,7 @@ export default function ClassDetail() {
                 <img
                   src={
                     classData.class_image_url ||
+                    classData.cover_photo_url ||
                     classData.image_url ||
                     "/images/detail_page.png"
                   }
@@ -539,8 +544,7 @@ export default function ClassDetail() {
                       <li className="font-manrope flex items-center gap-2">
                         <img src="/images/price_info.png" alt="" />
                         <span>
-                          {calculatePracticeSessions(classData)} practices of
-                          training
+                          {calculateTrainingWeeks(classData)} weeks of training
                         </span>
                       </li>
                       <li className="font-manrope flex items-center gap-2">

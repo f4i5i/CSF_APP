@@ -221,7 +221,11 @@ export default function ProgramOverview() {
             cls.price_display ||
             cls.price_text ||
             (cls.base_price ? `$${cls.base_price}` : "Contact for pricing"),
-          image: cls.cover_photo_url || cls.image_url || getClassImage(),
+          image:
+            cls.class_image_url ||
+            cls.cover_photo_url ||
+            cls.image_url ||
+            getClassImage(),
           schedule: buildScheduleFromClass(cls),
           price: cls.base_price,
         };

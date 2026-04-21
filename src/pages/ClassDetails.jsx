@@ -30,7 +30,10 @@ export default function ClassDetail() {
     isError,
   } = useClass({ classId: id ?? "" });
 
-  const image = classDetail?.cover_photo_url || classDetail?.image_url;
+  const image =
+    classDetail?.class_image_url ||
+    classDetail?.cover_photo_url ||
+    classDetail?.image_url;
   const scheduleFromClass = classDetail
     ? buildScheduleFromClass(classDetail)
     : [];
