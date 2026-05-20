@@ -3,22 +3,22 @@
  * Tests email composition, recipient selection, validation, preview, and sending
  */
 
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { server } from '../../../mocks/server';
-import { http, HttpResponse } from 'msw';
-import MassEmail from '../../../pages/AdminDashboard/MassEmail';
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { server } from "../../../mocks/server";
+import { http, HttpResponse } from "msw";
+import MassEmail from "../../../pages/AdminDashboard/MassEmail";
 
-const API_BASE = 'http://localhost:8000/api/v1';
+const API_BASE = "http://localhost:8000/api/v1";
 
 // Mock Header since it makes API calls that aren't relevant to MassEmail tests
-jest.mock('../../../components/Header', () => ({
+jest.mock("../../../components/Header", () => ({
   __esModule: true,
   default: () => <div data-testid="header">Header</div>,
 }));
 
 // Mock react-hot-toast so we can assert on toast.error calls for validation
-jest.mock('react-hot-toast', () => {
+jest.mock("react-hot-toast", () => {
   const mockToast: any = (msg: string) => msg;
   mockToast.success = jest.fn();
   mockToast.error = jest.fn();
@@ -31,11 +31,11 @@ jest.mock('react-hot-toast', () => {
     default: mockToast,
   };
 });
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 // Mock admin service to avoid unhandled rejections from apiClient chain
 const mockSendBulkEmail = jest.fn();
-jest.mock('../../../api/services/admin.service', () => ({
+jest.mock("../../../api/services/admin.service", () => ({
   __esModule: true,
   default: {
     sendBulkEmail: (...args: any[]) => mockSendBulkEmail(...args),
@@ -43,38 +43,42 @@ jest.mock('../../../api/services/admin.service', () => ({
 }));
 
 // Mock service imports used by dynamic import() in MassEmail component
-jest.mock('../../../api/services/classes.service', () => ({
+jest.mock("../../../api/services/classes.service", () => ({
   __esModule: true,
   default: {
-    getAll: jest.fn().mockResolvedValue({ items: [
-      { id: 'class-1', name: 'Soccer Stars U6' },
-      { id: 'class-2', name: 'Lightning Bolts U8' },
-    ]}),
+    getAll: jest.fn().mockResolvedValue({
+      items: [
+        { id: "class-1", name: "Soccer Stars U6" },
+        { id: "class-2", name: "Lightning Bolts U8" },
+      ],
+    }),
   },
 }));
 
-jest.mock('../../../api/services/programs.service', () => ({
+jest.mock("../../../api/services/programs.service", () => ({
   __esModule: true,
   default: {
-    getAll: jest.fn().mockResolvedValue({ items: [
-      { id: 'prog-1', name: 'Summer Program' },
-      { id: 'prog-2', name: 'After School Program' },
-    ]}),
+    getAll: jest.fn().mockResolvedValue({
+      items: [
+        { id: "prog-1", name: "Summer Program" },
+        { id: "prog-2", name: "After School Program" },
+      ],
+    }),
   },
 }));
 
-jest.mock('../../../api/services/areas.service', () => ({
+jest.mock("../../../api/services/areas.service", () => ({
   __esModule: true,
   default: {
     getAll: jest.fn().mockResolvedValue([
-      { id: 'area-1', name: 'Downtown' },
-      { id: 'area-2', name: 'Suburbs' },
+      { id: "area-1", name: "Downtown" },
+      { id: "area-2", name: "Suburbs" },
     ]),
   },
 }));
 
 // Mock ConfirmDialog to avoid complex dialog interactions
-jest.mock('../../../components/admin/ConfirmDialog', () => ({
+jest.mock("../../../components/admin/ConfirmDialog", () => ({
   __esModule: true,
   default: ({ isOpen, onClose, onConfirm, title, message }: any) => {
     if (!isOpen) return null;
@@ -89,13 +93,23 @@ jest.mock('../../../components/admin/ConfirmDialog', () => ({
   },
 }));
 
+// Captured `modules` prop reference from each render of ReactQuill — consumed
+// by the "Editor Stability When Adding Attachments" regression test below.
+const mockCapturedQuillModules: unknown[] = [];
+
 // Mock ReactQuill since it uses DOM APIs not available in tests
-jest.mock('react-quill', () => {
-  return function MockReactQuill({ value, onChange, placeholder }: any) {
+jest.mock("react-quill", () => {
+  return function MockReactQuill({
+    value,
+    onChange,
+    placeholder,
+    modules,
+  }: any) {
+    mockCapturedQuillModules.push(modules);
     return (
       <textarea
         data-testid="quill-editor"
-        value={value || ''}
+        value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
       />
@@ -104,61 +118,74 @@ jest.mock('react-quill', () => {
 });
 
 // Also mock the CSS import
-jest.mock('react-quill/dist/quill.snow.css', () => ({}));
+jest.mock("react-quill/dist/quill.snow.css", () => ({}));
 
 // Mock data
 const mockClasses = [
-  { id: 'class-1', name: 'Soccer Stars U6' },
-  { id: 'class-2', name: 'Lightning Bolts U8' },
+  { id: "class-1", name: "Soccer Stars U6" },
+  { id: "class-2", name: "Lightning Bolts U8" },
 ];
 
 const mockPrograms = [
-  { id: 'prog-1', name: 'Summer Program' },
-  { id: 'prog-2', name: 'After School Program' },
+  { id: "prog-1", name: "Summer Program" },
+  { id: "prog-2", name: "After School Program" },
 ];
 
 const mockAreas = [
-  { id: 'area-1', name: 'Downtown' },
-  { id: 'area-2', name: 'Suburbs' },
+  { id: "area-1", name: "Downtown" },
+  { id: "area-2", name: "Suburbs" },
 ];
 
-describe('Mass Email Integration Tests', () => {
+describe("Mass Email Integration Tests", () => {
   beforeEach(() => {
-    localStorage.setItem('csf_access_token', 'mock-access-token-admin');
-    localStorage.setItem('csf_refresh_token', 'mock-refresh-token-admin');
+    localStorage.setItem("csf_access_token", "mock-access-token-admin");
+    localStorage.setItem("csf_refresh_token", "mock-refresh-token-admin");
 
     mockSendBulkEmail.mockReset();
     (toast.error as jest.Mock).mockClear();
     (toast.success as jest.Mock).mockClear();
+    mockCapturedQuillModules.length = 0;
 
     // Re-apply mock resolved values for dynamic import() services
     // (jest.mock + dynamic import caching can lose resolved values between tests)
-    const classesService = require('../../../api/services/classes.service').default;
-    classesService.getAll.mockResolvedValue({ items: [
-      { id: 'class-1', name: 'Soccer Stars U6' },
-      { id: 'class-2', name: 'Lightning Bolts U8' },
-    ]});
-    const programsService = require('../../../api/services/programs.service').default;
-    programsService.getAll.mockResolvedValue({ items: [
-      { id: 'prog-1', name: 'Summer Program' },
-      { id: 'prog-2', name: 'After School Program' },
-    ]});
-    const areasService = require('../../../api/services/areas.service').default;
+    const classesService =
+      require("../../../api/services/classes.service").default;
+    classesService.getAll.mockResolvedValue({
+      items: [
+        { id: "class-1", name: "Soccer Stars U6" },
+        { id: "class-2", name: "Lightning Bolts U8" },
+      ],
+    });
+    const programsService =
+      require("../../../api/services/programs.service").default;
+    programsService.getAll.mockResolvedValue({
+      items: [
+        { id: "prog-1", name: "Summer Program" },
+        { id: "prog-2", name: "After School Program" },
+      ],
+    });
+    const areasService = require("../../../api/services/areas.service").default;
     areasService.getAll.mockResolvedValue([
-      { id: 'area-1', name: 'Downtown' },
-      { id: 'area-2', name: 'Suburbs' },
+      { id: "area-1", name: "Downtown" },
+      { id: "area-2", name: "Suburbs" },
     ]);
 
     server.use(
       http.get(`${API_BASE}/classes`, () => {
-        return HttpResponse.json({ items: mockClasses, total: mockClasses.length });
+        return HttpResponse.json({
+          items: mockClasses,
+          total: mockClasses.length,
+        });
       }),
       http.get(`${API_BASE}/programs`, () => {
-        return HttpResponse.json({ items: mockPrograms, total: mockPrograms.length });
+        return HttpResponse.json({
+          items: mockPrograms,
+          total: mockPrograms.length,
+        });
       }),
       http.get(`${API_BASE}/areas`, () => {
         return HttpResponse.json(mockAreas);
-      })
+      }),
     );
   });
 
@@ -169,154 +196,166 @@ describe('Mass Email Integration Tests', () => {
   // ===========================================
   // PAGE LOADING TESTS
   // ===========================================
-  describe('Page Loading', () => {
-    it('should render page title', async () => {
+  describe("Page Loading", () => {
+    it("should render page title", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText('Mass Email')).toBeInTheDocument();
+      expect(screen.getByText("Mass Email")).toBeInTheDocument();
     });
 
-    it('should render page description', async () => {
+    it("should render page description", async () => {
       render(<MassEmail />);
 
       expect(screen.getByText(/Send emails to parents/i)).toBeInTheDocument();
     });
 
-    it('should display Recipients section', async () => {
+    it("should display Recipients section", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText('Recipients')).toBeInTheDocument();
+      expect(screen.getByText("Recipients")).toBeInTheDocument();
     });
 
-    it('should display Compose Email section', async () => {
+    it("should display Compose Email section", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText('Compose Email')).toBeInTheDocument();
+      expect(screen.getByText("Compose Email")).toBeInTheDocument();
     });
 
-    it('should display Send Email button', async () => {
+    it("should display Send Email button", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText('Send Email')).toBeInTheDocument();
+      expect(screen.getByText("Send Email")).toBeInTheDocument();
     });
 
-    it('should display all recipient type options', async () => {
+    it("should display all recipient type options", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText('All Parents')).toBeInTheDocument();
-      expect(screen.getByText('By Class')).toBeInTheDocument();
-      expect(screen.getByText('By Program')).toBeInTheDocument();
-      expect(screen.getByText('By Area')).toBeInTheDocument();
+      expect(screen.getByText("All Parents")).toBeInTheDocument();
+      expect(screen.getByText("By Class")).toBeInTheDocument();
+      expect(screen.getByText("By Program")).toBeInTheDocument();
+      expect(screen.getByText("By Area")).toBeInTheDocument();
     });
 
-    it('should display recipient type descriptions', async () => {
+    it("should display recipient type descriptions", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText(/Send to all registered parents/i)).toBeInTheDocument();
-      expect(screen.getByText(/Send to parents of a specific class/i)).toBeInTheDocument();
-      expect(screen.getByText(/Send to parents in a program/i)).toBeInTheDocument();
-      expect(screen.getByText(/Send to parents in an area/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Send to all registered parents/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Send to parents of a specific class/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Send to parents in a program/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Send to parents in an area/i),
+      ).toBeInTheDocument();
     });
   });
 
   // ===========================================
   // RECIPIENT SELECTION TESTS
   // ===========================================
-  describe('Recipient Selection', () => {
-    it('should default to All Parents recipient type', async () => {
+  describe("Recipient Selection", () => {
+    it("should default to All Parents recipient type", async () => {
       render(<MassEmail />);
 
       // "all parents" appears in the <strong> inside "Sending to: <strong>all parents</strong>"
-      const strongElements = screen.getAllByText('all parents');
+      const strongElements = screen.getAllByText("all parents");
       expect(strongElements.length).toBeGreaterThan(0);
     });
 
-    it('should show class dropdown when By Class is selected', async () => {
+    it("should show class dropdown when By Class is selected", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       await waitFor(() => {
         expect(screen.getByText(/Select Class/i)).toBeInTheDocument();
       });
     });
 
-    it('should populate class dropdown options', async () => {
+    it("should populate class dropdown options", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       await waitFor(() => {
         // The select has an <option> with "Choose a class" text
-        const selectEl = screen.getByRole('combobox');
+        const selectEl = screen.getByRole("combobox");
         expect(selectEl).toBeInTheDocument();
-        expect(screen.getByText(/Choose a class|Loading classes/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Choose a class|Loading classes/i),
+        ).toBeInTheDocument();
       });
     });
 
-    it('should show program dropdown when By Program is selected', async () => {
+    it("should show program dropdown when By Program is selected", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Program'));
+      await user.click(screen.getByText("By Program"));
 
       await waitFor(() => {
         expect(screen.getByText(/Select Program/i)).toBeInTheDocument();
       });
     });
 
-    it('should show area dropdown when By Area is selected', async () => {
+    it("should show area dropdown when By Area is selected", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Area'));
+      await user.click(screen.getByText("By Area"));
 
       await waitFor(() => {
         expect(screen.getByText(/Select Area/i)).toBeInTheDocument();
       });
     });
 
-    it('should update recipient label when class is selected', async () => {
+    it("should update recipient label when class is selected", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       // Wait for the combobox to appear and options to load
-      const classDropdown = await screen.findByRole('combobox');
+      const classDropdown = await screen.findByRole("combobox");
 
       await waitFor(() => {
-        const options = classDropdown.querySelectorAll('option');
+        const options = classDropdown.querySelectorAll("option");
         expect(options.length).toBeGreaterThan(1);
       });
 
-      fireEvent.change(classDropdown, { target: { value: 'class-1' } });
+      fireEvent.change(classDropdown, { target: { value: "class-1" } });
 
       // The recipient label should now show the class name
       await waitFor(() => {
-        const matches = screen.getAllByText((content) => content.includes('Soccer Stars U6'));
+        const matches = screen.getAllByText((content) =>
+          content.includes("Soccer Stars U6"),
+        );
         expect(matches.length).toBeGreaterThanOrEqual(1);
       });
     });
 
-    it('should reset selection when switching recipient types', async () => {
+    it("should reset selection when switching recipient types", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       // Select By Class and choose a class
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       await waitFor(() => {
         expect(screen.getByText(/Choose a class/i)).toBeInTheDocument();
       });
 
-      const classDropdown = screen.getByRole('combobox');
-      fireEvent.change(classDropdown, { target: { value: 'class-1' } });
+      const classDropdown = screen.getByRole("combobox");
+      fireEvent.change(classDropdown, { target: { value: "class-1" } });
 
       // Switch to All Parents
-      await user.click(screen.getByText('All Parents'));
+      await user.click(screen.getByText("All Parents"));
 
       await waitFor(() => {
         // "all parents" in lowercase is the recipient label; "All Parents" is the button
@@ -325,11 +364,11 @@ describe('Mass Email Integration Tests', () => {
       });
 
       // Switch back to By Class
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       await waitFor(() => {
-        const select = screen.getByRole('combobox') as HTMLSelectElement;
-        expect(select.value).toBe('');
+        const select = screen.getByRole("combobox") as HTMLSelectElement;
+        expect(select.value).toBe("");
       });
     });
   });
@@ -337,67 +376,73 @@ describe('Mass Email Integration Tests', () => {
   // ===========================================
   // EMAIL COMPOSITION TESTS
   // ===========================================
-  describe('Email Composition', () => {
-    it('should display subject input', async () => {
+  describe("Email Composition", () => {
+    it("should display subject input", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByPlaceholderText(/Email subject line/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/Email subject line/i),
+      ).toBeInTheDocument();
     });
 
-    it('should display message editor', async () => {
+    it("should display message editor", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByTestId('quill-editor')).toBeInTheDocument();
+      expect(screen.getByTestId("quill-editor")).toBeInTheDocument();
     });
 
-    it('should display Preview button', async () => {
+    it("should display Preview button", async () => {
       render(<MassEmail />);
 
-      expect(screen.getByText('Preview')).toBeInTheDocument();
+      expect(screen.getByText("Preview")).toBeInTheDocument();
     });
 
-    it('should disable Preview button when no content', async () => {
+    it("should disable Preview button when no content", async () => {
       render(<MassEmail />);
 
-      const previewButton = screen.getByText('Preview');
+      const previewButton = screen.getByText("Preview");
       expect(previewButton).toBeDisabled();
     });
 
-    it('should enable Preview button when subject and message are provided', async () => {
+    it("should enable Preview button when subject and message are provided", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test Subject');
+      await user.type(subjectInput, "Test Subject");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Test message content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, {
+        target: { value: "Test message content" },
+      });
 
       await waitFor(() => {
-        const previewButton = screen.getByText('Preview');
+        const previewButton = screen.getByText("Preview");
         expect(previewButton).not.toBeDisabled();
       });
     });
 
-    it('should disable Send Email button when no content', async () => {
+    it("should disable Send Email button when no content", async () => {
       render(<MassEmail />);
 
-      const sendButton = screen.getByText('Send Email');
+      const sendButton = screen.getByText("Send Email");
       expect(sendButton).toBeDisabled();
     });
 
-    it('should enable Send Email button with valid content', async () => {
+    it("should enable Send Email button with valid content", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test Subject');
+      await user.type(subjectInput, "Test Subject");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Test message content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, {
+        target: { value: "Test message content" },
+      });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
     });
@@ -406,101 +451,107 @@ describe('Mass Email Integration Tests', () => {
   // ===========================================
   // VALIDATION TESTS
   // ===========================================
-  describe('Validation', () => {
-    it('should show error when subject is empty', async () => {
+  describe("Validation", () => {
+    it("should show error when subject is empty", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Test message' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Test message" } });
 
       // Force send button to be clickable by checking if it becomes enabled
       // Note: The button should still be disabled without subject
-      const sendButton = screen.getByText('Send Email');
+      const sendButton = screen.getByText("Send Email");
       expect(sendButton).toBeDisabled();
     });
 
-    it('should show error when message is empty', async () => {
+    it("should show error when message is empty", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test Subject');
+      await user.type(subjectInput, "Test Subject");
 
       // Send button should be disabled without message
-      const sendButton = screen.getByText('Send Email');
+      const sendButton = screen.getByText("Send Email");
       expect(sendButton).toBeDisabled();
     });
 
-    it('should show error when By Class is selected but no class chosen', async () => {
+    it("should show error when By Class is selected but no class chosen", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test Subject');
+      await user.type(subjectInput, "Test Subject");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Test message content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, {
+        target: { value: "Test message content" },
+      });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Please select a class');
+        expect(toast.error).toHaveBeenCalledWith("Please select a class");
       });
     });
 
-    it('should show error when By Program is selected but no program chosen', async () => {
+    it("should show error when By Program is selected but no program chosen", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Program'));
+      await user.click(screen.getByText("By Program"));
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test Subject');
+      await user.type(subjectInput, "Test Subject");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Test message content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, {
+        target: { value: "Test message content" },
+      });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Please select a program');
+        expect(toast.error).toHaveBeenCalledWith("Please select a program");
       });
     });
 
-    it('should show error when By Area is selected but no area chosen', async () => {
+    it("should show error when By Area is selected but no area chosen", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Area'));
+      await user.click(screen.getByText("By Area"));
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test Subject');
+      await user.type(subjectInput, "Test Subject");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Test message content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, {
+        target: { value: "Test message content" },
+      });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Please select an area');
+        expect(toast.error).toHaveBeenCalledWith("Please select an area");
       });
     });
   });
@@ -508,23 +559,23 @@ describe('Mass Email Integration Tests', () => {
   // ===========================================
   // SEND EMAIL TESTS
   // ===========================================
-  describe('Send Email', () => {
-    it('should show confirmation dialog before sending', async () => {
+  describe("Send Email", () => {
+    it("should show confirmation dialog before sending", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Important Update');
+      await user.type(subjectInput, "Important Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Hello everyone!' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Hello everyone!" } });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
@@ -532,7 +583,7 @@ describe('Mass Email Integration Tests', () => {
       });
     });
 
-    it('should send email successfully', async () => {
+    it("should send email successfully", async () => {
       const user = userEvent;
 
       mockSendBulkEmail.mockResolvedValueOnce({
@@ -544,33 +595,37 @@ describe('Mass Email Integration Tests', () => {
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Important Update');
+      await user.type(subjectInput, "Important Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Hello everyone!' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Hello everyone!" } });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      fireEvent.click(screen.getByText('Send Email'));
+      fireEvent.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
       // Confirm send
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
         expect(screen.getByText(/Email Sent/i)).toBeInTheDocument();
-        expect(screen.getByText(/25 of 25 emails sent successfully/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/25 of 25 emails sent successfully/i),
+        ).toBeInTheDocument();
       });
     });
 
-    it('should show partial success result', async () => {
+    it("should show partial success result", async () => {
       const user = userEvent;
 
       mockSendBulkEmail.mockResolvedValueOnce({
@@ -582,23 +637,25 @@ describe('Mass Email Integration Tests', () => {
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Update');
+      await user.type(subjectInput, "Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
@@ -607,103 +664,119 @@ describe('Mass Email Integration Tests', () => {
       });
     });
 
-    it('should send with class_id when By Class is selected', async () => {
+    it("should send with class_id when By Class is selected", async () => {
       const user = userEvent;
 
-      mockSendBulkEmail.mockResolvedValueOnce({ successful: 10, failed: 0, total_recipients: 10 });
+      mockSendBulkEmail.mockResolvedValueOnce({
+        successful: 10,
+        failed: 0,
+        total_recipients: 10,
+      });
 
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       // Wait for class options to be populated in the dropdown
       await waitFor(() => {
-        expect(screen.getByText('Soccer Stars U6')).toBeInTheDocument();
+        expect(screen.getByText("Soccer Stars U6")).toBeInTheDocument();
       });
 
-      const select = screen.getByRole('combobox');
-      fireEvent.change(select, { target: { value: 'class-1' } });
+      const select = screen.getByRole("combobox");
+      fireEvent.change(select, { target: { value: "class-1" } });
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Class Update');
+      await user.type(subjectInput, "Class Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Class message' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Class message" } });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
         expect(mockSendBulkEmail).toHaveBeenCalled();
         const payload = mockSendBulkEmail.mock.calls[0][0];
-        expect(payload.recipient_type).toBe('class');
-        expect(payload.class_id).toBe('class-1');
+        expect(payload.recipient_type).toBe("class");
+        expect(payload.class_id).toBe("class-1");
       });
     });
 
-    it('should handle send error', async () => {
+    it("should handle send error", async () => {
       const user = userEvent;
 
-      mockSendBulkEmail.mockRejectedValueOnce(new Error('Email service unavailable'));
+      mockSendBulkEmail.mockRejectedValueOnce(
+        new Error("Email service unavailable"),
+      );
 
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Update');
+      await user.type(subjectInput, "Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
       await waitFor(() => {
-        const sendButton = screen.getByText('Send Email');
+        const sendButton = screen.getByText("Send Email");
         expect(sendButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('Failed to send emails');
+        expect(toast.error).toHaveBeenCalledWith("Failed to send emails");
       });
     });
 
-    it('should show Send Another Email link after successful send', async () => {
+    it("should show Send Another Email link after successful send", async () => {
       const user = userEvent;
 
-      mockSendBulkEmail.mockResolvedValueOnce({ successful: 10, failed: 0, total_recipients: 10 });
+      mockSendBulkEmail.mockResolvedValueOnce({
+        successful: 10,
+        failed: 0,
+        total_recipients: 10,
+      });
 
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Update');
+      await user.type(subjectInput, "Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
@@ -711,26 +784,32 @@ describe('Mass Email Integration Tests', () => {
       });
     });
 
-    it('should reset form when clicking Send Another Email', async () => {
+    it("should reset form when clicking Send Another Email", async () => {
       const user = userEvent;
 
-      mockSendBulkEmail.mockResolvedValueOnce({ successful: 10, failed: 0, total_recipients: 10 });
+      mockSendBulkEmail.mockResolvedValueOnce({
+        successful: 10,
+        failed: 0,
+        total_recipients: 10,
+      });
 
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Update');
+      await user.type(subjectInput, "Update");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
@@ -741,8 +820,10 @@ describe('Mass Email Integration Tests', () => {
 
       await waitFor(() => {
         // Form should be visible again
-        expect(screen.getByText('Compose Email')).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/Email subject line/i)).toBeInTheDocument();
+        expect(screen.getByText("Compose Email")).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/Email subject line/i),
+        ).toBeInTheDocument();
       });
     });
   });
@@ -750,104 +831,106 @@ describe('Mass Email Integration Tests', () => {
   // ===========================================
   // PREVIEW TESTS
   // ===========================================
-  describe('Email Preview', () => {
-    it('should open preview modal with subject and message', async () => {
+  describe("Email Preview", () => {
+    it("should open preview modal with subject and message", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Preview Subject');
+      await user.type(subjectInput, "Preview Subject");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: '<p>Preview content</p>' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, {
+        target: { value: "<p>Preview content</p>" },
+      });
 
       await waitFor(() => {
-        const previewButton = screen.getByText('Preview');
+        const previewButton = screen.getByText("Preview");
         expect(previewButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Preview'));
+      await user.click(screen.getByText("Preview"));
 
       await waitFor(() => {
-        expect(screen.getByText('Email Preview')).toBeInTheDocument();
+        expect(screen.getByText("Email Preview")).toBeInTheDocument();
       });
 
-      expect(screen.getByText('Preview Subject')).toBeInTheDocument();
+      expect(screen.getByText("Preview Subject")).toBeInTheDocument();
     });
 
-    it('should display preview header and footer', async () => {
+    it("should display preview header and footer", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test');
+      await user.type(subjectInput, "Test");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
       await waitFor(() => {
-        const previewButton = screen.getByText('Preview');
+        const previewButton = screen.getByText("Preview");
         expect(previewButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Preview'));
+      await user.click(screen.getByText("Preview"));
 
       await waitFor(() => {
-        expect(screen.getByText('Email Preview')).toBeInTheDocument();
+        expect(screen.getByText("Email Preview")).toBeInTheDocument();
       });
 
       // "Carolina Soccer Factory" appears multiple times in the preview (header + footer)
-      const matches = screen.getAllByText('Carolina Soccer Factory');
+      const matches = screen.getAllByText("Carolina Soccer Factory");
       expect(matches.length).toBeGreaterThan(0);
     });
 
-    it('should close preview modal', async () => {
+    it("should close preview modal", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test');
+      await user.type(subjectInput, "Test");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
-      await user.click(screen.getByText('Preview'));
+      await user.click(screen.getByText("Preview"));
 
       await waitFor(() => {
-        expect(screen.getByText('Email Preview')).toBeInTheDocument();
+        expect(screen.getByText("Email Preview")).toBeInTheDocument();
       });
 
-      const closeButtons = screen.getAllByText('Close');
+      const closeButtons = screen.getAllByText("Close");
       await user.click(closeButtons[closeButtons.length - 1]);
 
       await waitFor(() => {
-        expect(screen.queryByText('Email Preview')).not.toBeInTheDocument();
+        expect(screen.queryByText("Email Preview")).not.toBeInTheDocument();
       });
     });
 
-    it('should display recipient info in preview', async () => {
+    it("should display recipient info in preview", async () => {
       const user = userEvent;
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test');
+      await user.type(subjectInput, "Test");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
       await waitFor(() => {
-        const previewButton = screen.getByText('Preview');
+        const previewButton = screen.getByText("Preview");
         expect(previewButton).not.toBeDisabled();
       });
 
-      await user.click(screen.getByText('Preview'));
+      await user.click(screen.getByText("Preview"));
 
       await waitFor(() => {
-        expect(screen.getByText('Email Preview')).toBeInTheDocument();
+        expect(screen.getByText("Email Preview")).toBeInTheDocument();
       });
 
       // "all parents" appears inside a <strong> element within a container that also has "Sending to:"
-      const recipientInfo = screen.getAllByText('all parents');
+      const recipientInfo = screen.getAllByText("all parents");
       expect(recipientInfo.length).toBeGreaterThan(0);
     });
   });
@@ -855,52 +938,114 @@ describe('Mass Email Integration Tests', () => {
   // ===========================================
   // LOADING STATE TESTS
   // ===========================================
-  describe('Loading States', () => {
-    it('should show loading text in dropdowns while options load', async () => {
+  describe("Loading States", () => {
+    it("should show loading text in dropdowns while options load", async () => {
       // Delay the response to see loading state
       server.use(
         http.get(`${API_BASE}/classes`, async () => {
-          await new Promise(r => setTimeout(r, 100));
+          await new Promise((r) => setTimeout(r, 100));
           return HttpResponse.json({ items: mockClasses });
-        })
+        }),
       );
 
       const user = userEvent;
       render(<MassEmail />);
 
-      await user.click(screen.getByText('By Class'));
+      await user.click(screen.getByText("By Class"));
 
       // May show loading text
-      expect(screen.getByText(/Loading classes|Choose a class/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Loading classes|Choose a class/i),
+      ).toBeInTheDocument();
     });
 
-    it('should show Sending... state during email send', async () => {
+    it("should show Sending... state during email send", async () => {
       const user = userEvent;
 
       // Use a delayed mock to keep isSending=true long enough
-      mockSendBulkEmail.mockImplementationOnce(() => new Promise(resolve => {
-        setTimeout(() => resolve({ successful: 10, failed: 0, total_recipients: 10 }), 200);
-      }));
+      mockSendBulkEmail.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(
+              () =>
+                resolve({ successful: 10, failed: 0, total_recipients: 10 }),
+              200,
+            );
+          }),
+      );
 
       render(<MassEmail />);
 
       const subjectInput = screen.getByPlaceholderText(/Email subject line/i);
-      await user.type(subjectInput, 'Test');
+      await user.type(subjectInput, "Test");
 
-      const messageEditor = screen.getByTestId('quill-editor');
-      fireEvent.change(messageEditor, { target: { value: 'Content' } });
+      const messageEditor = screen.getByTestId("quill-editor");
+      fireEvent.change(messageEditor, { target: { value: "Content" } });
 
-      await user.click(screen.getByText('Send Email'));
+      await user.click(screen.getByText("Send Email"));
 
       await waitFor(() => {
         expect(screen.getByText(/Send Mass Email/i)).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: /Confirm Send/i });
+      const confirmButton = screen.getByRole("button", {
+        name: /Confirm Send/i,
+      });
       await userEvent.click(confirmButton);
 
       // Should show sending state - use exact text to avoid matching "Sending to:"
-      expect(screen.getByText('Sending...')).toBeInTheDocument();
+      expect(screen.getByText("Sending...")).toBeInTheDocument();
+    });
+  });
+
+  // ===========================================
+  // EDITOR STABILITY REGRESSION TESTS
+  // ===========================================
+  // Guards against the react-quill v2 modules-stability bug. Background:
+  // `quillModules` had `handleQuillImage` as a dep, which in turn depended on
+  // `totalFileSize`/`totalFileCount`. Adding an attachment changed those values
+  // → `quillModules` got a new identity → react-quill re-instantiated the
+  // editor → the editor disappeared and the message body was lost.
+  describe("Editor Stability When Adding Attachments (regression)", () => {
+    it("keeps the editor mounted and quillModules reference stable when attachments change", async () => {
+      render(<MassEmail />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("quill-editor")).toBeInTheDocument();
+      });
+
+      const initialModules =
+        mockCapturedQuillModules[mockCapturedQuillModules.length - 1];
+      expect(initialModules).toBeDefined();
+
+      // Compose a message
+      fireEvent.change(screen.getByTestId("quill-editor"), {
+        target: { value: "Hello parents" },
+      });
+
+      // Attach a small PDF
+      const fileInput = document.querySelector(
+        'input[type="file"]',
+      ) as HTMLInputElement;
+      expect(fileInput).toBeTruthy();
+      const file = new File(["x".repeat(100)], "test.pdf", {
+        type: "application/pdf",
+      });
+      fireEvent.change(fileInput, { target: { files: [file] } });
+
+      await waitFor(() => {
+        expect(screen.getByText("test.pdf")).toBeInTheDocument();
+      });
+
+      // Editor must remain in the DOM with its content intact
+      expect(screen.getByTestId("quill-editor")).toBeInTheDocument();
+      expect(screen.getByTestId("quill-editor")).toHaveValue("Hello parents");
+
+      // The `modules` reference passed to react-quill must NEVER change across
+      // re-renders. If it does, react-quill tears down the editor instance.
+      for (const m of mockCapturedQuillModules) {
+        expect(m).toBe(initialModules);
+      }
     });
   });
 });

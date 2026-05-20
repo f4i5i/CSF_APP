@@ -103,7 +103,19 @@ export default function MassEmail() {
 
   const totalFileCount = attachments.length + inlineImages.length;
 
-  // Quill image handler for inline images
+  // react-quill v2 requires `modules` to be a stable reference for the lifetime
+  // of the editor. If it changes post-mount the editor re-instantiates and the
+  // message body disappears. We mirror the current limits into refs so the
+  // (stable) image handler below can read fresh values without invalidating
+  // its identity.
+  const totalFileSizeRef = useRef(0);
+  const totalFileCountRef = useRef(0);
+  useEffect(() => {
+    totalFileSizeRef.current = totalFileSize;
+    totalFileCountRef.current = totalFileCount;
+  }, [totalFileSize, totalFileCount]);
+
+  // Quill image handler for inline images. Stable across renders.
   const handleQuillImage = useCallback(() => {
     const input = document.createElement("input");
     input.type = "file";
@@ -120,14 +132,13 @@ export default function MassEmail() {
         toast.error(`Image exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`);
         return;
       }
-      const newTotalSize = totalFileSize + file.size;
-      if (newTotalSize > MAX_TOTAL_SIZE) {
+      if (totalFileSizeRef.current + file.size > MAX_TOTAL_SIZE) {
         toast.error(
           `Total file size would exceed ${MAX_TOTAL_SIZE / (1024 * 1024)}MB limit`,
         );
         return;
       }
-      if (totalFileCount + 1 > MAX_FILE_COUNT) {
+      if (totalFileCountRef.current + 1 > MAX_FILE_COUNT) {
         toast.error(`Maximum ${MAX_FILE_COUNT} files allowed`);
         return;
       }
@@ -151,9 +162,12 @@ export default function MassEmail() {
       }
     };
     input.click();
-  }, [totalFileSize, totalFileCount]);
+  }, []);
 
-  // Quill editor toolbar configuration
+  // Quill editor toolbar configuration — MUST stay stable across renders.
+  // `handleQuillImage` is intentionally stable (defined with empty deps above),
+  // so omitting it from the dep array is correct; including it would defeat
+  // the point and re-instantiate the editor on every attachment change.
   const quillModules = useMemo(
     () => ({
       toolbar: {
@@ -171,7 +185,8 @@ export default function MassEmail() {
         },
       },
     }),
-    [handleQuillImage],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   const quillFormats = [
