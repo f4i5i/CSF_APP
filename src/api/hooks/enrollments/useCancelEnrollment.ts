@@ -26,22 +26,21 @@
  *
  * When enrollment is cancelled:
  * - **PENDING -> CANCELLED**: No refund (payment not completed)
- * - **ACTIVE -> CANCELLED**: Refund calculated based on:
- *   - Time before class starts
- *   - Cancellation policy (e.g., full refund 7+ days before, 50% within 7 days, none day-of)
- *   - Payment method and processing fees
+ * - **ACTIVE -> CANCELLED**: Refund decided by the 15-day-before-class-start policy
  * - **COMPLETED -> CANCELLED**: Not allowed (class already finished)
  * - **CANCELLED**: Already cancelled, no action taken
  *
- * ## Refund Policy
+ * ## Refund Policy (one-time enrollments)
  *
- * Refunds are calculated automatically based on timing:
- * - **7+ days before start**: Full refund (100%)
- * - **3-7 days before**: Partial refund (50%)
- * - **Less than 3 days**: No refund (0%)
- * - **After class starts**: No refund
+ * This hook is for one-time (non-subscription) enrollments. The backend
+ * (CancellationService) applies a 15-day-before-class-start policy:
+ * - **15+ days before class start**: Full refund, auto-approved
+ * - **Less than 15 days**: Requires admin review (pending request)
  *
- * Note: Actual refund policy may vary - check backend implementation.
+ * Recurring memberships do NOT use this hook -- they cancel through the
+ * subscription path (subscriptionService), which applies the 15-day-before-
+ * period-end (month-end) cutoff. See subscription_cancellation_policy on the
+ * backend.
  *
  * ## Optimistic Updates
  *
@@ -152,12 +151,19 @@
  * }
  */
 
-import { useMutation, useQueryClient, type UseMutationOptions } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import { enrollmentService } from '../../services/enrollment.service';
-import { queryKeys } from '../../constants/query-keys';
-import type { CancelEnrollmentRequest, EnrollmentStatus } from '../../types/enrollment.types';
-import type { ApiErrorResponse } from '../../types/common.types';
+import {
+  useMutation,
+  useQueryClient,
+  type UseMutationOptions,
+} from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { enrollmentService } from "../../services/enrollment.service";
+import { queryKeys } from "../../constants/query-keys";
+import type {
+  CancelEnrollmentRequest,
+  EnrollmentStatus,
+} from "../../types/enrollment.types";
+import type { ApiErrorResponse } from "../../types/common.types";
 
 /**
  * Configuration options for the useCancelEnrollment hook
@@ -176,7 +182,7 @@ interface UseCancelEnrollmentOptions {
       { enrollmentId: string; data?: CancelEnrollmentRequest },
       { previousEnrollment: unknown }
     >,
-    'mutationFn'
+    "mutationFn"
   >;
 }
 
@@ -309,8 +315,13 @@ export function useCancelEnrollment(options: UseCancelEnrollmentOptions = {}) {
   const { mutationOptions } = options;
 
   return useMutation({
-    mutationFn: ({ enrollmentId, data }: { enrollmentId: string; data?: CancelEnrollmentRequest }) =>
-      enrollmentService.cancel(enrollmentId, data),
+    mutationFn: ({
+      enrollmentId,
+      data,
+    }: {
+      enrollmentId: string;
+      data?: CancelEnrollmentRequest;
+    }) => enrollmentService.cancel(enrollmentId, data),
 
     /**
      * Optimistic update handler - runs immediately before API request
@@ -322,7 +333,9 @@ export function useCancelEnrollment(options: UseCancelEnrollmentOptions = {}) {
      * @param {string} params.enrollmentId - ID of enrollment to cancel
      * @returns {Promise<{previousEnrollment: unknown}>} Snapshot for rollback
      */
-    onMutate: async ({ enrollmentId }): Promise<{ previousEnrollment: unknown }> => {
+    onMutate: async ({
+      enrollmentId,
+    }): Promise<{ previousEnrollment: unknown }> => {
       // Cancel outgoing refetches to prevent race conditions
       await queryClient.cancelQueries({
         queryKey: queryKeys.enrollments.detail(enrollmentId),
@@ -330,13 +343,13 @@ export function useCancelEnrollment(options: UseCancelEnrollmentOptions = {}) {
 
       // Snapshot current enrollment state for potential rollback
       const previousEnrollment = queryClient.getQueryData(
-        queryKeys.enrollments.detail(enrollmentId)
+        queryKeys.enrollments.detail(enrollmentId),
       );
 
       // Optimistically update status to CANCELLED
       queryClient.setQueryData(
         queryKeys.enrollments.detail(enrollmentId),
-        (old: any) => ({ ...old, status: 'CANCELLED' as EnrollmentStatus })
+        (old: any) => ({ ...old, status: "CANCELLED" as EnrollmentStatus }),
       );
 
       return { previousEnrollment };
@@ -357,10 +370,10 @@ export function useCancelEnrollment(options: UseCancelEnrollmentOptions = {}) {
       if (context?.previousEnrollment) {
         queryClient.setQueryData(
           queryKeys.enrollments.detail(enrollmentId),
-          context.previousEnrollment
+          context.previousEnrollment,
         );
       }
-      toast.error(error.message || 'Failed to cancel enrollment');
+      toast.error(error.message || "Failed to cancel enrollment");
     },
 
     /**
@@ -381,7 +394,9 @@ export function useCancelEnrollment(options: UseCancelEnrollmentOptions = {}) {
      */
     onSuccess: (result, { enrollmentId }) => {
       // Invalidate enrollment queries to refetch with real data
-      queryClient.invalidateQueries({ queryKey: queryKeys.enrollments.lists() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.enrollments.lists(),
+      });
       queryClient.invalidateQueries({
         queryKey: queryKeys.enrollments.detail(enrollmentId),
       });
@@ -389,7 +404,7 @@ export function useCancelEnrollment(options: UseCancelEnrollmentOptions = {}) {
       // Display success message with refund information if applicable
       const message = result.refund_amount
         ? `Enrollment cancelled. Refund of $${result.refund_amount} will be processed.`
-        : 'Enrollment cancelled successfully';
+        : "Enrollment cancelled successfully";
 
       toast.success(message);
     },

@@ -1,8 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AlertCircle, User, Calendar, DollarSign, BookOpen, ChevronDown, ChevronUp, X, AlertTriangle, Loader2, Pause, Play } from 'lucide-react';
-import { enrollmentService } from '../../api/services/enrollment.service';
-import { formatCurrency, formatDate } from '../../utils/format';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  AlertCircle,
+  User,
+  Calendar,
+  DollarSign,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  X,
+  AlertTriangle,
+  Loader2,
+  Pause,
+  Play,
+  CheckCircle,
+} from "lucide-react";
+import { enrollmentService } from "../../api/services/enrollment.service";
+import { subscriptionService } from "../../api/services/subscription.service";
+import { formatCurrency, formatDate } from "../../utils/format";
 
 const MembershipList = () => {
   const navigate = useNavigate();
@@ -17,14 +32,17 @@ const MembershipList = () => {
   const [cancellationPreview, setCancellationPreview] = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [cancelReason, setCancelReason] = useState('');
+  const [cancelReason, setCancelReason] = useState("");
   const [cancelError, setCancelError] = useState(null);
+  const [subPreview, setSubPreview] = useState(null); // subscription cancellation preview
+  const [cancelSuccess, setCancelSuccess] = useState(null); // success message after cancel
+  const [cancelBlockedMsg, setCancelBlockedMsg] = useState(null); // blocks confirm (e.g. no active subscription)
 
   // Pause modal state
   const [showPauseModal, setShowPauseModal] = useState(false);
   const [pauseEnrollment, setPauseEnrollment] = useState(null);
   const [pauseLoading, setPauseLoading] = useState(false);
-  const [pauseReason, setPauseReason] = useState('');
+  const [pauseReason, setPauseReason] = useState("");
   const [pauseError, setPauseError] = useState(null);
 
   // Resume state
@@ -40,44 +58,72 @@ const MembershipList = () => {
     try {
       const data = await enrollmentService.getMy();
       // Handle both array and {items: []} response formats
-      const enrollmentsList = Array.isArray(data) ? data : (data?.items || []);
+      const enrollmentsList = Array.isArray(data) ? data : data?.items || [];
       setEnrollments(enrollmentsList);
 
       // Auto-expand all children by default
-      const childIds = [...new Set(enrollmentsList.map(e => e.child_id))];
+      const childIds = [...new Set(enrollmentsList.map((e) => e.child_id))];
       const expanded = {};
-      childIds.forEach(id => { expanded[id] = true; });
+      childIds.forEach((id) => {
+        expanded[id] = true;
+      });
       setExpandedChildren(expanded);
     } catch (err) {
-      console.error('Failed to load enrollments:', err);
-      setError('Failed to load memberships');
+      console.error("Failed to load enrollments:", err);
+      setError("Failed to load memberships");
     } finally {
       setLoading(false);
     }
   };
 
   const toggleChild = (childId) => {
-    setExpandedChildren(prev => ({
+    setExpandedChildren((prev) => ({
       ...prev,
-      [childId]: !prev[childId]
+      [childId]: !prev[childId],
     }));
   };
 
   const handleCancelClick = async (enrollment) => {
     setSelectedEnrollment(enrollment);
     setShowCancelModal(true);
-    setCancelReason('');
+    setCancelReason("");
     setCancelError(null);
+    setCancelSuccess(null);
+    setCancelBlockedMsg(null);
     setCancellationPreview(null);
+    setSubPreview(null);
 
-    // Load cancellation preview
+    // Guard: subscription-billed membership with no Stripe subscription on record
+    // (e.g. legacy enrollment paid as a one-time charge). Nothing to cancel here.
+    if (
+      isSubscriptionEnrollment(enrollment) &&
+      !enrollment.stripe_subscription_id
+    ) {
+      setCancelBlockedMsg(
+        "We couldn't find an active subscription for this membership. Please contact support so we can help you cancel.",
+      );
+      return;
+    }
+
+    // Load cancellation preview (subscription vs one-time)
     setPreviewLoading(true);
     try {
-      const preview = await enrollmentService.getCancellationPreview(enrollment.id);
-      setCancellationPreview(preview);
+      if (isSubscriptionEnrollment(enrollment)) {
+        const preview = await subscriptionService.getCancellationPreview(
+          enrollment.id,
+        );
+        setSubPreview(preview);
+      } else {
+        const preview = await enrollmentService.getCancellationPreview(
+          enrollment.id,
+        );
+        setCancellationPreview(preview);
+      }
     } catch (err) {
-      console.error('Failed to load cancellation preview:', err);
-      setCancelError('Failed to load refund information. You can still proceed with cancellation.');
+      console.error("Failed to load cancellation preview:", err);
+      setCancelError(
+        "Failed to load cancellation details. You can still proceed with cancellation.",
+      );
     } finally {
       setPreviewLoading(false);
     }
@@ -89,18 +135,27 @@ const MembershipList = () => {
     setCancelLoading(true);
     setCancelError(null);
     try {
-      await enrollmentService.cancel(selectedEnrollment.id, {
-        reason: cancelReason || 'No reason provided',
-        refund_requested: true
-      });
+      let result;
+      if (isSubscriptionEnrollment(selectedEnrollment)) {
+        result = await subscriptionService.cancel(selectedEnrollment.id);
+      } else {
+        result = await enrollmentService.cancel(selectedEnrollment.id, {
+          reason: cancelReason || "No reason provided",
+          refund_requested: true,
+        });
+      }
 
-      // Refresh enrollments list
+      // Refresh enrollments list and show what happened (no more silent close)
       await loadEnrollments();
-      setShowCancelModal(false);
-      setSelectedEnrollment(null);
+      setCancelSuccess(
+        result?.message || "Your membership has been cancelled.",
+      );
     } catch (err) {
-      console.error('Failed to cancel enrollment:', err);
-      setCancelError(err.response?.data?.detail || 'Failed to cancel membership. Please try again.');
+      console.error("Failed to cancel enrollment:", err);
+      setCancelError(
+        err.response?.data?.detail ||
+          "Failed to cancel membership. Please try again.",
+      );
     } finally {
       setCancelLoading(false);
     }
@@ -110,15 +165,27 @@ const MembershipList = () => {
     setShowCancelModal(false);
     setSelectedEnrollment(null);
     setCancellationPreview(null);
-    setCancelReason('');
+    setSubPreview(null);
+    setCancelReason("");
     setCancelError(null);
+    setCancelSuccess(null);
+    setCancelBlockedMsg(null);
   };
+
+  // A recurring membership (vs a one-time class purchase)
+  const isSubscriptionEnrollment = (e) => !!e?.is_subscription;
+
+  // Subscription already scheduled to cancel (user-requested, not the auto
+  // cancel-at-class-end date)
+  const isScheduledToCancel = (e) =>
+    isSubscriptionEnrollment(e) &&
+    (e.cancel_at_period_end === true || !!e.subscription_cancelled_at);
 
   // Pause handlers
   const handlePauseClick = (enrollment) => {
     setPauseEnrollment(enrollment);
     setShowPauseModal(true);
-    setPauseReason('');
+    setPauseReason("");
     setPauseError(null);
   };
 
@@ -129,7 +196,7 @@ const MembershipList = () => {
     setPauseError(null);
     try {
       await enrollmentService.pause(pauseEnrollment.id, {
-        reason: pauseReason || undefined
+        reason: pauseReason || undefined,
       });
 
       // Refresh enrollments list
@@ -137,8 +204,11 @@ const MembershipList = () => {
       setShowPauseModal(false);
       setPauseEnrollment(null);
     } catch (err) {
-      console.error('Failed to pause enrollment:', err);
-      setPauseError(err.response?.data?.detail || 'Failed to pause membership. Please try again.');
+      console.error("Failed to pause enrollment:", err);
+      setPauseError(
+        err.response?.data?.detail ||
+          "Failed to pause membership. Please try again.",
+      );
     } finally {
       setPauseLoading(false);
     }
@@ -147,7 +217,7 @@ const MembershipList = () => {
   const closePauseModal = () => {
     setShowPauseModal(false);
     setPauseEnrollment(null);
-    setPauseReason('');
+    setPauseReason("");
     setPauseError(null);
   };
 
@@ -159,9 +229,12 @@ const MembershipList = () => {
       // Refresh enrollments list
       await loadEnrollments();
     } catch (err) {
-      console.error('Failed to resume enrollment:', err);
+      console.error("Failed to resume enrollment:", err);
       // Show error - could use a toast here
-      alert(err.response?.data?.detail || 'Failed to resume membership. Please try again.');
+      alert(
+        err.response?.data?.detail ||
+          "Failed to resume membership. Please try again.",
+      );
     } finally {
       setResumeLoading(null);
     }
@@ -170,27 +243,29 @@ const MembershipList = () => {
   const getStatusBadge = (status) => {
     const normalizedStatus = status?.toUpperCase();
     const styles = {
-      ACTIVE: 'bg-green-100 text-green-800 border-green-200',
-      PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      COMPLETED: 'bg-blue-100 text-blue-800 border-blue-200',
-      CANCELLED: 'bg-gray-100 text-gray-500 border-gray-200',
-      WAITLIST: 'bg-purple-100 text-purple-800 border-purple-200',
-      WAITLISTED: 'bg-purple-100 text-purple-800 border-purple-200',
-      PAUSED: 'bg-amber-100 text-amber-800 border-amber-200',
+      ACTIVE: "bg-green-100 text-green-800 border-green-200",
+      PENDING: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      COMPLETED: "bg-blue-100 text-blue-800 border-blue-200",
+      CANCELLED: "bg-gray-100 text-gray-500 border-gray-200",
+      WAITLIST: "bg-purple-100 text-purple-800 border-purple-200",
+      WAITLISTED: "bg-purple-100 text-purple-800 border-purple-200",
+      PAUSED: "bg-amber-100 text-amber-800 border-amber-200",
     };
 
     const labels = {
-      ACTIVE: 'Active',
-      PENDING: 'Pending',
-      COMPLETED: 'Completed',
-      CANCELLED: 'Cancelled',
-      WAITLIST: 'Waitlist',
-      WAITLISTED: 'Waitlist',
-      PAUSED: 'Paused',
+      ACTIVE: "Active",
+      PENDING: "Pending",
+      COMPLETED: "Completed",
+      CANCELLED: "Cancelled",
+      WAITLIST: "Waitlist",
+      WAITLISTED: "Waitlist",
+      PAUSED: "Paused",
     };
 
     return (
-      <span className={`px-2 py-1 text-xs rounded-full border font-medium ${styles[normalizedStatus] || 'bg-gray-100 text-gray-800'}`}>
+      <span
+        className={`px-2 py-1 text-xs rounded-full border font-medium ${styles[normalizedStatus] || "bg-gray-100 text-gray-800"}`}
+      >
         {labels[normalizedStatus] || status}
       </span>
     );
@@ -198,15 +273,17 @@ const MembershipList = () => {
 
   const canCancel = (status) => {
     const normalizedStatus = status?.toUpperCase();
-    return ['ACTIVE', 'PENDING', 'WAITLIST', 'PAUSED', 'WAITLISTED'].includes(normalizedStatus);
+    return ["ACTIVE", "PENDING", "WAITLIST", "PAUSED", "WAITLISTED"].includes(
+      normalizedStatus,
+    );
   };
 
   const canPause = (status) => {
-    return status?.toUpperCase() === 'ACTIVE';
+    return status?.toUpperCase() === "ACTIVE";
   };
 
   const canResume = (status) => {
-    return status?.toUpperCase() === 'PAUSED';
+    return status?.toUpperCase() === "PAUSED";
   };
 
   // Group enrollments by child
@@ -214,13 +291,15 @@ const MembershipList = () => {
     const childId = enrollment.child_id;
     if (!acc[childId]) {
       // Use child_name from API response (flat string) or fallback
-      const childName = enrollment.child_name || enrollment.child?.first_name
-        ? (enrollment.child_name || `${enrollment.child?.first_name || ''} ${enrollment.child?.last_name || ''}`.trim())
-        : 'Unknown Child';
+      const childName =
+        enrollment.child_name || enrollment.child?.first_name
+          ? enrollment.child_name ||
+            `${enrollment.child?.first_name || ""} ${enrollment.child?.last_name || ""}`.trim()
+          : "Unknown Child";
 
       acc[childId] = {
         childName: childName,
-        enrollments: []
+        enrollments: [],
       };
     }
     acc[childId].enrollments.push(enrollment);
@@ -265,7 +344,9 @@ const MembershipList = () => {
         <div className="text-center py-8 text-gray-500">
           <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p>No active memberships found</p>
-          <p className="text-sm mt-1">Enroll your children in classes to see memberships here</p>
+          <p className="text-sm mt-1">
+            Enroll your children in classes to see memberships here
+          </p>
         </div>
       </div>
     );
@@ -277,137 +358,169 @@ const MembershipList = () => {
         <h2 className="font-semibold text-lg mb-4">Active Memberships</h2>
 
         <div className="space-y-4">
-          {Object.entries(groupedByChild).map(([childId, { childName, enrollments: childEnrollments }]) => (
-            <div key={childId} className="border rounded-lg overflow-hidden">
-              {/* Child Header */}
-              <div className="flex items-center justify-between p-4 bg-gray-50">
-                <button
-                  onClick={() => toggleChild(childId)}
-                  className="flex items-center gap-3 flex-1 hover:bg-gray-100 -m-2 p-2 rounded-lg transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center">
-                    <User className="w-5 h-5 text-btn-gold" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold text-heading-dark">
-                      {childName}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {childEnrollments.length} enrollment{childEnrollments.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                  {expandedChildren[childId] ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
-                  )}
-                </button>
-              </div>
+          {Object.entries(groupedByChild).map(
+            ([childId, { childName, enrollments: childEnrollments }]) => (
+              <div key={childId} className="border rounded-lg overflow-hidden">
+                {/* Child Header */}
+                <div className="flex items-center justify-between p-4 bg-gray-50">
+                  <button
+                    onClick={() => toggleChild(childId)}
+                    className="flex items-center gap-3 flex-1 hover:bg-gray-100 -m-2 p-2 rounded-lg transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-btn-gold/20 flex items-center justify-center">
+                      <User className="w-5 h-5 text-btn-gold" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-heading-dark">
+                        {childName}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {childEnrollments.length} enrollment
+                        {childEnrollments.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                    {expandedChildren[childId] ? (
+                      <ChevronUp className="w-5 h-5 text-gray-400 ml-auto" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400 ml-auto" />
+                    )}
+                  </button>
+                </div>
 
-              {/* Enrollments List */}
-              {expandedChildren[childId] && (
-                <div className="divide-y divide-gray-100">
-                  {childEnrollments.map((enrollment) => (
-                    <div key={enrollment.id} className="p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <BookOpen className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium text-heading-dark">
-                              {enrollment.class_name || enrollment.class?.name || 'Class'}
-                            </span>
-                            {getStatusBadge(enrollment.status)}
-                          </div>
-
-                          {/* Schedule Info - use weekdays from API */}
-                          {enrollment.weekdays && enrollment.weekdays.length > 0 && (
-                            <div className="text-sm text-gray-500 ml-6 mb-1">
-                              {enrollment.weekdays.join(', ')}
+                {/* Enrollments List */}
+                {expandedChildren[childId] && (
+                  <div className="divide-y divide-gray-100">
+                    {childEnrollments.map((enrollment) => (
+                      <div
+                        key={enrollment.id}
+                        className="p-4 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <BookOpen className="w-4 h-4 text-gray-400" />
+                              <span className="font-medium text-heading-dark">
+                                {enrollment.class_name ||
+                                  enrollment.class?.name ||
+                                  "Class"}
+                              </span>
+                              {getStatusBadge(enrollment.status)}
                             </div>
-                          )}
 
-                          {/* Date Range */}
-                          <div className="flex items-center gap-2 text-sm text-gray-500 ml-6">
-                            <Calendar className="w-3.5 h-3.5" />
-                            <span>
-                              Enrolled: {formatDate(enrollment.enrolled_at || enrollment.created_at)}
-                            </span>
-                          </div>
-                        </div>
+                            {/* Schedule Info - use weekdays from API */}
+                            {enrollment.weekdays &&
+                              enrollment.weekdays.length > 0 && (
+                                <div className="text-sm text-gray-500 ml-6 mb-1">
+                                  {enrollment.weekdays.join(", ")}
+                                </div>
+                              )}
 
-                        {/* Price and Actions */}
-                        <div className="flex items-center gap-4 ml-6 sm:ml-0">
-                          <div className="text-right">
-                            <div className="flex items-center gap-1 justify-end">
-                              <DollarSign className="w-4 h-4 text-gray-400" />
-                              <span className="font-semibold text-heading-dark">
-                                {formatCurrency(enrollment.final_price)}
+                            {/* Date Range */}
+                            <div className="flex items-center gap-2 text-sm text-gray-500 ml-6">
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>
+                                Enrolled:{" "}
+                                {formatDate(
+                                  enrollment.enrolled_at ||
+                                    enrollment.created_at,
+                                )}
                               </span>
                             </div>
-                            {enrollment.discount_amount > 0 && (
-                              <div className="text-xs text-green-600">
-                                -{formatCurrency(enrollment.discount_amount)} discount
-                              </div>
-                            )}
-                            {!enrollment.payment_completed && enrollment.status === 'PENDING' && (
-                              <div className="text-xs text-yellow-600 font-medium">
-                                Payment pending
-                              </div>
-                            )}
+
+                            {/* Scheduled-to-cancel notice (subscriptions) */}
+                            {isScheduledToCancel(enrollment) &&
+                              enrollment.subscription_cancel_at && (
+                                <div className="flex items-center gap-2 text-sm text-amber-600 ml-6 mt-1">
+                                  <AlertCircle className="w-3.5 h-3.5" />
+                                  <span>
+                                    Cancelling — active until{" "}
+                                    {formatDate(
+                                      enrollment.subscription_cancel_at,
+                                    )}
+                                  </span>
+                                </div>
+                              )}
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-2">
-                            {/* Pause Button - only for ACTIVE */}
-                            {canPause(enrollment.status) && (
-                              <button
-                                onClick={() => handlePauseClick(enrollment)}
-                                className="px-3 py-1.5 text-sm text-amber-600 hover:text-amber-700 hover:bg-amber-50 border border-amber-200 rounded-lg transition-colors flex items-center gap-1"
-                              >
-                                <Pause className="w-3.5 h-3.5" />
-                                Pause
-                              </button>
-                            )}
-
-                            {/* Resume Button - only for PAUSED */}
-                            {canResume(enrollment.status) && (
-                              <button
-                                onClick={() => handleResume(enrollment)}
-                                disabled={resumeLoading === enrollment.id}
-                                className="px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
-                              >
-                                {resumeLoading === enrollment.id ? (
-                                  <>
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    Resuming...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="w-3.5 h-3.5" />
-                                    Resume
-                                  </>
+                          {/* Price and Actions */}
+                          <div className="flex items-center gap-4 ml-6 sm:ml-0">
+                            <div className="text-right">
+                              <div className="flex items-center gap-1 justify-end">
+                                <DollarSign className="w-4 h-4 text-gray-400" />
+                                <span className="font-semibold text-heading-dark">
+                                  {formatCurrency(enrollment.final_price)}
+                                </span>
+                              </div>
+                              {enrollment.discount_amount > 0 && (
+                                <div className="text-xs text-green-600">
+                                  -{formatCurrency(enrollment.discount_amount)}{" "}
+                                  discount
+                                </div>
+                              )}
+                              {!enrollment.payment_completed &&
+                                enrollment.status === "PENDING" && (
+                                  <div className="text-xs text-yellow-600 font-medium">
+                                    Payment pending
+                                  </div>
                                 )}
-                              </button>
-                            )}
+                            </div>
 
-                            {/* Cancel Button */}
-                            {canCancel(enrollment.status) && (
-                              <button
-                                onClick={() => handleCancelClick(enrollment)}
-                                className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-colors"
-                              >
-                                Cancel
-                              </button>
-                            )}
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2">
+                              {/* Pause Button - only for ACTIVE */}
+                              {canPause(enrollment.status) && (
+                                <button
+                                  onClick={() => handlePauseClick(enrollment)}
+                                  className="px-3 py-1.5 text-sm text-amber-600 hover:text-amber-700 hover:bg-amber-50 border border-amber-200 rounded-lg transition-colors flex items-center gap-1"
+                                >
+                                  <Pause className="w-3.5 h-3.5" />
+                                  Pause
+                                </button>
+                              )}
+
+                              {/* Resume Button - only for PAUSED */}
+                              {canResume(enrollment.status) && (
+                                <button
+                                  onClick={() => handleResume(enrollment)}
+                                  disabled={resumeLoading === enrollment.id}
+                                  className="px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                                >
+                                  {resumeLoading === enrollment.id ? (
+                                    <>
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                      Resuming...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Play className="w-3.5 h-3.5" />
+                                      Resume
+                                    </>
+                                  )}
+                                </button>
+                              )}
+
+                              {/* Cancel Button */}
+                              {canCancel(enrollment.status) &&
+                                !isScheduledToCancel(enrollment) && (
+                                  <button
+                                    onClick={() =>
+                                      handleCancelClick(enrollment)
+                                    }
+                                    className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+            ),
+          )}
         </div>
 
         {/* Total Summary */}
@@ -415,7 +528,11 @@ const MembershipList = () => {
           <div className="flex justify-between items-center">
             <span className="text-gray-600">Total Active Memberships</span>
             <span className="font-semibold text-heading-dark">
-              {enrollments.filter(e => e.status?.toUpperCase() === 'ACTIVE').length} of {enrollments.length}
+              {
+                enrollments.filter((e) => e.status?.toUpperCase() === "ACTIVE")
+                  .length
+              }{" "}
+              of {enrollments.length}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -423,8 +540,11 @@ const MembershipList = () => {
             <span className="font-semibold text-btn-gold text-lg">
               {formatCurrency(
                 enrollments
-                  .filter(e => e.status?.toUpperCase() === 'ACTIVE')
-                  .reduce((sum, e) => sum + (parseFloat(e.final_price) || 0), 0)
+                  .filter((e) => e.status?.toUpperCase() === "ACTIVE")
+                  .reduce(
+                    (sum, e) => sum + (parseFloat(e.final_price) || 0),
+                    0,
+                  ),
               )}
             </span>
           </div>
@@ -437,7 +557,9 @@ const MembershipList = () => {
           <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-semibold text-lg text-heading-dark">Cancel Membership</h3>
+              <h3 className="font-semibold text-lg text-heading-dark">
+                Cancel Membership
+              </h3>
               <button
                 onClick={closeCancelModal}
                 className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -448,108 +570,205 @@ const MembershipList = () => {
 
             {/* Modal Content */}
             <div className="p-4 space-y-4">
-              {/* Warning */}
-              <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-800">Are you sure you want to cancel?</p>
-                  <p className="text-xs text-yellow-700 mt-1">
-                    This action cannot be undone. The enrollment will be permanently cancelled.
-                  </p>
+              {cancelSuccess ? (
+                /* Success state */
+                <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-green-800">
+                      Cancellation confirmed
+                    </p>
+                    <p className="text-sm text-green-700 mt-1">
+                      {cancelSuccess}
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              {/* Enrollment Details */}
-              <div className="border rounded-lg p-3">
-                <p className="text-sm text-gray-500">Cancelling enrollment for:</p>
-                <p className="font-semibold text-heading-dark mt-1">
-                  {selectedEnrollment.child_name || `${selectedEnrollment.child?.first_name || ''} ${selectedEnrollment.child?.last_name || ''}`.trim() || 'Child'}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {selectedEnrollment.class_name || selectedEnrollment.class?.name || 'Class'}
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Original Price: {formatCurrency(selectedEnrollment.final_price)}
-                </p>
-              </div>
-
-              {/* Refund Preview */}
-              {previewLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="w-6 h-6 animate-spin text-btn-gold" />
-                  <span className="ml-2 text-gray-600">Calculating refund...</span>
+              ) : cancelBlockedMsg ? (
+                /* Cannot self-cancel (e.g. no active subscription on record) */
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-amber-800">{cancelBlockedMsg}</p>
                 </div>
-              ) : cancellationPreview ? (
-                <div className="border rounded-lg p-3 bg-gray-50">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Refund Details</p>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Original Amount:</span>
-                      <span className="text-heading-dark">{formatCurrency(cancellationPreview.refund_amount)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Cancellation Fee:</span>
-                      <span className="text-red-600">-{formatCurrency(cancellationPreview.cancellation_fee)}</span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t mt-2">
-                      <span className="font-medium text-gray-700">Net Refund:</span>
-                      <span className="font-semibold text-green-600">{formatCurrency(cancellationPreview.net_refund)}</span>
+              ) : (
+                <>
+                  {/* Warning */}
+                  <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">
+                        Are you sure you want to cancel?
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        {isSubscriptionEnrollment(selectedEnrollment)
+                          ? "Your membership will stop renewing. See the schedule below."
+                          : "This action cannot be undone. The enrollment will be permanently cancelled."}
+                      </p>
                     </div>
                   </div>
-                  {cancellationPreview.refund_policy && (
-                    <p className="text-xs text-gray-500 mt-2 italic">
-                      {cancellationPreview.refund_policy}
+
+                  {/* Enrollment Details */}
+                  <div className="border rounded-lg p-3">
+                    <p className="text-sm text-gray-500">
+                      Cancelling enrollment for:
                     </p>
+                    <p className="font-semibold text-heading-dark mt-1">
+                      {selectedEnrollment.child_name ||
+                        `${selectedEnrollment.child?.first_name || ""} ${selectedEnrollment.child?.last_name || ""}`.trim() ||
+                        "Child"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedEnrollment.class_name ||
+                        selectedEnrollment.class?.name ||
+                        "Class"}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      {isSubscriptionEnrollment(selectedEnrollment)
+                        ? "Monthly Price: "
+                        : "Original Price: "}
+                      {formatCurrency(selectedEnrollment.final_price)}
+                    </p>
+                  </div>
+
+                  {/* Cancellation Preview */}
+                  {previewLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-6 h-6 animate-spin text-btn-gold" />
+                      <span className="ml-2 text-gray-600">
+                        Loading details...
+                      </span>
+                    </div>
+                  ) : isSubscriptionEnrollment(selectedEnrollment) ? (
+                    subPreview ? (
+                      <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                        <p className="text-sm font-medium text-blue-800 mb-1">
+                          What happens next
+                        </p>
+                        <p className="text-sm text-blue-700">
+                          {subPreview.message}
+                        </p>
+                        <div className="flex justify-between text-sm mt-2 pt-2 border-t border-blue-200">
+                          <span className="text-blue-700">Membership ends</span>
+                          <span className="font-semibold text-blue-900">
+                            {formatDate(subPreview.effective_end_date)}
+                          </span>
+                        </div>
+                        {subPreview.will_charge_again && (
+                          <div className="flex justify-between text-sm mt-1">
+                            <span className="text-blue-700">
+                              One more charge
+                            </span>
+                            <span className="font-medium text-blue-900">
+                              {formatCurrency(subPreview.billing_amount)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : null
+                  ) : cancellationPreview ? (
+                    <div className="border rounded-lg p-3 bg-gray-50">
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        Refund Details
+                      </p>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">
+                            Original Amount:
+                          </span>
+                          <span className="text-heading-dark">
+                            {formatCurrency(cancellationPreview.refund_amount)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">
+                            Cancellation Fee:
+                          </span>
+                          <span className="text-red-600">
+                            -
+                            {formatCurrency(
+                              cancellationPreview.cancellation_fee,
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex justify-between pt-2 border-t mt-2">
+                          <span className="font-medium text-gray-700">
+                            Net Refund:
+                          </span>
+                          <span className="font-semibold text-green-600">
+                            {formatCurrency(cancellationPreview.net_refund)}
+                          </span>
+                        </div>
+                      </div>
+                      {cancellationPreview.refund_policy && (
+                        <p className="text-xs text-gray-500 mt-2 italic">
+                          {cancellationPreview.refund_policy}
+                        </p>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {/* Reason Input (one-time enrollments only) */}
+                  {!isSubscriptionEnrollment(selectedEnrollment) && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Reason for cancellation (optional)
+                      </label>
+                      <textarea
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        placeholder="Please let us know why you're cancelling..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold resize-none"
+                        rows={3}
+                      />
+                    </div>
                   )}
-                </div>
-              ) : null}
 
-              {/* Reason Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reason for cancellation (optional)
-                </label>
-                <textarea
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder="Please let us know why you're cancelling..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold resize-none"
-                  rows={3}
-                />
-              </div>
-
-              {/* Error Message */}
-              {cancelError && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                  <p className="text-sm text-red-700">{cancelError}</p>
-                </div>
+                  {/* Error Message */}
+                  {cancelError && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{cancelError}</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             {/* Modal Footer */}
             <div className="flex gap-3 p-4 border-t bg-gray-50">
-              <button
-                onClick={closeCancelModal}
-                disabled={cancelLoading}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                Keep Membership
-              </button>
-              <button
-                onClick={handleConfirmCancel}
-                disabled={cancelLoading}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {cancelLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Cancelling...
-                  </>
-                ) : (
-                  'Confirm Cancellation'
-                )}
-              </button>
+              {cancelSuccess ? (
+                <button
+                  onClick={closeCancelModal}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Done
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={closeCancelModal}
+                    disabled={cancelLoading}
+                    className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    {cancelBlockedMsg ? "Close" : "Keep Membership"}
+                  </button>
+                  {!cancelBlockedMsg && (
+                    <button
+                      onClick={handleConfirmCancel}
+                      disabled={cancelLoading}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {cancelLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Cancelling...
+                        </>
+                      ) : (
+                        "Confirm Cancellation"
+                      )}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -579,9 +798,12 @@ const MembershipList = () => {
               <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                 <Pause className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-amber-800">Pause this membership?</p>
+                  <p className="text-sm font-medium text-amber-800">
+                    Pause this membership?
+                  </p>
                   <p className="text-xs text-amber-700 mt-1">
-                    Your current billing cycle will complete. No future charges until you resume.
+                    Your current billing cycle will complete. No future charges
+                    until you resume.
                   </p>
                 </div>
               </div>
@@ -590,10 +812,14 @@ const MembershipList = () => {
               <div className="border rounded-lg p-3">
                 <p className="text-sm text-gray-500">Pausing membership for:</p>
                 <p className="font-semibold text-heading-dark mt-1">
-                  {pauseEnrollment.child_name || `${pauseEnrollment.child?.first_name || ''} ${pauseEnrollment.child?.last_name || ''}`.trim() || 'Child'}
+                  {pauseEnrollment.child_name ||
+                    `${pauseEnrollment.child?.first_name || ""} ${pauseEnrollment.child?.last_name || ""}`.trim() ||
+                    "Child"}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {pauseEnrollment.class_name || pauseEnrollment.class?.name || 'Class'}
+                  {pauseEnrollment.class_name ||
+                    pauseEnrollment.class?.name ||
+                    "Class"}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
                   Price: {formatCurrency(pauseEnrollment.final_price)}/month
