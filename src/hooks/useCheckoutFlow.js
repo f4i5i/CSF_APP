@@ -80,6 +80,8 @@ export const useCheckoutFlow = () => {
     // Payment
     paymentMethod: "full", // 'full' | 'subscribe' | 'installments'
     installmentPlan: null,
+    // Opt-in: "Save my card for faster future registrations and waitlist auto-enrollment"
+    savePaymentMethod: false,
 
     // Order
     orderId: null,
@@ -228,6 +230,31 @@ export const useCheckoutFlow = () => {
       paymentMethod: method,
       installmentPlan: method !== "installments" ? null : prev.installmentPlan,
     }));
+  }, []);
+
+  /**
+   * Toggle the "save my card" opt-in.
+   * If a checkout session was already created, reset the order so it is
+   * regenerated with the correct setup_future_usage flag.
+   */
+  const setSavePaymentMethod = useCallback((value) => {
+    setState((prev) => {
+      const next = typeof value === "boolean" ? value : !prev.savePaymentMethod;
+      // Only reset the order if the flag actually changed and a session exists
+      const needsReset = next !== prev.savePaymentMethod && prev.orderId;
+      if (needsReset) {
+        isCreatingOrder.current = false;
+        isCreatingPayment.current = false;
+        orderCreationFailed.current = false;
+        paymentCreationFailed.current = false;
+      }
+      return {
+        ...prev,
+        savePaymentMethod: next,
+        orderId: needsReset ? null : prev.orderId,
+        clientSecret: needsReset ? null : prev.clientSecret,
+      };
+    });
   }, []);
 
   /**
@@ -445,6 +472,7 @@ export const useCheckoutFlow = () => {
         order_id: orderId,
         amount: paymentAmount,
         payment_method: "card",
+        save_payment_method: state.savePaymentMethod,
       });
 
       console.log("[DEBUG] Payment created for orderId:", orderId);
@@ -610,6 +638,7 @@ export const useCheckoutFlow = () => {
       selectedFeesByChild: {}, // Reset custom fee selections
       paymentMethod: "full",
       installmentPlan: null,
+      savePaymentMethod: false,
       orderId: null,
       orderTotal: 0,
       appliedDiscount: null,
@@ -637,18 +666,63 @@ export const useCheckoutFlow = () => {
   );
 
   /**
-   * Join waitlist
+   * Join the waitlist for a full class.
+   * Called by WaitlistFlow as onJoinWaitlist(classId, childId); falls back to
+   * the current checkout selection when args are omitted. Uses the regular
+   * (no upfront payment) tier — the parent is notified when a spot opens.
+   * @param {string} [classId] - Class to join the waitlist for
+   * @param {string} [childId] - Child to enroll from the waitlist
+   * @returns {Promise<Object>} The created waitlisted enrollment
    */
-  const joinWaitlist = useCallback(async () => {
-    // TODO: Implement waitlist functionality
-  }, []);
+  const joinWaitlist = useCallback(
+    async (classId, childId) => {
+      const class_id = classId || state.classData?.id;
+      const child_id = childId || state.selectedChildId;
+
+      if (!class_id || !child_id) {
+        throw new Error("A class and child are required to join the waitlist.");
+      }
+
+      // WaitlistFlow renders its own success/error UI, so surface failures by
+      // rethrowing rather than swallowing them into checkout state.
+      return enrollmentsService.joinWaitlist({
+        class_id,
+        child_id,
+        priority: "regular",
+      });
+    },
+    [state.classData, state.selectedChildId],
+  );
 
   /**
-   * Download receipt
+   * Download the receipt PDF for a completed payment and save it to disk.
+   * @param {string} [paymentId] - Payment to download; defaults to the order's
+   *   payment captured during this checkout.
    */
-  const downloadReceipt = useCallback(() => {
-    // TODO: Implement receipt download
-  }, []);
+  const downloadReceipt = useCallback(
+    async (paymentId) => {
+      const id =
+        paymentId ||
+        state.orderData?.payment_id ||
+        state.orderData?.payments?.[0]?.id;
+
+      if (!id) {
+        console.warn("downloadReceipt: no payment id available");
+        return;
+      }
+
+      const blob = await paymentsService.downloadReceipt(id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `receipt-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    },
+    [state.orderData],
+  );
 
   /**
    * Retry after error
@@ -709,6 +783,7 @@ export const useCheckoutFlow = () => {
     toggleChildSelection, // NEW: Multi-select support
     toggleCustomFee, // Custom fee selection
     selectPaymentMethod,
+    setSavePaymentMethod, // Opt-in toggle for saving the card
     selectInstallmentPlan,
     applyDiscount,
     removeDiscount,

@@ -3,17 +3,29 @@
  * Displays successful order confirmation with enrollment details
  */
 
-import React from 'react';
-import { CheckCircle, Calendar, User, CreditCard, Mail, Download, ArrowRight } from 'lucide-react';
+import React from "react";
+import {
+  CheckCircle,
+  Calendar,
+  User,
+  CreditCard,
+  Mail,
+  Download,
+  ArrowRight,
+} from "lucide-react";
 
-export default function OrderConfirmation({ orderData, enrollmentData, onDownloadReceipt }) {
+export default function OrderConfirmation({
+  orderData,
+  enrollmentData,
+  onDownloadReceipt,
+}) {
   // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -44,7 +56,9 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
           {/* Order Number */}
           {orderData?.order_number && (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F3BC48]/10 rounded-lg">
-              <span className="font-manrope text-sm text-[#666D80]">Order Number:</span>
+              <span className="font-manrope text-sm text-[#666D80]">
+                Order Number:
+              </span>
               <span className="font-manrope font-bold text-base text-[#173151]">
                 {orderData.order_number}
               </span>
@@ -72,7 +86,8 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
                   {enrollmentData.class.schedule}
                 </p>
                 <p className="font-manrope text-sm text-[#666D80]">
-                  {formatDate(enrollmentData.class.start_date)} - {formatDate(enrollmentData.class.end_date)}
+                  {formatDate(enrollmentData.class.start_date)} -{" "}
+                  {formatDate(enrollmentData.class.end_date)}
                 </p>
               </div>
             </div>
@@ -83,9 +98,12 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
             <div className="flex items-start gap-3 p-4 bg-white rounded-lg">
               <User className="w-5 h-5 text-[#F3BC48] flex-shrink-0 mt-1" />
               <div className="flex-1">
-                <p className="font-manrope font-semibold text-sm text-[#173151]">Student</p>
+                <p className="font-manrope font-semibold text-sm text-[#173151]">
+                  Student
+                </p>
                 <p className="font-manrope text-base text-[#666D80]">
-                  {enrollmentData.child.first_name} {enrollmentData.child.last_name}
+                  {enrollmentData.child.first_name}{" "}
+                  {enrollmentData.child.last_name}
                 </p>
               </div>
             </div>
@@ -101,7 +119,9 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
 
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="font-manrope text-[#666D80]">Amount Paid:</span>
+                  <span className="font-manrope text-[#666D80]">
+                    Amount Paid:
+                  </span>
                   <span className="font-manrope font-semibold text-[#173151]">
                     {formatCurrency(orderData?.total || orderData?.amount_paid)}
                   </span>
@@ -109,16 +129,20 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
 
                 {orderData?.payment_method && (
                   <div className="flex justify-between text-sm">
-                    <span className="font-manrope text-[#666D80]">Payment Method:</span>
+                    <span className="font-manrope text-[#666D80]">
+                      Payment Method:
+                    </span>
                     <span className="font-manrope text-[#173151] capitalize">
-                      {orderData.payment_method.replace('_', ' ')}
+                      {orderData.payment_method.replace("_", " ")}
                     </span>
                   </div>
                 )}
 
                 {orderData?.payment_date && (
                   <div className="flex justify-between text-sm">
-                    <span className="font-manrope text-[#666D80]">Payment Date:</span>
+                    <span className="font-manrope text-[#666D80]">
+                      Payment Date:
+                    </span>
                     <span className="font-manrope text-[#173151]">
                       {formatDate(orderData.payment_date)}
                     </span>
@@ -127,19 +151,25 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
               </div>
 
               {/* Installment Plan Info */}
-              {orderData?.payment_plan === 'installments' && orderData?.installment_plan && (
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                  <p className="font-manrope text-sm text-blue-800 mb-1">
-                    <strong>Payment Plan:</strong> {orderData.installment_plan.count} Months
-                  </p>
-                  <p className="font-manrope text-sm text-blue-700">
-                    Next payment: {formatDate(orderData.installment_plan.next_due_date)} - {formatCurrency(orderData.installment_plan.amount_per_month)}
-                  </p>
-                </div>
-              )}
+              {orderData?.payment_plan === "installments" &&
+                orderData?.installment_plan && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                    <p className="font-manrope text-sm text-blue-800 mb-1">
+                      <strong>Payment Plan:</strong>{" "}
+                      {orderData.installment_plan.count} Months
+                    </p>
+                    <p className="font-manrope text-sm text-blue-700">
+                      Next payment:{" "}
+                      {formatDate(orderData.installment_plan.next_due_date)} -{" "}
+                      {formatCurrency(
+                        orderData.installment_plan.amount_per_month,
+                      )}
+                    </p>
+                  </div>
+                )}
 
               {/* Subscription Info */}
-              {orderData?.payment_plan === 'subscribe' && (
+              {orderData?.payment_plan === "subscribe" && (
                 <div className="mt-3 p-3 bg-purple-50 rounded-lg">
                   <p className="font-manrope text-sm text-purple-800">
                     <strong>Subscription Active:</strong> Auto-renews monthly
@@ -177,7 +207,8 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
                 Mark Your Calendar
               </p>
               <p className="font-manrope text-sm text-[#666D80]">
-                First class starts on {formatDate(enrollmentData?.class?.start_date)}
+                First class starts on{" "}
+                {formatDate(enrollmentData?.class?.start_date)}
               </p>
             </div>
           </div>
@@ -200,7 +231,7 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
       <div className="flex flex-col sm:flex-row gap-3">
         {onDownloadReceipt && (
           <button
-            onClick={onDownloadReceipt}
+            onClick={() => onDownloadReceipt()}
             className="flex-1 px-6 py-3 bg-white border-2 border-[#173151] text-[#173151] font-manrope font-semibold rounded-lg hover:bg-[#173151] hover:text-white transition flex items-center justify-center gap-2"
           >
             <Download className="w-5 h-5" />
@@ -209,7 +240,7 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
         )}
 
         <button
-          onClick={() => (window.location.href = '/dashboard')}
+          onClick={() => (window.location.href = "/dashboard")}
           className="flex-1 px-6 py-3 bg-[#173151] text-white font-manrope font-semibold rounded-lg hover:bg-[#173151]/90 transition flex items-center justify-center gap-2"
         >
           Go to Dashboard
@@ -220,11 +251,14 @@ export default function OrderConfirmation({ orderData, enrollmentData, onDownloa
       {/* Additional Info */}
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <p className="text-sm font-manrope text-blue-800 text-center">
-          Questions? Contact us at{' '}
-          <a href="mailto:support@example.com" className="font-semibold underline">
+          Questions? Contact us at{" "}
+          <a
+            href="mailto:support@example.com"
+            className="font-semibold underline"
+          >
             support@example.com
-          </a>{' '}
-          or call{' '}
+          </a>{" "}
+          or call{" "}
           <a href="tel:+1234567890" className="font-semibold underline">
             (123) 456-7890
           </a>

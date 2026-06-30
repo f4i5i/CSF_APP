@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import WaiversAlert from "../components/WaiversAlert";
 import StatCard from "../components/dashboard/StatCard";
 import DashboardWidgets from "@/components/DashboardWidgets";
+import SharedCalendar from "../components/calendar/SharedCalendar";
 import AnnouncementsSection from "@/components/AnnouncementsSection";
 // Hooks
 import { useAuth } from "../context/auth";
@@ -431,6 +432,15 @@ export default function Dashboard() {
                 loadingPhoto={loadingPhotos}
               />
             </div>
+
+            {/* Unified calendar */}
+            <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm mt-8">
+              <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">
+                Calendar
+              </h2>
+              <SharedCalendar />
+            </div>
+
             {/* Left Column - Announcements */}
             {/* <div className="w-full lg:w-[48%] max-sm:hidden">
 

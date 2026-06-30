@@ -3,8 +3,8 @@
  * Handles class enrollment operations and registration
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 const enrollmentsService = {
   /**
@@ -51,7 +51,7 @@ const enrollmentsService = {
   async create(enrollmentData) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.ENROLLMENTS.CREATE,
-      enrollmentData
+      enrollmentData,
     );
     return data;
   },
@@ -65,7 +65,21 @@ const enrollmentsService = {
   async update(id, enrollmentData) {
     const { data } = await apiClient.put(
       API_ENDPOINTS.ENROLLMENTS.BY_ID(id),
-      enrollmentData
+      enrollmentData,
+    );
+    return data;
+  },
+
+  /**
+   * Set or clear an enrollment's roster group number (coach/admin)
+   * @param {string} id - Enrollment ID
+   * @param {number|null} groupNumber - Group number 1-10, or null to unassign
+   * @returns {Promise<Object>} Updated enrollment
+   */
+  async updateGroup(id, groupNumber) {
+    const { data } = await apiClient.patch(
+      API_ENDPOINTS.ENROLLMENTS.GROUP(id),
+      { group_number: groupNumber },
     );
     return data;
   },
@@ -80,7 +94,7 @@ const enrollmentsService = {
   async cancel(id, cancellationData = {}) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.ENROLLMENTS.CANCEL(id),
-      cancellationData
+      cancellationData,
     );
     return data;
   },
@@ -92,7 +106,7 @@ const enrollmentsService = {
    */
   async getAttendance(id) {
     const { data } = await apiClient.get(
-      API_ENDPOINTS.ENROLLMENTS.ATTENDANCE(id)
+      API_ENDPOINTS.ENROLLMENTS.ATTENDANCE(id),
     );
     return data;
   },
@@ -106,7 +120,7 @@ const enrollmentsService = {
   async checkEligibility(childId, classId) {
     const { data } = await apiClient.post(
       API_ENDPOINTS.ENROLLMENTS.CHECK_ELIGIBILITY,
-      { child_id: childId, class_id: classId }
+      { child_id: childId, class_id: classId },
     );
     return data;
   },
@@ -135,7 +149,7 @@ const enrollmentsService = {
    * @returns {Promise<Array>} Active enrollments
    */
   async getActive() {
-    return this.getMy({ status: 'active' });
+    return this.getMy({ status: "active" });
   },
 
   /**
@@ -143,7 +157,7 @@ const enrollmentsService = {
    * @returns {Promise<Array>} Completed enrollments
    */
   async getCompleted() {
-    return this.getMy({ status: 'completed' });
+    return this.getMy({ status: "completed" });
   },
 
   /**
@@ -151,7 +165,7 @@ const enrollmentsService = {
    * @returns {Promise<Array>} Cancelled enrollments
    */
   async getCancelled() {
-    return this.getMy({ status: 'cancelled' });
+    return this.getMy({ status: "cancelled" });
   },
 
   // ============== Admin Methods ==============
@@ -178,7 +192,9 @@ const enrollmentsService = {
    * @returns {Promise<Object>} Deletion confirmation
    */
   async delete(id) {
-    const { data } = await apiClient.delete(API_ENDPOINTS.ENROLLMENTS.BY_ID(id));
+    const { data } = await apiClient.delete(
+      API_ENDPOINTS.ENROLLMENTS.BY_ID(id),
+    );
     return data;
   },
 
@@ -188,7 +204,53 @@ const enrollmentsService = {
    * @returns {Promise<Object>} Updated enrollment
    */
   async activate(id) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ENROLLMENTS.ACTIVATE(id));
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.ACTIVATE(id),
+    );
+    return data;
+  },
+
+  /**
+   * Email the parent a hosted Stripe payment link for a pending enrollment (admin only)
+   * @param {string} id - Enrollment ID
+   * @returns {Promise<Object>} { status, enrollment_id, order_id, payment_url, parent_email }
+   */
+  async sendPaymentLink(id) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.SEND_PAYMENT_LINK(id),
+    );
+    return data;
+  },
+
+  /**
+   * Join the waitlist for a full class.
+   * Regular waitlist gives a 12-hour claim window when a spot opens; priority
+   * waitlist auto-charges the saved card on file (requires payment_method_id).
+   * @param {Object} waitlistData
+   * @param {string} waitlistData.class_id - Class ID
+   * @param {string} waitlistData.child_id - Child ID
+   * @param {('regular'|'priority')} [waitlistData.priority='regular'] - Waitlist tier
+   * @param {string} [waitlistData.payment_method_id] - Required for priority tier
+   * @returns {Promise<Object>} The created waitlisted enrollment
+   */
+  async joinWaitlist(waitlistData) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.WAITLIST_JOIN,
+      { priority: "regular", ...waitlistData },
+    );
+    return data;
+  },
+
+  /**
+   * Claim a regular waitlist spot within the 12-hour notification window.
+   * Converts the waitlisted entry to a PENDING enrollment ready for payment.
+   * @param {string} id - Enrollment ID
+   * @returns {Promise<Object>} The enrollment, now PENDING
+   */
+  async claimWaitlist(id) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.WAITLIST_CLAIM(id),
+    );
     return data;
   },
 
@@ -199,9 +261,12 @@ const enrollmentsService = {
    * @returns {Promise<Object>} Updated enrollment
    */
   async transfer(id, newClassId) {
-    const { data } = await apiClient.post(API_ENDPOINTS.ENROLLMENTS.TRANSFER(id), {
-      new_class_id: newClassId,
-    });
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.TRANSFER(id),
+      {
+        new_class_id: newClassId,
+      },
+    );
     return data;
   },
 
@@ -216,7 +281,10 @@ const enrollmentsService = {
    * @returns {Promise<Object>} Created enrollment with payment info
    */
   async adminEnroll(enrollmentData) {
-    const { data } = await apiClient.post('/admin/enrollments/enroll', enrollmentData);
+    const { data } = await apiClient.post(
+      "/admin/enrollments/enroll",
+      enrollmentData,
+    );
     return data;
   },
 
@@ -226,7 +294,9 @@ const enrollmentsService = {
    * @returns {Promise<Object>} Parent's payment method info
    */
   async getParentPaymentMethod(childId) {
-    const { data } = await apiClient.get(`/admin/children/${childId}/payment-method`);
+    const { data } = await apiClient.get(
+      `/admin/children/${childId}/payment-method`,
+    );
     return data;
   },
 };

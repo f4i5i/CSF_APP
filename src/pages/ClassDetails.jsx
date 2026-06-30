@@ -19,6 +19,9 @@ import {
   getPriceModelLabel,
 } from "../utils/classHelpers";
 
+// Default visible: only hide when the key is explicitly false.
+const canShow = (ds, key) => ds?.[key] !== false;
+
 export default function ClassDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -136,7 +139,9 @@ export default function ClassDetail() {
                   <div>
                     <p className="font-semibold text-gray-500">Location</p>
                     <p className="text-gray-800">
-                      {classDetail.location || "To be announced"}
+                      {[classDetail.school_name, classDetail.school_address]
+                        .filter(Boolean)
+                        .join(" — ") || "To be announced"}
                     </p>
                   </div>
                   <div>
@@ -155,14 +160,15 @@ export default function ClassDetail() {
                       </p>
                     </div>
                   )}
-                  {offeringLabel && (
-                    <div>
-                      <p className="font-semibold text-gray-500">
-                        Program Type
-                      </p>
-                      <p className="text-gray-800">{offeringLabel}</p>
-                    </div>
-                  )}
+                  {canShow(classDetail.display_settings, "show_program_type") &&
+                    offeringLabel && (
+                      <div>
+                        <p className="font-semibold text-gray-500">
+                          Program Type
+                        </p>
+                        <p className="text-gray-800">{offeringLabel}</p>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
@@ -193,22 +199,25 @@ export default function ClassDetail() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-white/70 p-6 space-y-2">
-                <p className="text-sm uppercase tracking-wide text-gray-500">
-                  Price & Membership
-                </p>
-                <p className="text-3xl font-bold text-[#173151]">
-                  {priceLabel}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Price model: {priceModel}
-                </p>
-                {offeringLabel && (
-                  <p className="text-sm text-gray-600">
-                    Billing type: {offeringLabel}
+              {canShow(classDetail.display_settings, "show_pricing") && (
+                <div className="rounded-2xl bg-white/70 p-6 space-y-2">
+                  <p className="text-sm uppercase tracking-wide text-gray-500">
+                    Price & Membership
                   </p>
-                )}
-              </div>
+                  <p className="text-3xl font-bold text-[#173151]">
+                    {priceLabel}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Price model: {priceModel}
+                  </p>
+                  {canShow(classDetail.display_settings, "show_program_type") &&
+                    offeringLabel && (
+                      <p className="text-sm text-gray-600">
+                        Billing type: {offeringLabel}
+                      </p>
+                    )}
+                </div>
+              )}
 
               <div className="rounded-2xl bg-white/70 p-6 space-y-3">
                 <p className="text-sm uppercase tracking-wide text-gray-500">
@@ -242,14 +251,18 @@ export default function ClassDetail() {
             </div>
 
             <div className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm uppercase tracking-wide text-gray-500">
-                  Investment ({priceModel})
-                </p>
-                <p className="text-3xl font-bold text-[#173151]">
-                  {priceLabel}
-                </p>
-              </div>
+              {canShow(classDetail.display_settings, "show_pricing") ? (
+                <div>
+                  <p className="text-sm uppercase tracking-wide text-gray-500">
+                    Investment ({priceModel})
+                  </p>
+                  <p className="text-3xl font-bold text-[#173151]">
+                    {priceLabel}
+                  </p>
+                </div>
+              ) : (
+                <div />
+              )}
               <button
                 onClick={handleRegister}
                 className="w-full rounded-full bg-[#F3BC48] px-8 py-3 font-semibold text-[#173151] shadow sm:w-auto"

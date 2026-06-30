@@ -20,6 +20,7 @@ import {
   Tag,
   User,
   Loader2,
+  Mail,
 } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -168,6 +169,22 @@ export default function Enrollments() {
     } catch (error) {
       console.error("Failed to activate enrollment:", error);
       toast.error(error.message || "Failed to activate enrollment");
+    }
+  };
+
+  const handleSendPaymentLink = async (enrollmentId) => {
+    const loadingToast = toast.loading("Creating payment link...");
+    try {
+      const result = await enrollmentsService.sendPaymentLink(enrollmentId);
+      toast.success(
+        `Payment link emailed to ${result?.parent_email || "the parent"}`,
+        { id: loadingToast },
+      );
+    } catch (error) {
+      console.error("Failed to send payment link:", error);
+      toast.error(error.message || "Failed to send payment link", {
+        id: loadingToast,
+      });
     }
   };
 
@@ -360,6 +377,11 @@ export default function Enrollments() {
             label: "Activate",
             icon: CheckCircle,
             onClick: () => handleActivateEnrollment(row.id),
+          });
+          actions.push({
+            label: "Email payment link",
+            icon: Mail,
+            onClick: () => handleSendPaymentLink(row.id),
           });
         }
 

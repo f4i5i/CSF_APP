@@ -75,6 +75,24 @@ const badgesService = {
   },
 
   /**
+   * Upload a badge icon image (admin only). Stored in the DB and served from
+   * GET /badges/{id}/icon. Returns the updated badge (icon_url = that path).
+   * @param {string} id - Badge ID
+   * @param {File} file - Image file (jpeg/png, <=10MB)
+   * @returns {Promise<Object>} Updated badge
+   */
+  async uploadIcon(id, file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.BADGES.ICON(id),
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return data;
+  },
+
+  /**
    * Get badges earned by a child
    * @param {string} childId - Child ID (uses first enrollment)
    * @returns {Promise<Array>} List of earned badges with earn dates

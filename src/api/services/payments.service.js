@@ -43,7 +43,7 @@ const paymentsService = {
    * @returns {Promise<Object>} Payment intent with client secret
    */
   async createIntent(paymentData) {
-    const { order_id, payment_method_id } = paymentData;
+    const { order_id, payment_method_id, save_payment_method } = paymentData;
 
     // Get the current app's base URL for dynamic redirect URLs
     const appBaseUrl = window.location.origin;
@@ -52,6 +52,8 @@ const paymentsService = {
       API_ENDPOINTS.PAYMENTS.CREATE_INTENT(order_id),
       {
         ...(payment_method_id ? { payment_method_id } : {}),
+        // Opt-in: persist the card on the customer for future off-session charges
+        ...(save_payment_method ? { save_payment_method: true } : {}),
         success_url: `${appBaseUrl}/payment/success`,
         cancel_url: `${appBaseUrl}/payment/cancel`,
       },

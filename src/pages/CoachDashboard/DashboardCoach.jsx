@@ -15,6 +15,7 @@ import { CircleCheckBig } from "lucide-react";
 // Layout Components
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import SharedCalendar from "../../components/calendar/SharedCalendar";
 
 // Coach Components
 import {
@@ -443,6 +444,14 @@ export default function DashboardCoach() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Unified calendar */}
+        <div className="bg-[#FFFFFF80] rounded-fluid-xl p-6 shadow-sm mt-6">
+          <h2 className="text-fluid-lg font-normal font-kollektif text-[#0f1d2e] leading-[1.5] tracking-[-0.2px] mb-4">
+            Calendar
+          </h2>
+          <SharedCalendar />
         </div>
       </main>
 

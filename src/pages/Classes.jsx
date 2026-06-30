@@ -60,7 +60,7 @@ export default function Classes() {
       return {
         ...cls,
         title: cls.name,
-        school: cls.school?.name || cls.location || "Location TBA",
+        school: cls.school_name || cls.school?.name || "Location TBA",
         dates: formatDateRange(cls.start_date, cls.end_date),
         time: formatSchedule(buildScheduleFromClass(cls)),
         ages:

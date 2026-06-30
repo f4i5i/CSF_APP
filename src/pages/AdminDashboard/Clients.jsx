@@ -377,6 +377,9 @@ export default function Clients() {
                       {child.grade && (
                         <span>• Grade {formatGrade(child.grade)}</span>
                       )}
+                      {child.jersey_size && (
+                        <span>• Jersey {child.jersey_size.toUpperCase()}</span>
+                      )}
                     </div>
 
                     {/* Enrollments */}

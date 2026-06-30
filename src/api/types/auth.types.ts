@@ -3,7 +3,7 @@
  * Types for login, registration, and authentication-related operations
  */
 
-import type { UserRole, UserId } from './common.types';
+import type { UserRole, UserId } from "./common.types";
 
 // ============================================================================
 // User Interface
@@ -48,7 +48,11 @@ export interface RegisterRequest {
   confirm_password: string;
   first_name: string;
   last_name: string;
-  phone?: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
 }
 
 /**
@@ -128,6 +132,6 @@ export interface AuthState {
  * Token storage keys
  */
 export const TOKEN_KEYS = {
-  ACCESS_TOKEN: 'csf_access_token',
-  REFRESH_TOKEN: 'csf_refresh_token',
+  ACCESS_TOKEN: "csf_access_token",
+  REFRESH_TOKEN: "csf_refresh_token",
 } as const;

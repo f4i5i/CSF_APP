@@ -5,6 +5,7 @@ import MiddleSummary from "../../components/AdminDashboard/MiddleSummary";
 import MembersBarChart from "../../components/AdminDashboard/MembersBarChart";
 import TodayClasses from "../../components/AdminDashboard/TodayClasses";
 import Header from "../../components/Header";
+import SharedCalendar from "../../components/calendar/SharedCalendar";
 import adminService from "../../api/services/admin.service";
 import { useAuth } from "../../context/auth";
 import toast from "react-hot-toast";
@@ -32,48 +33,54 @@ const AdminDashboard = () => {
   };
 
   // Transform API data into format expected by components
-  const stats = metrics ? {
-    activeStudents: metrics.active_enrollments,
-    totalStudents: metrics.total_students,
-    programs: metrics.programs_with_counts?.map(p => ({
-      name: p.name,
-      count: p.count
-    })) || [],
-    registrations: {
-      "24h": metrics.registrations_24h,
-      "7d": metrics.registrations_7d,
-      "30d": metrics.registrations_30d
-    },
-    cancellations: {
-      "24h": metrics.cancellations_24h,
-      "7d": metrics.cancellations_7d,
-      "30d": metrics.cancellations_30d
-    },
-    subscriptionStudents: metrics.active_enrollments,
-    shortTermStudents: metrics.pending_orders,
-    monthlyMembers: metrics.monthly_enrollments || []
-  } : {
-    activeStudents: 0,
-    totalStudents: 0,
-    programs: [],
-    registrations: { "24h": 0, "7d": 0, "30d": 0 },
-    cancellations: { "24h": 0, "7d": 0, "30d": 0 },
-    subscriptionStudents: 0,
-    shortTermStudents: 0,
-    monthlyMembers: []
-  };
+  const stats = metrics
+    ? {
+        activeStudents: metrics.active_enrollments,
+        totalStudents: metrics.total_students,
+        programs:
+          metrics.programs_with_counts?.map((p) => ({
+            name: p.name,
+            count: p.count,
+          })) || [],
+        registrations: {
+          "24h": metrics.registrations_24h,
+          "7d": metrics.registrations_7d,
+          "30d": metrics.registrations_30d,
+        },
+        cancellations: {
+          "24h": metrics.cancellations_24h,
+          "7d": metrics.cancellations_7d,
+          "30d": metrics.cancellations_30d,
+        },
+        subscriptionStudents: metrics.active_enrollments,
+        shortTermStudents: metrics.pending_orders,
+        monthlyMembers: metrics.monthly_enrollments || [],
+      }
+    : {
+        activeStudents: 0,
+        totalStudents: 0,
+        programs: [],
+        registrations: { "24h": 0, "7d": 0, "30d": 0 },
+        cancellations: { "24h": 0, "7d": 0, "30d": 0 },
+        subscriptionStudents: 0,
+        shortTermStudents: 0,
+        monthlyMembers: [],
+      };
 
-  const todayClasses = metrics?.today_classes?.map((cls, index) => ({
-    id: cls.id || index,
-    title: cls.name,
-    school: cls.school_name,
-    time: cls.start_time && cls.end_time
-      ? `${cls.start_time} - ${cls.end_time}`
-      : cls.start_time || "TBD",
-    enrolled: cls.enrolled_count
-  })) || [];
+  const todayClasses =
+    metrics?.today_classes?.map((cls, index) => ({
+      id: cls.id || index,
+      title: cls.name,
+      school: cls.school_name,
+      time:
+        cls.start_time && cls.end_time
+          ? `${cls.start_time} - ${cls.end_time}`
+          : cls.start_time || "TBD",
+      enrolled: cls.enrolled_count,
+    })) || [];
 
-  const userName = user?.first_name || user?.full_name?.split(' ')[0] || 'Admin';
+  const userName =
+    user?.first_name || user?.full_name?.split(" ")[0] || "Admin";
 
   if (loading) {
     return (
@@ -98,7 +105,8 @@ const AdminDashboard = () => {
               Welcome back, {userName}!
             </div>
             <p className="text-heading-dark font-manrope font-medium md:text-base text-xs">
-              Managing {metrics?.total_schools || 0} locations &bull; {metrics?.active_enrollments || 0} active students
+              Managing {metrics?.total_schools || 0} locations &bull;{" "}
+              {metrics?.active_enrollments || 0} active students
             </p>
           </div>
           <div className="text-right">
@@ -152,10 +160,16 @@ const AdminDashboard = () => {
               weekday: "long",
               year: "numeric",
               month: "long",
-              day: "numeric"
+              day: "numeric",
             })}
             classes={todayClasses}
           />
+        </div>
+
+        {/* Unified calendar */}
+        <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow mt-6">
+          <h3 className="text-lg font-manrope font-semibold mb-4">Calendar</h3>
+          <SharedCalendar />
         </div>
       </div>
     </div>

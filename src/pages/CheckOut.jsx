@@ -36,6 +36,7 @@ export default function CheckOut() {
     selectedChildId,
     selectedChildIds, // NEW: Multi-select support
     paymentMethod,
+    savePaymentMethod, // Opt-in: save card for future use
     selectedInstallmentPlan,
     appliedDiscount,
     orderTotal,
@@ -59,6 +60,7 @@ export default function CheckOut() {
     toggleChildSelection, // NEW: Multi-select toggle
     toggleCustomFee, // Custom fee toggle
     selectPaymentMethod,
+    setSavePaymentMethod, // Opt-in toggle for saving the card
     selectInstallmentPlan,
     applyDiscount,
     removeDiscount,
@@ -361,6 +363,34 @@ export default function CheckOut() {
                 classData={classData}
               />
             )}
+
+            {/* Save Card Opt-in (one-time payments only; subscriptions auto-save) */}
+            {hasChildSelected &&
+              waiversChecked &&
+              !isFreeClass &&
+              paymentMethod === "full" && (
+                <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!savePaymentMethod}
+                      onChange={(e) => setSavePaymentMethod(e.target.checked)}
+                      className="mt-1 w-4 h-4 accent-[#F3BC48] cursor-pointer"
+                    />
+                    <span className="font-manrope">
+                      <span className="block text-sm font-semibold text-[#173151]">
+                        Save my card for faster future registrations and
+                        waitlist auto-enrollment
+                      </span>
+                      <span className="block text-xs text-[#666D80] mt-1">
+                        Your card is stored securely by Stripe. We never see or
+                        store your full card details. You can remove it anytime
+                        from Payment Methods.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              )}
 
             {/* Installment Plan Selection (only if installments selected) */}
             {hasChildSelected &&

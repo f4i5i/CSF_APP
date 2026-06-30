@@ -140,6 +140,7 @@ const CheckIn = () => {
         enrollment_id: enrollId,
         name: childName || "Unknown",
         grade: item.child?.grade || item.grade || "-",
+        groupNumber: item.group_number ?? item.child?.group_number ?? null,
         checked: isChecked,
         wasUnchecked: !isChecked && uncheckedIds.has(enrollId),
         checkInId: item.check_in_id || item.checkin_id || null,
@@ -148,7 +149,12 @@ const CheckIn = () => {
         // Additional data for modal
         child: item.child,
         parent,
-        medical_info: item.medical_info || item.child?.medical_info,
+        medical_info:
+          item.medical_conditions ||
+          item.medical_info ||
+          item.child?.medical_info,
+        hasMedicalAlert: item.has_medical_alert || false,
+        hasNoMedicalConditions: item.has_no_medical_conditions || false,
         notes: item.notes,
       };
     });

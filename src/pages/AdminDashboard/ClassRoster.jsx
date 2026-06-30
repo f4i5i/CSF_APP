@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import adminService from "../../api/services/admin.service";
+import enrollmentsService from "../../api/services/enrollments.service";
 
 const ClassRoster = () => {
   const { classId } = useParams();
@@ -23,6 +24,35 @@ const ClassRoster = () => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareLink, setShareLink] = useState(null);
   const [generatingLink, setGeneratingLink] = useState(false);
+  const [savingGroupId, setSavingGroupId] = useState(null);
+
+  const handleGroupChange = async (enrollmentId, value) => {
+    const groupNumber = value === "" ? null : parseInt(value, 10);
+    setSavingGroupId(enrollmentId);
+    try {
+      await enrollmentsService.updateGroup(enrollmentId, groupNumber);
+      setRosterData((prev) => {
+        if (!prev) return prev;
+        const list = prev.students || prev.enrollments || [];
+        const updated = list.map((s) =>
+          (s.enrollment_id || s.enrollment?.id) === enrollmentId
+            ? { ...s, group_number: groupNumber }
+            : s,
+        );
+        return prev.students
+          ? { ...prev, students: updated }
+          : { ...prev, enrollments: updated };
+      });
+      toast.success(
+        groupNumber ? `Group ${groupNumber} assigned` : "Group cleared",
+      );
+    } catch (err) {
+      console.error("Failed to update group:", err);
+      toast.error("Failed to update group");
+    } finally {
+      setSavingGroupId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchRoster = async () => {
@@ -269,6 +299,9 @@ const ClassRoster = () => {
                   student.child?.id ||
                   student.enrollment_id ||
                   idx;
+                const enrollmentId =
+                  student.enrollment_id || student.enrollment?.id;
+                const groupNumber = student.group_number ?? "";
 
                 return (
                   <div
@@ -313,6 +346,35 @@ const ClassRoster = () => {
                             </span>
                           )}
                         </div>
+
+                        {/* Group Number Selector */}
+                        {enrollmentId && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <label className="text-xs font-medium text-text-muted font-manrope">
+                              Group:
+                            </label>
+                            <select
+                              value={groupNumber}
+                              disabled={savingGroupId === enrollmentId}
+                              onChange={(e) =>
+                                handleGroupChange(enrollmentId, e.target.value)
+                              }
+                              className="text-xs sm:text-sm border border-gray-300 rounded-md px-2 py-1 font-manrope bg-white focus:outline-none focus:ring-1 focus:ring-btn-gold disabled:opacity-50"
+                            >
+                              <option value="">—</option>
+                              {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                                (n) => (
+                                  <option key={n} value={n}>
+                                    {n}
+                                  </option>
+                                ),
+                              )}
+                            </select>
+                            {savingGroupId === enrollmentId && (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-btn-gold" />
+                            )}
+                          </div>
+                        )}
 
                         {/* Custom Fees Paid */}
                         {student.selected_custom_fees?.length > 0 && (

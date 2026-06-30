@@ -75,6 +75,7 @@ const initialFormData = {
   registration_end_date: "", // Registration period end
   recurrence_pattern: "weekly", // weekly, monthly, one-time
   repeat_every_weeks: "1", // Number of weeks between repetitions
+  class_dates: [], // Explicit session dates (ISO "YYYY-MM-DD"); source of truth
   class_type: "", // one-time or membership
   class_image: null, // Image file or URL
   website_link: "", // Class website/info link
@@ -130,6 +131,15 @@ const initialFormData = {
 
   // Custom Fees (optional, editable fees like Jersey Fee, Equipment Fee, etc.)
   custom_fees: [],
+
+  // Per-class public display toggles (controls what explore/detail pages show)
+  display_settings: {
+    show_capacity: true,
+    show_spots_remaining: true,
+    show_pricing: true,
+    show_coach: true,
+    show_program_type: true,
+  },
 };
 
 export default function useClassForm(initialData = null, mode = "create") {
@@ -280,6 +290,11 @@ export default function useClassForm(initialData = null, mode = "create") {
         // New fields
         recurrence_pattern: initialData.recurrence_pattern || "weekly",
         repeat_every_weeks: initialData.repeat_every_weeks?.toString() || "1",
+        class_dates: Array.isArray(initialData.class_dates)
+          ? initialData.class_dates.map((d) =>
+              typeof d === "string" ? d.split("T")[0] : d,
+            )
+          : [],
         class_type: initialData.class_type || "",
         website_link: initialData.website_link || "",
         class_image:
@@ -293,6 +308,12 @@ export default function useClassForm(initialData = null, mode = "create") {
 
         // Custom fees (optional fees like Jersey Fee)
         custom_fees: initialData.custom_fees || [],
+
+        // Display toggles - merge backend values over defaults (missing = shown)
+        display_settings: {
+          ...initialFormData.display_settings,
+          ...(initialData.display_settings || {}),
+        },
       };
 
       setFormData(mappedData);
@@ -485,15 +506,20 @@ export default function useClassForm(initialData = null, mode = "create") {
       }
     }
 
-    // Schedule validation
+    // Class time validation (single start/end applied to all dates)
     if (!formData.schedule || formData.schedule.length === 0) {
-      newErrors.schedule = "At least one schedule entry is required";
+      newErrors.schedule = "Class start and end time are required";
     } else {
       formData.schedule.forEach((sched, index) => {
         if (sched.start_time >= sched.end_time) {
           newErrors[`schedule_${index}`] = "End time must be after start time";
         }
       });
+    }
+
+    // Class dates validation (explicit sessions are the source of truth)
+    if (!formData.class_dates || formData.class_dates.length === 0) {
+      newErrors.class_dates = "Select at least one class date";
     }
 
     // Payment options validation

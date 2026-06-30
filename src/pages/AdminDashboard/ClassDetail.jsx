@@ -253,6 +253,11 @@ export default function ClassDetail() {
    * @returns {number} Number of training weeks
    */
   const calculateTrainingWeeks = (cls) => {
+    // Explicit class_dates is the source of truth: count of sessions.
+    if (Array.isArray(cls.class_dates) && cls.class_dates.length > 0) {
+      return cls.class_dates.length;
+    }
+
     if (
       !cls.start_date ||
       !cls.end_date ||
@@ -544,7 +549,10 @@ export default function ClassDetail() {
                       <li className="font-manrope flex items-center gap-2">
                         <img src="/images/price_info.png" alt="" />
                         <span>
-                          {calculateTrainingWeeks(classData)} weeks of training
+                          {Array.isArray(classData.class_dates) &&
+                          classData.class_dates.length > 0
+                            ? `${classData.class_dates.length} sessions`
+                            : `${calculateTrainingWeeks(classData)} weeks of training`}
                         </span>
                       </li>
                       <li className="font-manrope flex items-center gap-2">

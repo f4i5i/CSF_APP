@@ -146,13 +146,35 @@ export default function AdminChildForm({
       onClose();
     } catch (error) {
       console.error("Failed to save child:", error);
-      const errorMessage =
-        error.response?.data?.detail ||
-        error.response?.data?.message ||
-        `Failed to ${mode === "edit" ? "update" : "create"} child`;
-      toast.error(
-        typeof errorMessage === "string" ? errorMessage : "An error occurred",
-      );
+
+      // Map structured Pydantic 422 field errors to inline form errors.
+      // This form's field names already match the backend, so only the
+      // emergency-contact sub-fields (name/phone/relation) need remapping.
+      const detail = error.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        const fieldMap = {
+          name: "emergency_name",
+          phone: "emergency_phone",
+          relation: "emergency_relation",
+          relationship: "emergency_relation",
+        };
+        const fieldErrors = {};
+        detail.forEach((err) => {
+          const apiField = err.loc?.[err.loc.length - 1];
+          const formField = fieldMap[apiField] || apiField;
+          if (formField) fieldErrors[formField] = err.msg;
+        });
+        setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        toast.error("Please fix the highlighted fields.");
+      } else {
+        const errorMessage =
+          (typeof detail === "string" && detail) ||
+          error.response?.data?.message ||
+          `Failed to ${mode === "edit" ? "update" : "create"} child`;
+        toast.error(
+          typeof errorMessage === "string" ? errorMessage : "An error occurred",
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -360,6 +382,11 @@ export default function AdminChildForm({
                     className={inputStyle("emergency_name")}
                     placeholder="Contact name"
                   />
+                  {errors.emergency_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.emergency_name}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-600 font-manrope">
@@ -373,6 +400,11 @@ export default function AdminChildForm({
                     className={inputStyle("emergency_phone")}
                     placeholder="+1234567890"
                   />
+                  {errors.emergency_phone && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.emergency_phone}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-600 font-manrope">
@@ -391,6 +423,11 @@ export default function AdminChildForm({
                       </option>
                     ))}
                   </select>
+                  {errors.emergency_relation && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.emergency_relation}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

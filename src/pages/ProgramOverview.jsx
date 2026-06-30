@@ -90,9 +90,9 @@ export default function ProgramOverview() {
   const timeOfDayOptions = ["all", "morning", "afternoon", "evening"];
   const capacityOptions = ["all", "available", "full"];
   const programTypeOptions = [
-    { value: "all", label: "Membership + Short-term" },
-    { value: "membership", label: "Membership only" },
-    { value: "short-term", label: "Short-term only" },
+    { value: "all", label: "Monthly Membership + One Time Payment" },
+    { value: "membership", label: "Monthly Membership only" },
+    { value: "short-term", label: "One Time Payment only" },
   ];
 
   const schoolOptions = useMemo(() => {
@@ -199,7 +199,7 @@ export default function ProgramOverview() {
           program: cls.program_id,
           title: cls.name,
           description: cls.description,
-          school: cls.school?.name || cls.location || "Location TBA",
+          school: cls.school_name || cls.school?.name || "Location TBA",
           programName: cls.program?.name || "",
           dates: formatDateRange(cls.start_date, cls.end_date),
           time: formatSchedule(buildScheduleFromClass(cls)),
@@ -228,6 +228,7 @@ export default function ProgramOverview() {
             getClassImage(),
           schedule: buildScheduleFromClass(cls),
           price: cls.base_price,
+          display_settings: cls.display_settings,
         };
       });
   };

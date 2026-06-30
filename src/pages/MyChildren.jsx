@@ -199,7 +199,36 @@ export default function MyChildren() {
       fetchChildren();
     } catch (err) {
       console.error("Failed to save child:", err);
-      toast.error(err?.response?.data?.detail || "Failed to save child");
+
+      // Map structured Pydantic 422 field errors to inline form errors.
+      const detail = err?.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        const fieldMap = {
+          first_name: "firstName",
+          last_name: "lastName",
+          date_of_birth: "dob",
+          jersey_size: "jersey",
+          medical_conditions: "medical",
+          health_insurance_number: "insurance",
+          how_heard_about_us: "hearAbout",
+          name: "emergencyName",
+          phone: "emergencyPhone",
+          relation: "emergencyRelation",
+          relationship: "emergencyRelation",
+        };
+        const fieldErrors = {};
+        detail.forEach((e) => {
+          const apiField = e.loc?.[e.loc.length - 1];
+          const formField = fieldMap[apiField] || apiField;
+          if (formField) fieldErrors[formField] = e.msg;
+        });
+        setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        toast.error("Please fix the highlighted fields.");
+      } else {
+        toast.error(
+          typeof detail === "string" ? detail : "Failed to save child",
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }

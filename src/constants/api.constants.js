@@ -104,6 +104,11 @@ export const API_ENDPOINTS = {
     CANCELLATION_PREVIEW: (id) => `/enrollments/${id}/cancellation-preview`,
     TRANSFER: (id) => `/enrollments/${id}/transfer`, // Transfer to different class
     ACTIVATE: (id) => `/enrollments/${id}/activate`, // Activate pending (ADMIN)
+    SEND_PAYMENT_LINK: (id) => `/enrollments/${id}/send-payment-link`, // Email hosted Stripe payment link (ADMIN)
+    GROUP: (id) => `/enrollments/${id}/group`, // Set roster group number (coach/admin)
+    WAITLIST_JOIN: "/enrollments/waitlist/join", // Join waitlist for a full class
+    WAITLIST_CLAIM: (id) => `/enrollments/${id}/waitlist/claim`, // Claim a regular waitlist spot
+    WAITLIST_BY_CLASS: (classId) => `/enrollments/waitlist/class/${classId}`, // List a class's waitlist
   },
 
   // ===================
@@ -273,6 +278,13 @@ export const API_ENDPOINTS = {
   },
 
   // ===================
+  // CALENDAR (unified, role-scoped)
+  // ===================
+  CALENDAR: {
+    GET: "/calendar/", // Aggregated sessions/events/cancellations in [start,end]
+  },
+
+  // ===================
   // PHOTOS
   // ===================
   PHOTOS: {
@@ -294,7 +306,9 @@ export const API_ENDPOINTS = {
   // ===================
   BADGES: {
     LIST: "/badges", // List available badges (public)
-    BY_ID: (id) => `/badges/${id}`, // Get badge details
+    CREATE: "/badges", // Create badge (ADMIN)
+    BY_ID: (id) => `/badges/${id}`, // Get/Update(PUT)/Delete badge
+    ICON: (id) => `/badges/${id}/icon`, // Upload(POST)/serve(GET) badge icon
     BY_ENROLLMENT: (enrollmentId) => `/badges/enrollment/${enrollmentId}`, // Student badges
     BY_CHILD: (enrollmentId) => `/badges/enrollment/${enrollmentId}`, // Alias (use first enrollment)
     AWARD: "/badges/award", // Award badge (COACH)

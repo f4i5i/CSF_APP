@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import TimePicker12Hour from "../ui/TimePicker12Hour";
 import MultiCoachSelector from "./MultiCoachSelector";
 import GooglePlacesAutocomplete from "../ui/GooglePlacesAutocomplete";
+import ClassDatesCalendar from "./ClassDatesCalendar";
 
 const DAYS = [
   { id: "monday", name: "Monday" },
@@ -993,147 +994,66 @@ export default function ClassFormModal({
               </div>
             </div>
 
-            {/* Schedule Section */}
+            {/* Class Time Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-xl font-semibold text-text-primary font-manrope border-border-light">
-                  Schedule
-                </h3>
-                <button
-                  type="button"
-                  onClick={addSchedule}
-                  className="text-sm text-btn-secondary hover:text-[#e5ad35] font-semibold"
-                >
-                  + Add Schedule
-                </button>
-              </div>
-
-              {formData.schedule.map((sched, index) => (
-                <div
-                  key={index}
-                  className="flex gap-3 items-start p-4 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex-1 grid sm:grid-cols-3 grid-cols-1 gap-3">
-                    <div>
-                      <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
-                        Day of Week
-                      </label>
-                      <CustomDropdown
-                        value={sched.day_of_week}
-                        onChange={(val) =>
-                          updateSchedule(index, "day_of_week", val)
-                        }
-                        options={DAYS}
-                        placeholder="Select Day"
-                        error={null}
-                      />
-                    </div>
-                    <div>
-                      <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
-                        Start Time
-                      </label>
-                      <TimePicker12Hour
-                        value={sched.start_time}
-                        onChange={(value) =>
-                          updateSchedule(index, "start_time", value)
-                        }
-                        placeholder="Select start time"
-                      />
-                    </div>
-                    <div>
-                      <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
-                        End Time
-                      </label>
-                      <TimePicker12Hour
-                        value={sched.end_time}
-                        onChange={(value) =>
-                          updateSchedule(index, "end_time", value)
-                        }
-                        placeholder="Select end time"
-                      />
-                    </div>
-                  </div>
-                  {formData.schedule.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSchedule(index)}
-                      className="text-btn-gold hover:text-red-700 mt-6"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  )}
+              <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                Class Time
+              </h3>
+              <p className="text-xs text-gray-600">
+                One start and end time applies to every selected class date.
+              </p>
+              <div className="grid sm:grid-cols-2 grid-cols-1 gap-3">
+                <div>
+                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    Start Time <span className="text-btn-gold">*</span>
+                  </label>
+                  <TimePicker12Hour
+                    value={formData.schedule?.[0]?.start_time}
+                    onChange={(value) => updateSchedule(0, "start_time", value)}
+                    placeholder="Select start time"
+                  />
                 </div>
-              ))}
-              {errors.schedule && (
-                <p className="text-btn-gold text-sm">{errors.schedule}</p>
+                <div>
+                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
+                    End Time <span className="text-btn-gold">*</span>
+                  </label>
+                  <TimePicker12Hour
+                    value={formData.schedule?.[0]?.end_time}
+                    onChange={(value) => updateSchedule(0, "end_time", value)}
+                    placeholder="Select end time"
+                  />
+                </div>
+              </div>
+              {(errors.schedule || errors.schedule_0) && (
+                <p className="text-btn-gold text-sm">
+                  {errors.schedule || errors.schedule_0}
+                </p>
               )}
             </div>
 
-            {/* Recurrence Pattern Section */}
+            {/* Class Dates Section — explicit sessions are the source of truth */}
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
-                Recurrence
+                Class Dates <span className="text-btn-gold">*</span>
               </h3>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                    Schedule Pattern <span className="text-btn-gold">*</span>
-                  </label>
-                  <CustomDropdown
-                    value={formData.recurrence_pattern}
-                    onChange={(value) =>
-                      updateField("recurrence_pattern", value)
-                    }
-                    options={RECURRENCE_PATTERNS}
-                    placeholder="Select Pattern"
-                    error={errors.recurrence_pattern}
-                  />
-                  {errors.recurrence_pattern && (
-                    <p className="text-error-darker font-manrope text-xs mt-1">
-                      {errors.recurrence_pattern}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block sm:text-base text-sm font-medium font-manrope text-heading-dark mb-1">
-                    Repeat Every <span className="text-btn-gold">*</span>
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <CustomDropdown
-                        value={formData.repeat_every_weeks}
-                        onChange={(value) =>
-                          updateField("repeat_every_weeks", value)
-                        }
-                        options={REPEAT_EVERY_WEEKS}
-                        placeholder="Select"
-                        error={errors.repeat_every_weeks}
-                      />
-                    </div>
-                    <span className="text-sm font-manrope text-heading-dark">
-                      {formData.recurrence_pattern === "monthly"
-                        ? "months"
-                        : "weeks"}
-                    </span>
-                  </div>
-                  {errors.repeat_every_weeks && (
-                    <p className="text-error-darker font-manrope text-xs mt-1">
-                      {errors.repeat_every_weeks}
-                    </p>
-                  )}
-                </div>
-              </div>
-
               <p className="text-xs text-gray-600">
-                {formData.recurrence_pattern === "weekly" &&
-                  `Class repeats every ${formData.repeat_every_weeks} ${parseInt(formData.repeat_every_weeks) === 1 ? "week" : "weeks"} on the selected days`}
-                {formData.recurrence_pattern === "monthly" &&
-                  "Class repeats monthly on the same dates"}
-                {formData.recurrence_pattern === "one-time" &&
-                  "Class occurs only once"}
+                Pick weekday(s) and an interval, then click Generate to fill the
+                calendar between the start and end dates. Click any date to add
+                or remove it (e.g. skip a holiday). These dates are what the
+                class actually runs on.
               </p>
+              <ClassDatesCalendar
+                value={formData.class_dates}
+                onChange={(dates) => updateField("class_dates", dates)}
+                startDate={formData.start_date}
+                endDate={formData.end_date}
+                weekdays={(formData.schedule || []).map((s) => s.day_of_week)}
+              />
+              {errors.class_dates && (
+                <p className="text-error-darker font-manrope text-xs mt-1">
+                  {errors.class_dates}
+                </p>
+              )}
             </div>
 
             {/* Class Type Section */}
@@ -1148,7 +1068,21 @@ export default function ClassFormModal({
                 </label>
                 <CustomDropdown
                   value={formData.class_type}
-                  onChange={(value) => updateField("class_type", value)}
+                  onChange={(value) => {
+                    updateField("class_type", value);
+                    // Keep enabled payment options consistent with the class
+                    // type: membership -> monthly subscription only; one-time ->
+                    // one-time / installments only.
+                    if (value === "membership") {
+                      [0, 2, 3, 4, 5].forEach((i) =>
+                        updatePaymentOption(i, "enabled", false),
+                      );
+                      updatePaymentOption(1, "enabled", true);
+                    } else if (value === "one-time") {
+                      updatePaymentOption(1, "enabled", false);
+                      updatePaymentOption(0, "enabled", true);
+                    }
+                  }}
                   options={CLASS_TYPES}
                   placeholder="Select Class Type"
                   error={errors.class_type}
@@ -1179,255 +1113,278 @@ export default function ClassFormModal({
               </p>
 
               <div className="space-y-3">
-                {/* Pay in Full */}
-                <div className="border border-border-light rounded-lg p-4">
-                  <div className="flex items-start gap-4">
-                    <label className="flex items-center space-x-2 w-36 pt-2">
-                      <input
-                        type="radio"
-                        name="payment_option"
-                        checked={formData.payment_options[0].enabled}
-                        onChange={() => {
-                          // Disable all other options
-                          [1, 2, 3, 4, 5].forEach((i) => {
-                            updatePaymentOption(i, "enabled", false);
-                          });
-                          // Enable this option
-                          updatePaymentOption(0, "enabled", true);
-                        }}
-                        className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
-                      />
-                      <span className="font-semibold text-heading-dark font-manrope text-sm">
-                        One-time
-                      </span>
-                    </label>
-                    {formData.payment_options[0].enabled && (
-                      <div className="flex-1 space-y-2">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">
-                              Display Name
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.payment_options[0].custom_name}
-                              onChange={(e) =>
-                                updatePaymentOption(
-                                  0,
-                                  "custom_name",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
-                              placeholder="Pay in Full"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">
-                              Price ($)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={formData.payment_options[0].price}
-                              onChange={(e) =>
-                                updatePaymentOption(0, "price", e.target.value)
-                              }
-                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                              placeholder="299.00"
-                            />
-                          </div>
-                        </div>
-                        {errors.payment_full_payment && (
-                          <p className="text-error-darkest text-xs mt-1">
-                            {errors.payment_full_payment}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Monthly Subscription */}
-                <div className="border border-border-light rounded-lg p-4">
-                  <div className="flex items-start gap-4">
-                    <label className="flex items-center space-x-2 w-36 pt-2">
-                      <input
-                        type="radio"
-                        name="payment_option"
-                        checked={formData.payment_options[1].enabled}
-                        onChange={() => {
-                          // Disable all other options
-                          [0, 2, 3, 4, 5].forEach((i) => {
-                            updatePaymentOption(i, "enabled", false);
-                          });
-                          // Enable this option
-                          updatePaymentOption(1, "enabled", true);
-                        }}
-                        className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
-                      />
-                      <span className="font-semibold text-heading-dark font-manrope text-sm">
-                        Subscription
-                      </span>
-                    </label>
-                    {formData.payment_options[1].enabled && (
-                      <div className="flex-1 space-y-2">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">
-                              Display Name
-                            </label>
-                            <input
-                              type="text"
-                              value={formData.payment_options[1].custom_name}
-                              onChange={(e) =>
-                                updatePaymentOption(
-                                  1,
-                                  "custom_name",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
-                              placeholder="Monthly Subscription"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">
-                              Monthly Price ($)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={formData.payment_options[1].price}
-                              onChange={(e) =>
-                                updatePaymentOption(1, "price", e.target.value)
-                              }
-                              className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                              placeholder="69.00"
-                            />
-                          </div>
-                        </div>
-                        {errors.payment_monthly_subscription && (
-                          <p className="text-error-darkest text-xs mt-1">
-                            {errors.payment_monthly_subscription}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Installment Plans */}
-                <div className="border border-border-light rounded-lg p-4">
-                  <h4 className="font-semibold text-heading-dark font-manrope mb-3">
-                    Installment Plans
-                  </h4>
-                  <div className="space-y-4">
-                    {[
-                      {
-                        index: 2,
-                        label: "2 Months",
-                        type: "installment_2",
-                        defaultName: "2 Month Installment",
-                      },
-                      {
-                        index: 3,
-                        label: "3 Months",
-                        type: "installment_3",
-                        defaultName: "3 Month Installment",
-                      },
-                      {
-                        index: 4,
-                        label: "4 Months",
-                        type: "installment_4",
-                        defaultName: "4 Month Installment",
-                      },
-                      {
-                        index: 5,
-                        label: "6 Months",
-                        type: "installment_6",
-                        defaultName: "6 Month Installment",
-                      },
-                    ].map(({ index, label, type, defaultName }) => (
-                      <div key={index} className="flex items-start gap-4">
-                        <label className="flex items-center space-x-2 w-36 pt-2">
-                          <input
-                            type="radio"
-                            name="payment_option"
-                            checked={formData.payment_options[index].enabled}
-                            onChange={() => {
-                              // Disable all other options (including Pay in Full and Monthly)
-                              [0, 1, 2, 3, 4, 5].forEach((i) => {
-                                if (i !== index) {
-                                  updatePaymentOption(i, "enabled", false);
+                {/* Pay in Full — one-time classes only */}
+                {formData.class_type === "one-time" && (
+                  <div className="border border-border-light rounded-lg p-4">
+                    <div className="flex items-start gap-4">
+                      <label className="flex items-center space-x-2 w-36 pt-2">
+                        <input
+                          type="radio"
+                          name="payment_option"
+                          checked={formData.payment_options[0].enabled}
+                          onChange={() => {
+                            // Disable all other options
+                            [1, 2, 3, 4, 5].forEach((i) => {
+                              updatePaymentOption(i, "enabled", false);
+                            });
+                            // Enable this option
+                            updatePaymentOption(0, "enabled", true);
+                          }}
+                          className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
+                        />
+                        <span className="font-semibold text-heading-dark font-manrope text-sm">
+                          One-time
+                        </span>
+                      </label>
+                      {formData.payment_options[0].enabled && (
+                        <div className="flex-1 space-y-2">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">
+                                Display Name
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.payment_options[0].custom_name}
+                                onChange={(e) =>
+                                  updatePaymentOption(
+                                    0,
+                                    "custom_name",
+                                    e.target.value,
+                                  )
                                 }
-                              });
-                              // Enable the selected one
-                              updatePaymentOption(index, "enabled", true);
-                            }}
-                            className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
-                          />
-                          <span className="text-sm font-medium font-manrope text-heading-dark">
-                            {label}
-                          </span>
-                        </label>
-                        {formData.payment_options[index].enabled && (
-                          <div className="flex-1 space-y-2">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">
-                                  Display Name
-                                </label>
-                                <input
-                                  type="text"
-                                  value={
-                                    formData.payment_options[index].custom_name
-                                  }
-                                  onChange={(e) =>
-                                    updatePaymentOption(
-                                      index,
-                                      "custom_name",
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
-                                  placeholder={defaultName}
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-gray-500 mb-1">
-                                  Monthly Payment ($)
-                                </label>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  value={formData.payment_options[index].price}
-                                  onChange={(e) =>
-                                    updatePaymentOption(
-                                      index,
-                                      "price",
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
-                                  placeholder="Monthly payment"
-                                />
-                              </div>
+                                className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                                placeholder="Pay in Full"
+                              />
                             </div>
-                            {errors[`payment_${type}`] && (
-                              <p className="text-error-darkest text-xs mt-1">
-                                {errors[`payment_${type}`]}
-                              </p>
-                            )}
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">
+                                Price ($)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={formData.payment_options[0].price}
+                                onChange={(e) =>
+                                  updatePaymentOption(
+                                    0,
+                                    "price",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                                placeholder="299.00"
+                              />
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          {errors.payment_full_payment && (
+                            <p className="text-error-darkest text-xs mt-1">
+                              {errors.payment_full_payment}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Monthly Subscription — membership classes only */}
+                {formData.class_type === "membership" && (
+                  <div className="border border-border-light rounded-lg p-4">
+                    <div className="flex items-start gap-4">
+                      <label className="flex items-center space-x-2 w-36 pt-2">
+                        <input
+                          type="radio"
+                          name="payment_option"
+                          checked={formData.payment_options[1].enabled}
+                          onChange={() => {
+                            // Disable all other options
+                            [0, 2, 3, 4, 5].forEach((i) => {
+                              updatePaymentOption(i, "enabled", false);
+                            });
+                            // Enable this option
+                            updatePaymentOption(1, "enabled", true);
+                          }}
+                          className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
+                        />
+                        <span className="font-semibold text-heading-dark font-manrope text-sm">
+                          Subscription
+                        </span>
+                      </label>
+                      {formData.payment_options[1].enabled && (
+                        <div className="flex-1 space-y-2">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">
+                                Display Name
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.payment_options[1].custom_name}
+                                onChange={(e) =>
+                                  updatePaymentOption(
+                                    1,
+                                    "custom_name",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                                placeholder="Monthly Subscription"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">
+                                Monthly Price ($)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={formData.payment_options[1].price}
+                                onChange={(e) =>
+                                  updatePaymentOption(
+                                    1,
+                                    "price",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                                placeholder="69.00"
+                              />
+                            </div>
+                          </div>
+                          {errors.payment_monthly_subscription && (
+                            <p className="text-error-darkest text-xs mt-1">
+                              {errors.payment_monthly_subscription}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Installment Plans — one-time classes only */}
+                {formData.class_type === "one-time" && (
+                  <div className="border border-border-light rounded-lg p-4">
+                    <h4 className="font-semibold text-heading-dark font-manrope mb-3">
+                      Installment Plans
+                    </h4>
+                    <div className="space-y-4">
+                      {[
+                        {
+                          index: 2,
+                          label: "2 Months",
+                          type: "installment_2",
+                          defaultName: "2 Month Installment",
+                        },
+                        {
+                          index: 3,
+                          label: "3 Months",
+                          type: "installment_3",
+                          defaultName: "3 Month Installment",
+                        },
+                        {
+                          index: 4,
+                          label: "4 Months",
+                          type: "installment_4",
+                          defaultName: "4 Month Installment",
+                        },
+                        {
+                          index: 5,
+                          label: "6 Months",
+                          type: "installment_6",
+                          defaultName: "6 Month Installment",
+                        },
+                      ].map(({ index, label, type, defaultName }) => (
+                        <div key={index} className="flex items-start gap-4">
+                          <label className="flex items-center space-x-2 w-36 pt-2">
+                            <input
+                              type="radio"
+                              name="payment_option"
+                              checked={formData.payment_options[index].enabled}
+                              onChange={() => {
+                                // Disable all other options (including Pay in Full and Monthly)
+                                [0, 1, 2, 3, 4, 5].forEach((i) => {
+                                  if (i !== index) {
+                                    updatePaymentOption(i, "enabled", false);
+                                  }
+                                });
+                                // Enable the selected one
+                                updatePaymentOption(index, "enabled", true);
+                              }}
+                              className="w-4 h-4 text-[#F3BC48] border-border-light focus:ring-btn-gold"
+                            />
+                            <span className="text-sm font-medium font-manrope text-heading-dark">
+                              {label}
+                            </span>
+                          </label>
+                          {formData.payment_options[index].enabled && (
+                            <div className="flex-1 space-y-2">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                                    Display Name
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={
+                                      formData.payment_options[index]
+                                        .custom_name
+                                    }
+                                    onChange={(e) =>
+                                      updatePaymentOption(
+                                        index,
+                                        "custom_name",
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light text-sm"
+                                    placeholder={defaultName}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                                    Monthly Payment ($)
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={
+                                      formData.payment_options[index].price
+                                    }
+                                    onChange={(e) =>
+                                      updatePaymentOption(
+                                        index,
+                                        "price",
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                                    placeholder="Monthly payment"
+                                  />
+                                </div>
+                              </div>
+                              {errors[`payment_${type}`] && (
+                                <p className="text-error-darkest text-xs mt-1">
+                                  {errors[`payment_${type}`]}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!formData.class_type && (
+                  <p className="text-sm text-gray-500 italic font-manrope">
+                    Select a class type above to configure its payment options.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1649,6 +1606,46 @@ export default function ClassFormModal({
                     Preview link →
                   </a>
                 )}
+              </div>
+            </div>
+
+            {/* Display Settings Section — control what the public pages show */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
+                Display Settings
+              </h3>
+              <p className="text-sm text-gray-600">
+                Control what appears on the public explore and class detail
+                pages for this class. Unchecked items are hidden from parents.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { key: "show_capacity", label: "Show capacity" },
+                  { key: "show_spots_remaining", label: "Show spots remaining" },
+                  { key: "show_pricing", label: "Show pricing" },
+                  { key: "show_coach", label: "Show coach" },
+                  { key: "show_program_type", label: "Show program type" },
+                ].map(({ key, label }) => (
+                  <label
+                    key={key}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.display_settings?.[key] !== false}
+                      onChange={(e) =>
+                        updateField("display_settings", {
+                          ...formData.display_settings,
+                          [key]: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-[#F3BC48] border-border-light rounded focus:ring-btn-gold"
+                    />
+                    <span className="text-sm font-medium font-manrope text-heading-dark">
+                      {label}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
 
