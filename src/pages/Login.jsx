@@ -51,26 +51,39 @@ export default function Login() {
       localStorage.setItem("role", target.storage);
 
       // Priority 1: Check if user was trying to register for a class
-      const intendedClass = sessionStorage.getItem('intendedClass');
+      const intendedClass = sessionStorage.getItem("intendedClass");
       if (intendedClass) {
-        sessionStorage.removeItem('intendedClass');
+        sessionStorage.removeItem("intendedClass");
 
         // Only allow parents to access checkout
-        if (normalizedRole === 'PARENT') {
+        if (normalizedRole === "PARENT") {
           navigate(`/checkout?classId=${intendedClass}`, { replace: true });
           return;
         } else {
           // Non-parent user - show error and go to their dashboard
-          toast.error('Only parents can register for classes');
+          toast.error("Only parents can register for classes");
           navigate(target.route, { replace: true });
           return;
         }
       }
 
-      // Priority 2: Check if user was redirected from another page
+      // Priority 2: Check if user was redirected from another page (deep link).
       const fromLocation = location.state?.from;
-      const from = fromLocation ? (fromLocation.pathname + (fromLocation.search || '')) : null;
-      const intendedRoute = from && from !== '/login' ? from : target.route;
+      const from = fromLocation
+        ? fromLocation.pathname + (fromLocation.search || "")
+        : null;
+      // Never "return" a user to ANOTHER role's home dashboard via `from`
+      // (e.g. an admin bounced from /coachdashboard while logged out must not
+      // land back on the coach dashboard after logging in). Role home routes
+      // are always reached via role logic; deep sub-links are still honored.
+      const ROLE_HOME_ROUTES = ["/dashboard", "/coachdashboard", "/admin"];
+      const fromPath = from ? from.split("?")[0] : null;
+      const isForeignHome =
+        fromPath &&
+        ROLE_HOME_ROUTES.includes(fromPath) &&
+        fromPath !== target.route;
+      const intendedRoute =
+        from && from !== "/login" && !isForeignHome ? from : target.route;
 
       // Navigate to intended page or fallback to role-based default
       navigate(intendedRoute, { replace: true });

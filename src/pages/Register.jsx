@@ -74,12 +74,21 @@ export default function Register() {
         }
       }
 
-      // Priority 2: Check if user was redirected from another page
+      // Priority 2: Check if user was redirected from another page (deep link).
       const fromLocation = location.state?.from;
       const from = fromLocation
         ? fromLocation.pathname + (fromLocation.search || "")
         : null;
-      const intendedRoute = from && from !== "/register" ? from : target.route;
+      // Never "return" a user to ANOTHER role's home dashboard via `from`
+      // (deep sub-links are still honored; role homes are reached via role logic).
+      const ROLE_HOME_ROUTES = ["/dashboard", "/coachdashboard", "/admin"];
+      const fromPath = from ? from.split("?")[0] : null;
+      const isForeignHome =
+        fromPath &&
+        ROLE_HOME_ROUTES.includes(fromPath) &&
+        fromPath !== target.route;
+      const intendedRoute =
+        from && from !== "/register" && !isForeignHome ? from : target.route;
 
       // Navigate to intended page or fallback to role-based default
       navigate(intendedRoute, { replace: true });
