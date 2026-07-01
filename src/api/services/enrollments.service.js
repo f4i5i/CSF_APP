@@ -255,6 +255,37 @@ const enrollmentsService = {
   },
 
   /**
+   * List a class's waitlist entries (admin only).
+   * Backend returns { class_id, class_name, total_waitlisted, priority_count,
+   * regular_count, entries: [{ enrollment_id, child_id, child_name, class_id,
+   * class_name, waitlist_priority, position, auto_promote,
+   * claim_window_expires_at, created_at }] }.
+   * @param {string} classId - Class ID
+   * @returns {Promise<Object>} Waitlist response with an `entries` array
+   */
+  async getClassWaitlist(classId) {
+    const { data } = await apiClient.get(
+      API_ENDPOINTS.ENROLLMENTS.WAITLIST_BY_CLASS(classId),
+    );
+    return data;
+  },
+
+  /**
+   * Manually promote a waitlisted enrollment to active (admin only).
+   * @param {string} id - Enrollment ID
+   * @param {Object} [options] - Promotion options
+   * @param {boolean} [options.skip_payment] - Skip the payment requirement
+   * @returns {Promise<Object>} The promoted enrollment
+   */
+  async promoteFromWaitlist(id, options = {}) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.WAITLIST_PROMOTE(id),
+      options,
+    );
+    return data;
+  },
+
+  /**
    * Transfer enrollment to another class
    * @param {string} id - Enrollment ID
    * @param {string} newClassId - New class ID

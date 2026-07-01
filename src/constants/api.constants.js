@@ -109,6 +109,7 @@ export const API_ENDPOINTS = {
     WAITLIST_JOIN: "/enrollments/waitlist/join", // Join waitlist for a full class
     WAITLIST_CLAIM: (id) => `/enrollments/${id}/waitlist/claim`, // Claim a regular waitlist spot
     WAITLIST_BY_CLASS: (classId) => `/enrollments/waitlist/class/${classId}`, // List a class's waitlist
+    WAITLIST_PROMOTE: (id) => `/enrollments/${id}/waitlist/promote`, // Manually promote a waitlisted enrollment (ADMIN)
   },
 
   // ===================

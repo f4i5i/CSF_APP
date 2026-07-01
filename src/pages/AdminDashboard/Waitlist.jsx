@@ -3,37 +3,73 @@
  * Admin page for managing class waitlists
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { UserPlus, X, Bell } from 'lucide-react';
-import DataTable from '../../components/admin/DataTable';
-import FilterBar from '../../components/admin/FilterBar';
-import ConfirmDialog from '../../components/admin/ConfirmDialog';
-import waitlistService from '../../api/services/waitlist.service';
-import Header from '../../components/Header';
+import React, { useState, useEffect, useCallback } from "react";
+import { UserPlus, X, GraduationCap } from "lucide-react";
+import DataTable from "../../components/admin/DataTable";
+import FilterBar from "../../components/admin/FilterBar";
+import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import enrollmentsService from "../../api/services/enrollments.service";
+import classesService from "../../api/services/classes.service";
+import Header from "../../components/Header";
 
 export default function Waitlist() {
   const [waitlistEntries, setWaitlistEntries] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [classFilter, setClassFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [classFilter, setClassFilter] = useState("");
 
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
-    title: '',
-    message: '',
+    title: "",
+    message: "",
     action: null,
   });
 
+  // Load classes to drive the required class selector (the real waitlist
+  // list endpoint is scoped to a single class).
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await classesService.getAll({ limit: 200 });
+        setClasses(response?.items || response || []);
+      } catch (error) {
+        console.error("Failed to fetch classes:", error);
+      }
+    })();
+  }, []);
+
   const fetchWaitlist = useCallback(async () => {
+    // The backend lists the waitlist per class, so a class must be selected.
+    if (!classFilter) {
+      setWaitlistEntries([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      const response = await waitlistService.getAll({
-        class_id: classFilter,
-        search: searchQuery,
-      });
-      setWaitlistEntries(response.data || response);
+      const response = await enrollmentsService.getClassWaitlist(classFilter);
+      const entries = (response?.entries || []).map((entry) => ({
+        id: entry.enrollment_id,
+        position: entry.position,
+        class: { name: entry.class_name },
+        child: { first_name: entry.child_name },
+        parent: {},
+        joined_date: entry.created_at,
+        status: entry.waitlist_priority,
+      }));
+      const query = searchQuery.trim().toLowerCase();
+      setWaitlistEntries(
+        query
+          ? entries.filter((row) =>
+              [row.child?.first_name, row.class?.name]
+                .filter(Boolean)
+                .some((field) => field.toLowerCase().includes(query)),
+            )
+          : entries,
+      );
     } catch (error) {
-      console.error('Failed to fetch waitlist:', error);
+      console.error("Failed to fetch waitlist:", error);
     } finally {
       setLoading(false);
     }
@@ -43,44 +79,37 @@ export default function Waitlist() {
     fetchWaitlist();
   }, [fetchWaitlist]);
 
-  const handleMoveToEnrolled = async (waitlistId) => {
+  const handleMoveToEnrolled = async (enrollmentId) => {
     try {
-      await waitlistService.moveToEnrolled(waitlistId, { notify: true });
-      alert('Student moved to enrolled successfully');
+      await enrollmentsService.promoteFromWaitlist(enrollmentId);
+      alert("Student promoted from waitlist successfully");
       fetchWaitlist();
       setConfirmDialog({ isOpen: false });
     } catch (error) {
-      console.error('Failed to move to enrolled:', error);
-      alert('Failed to move student to enrolled: ' + (error.message || 'Unknown error'));
+      console.error("Failed to promote from waitlist:", error);
+      alert(
+        "Failed to promote student from waitlist: " +
+          (error.message || "Unknown error"),
+      );
     }
   };
 
-  const handleRemove = async (waitlistId) => {
+  const handleRemove = async (enrollmentId) => {
     try {
-      await waitlistService.remove(waitlistId);
-      alert('Removed from waitlist successfully');
+      await enrollmentsService.delete(enrollmentId);
+      alert("Removed from waitlist successfully");
       fetchWaitlist();
       setConfirmDialog({ isOpen: false });
     } catch (error) {
-      console.error('Failed to remove from waitlist:', error);
-      alert('Failed to remove from waitlist');
-    }
-  };
-
-  const handleNotify = async (waitlistId) => {
-    try {
-      await waitlistService.notifyAvailable(waitlistId);
-      alert('Notification sent successfully');
-    } catch (error) {
-      console.error('Failed to send notification:', error);
-      alert('Failed to send notification');
+      console.error("Failed to remove from waitlist:", error);
+      alert("Failed to remove from waitlist");
     }
   };
 
   const columns = [
     {
-      key: 'position',
-      label: 'Position',
+      key: "position",
+      label: "Position",
       sortable: true,
       render: (value) => (
         <div className="w-8 h-8 bg-[#F3BC48] rounded-full flex items-center justify-center">
@@ -89,32 +118,37 @@ export default function Waitlist() {
       ),
     },
     {
-      key: 'class',
-      label: 'Class',
+      key: "class",
+      label: "Class",
       render: (value, row) => (
         <div>
-          <p className="font-semibold text-[#173151] text-sm">{row.class?.name}</p>
+          <p className="font-semibold text-[#173151] text-sm">
+            {row.class?.name}
+          </p>
           <p className="text-xs text-gray-500">
-            Capacity: {row.class?.current_enrollment || 0}/{row.class?.capacity || 0}
+            Capacity: {row.class?.current_enrollment || 0}/
+            {row.class?.capacity || 0}
           </p>
         </div>
       ),
     },
     {
-      key: 'child',
-      label: 'Child',
+      key: "child",
+      label: "Child",
       render: (value, row) => (
         <div>
           <p className="font-semibold text-[#173151]">
             {row.child?.first_name} {row.child?.last_name}
           </p>
-          <p className="text-xs text-gray-500">Age: {row.child?.age || 'N/A'}</p>
+          <p className="text-xs text-gray-500">
+            Age: {row.child?.age || "N/A"}
+          </p>
         </div>
       ),
     },
     {
-      key: 'parent',
-      label: 'Parent',
+      key: "parent",
+      label: "Parent",
       render: (value, row) => (
         <div>
           <p className="text-sm text-gray-700">
@@ -125,48 +159,43 @@ export default function Waitlist() {
       ),
     },
     {
-      key: 'joined_date',
-      label: 'Joined Waitlist',
-      type: 'date',
+      key: "joined_date",
+      label: "Joined Waitlist",
+      type: "date",
       sortable: true,
     },
     {
-      key: 'status',
-      label: 'Status',
-      type: 'status',
+      key: "status",
+      label: "Status",
+      type: "status",
       sortable: true,
     },
     {
-      key: 'actions',
-      label: 'Actions',
-      type: 'actions',
-      align: 'right',
+      key: "actions",
+      label: "Actions",
+      type: "actions",
+      align: "right",
       actions: (row) => [
         {
-          label: 'Move to Enrolled',
+          label: "Move to Enrolled",
           icon: UserPlus,
           onClick: () => {
             setConfirmDialog({
               isOpen: true,
-              title: 'Move to Enrolled',
+              title: "Move to Enrolled",
               message: `Move ${row.child?.first_name} from waitlist to enrolled? They will receive an enrollment notification.`,
               action: () => handleMoveToEnrolled(row.id),
             });
           },
         },
         {
-          label: 'Notify Spot Available',
-          icon: Bell,
-          onClick: () => handleNotify(row.id),
-        },
-        {
-          label: 'Remove from Waitlist',
+          label: "Remove from Waitlist",
           icon: X,
-          variant: 'destructive',
+          variant: "destructive",
           onClick: () => {
             setConfirmDialog({
               isOpen: true,
-              title: 'Remove from Waitlist',
+              title: "Remove from Waitlist",
               message: `Remove ${row.child?.first_name} from the waitlist?`,
               action: () => handleRemove(row.id),
             });
@@ -176,12 +205,24 @@ export default function Waitlist() {
     },
   ];
 
-  const filters = [];
+  const filters = [
+    {
+      type: "select",
+      icon: GraduationCap,
+      value: classFilter,
+      placeholder: "Select a class",
+      onChange: setClassFilter,
+      options: (classes || []).map((cls) => ({
+        value: cls.id,
+        label: cls.name,
+      })),
+    },
+  ];
 
   const hasActiveFilters = classFilter || searchQuery;
   const clearFilters = () => {
-    setSearchQuery('');
-    setClassFilter('');
+    setSearchQuery("");
+    setClassFilter("");
   };
 
   return (
@@ -216,7 +257,11 @@ export default function Waitlist() {
             columns={columns}
             data={waitlistEntries}
             loading={loading}
-            emptyMessage="No students on waitlist"
+            emptyMessage={
+              classFilter
+                ? "No students on waitlist"
+                : "Select a class to view its waitlist"
+            }
             pagination={false}
           />
         </div>
