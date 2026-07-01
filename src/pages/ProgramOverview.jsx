@@ -26,6 +26,40 @@ const getClassImage = () => {
   return image; // Use the existing imported image
 };
 
+/**
+ * Derive a parent-facing waitlist badge from an enrollment object, using only
+ * fields the enrollment already carries (status, waitlist_priority,
+ * position/promoted_at). Position isn't part of every enrollment payload, so
+ * it degrades to a plain "Waitlisted" label when absent. Returns null when the
+ * enrollment isn't waitlist-relevant (or no enrollment is present at all).
+ */
+const getWaitlistEnrollmentStatus = (enrollment) => {
+  if (!enrollment) return null;
+
+  const status = String(enrollment.status || "").toLowerCase();
+
+  // Promoted off the waitlist into an active seat.
+  if (status === "active" && enrollment.promoted_at) {
+    return { label: "Enrolled from waitlist", tone: "success" };
+  }
+
+  if (status === "waitlisted") {
+    const position = enrollment.position ?? enrollment.waitlist_position;
+    const priority = String(enrollment.waitlist_priority || "").toLowerCase();
+
+    let label = "Waitlisted";
+    if (typeof position === "number" && position > 0) {
+      label = `Waitlisted — #${position}`;
+    } else if (priority === "priority") {
+      label = "Waitlisted (Priority)";
+    }
+
+    return { label, tone: "waitlist" };
+  }
+
+  return null;
+};
+
 export default function ProgramOverview() {
   const navigate = useNavigate();
   // Fetch programs from API
@@ -214,6 +248,9 @@ export default function ProgramOverview() {
           hasCapacity: capacityMeta.hasCapacity,
           spotsRemaining: capacityMeta.availableSpots,
           waitlistCount: capacityMeta.waitlistCount,
+          waitlistStatus: getWaitlistEnrollmentStatus(
+            cls.my_enrollment || cls.enrollment,
+          ),
           badgeLabel,
           offeringType,
           priceModel: getPriceModelLabel(cls, offeringType),
@@ -562,14 +599,26 @@ export default function ProgramOverview() {
                       <p className="text-gray-500">No classes found.</p>
                     ) : (
                       filteredClasses(area.id).map((cls) => (
-                        <ClassCard
-                          key={cls.id}
-                          cls={cls}
-                          onClick={() => navigate(`/class/${cls.id}`)}
-                          onRegister={() =>
-                            navigate(`/checkout?classId=${cls.id}`)
-                          }
-                        />
+                        <div key={cls.id} className="relative">
+                          {cls.waitlistStatus && (
+                            <div
+                              className={`mb-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-manrope font-semibold ${
+                                cls.waitlistStatus.tone === "success"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-[#FDF3DC] text-[#8A6516]"
+                              }`}
+                            >
+                              {cls.waitlistStatus.label}
+                            </div>
+                          )}
+                          <ClassCard
+                            cls={cls}
+                            onClick={() => navigate(`/class/${cls.id}`)}
+                            onRegister={() =>
+                              navigate(`/checkout?classId=${cls.id}`)
+                            }
+                          />
+                        </div>
                       ))
                     )}
                   </div>

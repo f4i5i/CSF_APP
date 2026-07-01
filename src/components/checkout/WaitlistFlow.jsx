@@ -3,17 +3,18 @@
  * Displays when class is full and allows joining the waitlist
  */
 
-import React, { useState } from 'react';
-import { Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { Users, Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
   const [isJoining, setIsJoining] = useState(false);
   const [joined, setJoined] = useState(false);
+  const [waitlistEntry, setWaitlistEntry] = useState(null);
   const [error, setError] = useState(null);
 
   const handleJoinWaitlist = async () => {
     if (!childId) {
-      setError('Please select a child first');
+      setError("Please select a child first");
       return;
     }
 
@@ -21,17 +22,42 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
     setError(null);
 
     try {
-      await onJoinWaitlist(classData.id, childId);
+      // The API returns the created waitlisted enrollment; keep it so the
+      // confirmation can reflect the real tier/state instead of static copy.
+      const entry = await onJoinWaitlist(classData.id, childId);
+      setWaitlistEntry(entry || null);
       setJoined(true);
     } catch (err) {
-      console.error('Failed to join waitlist:', err);
-      setError(err.message || 'Failed to join waitlist. Please try again.');
+      console.error("Failed to join waitlist:", err);
+      setError(err.message || "Failed to join waitlist. Please try again.");
     } finally {
       setIsJoining(false);
     }
   };
 
   if (joined) {
+    // Derive the real state from the enrollment the API returned. Priority /
+    // auto-promote entries are auto-enrolled and charged to the saved card when
+    // a spot opens; regular entries get a claim window to confirm and pay.
+    // Position isn't part of the enrollment response, so we don't show one.
+    const priority = String(
+      waitlistEntry?.waitlist_priority || "",
+    ).toLowerCase();
+    const autoCharge =
+      waitlistEntry?.auto_promote === true || priority === "priority";
+    const claimExpiresAt = waitlistEntry?.claim_window_expires_at
+      ? new Date(waitlistEntry.claim_window_expires_at)
+      : null;
+    const claimDeadline =
+      claimExpiresAt && !Number.isNaN(claimExpiresAt.getTime())
+        ? claimExpiresAt.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : null;
+
     return (
       <div className="bg-white/50 backdrop-blur-sm rounded-fluid-xl p-fluid-5 shadow-sm border border-white/20">
         <div className="text-center py-8">
@@ -40,11 +66,15 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
           </div>
 
           <h2 className="text-fluid-xl font-bold font-manrope text-[#173151] mb-2">
-            Added to Waitlist!
+            {autoCharge
+              ? "You're on the Priority Waitlist!"
+              : "Added to Waitlist!"}
           </h2>
 
           <p className="text-fluid-base font-manrope text-[#666D80] mb-6">
-            You'll receive an email notification when a spot becomes available.
+            {autoCharge
+              ? "When a spot opens we'll automatically enroll your child and charge the card on file — no further action needed."
+              : "We'll email you the moment a spot opens so you can confirm the spot and complete payment."}
           </p>
 
           <div className="bg-blue-50 rounded-lg p-4 mb-6">
@@ -52,14 +82,31 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
               <strong>What happens next?</strong>
             </p>
             <ul className="text-sm font-manrope text-blue-700 mt-2 space-y-1 text-left list-disc list-inside">
-              <li>We'll notify you via email when a spot opens</li>
-              <li>You'll have 24 hours to complete enrollment</li>
-              <li>You can manage your waitlist status in your dashboard</li>
+              {autoCharge ? (
+                <>
+                  <li>We'll notify you by email when a spot opens</li>
+                  <li>
+                    Your child is enrolled automatically and your saved card is
+                    charged the class fee
+                  </li>
+                  <li>You can manage your waitlist status in your dashboard</li>
+                </>
+              ) : (
+                <>
+                  <li>We'll notify you via email when a spot opens</li>
+                  <li>
+                    {claimDeadline
+                      ? `You'll have until ${claimDeadline} to confirm and complete enrollment`
+                      : "You'll have a limited window to confirm and complete enrollment"}
+                  </li>
+                  <li>You can manage your waitlist status in your dashboard</li>
+                </>
+              )}
             </ul>
           </div>
 
           <button
-            onClick={() => window.location.href = '/dashboard'}
+            onClick={() => (window.location.href = "/dashboard")}
             className="px-6 py-3 bg-[#173151] text-white font-manrope font-semibold rounded-lg hover:bg-[#173151]/90 transition"
           >
             Go to Dashboard
@@ -84,14 +131,14 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
 
         {/* Waitlist Info */}
         <p className="text-fluid-base font-manrope text-[#666D80] mb-6">
-          Don't worry! You can join the waitlist and we'll notify you when a spot becomes
-          available.
+          Don't worry! You can join the waitlist and we'll notify you when a
+          spot becomes available.
         </p>
 
         {/* Class Details Card */}
         <div className="bg-white rounded-lg p-4 mb-6 text-left">
           <h3 className="font-manrope font-semibold text-base text-[#173151] mb-3">
-            {classData?.name || 'Class Details'}
+            {classData?.name || "Class Details"}
           </h3>
 
           <div className="space-y-2">
@@ -102,7 +149,8 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
                   Current Waitlist:
                 </span>
                 <span className="text-sm font-manrope font-semibold text-[#173151]">
-                  {classData.waitlist_count} {classData.waitlist_count === 1 ? 'student' : 'students'}
+                  {classData.waitlist_count}{" "}
+                  {classData.waitlist_count === 1 ? "student" : "students"}
                 </span>
               </div>
             )}
@@ -110,7 +158,9 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
             {/* Capacity */}
             {classData?.capacity && (
               <div className="flex items-center justify-between">
-                <span className="text-sm font-manrope text-[#666D80]">Capacity:</span>
+                <span className="text-sm font-manrope text-[#666D80]">
+                  Capacity:
+                </span>
                 <span className="text-sm font-manrope font-semibold text-[#173151]">
                   {classData.current_enrollment || 0}/{classData.capacity}
                 </span>
@@ -120,12 +170,14 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
             {/* Start Date */}
             {classData?.start_date && (
               <div className="flex items-center justify-between">
-                <span className="text-sm font-manrope text-[#666D80]">Starts:</span>
+                <span className="text-sm font-manrope text-[#666D80]">
+                  Starts:
+                </span>
                 <span className="text-sm font-manrope font-semibold text-[#173151]">
-                  {new Date(classData.start_date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
+                  {new Date(classData.start_date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
                   })}
                 </span>
               </div>
@@ -138,7 +190,9 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
           <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="text-left">
-              <p className="font-manrope font-semibold text-sm text-red-900">Error</p>
+              <p className="font-manrope font-semibold text-sm text-red-900">
+                Error
+              </p>
               <p className="font-manrope text-sm text-red-700 mt-1">{error}</p>
             </div>
           </div>

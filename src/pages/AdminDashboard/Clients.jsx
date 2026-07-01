@@ -423,6 +423,45 @@ export default function Clients() {
                       </p>
                     )}
 
+                    {/* Emergency Contacts */}
+                    <div className="mt-3 space-y-1.5">
+                      <p className="text-xs font-medium text-text-muted flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        Emergency Contacts
+                      </p>
+                      {child.emergency_contacts &&
+                      child.emergency_contacts.length > 0 ? (
+                        <div className="space-y-1">
+                          {child.emergency_contacts.map((contact, idx) => (
+                            <div
+                              key={idx}
+                              className="text-xs px-2 py-1 rounded bg-gray-50 text-gray-600"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="truncate font-medium text-text-primary">
+                                  {contact.name || "—"}
+                                </span>
+                                {(contact.relation || contact.relationship) && (
+                                  <span className="text-[10px] uppercase shrink-0">
+                                    {contact.relation || contact.relationship}
+                                  </span>
+                                )}
+                              </div>
+                              {contact.phone && (
+                                <span className="text-text-muted">
+                                  {contact.phone}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-text-muted italic">
+                          No emergency contacts
+                        </p>
+                      )}
+                    </div>
+
                     {/* Add Class Button */}
                     <button
                       onClick={() => navigate(`/class?child_id=${child.id}`)}
