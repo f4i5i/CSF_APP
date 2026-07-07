@@ -46,6 +46,7 @@ import { ArrowLeft, Clock, User } from "lucide-react";
 
 // Services and Context
 import classesService from "../../api/services/classes.service";
+import { getOfferingType } from "../../utils/classHelpers";
 import { useAuth } from "../../context/auth";
 
 // Components
@@ -534,7 +535,11 @@ export default function ClassDetail() {
                     {/* Price display */}
                     <div className="flex justify-between items-center w-full">
                       <h4 className="font-bold text-lg font-manrope text-text-primary">
-                        Total Price
+                        {getOfferingType(classData) === "membership" ||
+                        String(classData.billing_model).toLowerCase() ===
+                          "monthly"
+                          ? "Monthly Price"
+                          : "Total Price"}
                       </h4>
                       <div className="text-[32px] font-semibold font-manrope">
                         ${classData.price || "0"}

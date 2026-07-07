@@ -17,7 +17,7 @@ const loadGooglePlacesScript = (apiKey) => {
 
     // Check if script is already being loaded
     const existingScript = document.querySelector(
-      'script[src*="maps.googleapis.com/maps/api/js"]'
+      'script[src*="maps.googleapis.com/maps/api/js"]',
     );
     if (existingScript) {
       existingScript.addEventListener("load", () => resolve(window.google));
@@ -105,6 +105,27 @@ export default function GooglePlacesAutocomplete({
 
   const apiKey = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
 
+  // Google renders its suggestions dropdown (.pac-container) as a direct child
+  // of <body>, so its default z-index (1000) can end up *below* modal overlays
+  // in some stacking contexts, leaving the suggestions invisible/unclickable.
+  // Force it above everything so the address list is always reachable.
+  useEffect(() => {
+    const STYLE_ID = "gplaces-pac-container-zfix";
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = ".pac-container{z-index:100000 !important;}";
+    document.head.appendChild(style);
+  }, []);
+
+  // Selecting a Google suggestion with Enter must not submit the surrounding
+  // <form> (the class form) — that was firing a premature create/save.
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  }, []);
+
   // Initialize Google Places
   useEffect(() => {
     if (!apiKey) {
@@ -141,7 +162,7 @@ export default function GooglePlacesAutocomplete({
             "formatted_address",
             "geometry",
           ],
-        }
+        },
       );
 
       autocompleteRef.current.addListener("place_changed", () => {
@@ -174,7 +195,7 @@ export default function GooglePlacesAutocomplete({
     return () => {
       if (autocompleteRef.current) {
         window.google?.maps?.event?.clearInstanceListeners(
-          autocompleteRef.current
+          autocompleteRef.current,
         );
       }
     };
@@ -203,6 +224,7 @@ export default function GooglePlacesAutocomplete({
           type="text"
           value={value}
           onChange={(e) => onChange && onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
           className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold ${className}`}
@@ -234,6 +256,7 @@ export default function GooglePlacesAutocomplete({
           type="text"
           value={value}
           onChange={(e) => onChange && onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={isLoading ? "Loading..." : placeholder}
           disabled={disabled || isLoading}
           className={`w-full pl-9 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold ${

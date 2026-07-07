@@ -14,8 +14,8 @@
 
 .rbc-header {
   font-family: 'Kollektif', sans-serif;
-  font-weight: 400;
-  color: rgba(37, 40, 43, 0.88);
+  font-weight: 500;
+  color: #25282b;
   padding: 12px 0;
   font-size: 18px;
   letter-spacing: 0.1px;
@@ -31,13 +31,13 @@
   font-size: 18px;
   font-family: 'Montserrat', sans-serif;
   font-weight: 600;
-  color: rgba(37, 40, 43, 0.56);
+  color: #25282b;
   text-align: right;
 }
 
-/* Past days faded */
+/* Past / adjacent-month days: dimmed but still legible */
 .rbc-off-range {
-  color: rgba(37, 40, 43, 0.22) !important;
+  color: rgba(37, 40, 43, 0.5) !important;
 }
 
 .rbc-off-range-bg {
