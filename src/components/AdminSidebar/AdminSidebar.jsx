@@ -1,6 +1,40 @@
 import React, { useState, useMemo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Users, UserCog, Calendar, DollarSign, FileText, BarChart3, ChevronRight, ChevronDown, PanelRightOpen, PanelLeftOpen, LogOut, ClipboardList, Layers, MapPin, School, RotateCcw, CalendarDays, Award, Image, XCircle, Settings, Bell, Shield, Tag, Mail } from "lucide-react";
+import {
+  Home,
+  BookOpen,
+  Users,
+  UserCog,
+  Calendar,
+  DollarSign,
+  FileText,
+  BarChart3,
+  ChevronRight,
+  ChevronDown,
+  PanelRightOpen,
+  PanelLeftOpen,
+  LogOut,
+  ClipboardList,
+  Layers,
+  MapPin,
+  School,
+  RotateCcw,
+  CalendarDays,
+  Award,
+  Image,
+  XCircle,
+  Settings,
+  Bell,
+  Shield,
+  Tag,
+  Mail,
+  Megaphone,
+  Contact,
+  Send,
+  Filter,
+  Upload,
+  History,
+} from "lucide-react";
 import { useAuth } from "../../context/auth";
 import { usePermissions } from "../../hooks/usePermissions";
 
@@ -11,45 +45,110 @@ const categorizedRoutes = [
     category: "Setup",
     icon: Settings,
     items: [
-      { name: "Programs", to: "/admin/programs", icon: Layers, permission: "canManagePrograms" },
-      { name: "Areas", to: "/admin/areas", icon: MapPin, permission: "canManageAreas" },
-      { name: "Sites", to: "/admin/schools", icon: School, permission: "canManageSchools" },
-    ]
+      {
+        name: "Programs",
+        to: "/admin/programs",
+        icon: Layers,
+        permission: "canManagePrograms",
+      },
+      {
+        name: "Areas",
+        to: "/admin/areas",
+        icon: MapPin,
+        permission: "canManageAreas",
+      },
+      {
+        name: "Sites",
+        to: "/admin/schools",
+        icon: School,
+        permission: "canManageSchools",
+      },
+    ],
   },
   {
     category: "Classes",
     icon: BookOpen,
     items: [
-      { name: "Classes", to: "/admin/classes", icon: BookOpen, permission: "canManageClasses" },
-      { name: "Enrollments", to: "/admin/enrollments", icon: ClipboardList, permission: "canManageClasses" },
-      { name: "Discounts", to: "/admin/discounts", icon: Tag, permission: "canManageDiscounts" },
-    ]
+      {
+        name: "Classes",
+        to: "/admin/classes",
+        icon: BookOpen,
+        permission: "canManageClasses",
+      },
+      {
+        name: "Enrollments",
+        to: "/admin/enrollments",
+        icon: ClipboardList,
+        permission: "canManageClasses",
+      },
+      {
+        name: "Discounts",
+        to: "/admin/discounts",
+        icon: Tag,
+        permission: "canManageDiscounts",
+      },
+    ],
   },
   {
     category: "People",
     icon: Users,
     items: [
-      { name: "Users", to: "/admin/users", icon: UserCog, permission: "canManageUsers" },
-      { name: "Clients", to: "/clients", icon: Users, permission: "canViewAllClients" },
-    ]
+      {
+        name: "Users",
+        to: "/admin/users",
+        icon: UserCog,
+        permission: "canManageUsers",
+      },
+      {
+        name: "Clients",
+        to: "/clients",
+        icon: Users,
+        permission: "canViewAllClients",
+      },
+    ],
   },
   {
     category: "Documents",
     icon: FileText,
     items: [
-      { name: "Waivers", to: "/admin/waivers", icon: FileText, permission: "canManageWaivers" },
-      { name: "Waiver Reports", to: "/admin/waiver-reports", icon: BarChart3, permission: "canViewReports" },
-    ]
+      {
+        name: "Waivers",
+        to: "/admin/waivers",
+        icon: FileText,
+        permission: "canManageWaivers",
+      },
+      {
+        name: "Waiver Reports",
+        to: "/admin/waiver-reports",
+        icon: BarChart3,
+        permission: "canViewReports",
+      },
+    ],
   },
   {
     category: "Finance",
     icon: DollarSign,
     minRole: "OWNER", // Only Owner can access finance section
     items: [
-      { name: "Financials", to: "/financials", icon: DollarSign, permission: "canViewFinancials" },
-      { name: "Refunds", to: "/admin/refunds", icon: RotateCcw, permission: "canProcessRefunds" },
-      { name: "Cancellations", to: "/admin/cancellations", icon: XCircle, permission: "canManageFinancials" },
-    ]
+      {
+        name: "Financials",
+        to: "/financials",
+        icon: DollarSign,
+        permission: "canViewFinancials",
+      },
+      {
+        name: "Refunds",
+        to: "/admin/refunds",
+        icon: RotateCcw,
+        permission: "canProcessRefunds",
+      },
+      {
+        name: "Cancellations",
+        to: "/admin/cancellations",
+        icon: XCircle,
+        permission: "canManageFinancials",
+      },
+    ],
   },
   {
     category: "Media",
@@ -59,17 +158,63 @@ const categorizedRoutes = [
       { name: "Announcements", to: "/admin/announcements", icon: Bell },
       { name: "Calendar", to: "/admin/calendar", icon: Calendar },
       { name: "Events", to: "/admin/events", icon: CalendarDays },
-      { name: "Badges", to: "/admin/badges", icon: Award, permission: "canManageBadges" },
+      {
+        name: "Badges",
+        to: "/admin/badges",
+        icon: Award,
+        permission: "canManageBadges",
+      },
       { name: "Photos", to: "/admin/photos", icon: Image },
-    ]
+    ],
+  },
+  {
+    category: "Marketing",
+    icon: Megaphone,
+    items: [
+      {
+        name: "Contacts",
+        to: "/admin/marketing/contacts",
+        icon: Contact,
+        permission: "canManageMarketing",
+      },
+      {
+        name: "Compose Email",
+        to: "/admin/marketing/compose",
+        icon: Send,
+        permission: "canManageMarketing",
+      },
+      {
+        name: "Segments",
+        to: "/admin/marketing/segments",
+        icon: Filter,
+        permission: "canManageMarketing",
+      },
+      {
+        name: "Import History",
+        to: "/admin/marketing/imports",
+        icon: Upload,
+        permission: "canManageMarketing",
+      },
+      {
+        name: "Send History",
+        to: "/admin/marketing/sends",
+        icon: History,
+        permission: "canManageMarketing",
+      },
+    ],
   },
   {
     category: "System",
     icon: Shield,
     minRole: "OWNER", // Only visible to Owner
     items: [
-      { name: "Settings", to: "/admin/settings", icon: Settings, permission: "canManageSystemSettings" },
-    ]
+      {
+        name: "Settings",
+        to: "/admin/settings",
+        icon: Settings,
+        permission: "canManageSystemSettings",
+      },
+    ],
   },
 ];
 
@@ -89,26 +234,26 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
   const navigate = useNavigate();
 
   const toggleCategory = (category) => {
-    setExpandedCategories(prev => ({
+    setExpandedCategories((prev) => ({
       ...prev,
-      [category]: !prev[category]
+      [category]: !prev[category],
     }));
   };
 
   // Filter routes based on permissions
   const filteredRoutes = useMemo(() => {
     return categorizedRoutes
-      .filter(item => {
+      .filter((item) => {
         // Check if category has a minimum role requirement
         if (item.minRole && !isAtLeast(item.minRole)) {
           return false;
         }
         return true;
       })
-      .map(item => {
+      .map((item) => {
         // If it's a category with items, filter the items
         if (item.items) {
-          const filteredItems = item.items.filter(subItem => {
+          const filteredItems = item.items.filter((subItem) => {
             // If no permission required, show item
             if (!subItem.permission) return true;
             // Check if user has the required permission
@@ -167,11 +312,13 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
       {/* Role Badge */}
       {!collapsed && (
         <div className="px-4 py-2">
-          <div className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${
-            isOwner
-              ? 'bg-purple-100 text-purple-800 border border-purple-200'
-              : 'bg-blue-100 text-blue-800 border border-blue-200'
-          }`}>
+          <div
+            className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${
+              isOwner
+                ? "bg-purple-100 text-purple-800 border border-purple-200"
+                : "bg-blue-100 text-blue-800 border border-blue-200"
+            }`}
+          >
             <Shield size={12} />
             <span>{roleLabel}</span>
           </div>
@@ -206,7 +353,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
                 </div>
                 {!collapsed && (
                   <>
-                    <span className="flex-1 truncate font-manrope">{item.name}</span>
+                    <span className="flex-1 truncate font-manrope">
+                      {item.name}
+                    </span>
                     <ChevronRight size={16} className="text-gray-700" />
                   </>
                 )}
@@ -248,7 +397,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
               {/* Category Items */}
               <div
                 className={`overflow-hidden transition-all duration-200 ${
-                  collapsed || isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  collapsed || isExpanded
+                    ? "max-h-96 opacity-100"
+                    : "max-h-0 opacity-0"
                 }`}
               >
                 {item.items.map((subItem) => {
@@ -276,7 +427,9 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
                       </div>
                       {!collapsed && (
                         <>
-                          <span className="flex-1 truncate font-manrope text-sm">{subItem.name}</span>
+                          <span className="flex-1 truncate font-manrope text-sm">
+                            {subItem.name}
+                          </span>
                           <ChevronRight size={14} className="text-gray-500" />
                         </>
                       )}
