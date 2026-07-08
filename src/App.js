@@ -108,6 +108,11 @@ import AnnouncementsManagement from "./pages/AdminDashboard/AnnouncementsManagem
 import AdminCalendar from "./pages/AdminDashboard/AdminCalendar";
 import DiscountManagement from "./pages/AdminDashboard/DiscountManagement";
 import MassEmail from "./pages/AdminDashboard/MassEmail";
+import MarketingContacts from "./pages/AdminDashboard/marketing/Contacts";
+import MarketingCompose from "./pages/AdminDashboard/marketing/Compose";
+import MarketingSegments from "./pages/AdminDashboard/marketing/Segments";
+import MarketingImportHistory from "./pages/AdminDashboard/marketing/ImportHistory";
+import MarketingSendHistory from "./pages/AdminDashboard/marketing/SendHistory";
 import WaiversManagement from "./pages/admin/WaiversManagement";
 import WaiverReports from "./pages/admin/WaiverReports";
 import PublicRoster from "./pages/PublicRoster";
@@ -580,6 +585,28 @@ export default function App() {
 
             {/* Mass Email - Send bulk emails to parents */}
             <Route path="/admin/mass-email" element={<MassEmail />} />
+
+            {/* Marketing module - contacts, segments, compose, history */}
+            <Route
+              path="/admin/marketing/contacts"
+              element={<MarketingContacts />}
+            />
+            <Route
+              path="/admin/marketing/compose"
+              element={<MarketingCompose />}
+            />
+            <Route
+              path="/admin/marketing/segments"
+              element={<MarketingSegments />}
+            />
+            <Route
+              path="/admin/marketing/imports"
+              element={<MarketingImportHistory />}
+            />
+            <Route
+              path="/admin/marketing/sends"
+              element={<MarketingSendHistory />}
+            />
           </Route>
         </Routes>
       </ChildrenProvider>

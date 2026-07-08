@@ -78,6 +78,25 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/schools/${id}/`, // Delete school (ADMIN)
   },
 
+  // Marketing module (ADMIN/OWNER) — contacts, segments, sends
+  MARKETING: {
+    UPLOAD: "/marketing/upload/excel", // Import CSV/XLSX contacts
+    RECORDS: "/marketing/records", // Filtered, paginated contacts
+    FILTER_SCHEMA: "/marketing/records/filter-schema", // Fields + operators
+    UPDATE_CONTACT: (id) => `/marketing/records/${id}`, // PATCH contact
+    DELETE_CONTACT: (id) => `/marketing/records/${id}`, // Soft-delete contact
+    BULK_DELETE: "/marketing/records/bulk-delete", // Delete by ids/filters
+    DUPLICATES: "/marketing/records/duplicates", // Duplicate emails
+    SEGMENTS: "/marketing/segments", // List/create segments
+    SEGMENT_BY_ID: (id) => `/marketing/segments/${id}`, // Update/delete segment
+    PREVIEW_COUNT: "/marketing/send/preview-count", // Live recipient count
+    SEND: "/marketing/send", // Compose + send
+    SENDS: "/marketing/sends", // Send history
+    SEND_BY_ID: (id) => `/marketing/sends/${id}`, // One send
+    OPERATIONS: "/marketing/operations", // Import history
+    OPERATION_ERRORS: (id) => `/marketing/operations/${id}/errors`, // Error CSV
+  },
+
   // ===================
   // CLASSES
   // ===================

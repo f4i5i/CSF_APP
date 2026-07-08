@@ -13,10 +13,10 @@ export const ROLE_HIERARCHY = {
 
 // Role display names
 export const ROLE_LABELS = {
-  PARENT: 'Parent',
-  COACH: 'Coach',
-  ADMIN: 'Admin',
-  OWNER: 'Owner',
+  PARENT: "Parent",
+  COACH: "Coach",
+  ADMIN: "Admin",
+  OWNER: "Owner",
 };
 
 // Permission definitions for each role
@@ -42,6 +42,7 @@ export const ROLE_PERMISSIONS = {
     canViewReports: true,
     canExportData: true,
     canManageDiscounts: true,
+    canManageMarketing: true,
     canManageSystemSettings: true,
   },
   ADMIN: {
@@ -59,6 +60,7 @@ export const ROLE_PERMISSIONS = {
     canManageFinancials: false, // Only Owner can manage financials
     canProcessRefunds: false, // Only Owner can process refunds
     canManageDiscounts: true, // Admin can manage discounts/coupons
+    canManageMarketing: true, // Admin + Owner can manage marketing contacts
     canViewAllClients: true,
     canDeleteClients: false, // Only Owner can delete clients
     canViewRosters: true,
@@ -82,6 +84,7 @@ export const ROLE_PERMISSIONS = {
     canManageFinancials: false,
     canProcessRefunds: false,
     canManageDiscounts: false,
+    canManageMarketing: false,
     canViewAllClients: false,
     canDeleteClients: false,
     canViewRosters: true, // Coaches can view rosters of their classes
@@ -110,6 +113,7 @@ export const ROLE_PERMISSIONS = {
     canManageFinancials: false,
     canProcessRefunds: false,
     canManageDiscounts: false,
+    canManageMarketing: false,
     canViewAllClients: false,
     canDeleteClients: false,
     canViewRosters: false,
@@ -150,7 +154,7 @@ export const hasPermission = (role, permission) => {
  * @returns {boolean}
  */
 export const hasAnyPermission = (role, permissions) => {
-  return permissions.some(perm => hasPermission(role, perm));
+  return permissions.some((perm) => hasPermission(role, perm));
 };
 
 /**
@@ -160,7 +164,7 @@ export const hasAnyPermission = (role, permissions) => {
  * @returns {boolean}
  */
 export const hasAllPermissions = (role, permissions) => {
-  return permissions.every(perm => hasPermission(role, perm));
+  return permissions.every((perm) => hasPermission(role, perm));
 };
 
 /**
@@ -181,7 +185,7 @@ export const isRoleAtLeast = (userRole, minimumRole) => {
  * @returns {boolean}
  */
 export const canAccessAdmin = (role) => {
-  return isRoleAtLeast(role, 'ADMIN');
+  return isRoleAtLeast(role, "ADMIN");
 };
 
 /**
@@ -207,18 +211,18 @@ export const getRoleLabel = (role) => {
 // Admin sidebar menu items with required permissions
 export const ADMIN_MENU_ITEMS = {
   dashboard: { permission: null }, // All admin roles
-  classes: { permission: 'canManageClasses' },
-  programs: { permission: 'canManagePrograms' },
-  schools: { permission: 'canManageSchools' },
-  areas: { permission: 'canManageAreas' },
-  clients: { permission: 'canViewAllClients' },
-  enrollments: { permission: 'canManageClasses' },
-  waivers: { permission: 'canManageWaivers' },
-  badges: { permission: 'canManageBadges' },
-  users: { permission: 'canManageUsers', minRole: 'ADMIN' },
-  financials: { permission: 'canViewFinancials' },
-  reports: { permission: 'canViewReports' },
-  settings: { permission: 'canManageSystemSettings', minRole: 'OWNER' },
+  classes: { permission: "canManageClasses" },
+  programs: { permission: "canManagePrograms" },
+  schools: { permission: "canManageSchools" },
+  areas: { permission: "canManageAreas" },
+  clients: { permission: "canViewAllClients" },
+  enrollments: { permission: "canManageClasses" },
+  waivers: { permission: "canManageWaivers" },
+  badges: { permission: "canManageBadges" },
+  users: { permission: "canManageUsers", minRole: "ADMIN" },
+  financials: { permission: "canViewFinancials" },
+  reports: { permission: "canViewReports" },
+  settings: { permission: "canManageSystemSettings", minRole: "OWNER" },
 };
 
 /**
@@ -228,7 +232,7 @@ export const ADMIN_MENU_ITEMS = {
  * @returns {Array} Filtered menu items
  */
 export const filterMenuByRole = (role, menuItems) => {
-  return menuItems.filter(item => {
+  return menuItems.filter((item) => {
     // If no permission required, show to all admin roles
     if (!item.permission && !item.minRole) {
       return canAccessAdmin(role);
