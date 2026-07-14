@@ -131,3 +131,20 @@ export const formatGrade = (grade) => {
   if (grade === "k") return "K";
   return grade.toUpperCase();
 };
+
+/**
+ * Badge label + Tailwind classes for a class's lifecycle status.
+ * A completed class (end date passed / marked complete) wins over is_active,
+ * which the nightly job flips to false — otherwise it would mislabel as "Draft".
+ * @param {{ status?: string, is_active?: boolean }} cls
+ * @returns {{ label: string, className: string }}
+ */
+export const getClassStatusBadge = (cls) => {
+  if (cls?.status === "completed") {
+    return { label: "Completed", className: "bg-gray-100 text-gray-600" };
+  }
+  if (cls?.is_active) {
+    return { label: "Active", className: "bg-[#DFF5E8] text-status-success" };
+  }
+  return { label: "Draft", className: "bg-amber-100 text-amber-700" };
+};
