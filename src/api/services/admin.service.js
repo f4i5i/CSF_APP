@@ -17,6 +17,19 @@ const adminService = {
   },
 
   /**
+   * Download the full parent + child CSV export as a Blob.
+   * @param {Object} params - optional { start_date, end_date, program_id }
+   * @returns {Promise<Blob>} CSV file blob
+   */
+  async exportStudentsCsv(params = {}) {
+    const response = await apiClient.get(API_ENDPOINTS.ADMIN.EXPORT_STUDENTS, {
+      params,
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  /**
    * Get revenue report
    * @param {Object} params - Report parameters
    * @param {string} [params.start_date] - Start date (YYYY-MM-DD)

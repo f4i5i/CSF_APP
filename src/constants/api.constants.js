@@ -336,6 +336,7 @@ export const API_ENDPOINTS = {
     CLIENT_BY_ID: (id) => `/admin/clients/${id}`, // Client details
     COACHES: "/admin/coaches", // List coaches for class assignment
     ROSTER: (classId) => `/admin/classes/${classId}/roster`, // Class roster
+    EXPORT_STUDENTS: "/admin/export/students", // Full parent + child CSV export
 
     // Refunds
     REFUNDS_SEARCH: "/admin/refunds/search", // Search/filter refunds
