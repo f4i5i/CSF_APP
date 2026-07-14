@@ -17,6 +17,7 @@ import {
   Loader2,
   Pencil,
   UserPlus,
+  Download,
 } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -32,6 +33,7 @@ import toast from "react-hot-toast";
 export default function Clients() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
+  const [exporting, setExporting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -647,6 +649,27 @@ export default function Clients() {
     setCurrentPage(1);
   };
 
+  const handleExportStudents = async () => {
+    setExporting(true);
+    try {
+      const blob = await adminService.exportStudentsCsv();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `students_export_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Students CSV exported");
+    } catch (err) {
+      console.error("Failed to export students CSV:", err);
+      toast.error("Failed to export students CSV");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <Header />
@@ -661,6 +684,19 @@ export default function Clients() {
               Manage client accounts and their enrollments
             </p>
           </div>
+          <button
+            onClick={handleExportStudents}
+            disabled={exporting}
+            title="Download all parent + child fields (incl. emergency contacts) as CSV"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-btn-gold hover:bg-[#e5ad35] disabled:opacity-60 text-text-primary text-xs sm:text-sm font-semibold rounded-lg transition-colors shrink-0"
+          >
+            {exporting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            {exporting ? "Exporting…" : "Export CSV"}
+          </button>
         </div>
 
         <div className="shrink-0">
