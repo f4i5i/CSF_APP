@@ -1,21 +1,30 @@
 /**
  * Google Places Autocomplete Component
- * Provides address search with auto-population of address fields
+ *
+ * Address search with auto-population of address fields, built on the
+ * **new** Places API ("Places API (New)") Autocomplete Data API
+ * (`AutocompleteSuggestion.fetchAutocompleteSuggestions` + `Place.fetchFields`).
+ *
+ * The legacy `google.maps.places.Autocomplete` widget was retired for new
+ * Google Cloud projects on 2025-03-01 (ApiNotActivatedMapError / "not
+ * available to new customers"). This implementation keeps a controlled
+ * <input> and renders its own suggestions dropdown, so the surrounding form
+ * still owns the field value (free-text site names keep working) and there is
+ * no body-level `.pac-container` to fight modal stacking contexts.
  */
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { MapPin, Loader2, X } from "lucide-react";
 
-// Load Google Places API script
+// Load the Google Maps JS script (places library). Kept as-is: it only loads
+// the SDK; the autocomplete calls below use the new Places API classes.
 const loadGooglePlacesScript = (apiKey) => {
   return new Promise((resolve, reject) => {
-    // Check if already loaded
     if (window.google && window.google.maps && window.google.maps.places) {
       resolve(window.google);
       return;
     }
 
-    // Check if script is already being loaded
     const existingScript = document.querySelector(
       'script[src*="maps.googleapis.com/maps/api/js"]',
     );
@@ -25,9 +34,8 @@ const loadGooglePlacesScript = (apiKey) => {
       return;
     }
 
-    // Create and load script
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve(window.google);
@@ -36,48 +44,43 @@ const loadGooglePlacesScript = (apiKey) => {
   });
 };
 
-// Parse address components from Google Places result
+// Parse address components from a NEW Places API `Place` object.
+// The new API uses `addressComponents` with `longText`/`shortText`
+// (vs the legacy `address_components` with `long_name`/`short_name`).
 const parseAddressComponents = (place) => {
   const result = {
-    name: place.name || "",
+    name: place.displayName || "",
     address: "",
     city: "",
     state: "",
     zipCode: "",
-    fullAddress: place.formatted_address || "",
+    fullAddress: place.formattedAddress || "",
   };
 
-  if (!place.address_components) {
-    return result;
-  }
-
-  const components = place.address_components;
-
-  // Build street address from street number and route
+  const components = place.addressComponents || [];
   let streetNumber = "";
   let route = "";
 
   for (const component of components) {
-    const types = component.types;
+    const types = component.types || [];
 
     if (types.includes("street_number")) {
-      streetNumber = component.long_name;
+      streetNumber = component.longText || "";
     }
     if (types.includes("route")) {
-      route = component.long_name;
+      route = component.longText || "";
     }
     if (types.includes("locality") || types.includes("sublocality")) {
-      result.city = component.long_name;
+      result.city = component.longText || result.city;
     }
     if (types.includes("administrative_area_level_1")) {
-      result.state = component.short_name; // Use short name for state (e.g., "CA" instead of "California")
+      result.state = component.shortText || ""; // e.g. "CA"
     }
     if (types.includes("postal_code")) {
-      result.zipCode = component.long_name;
+      result.zipCode = component.longText || "";
     }
   }
 
-  // Combine street number and route for address
   if (streetNumber && route) {
     result.address = `${streetNumber} ${route}`;
   } else if (route) {
@@ -97,36 +100,23 @@ export default function GooglePlacesAutocomplete({
   label,
   required = false,
 }) {
+  const apiKey = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
+
   const inputRef = useRef(null);
-  const autocompleteRef = useRef(null);
+  const placesRef = useRef(null); // { AutocompleteSessionToken, AutocompleteSuggestion }
+  const sessionTokenRef = useRef(null);
+  const debounceRef = useRef(null);
+  const blurTimerRef = useRef(null);
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [predictions, setPredictions] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
-  const apiKey = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
-
-  // Google renders its suggestions dropdown (.pac-container) as a direct child
-  // of <body>, so its default z-index (1000) can end up *below* modal overlays
-  // in some stacking contexts, leaving the suggestions invisible/unclickable.
-  // Force it above everything so the address list is always reachable.
-  useEffect(() => {
-    const STYLE_ID = "gplaces-pac-container-zfix";
-    if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = ".pac-container{z-index:100000 !important;}";
-    document.head.appendChild(style);
-  }, []);
-
-  // Selecting a Google suggestion with Enter must not submit the surrounding
-  // <form> (the class form) — that was firing a premature create/save.
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-    }
-  }, []);
-
-  // Initialize Google Places
+  // Selecting a suggestion with Enter must not submit the surrounding <form>.
+  // Load the SDK and resolve the new Places API classes once.
   useEffect(() => {
     if (!apiKey) {
       setError("Google Places API key not configured");
@@ -134,84 +124,146 @@ export default function GooglePlacesAutocomplete({
       return;
     }
 
+    let cancelled = false;
     loadGooglePlacesScript(apiKey)
-      .then(() => {
-        setIsLoaded(true);
-        setIsLoading(false);
+      .then(async () => {
+        const g = window.google;
+        const lib = g.maps.importLibrary
+          ? await g.maps.importLibrary("places")
+          : g.maps.places;
+        placesRef.current = {
+          AutocompleteSessionToken: lib.AutocompleteSessionToken,
+          AutocompleteSuggestion: lib.AutocompleteSuggestion,
+        };
+        if (!cancelled) {
+          setIsLoaded(true);
+          setIsLoading(false);
+        }
       })
       .catch((err) => {
         console.error("Failed to load Google Places API:", err);
-        setError("Failed to load location search");
-        setIsLoading(false);
+        if (!cancelled) {
+          setError("Failed to load location search");
+          setIsLoading(false);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [apiKey]);
 
-  // Initialize Autocomplete when script is loaded
-  useEffect(() => {
-    if (!isLoaded || !inputRef.current || autocompleteRef.current) return;
+  const fetchPredictions = useCallback(async (input) => {
+    const P = placesRef.current;
+    if (!P?.AutocompleteSuggestion || !input || input.trim().length < 2) {
+      setPredictions([]);
+      setOpen(false);
+      return;
+    }
+
+    // One session token spans the keystrokes leading to a selection (billing).
+    if (!sessionTokenRef.current && P.AutocompleteSessionToken) {
+      sessionTokenRef.current = new P.AutocompleteSessionToken();
+    }
 
     try {
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        inputRef.current,
-        {
-          types: ["establishment", "geocode"],
-          componentRestrictions: { country: "us" },
-          fields: [
-            "name",
-            "address_components",
-            "formatted_address",
-            "geometry",
-          ],
-        },
-      );
+      const { suggestions } =
+        await P.AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: input.trim(),
+          sessionToken: sessionTokenRef.current,
+          includedRegionCodes: ["us"],
+        });
 
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current.getPlace();
+      const preds = (suggestions || [])
+        .map((s) => s.placePrediction)
+        .filter(Boolean)
+        .map((p) => ({
+          id: p.placeId,
+          text: p.text?.toString?.() ?? String(p.text ?? ""),
+          prediction: p,
+        }));
 
-        if (!place || !place.address_components) {
-          return;
-        }
-
-        const parsedAddress = parseAddressComponents(place);
-
-        // Update the input value with the place name
-        if (onChange) {
-          onChange(parsedAddress.name || place.name || "");
-        }
-
-        // Notify parent with all parsed address data
-        if (onPlaceSelect) {
-          onPlaceSelect(parsedAddress);
-        }
-      });
+      setPredictions(preds);
+      setOpen(preds.length > 0);
+      setActiveIndex(-1);
     } catch (err) {
-      console.error("Failed to initialize Google Places Autocomplete:", err);
-      setError("Failed to initialize location search");
+      console.error("Autocomplete fetch failed:", err);
+      setPredictions([]);
+      setOpen(false);
     }
-  }, [isLoaded, onChange, onPlaceSelect]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (autocompleteRef.current) {
-        window.google?.maps?.event?.clearInstanceListeners(
-          autocompleteRef.current,
-        );
-      }
-    };
   }, []);
 
+  const handleInputChange = useCallback(
+    (e) => {
+      const v = e.target.value;
+      if (onChange) onChange(v);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => fetchPredictions(v), 250);
+    },
+    [onChange, fetchPredictions],
+  );
+
+  const handleSelect = useCallback(
+    async (pred) => {
+      try {
+        const place = pred.prediction.toPlace();
+        await place.fetchFields({
+          fields: ["displayName", "formattedAddress", "addressComponents"],
+        });
+        const parsed = parseAddressComponents(place);
+        if (onChange) onChange(parsed.name || pred.text);
+        if (onPlaceSelect) onPlaceSelect(parsed);
+      } catch (err) {
+        console.error("Failed to fetch place details:", err);
+      } finally {
+        setPredictions([]);
+        setOpen(false);
+        setActiveIndex(-1);
+        sessionTokenRef.current = null; // selection ends the billing session
+      }
+    },
+    [onChange, onPlaceSelect],
+  );
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter") {
+        // Never let a selection/Enter submit the surrounding class form.
+        e.preventDefault();
+        if (open && activeIndex >= 0 && predictions[activeIndex]) {
+          handleSelect(predictions[activeIndex]);
+        }
+      } else if (e.key === "ArrowDown" && predictions.length) {
+        e.preventDefault();
+        setOpen(true);
+        setActiveIndex((i) => Math.min(i + 1, predictions.length - 1));
+      } else if (e.key === "ArrowUp" && predictions.length) {
+        e.preventDefault();
+        setActiveIndex((i) => Math.max(i - 1, 0));
+      } else if (e.key === "Escape") {
+        setOpen(false);
+      }
+    },
+    [open, activeIndex, predictions, handleSelect],
+  );
+
   const handleClear = useCallback(() => {
-    if (onChange) {
-      onChange("");
-    }
-    if (inputRef.current) {
-      inputRef.current.value = "";
-      inputRef.current.focus();
-    }
+    if (onChange) onChange("");
+    setPredictions([]);
+    setOpen(false);
+    if (inputRef.current) inputRef.current.focus();
   }, [onChange]);
 
-  // If no API key, show regular input
+  // Cleanup timers on unmount.
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+    },
+    [],
+  );
+
+  // If no API key, show a plain manual-entry input.
   if (!apiKey) {
     return (
       <div>
@@ -224,7 +276,7 @@ export default function GooglePlacesAutocomplete({
           type="text"
           value={value}
           onChange={(e) => onChange && onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
           placeholder={placeholder}
           disabled={disabled}
           className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold ${className}`}
@@ -255,10 +307,17 @@ export default function GooglePlacesAutocomplete({
           ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => onChange && onChange(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onFocus={() => {
+            if (predictions.length) setOpen(true);
+          }}
+          onBlur={() => {
+            blurTimerRef.current = setTimeout(() => setOpen(false), 150);
+          }}
           placeholder={isLoading ? "Loading..." : placeholder}
           disabled={disabled || isLoading}
+          autoComplete="off"
           className={`w-full pl-9 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btn-gold focus:border-btn-gold ${
             disabled ? "bg-gray-100" : ""
           } ${className}`}
@@ -271,6 +330,26 @@ export default function GooglePlacesAutocomplete({
           >
             <X className="w-4 h-4" />
           </button>
+        )}
+        {open && predictions.length > 0 && (
+          <ul className="absolute left-0 right-0 z-[100000] mt-1 max-h-56 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+            {predictions.map((p, idx) => (
+              <li
+                key={p.id || idx}
+                // onMouseDown (not onClick) so the selection fires before the
+                // input's onBlur closes the dropdown.
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(p);
+                }}
+                className={`cursor-pointer px-3 py-2 text-sm ${
+                  idx === activeIndex ? "bg-gray-100" : "hover:bg-gray-50"
+                }`}
+              >
+                {p.text}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
