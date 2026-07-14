@@ -33,6 +33,7 @@ import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import ClassFormModal from "../../components/admin/ClassFormModal";
 import classesService from "../../api/services/classes.service";
+import { getClassStatusBadge } from "../../utils/format";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import adminService from "../../api/services/admin.service";
@@ -582,17 +583,16 @@ export default function Classes() {
       label: "Status",
       type: "status",
       sortable: true,
-      render: (value) => (
-        <span
-          className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap ${
-            value
-              ? "bg-[#DFF5E8] text-status-success"
-              : "bg-amber-100 text-amber-700"
-          }`}
-        >
-          {value ? "Active" : "Draft"}
-        </span>
-      ),
+      render: (value, row) => {
+        const badge = getClassStatusBadge(row);
+        return (
+          <span
+            className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap ${badge.className}`}
+          >
+            {badge.label}
+          </span>
+        );
+      },
     },
     {
       key: "actions",
@@ -1290,9 +1290,9 @@ export default function Classes() {
                           </span>
                         )}
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-semibold ${cls.is_active ? "bg-[#DFF5E8] text-status-success" : "bg-amber-100 text-amber-700"}`}
+                          className={`text-xs px-2 py-0.5 rounded-full font-semibold ${getClassStatusBadge(cls).className}`}
                         >
-                          {cls.is_active ? "Active" : "Draft"}
+                          {getClassStatusBadge(cls).label}
                         </span>
                       </div>
                       {cls.description && (
