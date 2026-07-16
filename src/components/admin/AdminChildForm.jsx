@@ -3,8 +3,7 @@ import { motion } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import childrenService from "../../api/services/children.service";
-import { GRADE_OPTIONS } from "../../utils/format";
-const JERSEY_SIZES = ["xs", "s", "m", "l", "xl", "xxl"];
+import { GRADE_OPTIONS, JERSEY_SIZE_OPTIONS } from "../../utils/format";
 const RELATION_OPTIONS = [
   "Parent",
   "Guardian",
@@ -308,9 +307,9 @@ export default function AdminChildForm({
                 className={inputStyle("jersey_size")}
               >
                 <option value="">Select size</option>
-                {JERSEY_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s.toUpperCase()}
+                {JERSEY_SIZE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
                   </option>
                 ))}
               </select>

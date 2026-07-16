@@ -27,7 +27,7 @@ import Header from "../../components/Header";
 import adminService from "../../api/services/admin.service";
 import childrenService from "../../api/services/children.service";
 import programsService from "../../api/services/programs.service";
-import { formatGrade } from "../../utils/format";
+import { formatGrade, formatJerseySize } from "../../utils/format";
 import toast from "react-hot-toast";
 
 export default function Clients() {
@@ -380,7 +380,9 @@ export default function Clients() {
                         <span>• Grade {formatGrade(child.grade)}</span>
                       )}
                       {child.jersey_size && (
-                        <span>• Jersey {child.jersey_size.toUpperCase()}</span>
+                        <span>
+                          • Jersey {formatJerseySize(child.jersey_size)}
+                        </span>
                       )}
                     </div>
 

@@ -16,7 +16,12 @@ import toast from "react-hot-toast";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import childrenService from "../api/services/children.service";
-import { formatGrade, GRADE_OPTIONS } from "../utils/format";
+import {
+  formatGrade,
+  formatJerseySize,
+  GRADE_OPTIONS,
+  JERSEY_SIZE_OPTIONS,
+} from "../utils/format";
 
 // Calculate age from DOB
 function calculateAge(dob) {
@@ -414,7 +419,7 @@ export default function MyChildren() {
                         />
                         <Detail
                           label="Jersey Size"
-                          value={child.jersey_size?.toUpperCase()}
+                          value={formatJerseySize(child.jersey_size)}
                         />
                         <Detail
                           label="After School"
@@ -670,9 +675,9 @@ export default function MyChildren() {
                     className={inputClass("jersey")}
                   >
                     <option value="">Select</option>
-                    {["xs", "s", "m", "l", "xl", "xxl"].map((s) => (
-                      <option key={s} value={s}>
-                        {s.toUpperCase()}
+                    {JERSEY_SIZE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
                       </option>
                     ))}
                   </select>
