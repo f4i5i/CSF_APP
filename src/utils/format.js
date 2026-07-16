@@ -133,6 +133,36 @@ export const formatGrade = (grade) => {
 };
 
 /**
+ * Jersey size options matching backend JerseySize enum.
+ * Use this everywhere a jersey size dropdown is needed.
+ */
+export const JERSEY_SIZE_OPTIONS = [
+  { value: "youth_xxs", label: "Youth XXS" },
+  { value: "youth_xs", label: "Youth XS" },
+  { value: "youth_s", label: "Youth S" },
+  { value: "youth_m", label: "Youth M" },
+  { value: "youth_l", label: "Youth L" },
+  { value: "youth_xl", label: "Youth XL" },
+  { value: "s", label: "S" },
+  { value: "m", label: "M" },
+  { value: "l", label: "L" },
+  { value: "xl", label: "XL" },
+];
+
+/**
+ * Format jersey size value for display.
+ * Backend stores: "youth_m", "xl", etc.
+ * Display as: "Youth M", "XL", etc.
+ * @param {string} size - Jersey size value from API
+ * @returns {string} Formatted jersey size for display
+ */
+export const formatJerseySize = (size) => {
+  if (!size) return "";
+  const match = JERSEY_SIZE_OPTIONS.find((o) => o.value === size.toLowerCase());
+  return match ? match.label : size.toUpperCase();
+};
+
+/**
  * Badge label + Tailwind classes for a class's lifecycle status.
  * A completed class (end date passed / marked complete) wins over is_active,
  * which the nightly job flips to false — otherwise it would mislabel as "Draft".

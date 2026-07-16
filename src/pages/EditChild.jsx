@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { Camera, X, Loader2 } from "lucide-react";
 import childrenService from "../api/services/children.service";
 import Logo from "../components/Logo";
-import { GRADE_OPTIONS } from "../utils/format";
+import { GRADE_OPTIONS, JERSEY_SIZE_OPTIONS } from "../utils/format";
 
 export default function EditChild() {
   const navigate = useNavigate();
@@ -415,12 +415,11 @@ export default function EditChild() {
                 className={inputStyle("jersey")}
               >
                 <option value="">Select size</option>
-                <option value="xs">XS</option>
-                <option value="s">S</option>
-                <option value="m">M</option>
-                <option value="l">L</option>
-                <option value="xl">XL</option>
-                <option value="xxl">XXL</option>
+                {JERSEY_SIZE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
               {errors.jersey && (
                 <p className="text-red-500 text-xs mt-1">{errors.jersey}</p>

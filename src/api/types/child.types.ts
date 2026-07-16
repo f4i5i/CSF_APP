@@ -124,15 +124,16 @@ export interface ChildFilters {
  * Jersey sizes
  */
 export enum JerseySize {
-  YXS = 'YXS',
-  YS = 'YS',
-  YM = 'YM',
-  YL = 'YL',
-  YXL = 'YXL',
-  AS = 'AS',
-  AM = 'AM',
-  AL = 'AL',
-  AXL = 'AXL',
+  YOUTH_XXS = 'youth_xxs',
+  YOUTH_XS = 'youth_xs',
+  YOUTH_S = 'youth_s',
+  YOUTH_M = 'youth_m',
+  YOUTH_L = 'youth_l',
+  YOUTH_XL = 'youth_xl',
+  S = 's',
+  M = 'm',
+  L = 'l',
+  XL = 'xl',
 }
 
 /**

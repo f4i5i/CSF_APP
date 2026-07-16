@@ -154,12 +154,21 @@ describe('AdminChildForm Component', () => {
 
     it('should render jersey size options', () => {
       render(<AdminChildForm {...defaultProps} />);
-      expect(screen.getByText('XS')).toBeInTheDocument();
+      // Youth tier
+      expect(screen.getByText('Youth XXS')).toBeInTheDocument();
+      expect(screen.getByText('Youth XS')).toBeInTheDocument();
+      expect(screen.getByText('Youth S')).toBeInTheDocument();
+      expect(screen.getByText('Youth M')).toBeInTheDocument();
+      expect(screen.getByText('Youth L')).toBeInTheDocument();
+      expect(screen.getByText('Youth XL')).toBeInTheDocument();
+      // Adult tier -- exact text match, so these do not collide with 'Youth X'
       expect(screen.getByText('S')).toBeInTheDocument();
       expect(screen.getByText('M')).toBeInTheDocument();
       expect(screen.getByText('L')).toBeInTheDocument();
       expect(screen.getByText('XL')).toBeInTheDocument();
-      expect(screen.getByText('XXL')).toBeInTheDocument();
+      // Retired sizes must be gone
+      expect(screen.queryByText('XS')).not.toBeInTheDocument();
+      expect(screen.queryByText('XXL')).not.toBeInTheDocument();
     });
 
     it('should render emergency contact relation options', () => {
