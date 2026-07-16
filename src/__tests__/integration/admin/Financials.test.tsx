@@ -723,7 +723,7 @@ describe('Financials Page Integration Tests', () => {
   });
 
   describe('Monthly Data Generation', () => {
-    it('should generate sample data when no real data available', async () => {
+    it('should render an empty chart when no real data available', async () => {
       server.use(
         http.get(`${API_BASE}/admin/finance/revenue`, () => {
           return HttpResponse.json({
@@ -739,7 +739,7 @@ describe('Financials Page Integration Tests', () => {
         expect(screen.queryByRole('progressbar', { hidden: true })).not.toBeInTheDocument();
       });
 
-      // Chart should still render with sample data
+      // Chart still renders, but with zeros -- it must never invent sample data.
       expect(screen.getByText(/Revenue per Class/i)).toBeInTheDocument();
     });
 

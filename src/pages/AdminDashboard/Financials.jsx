@@ -99,8 +99,7 @@ const Financials = () => {
     return classes.map((cls) => ({
       id: cls.id,
       label: `${cls.school?.name || "Unknown"} • ${cls.name}`,
-      // Generate monthly data from revenue report if available
-      monthly: generateMonthlyData(revenueReport, cls.id),
+      monthly: generateMonthlyData(revenueReport),
     }));
   }, [classes, revenueReport]);
 
@@ -227,46 +226,47 @@ const Financials = () => {
   );
 };
 
-// Helper function to generate monthly data from revenue report
-function generateMonthlyData(revenueReport, classId) {
-  // If we have revenue by date, extract monthly totals
-  if (revenueReport?.revenue_by_date) {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+/**
+ * Revenue for a single day from the report's revenue_by_date entry.
+ * The API sends the per-payment-type keys alongside a pre-computed "total",
+ * so summing every value in the entry would count the day's revenue twice.
+ */
+function dayRevenue(values) {
+  if (!values) return 0;
+  if (typeof values.total === "number") return values.total;
+  return Object.entries(values)
+    .filter(([key]) => key !== "total")
+    .reduce((sum, [, val]) => sum + (Number(val) || 0), 0);
+}
 
-    const monthlyTotals = months.map(() => 0);
+/**
+ * Month index (0-11) for a "YYYY-MM-DD" report key.
+ * Read off the string rather than via new Date(): a date-only string parses as
+ * UTC midnight, which resolves to the previous month in US timezones.
+ */
+function monthIndexOf(dateStr) {
+  const month = Number(String(dateStr).split("-")[1]);
+  return Number.isInteger(month) && month >= 1 && month <= 12 ? month - 1 : -1;
+}
 
-    Object.entries(revenueReport.revenue_by_date).forEach(
-      ([dateStr, values]) => {
-        const date = new Date(dateStr);
-        const monthIndex = date.getMonth();
-        const total = Object.values(values).reduce((sum, val) => sum + val, 0);
-        monthlyTotals[monthIndex] += total;
-      },
-    );
+/**
+ * Monthly revenue totals (Jan-Dec) from the revenue report.
+ * Months with no revenue stay 0 -- an empty report renders a flat chart, which
+ * is the truth. Note this is org-wide: /admin/finance/revenue has no per-class
+ * breakdown, so this cannot yet be scoped to a single class.
+ */
+export function generateMonthlyData(revenueReport) {
+  const monthlyTotals = Array(12).fill(0);
+  if (!revenueReport?.revenue_by_date) return monthlyTotals;
 
-    // Return non-zero values or sample data
-    const hasData = monthlyTotals.some((v) => v > 0);
-    if (hasData) {
-      return monthlyTotals;
+  Object.entries(revenueReport.revenue_by_date).forEach(([dateStr, values]) => {
+    const monthIndex = monthIndexOf(dateStr);
+    if (monthIndex >= 0) {
+      monthlyTotals[monthIndex] += dayRevenue(values);
     }
-  }
+  });
 
-  // Return sample data if no real data available
-  // This provides a realistic chart for demo purposes
-  return [200, 300, 250, 280, 310, 340, 360, 380, 400, 420, 450, 480];
+  return monthlyTotals;
 }
 
 export default Financials;
