@@ -37,6 +37,7 @@ import React, { useState, useEffect } from "react";
 import {
   Link,
   useNavigate,
+  useParams,
   useSearchParams,
   useLocation,
 } from "react-router-dom";
@@ -47,6 +48,7 @@ import { ArrowLeft, Clock, User } from "lucide-react";
 // Services and Context
 import classesService from "../../api/services/classes.service";
 import { getOfferingType } from "../../utils/classHelpers";
+
 import { useAuth } from "../../context/auth";
 
 // Components
@@ -55,6 +57,12 @@ import Footer from "@/components/Footer";
 
 // UI Libraries
 import toast from "react-hot-toast";
+
+// A class is fetched by id or by slug depending on which the URL carries.
+// Slugs are lowercase kebab-case and never match this shape.
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isUuid = (value) => UUID_PATTERN.test(String(value || ""));
 
 // ============================================================================
 // CUSTOM ICON COMPONENTS
@@ -94,8 +102,14 @@ export default function ClassDetail() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth(); // Get current authenticated user
 
-  // Extract class ID from URL query parameters
-  const classId = searchParams.get("id");
+  // The class this page is showing, taken from either URL shape:
+  //   /class/blythe-spring-session  (slug -- the link shared with families)
+  //   /class/<uuid>                 (id)
+  //   /class-detail?id=<uuid>       (legacy, still linked from ClassList)
+  // Only the route segment is ambiguous; ?id= is always an id.
+  const { classRef: routeRef } = useParams();
+  const classRef = routeRef || searchParams.get("id");
+  const lookupBySlug = Boolean(routeRef) && !isUuid(routeRef);
 
   // Get area ID from location state (passed from ClassList)
   const _areaId = location.state?.areaId;
@@ -112,15 +126,15 @@ export default function ClassDetail() {
   // --------------------------------------------------------------------------
 
   useEffect(() => {
-    if (classId) {
+    if (classRef) {
       loadClassDetails();
     } else {
-      // No class ID in URL - redirect to class list
+      // No class in URL - redirect to class list
       toast.error("No class ID provided");
       navigate(backToClassListUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classId]);
+  }, [classRef]);
 
   // --------------------------------------------------------------------------
   // API FUNCTIONS
@@ -133,7 +147,9 @@ export default function ClassDetail() {
   const loadClassDetails = async () => {
     try {
       setLoading(true);
-      const data = await classesService.getById(classId);
+      const data = lookupBySlug
+        ? await classesService.getBySlug(classRef)
+        : await classesService.getById(classRef);
 
       // Backward compatibility: Construct school object from individual fields
       // if school object doesn't exist but school_name does
@@ -171,8 +187,9 @@ export default function ClassDetail() {
   const handleRegister = () => {
     // Step 1: Authentication check
     if (!user) {
-      // Save intended class for post-login redirect
-      sessionStorage.setItem("intendedClass", classId);
+      // Save intended class for post-login redirect. Use the loaded class's id:
+      // a slug URL carries no id, and login/checkout only speak ids.
+      sessionStorage.setItem("intendedClass", classData.id);
       toast("Please log in to register for this class");
       navigate("/login");
       return;
@@ -186,7 +203,7 @@ export default function ClassDetail() {
     }
 
     // Step 3: Proceed to checkout
-    navigate(`/checkout?classId=${classId}`);
+    navigate(`/checkout?classId=${classData.id}`);
   };
 
   // --------------------------------------------------------------------------

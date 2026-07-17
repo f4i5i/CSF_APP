@@ -98,7 +98,7 @@ jest.mock('../ui/TimePicker12Hour', () => {
     );
   };
 });
-jest.mock('./MultiCoachSelector', () => {
+jest.mock('../admin/MultiCoachSelector', () => {
   return function MockMultiCoachSelector({ label }: any) {
     return <div data-testid="multi-coach-selector">{label}</div>;
   };
@@ -342,8 +342,8 @@ describe('ClassFormModal Component', () => {
   // ===========================================
   // REGISTRATION LINK TESTS (EDIT MODE)
   // ===========================================
-  describe('Registration Link (Edit Mode)', () => {
-    it('should show Registration Link section in edit mode with initialData', () => {
+  describe('Class Link (Edit Mode)', () => {
+    it('should show Class Link section in edit mode with initialData', () => {
       render(
         <ClassFormModal
           {...defaultProps}
@@ -351,12 +351,39 @@ describe('ClassFormModal Component', () => {
           initialData={{ id: 'class-1', slug: 'soccer-fall' }}
         />
       );
-      expect(screen.getByText('Registration Link')).toBeInTheDocument();
+      expect(screen.getByText('Class Link')).toBeInTheDocument();
     });
 
-    it('should not show Registration Link section in create mode', () => {
+    it('should not show Class Link section in create mode', () => {
       render(<ClassFormModal {...defaultProps} />);
-      expect(screen.queryByText('Registration Link')).not.toBeInTheDocument();
+      expect(screen.queryByText('Class Link')).not.toBeInTheDocument();
+    });
+
+    it('should link to the public class overview, not straight to registration', () => {
+      render(
+        <ClassFormModal
+          {...defaultProps}
+          mode="edit"
+          initialData={{ id: 'class-1', slug: 'soccer-fall' }}
+        />
+      );
+      const link = screen.getByDisplayValue(/\/class\//) as HTMLInputElement;
+      // Families must be able to read the class before creating an account.
+      expect(link.value).toBe(`${window.location.origin}/class/soccer-fall`);
+      expect(link.value).not.toContain('/register/');
+      expect(link.value).not.toContain('/checkout');
+    });
+
+    it('should fall back to the class id when no slug is set', () => {
+      render(
+        <ClassFormModal
+          {...defaultProps}
+          mode="edit"
+          initialData={{ id: 'class-1' }}
+        />
+      );
+      const link = screen.getByDisplayValue(/\/class\//) as HTMLInputElement;
+      expect(link.value).toBe(`${window.location.origin}/class/class-1`);
     });
 
     it('should show copy button in edit mode', () => {

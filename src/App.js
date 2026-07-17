@@ -393,8 +393,9 @@ export default function App() {
             }
           />
 
-          {/* Class Detail - View detailed class information */}
-          <Route path="/class/:id" element={<ClassDetail />} />
+          {/* Class Detail - Public class overview by slug or id. This is the
+              link shared with families: they see the class before signing up. */}
+          <Route path="/class/:classRef" element={<ClassDetail />} />
 
           {/* Custom URL Registration - Short URL for class registration */}
           <Route path="/register/:slug" element={<ClassRegister />} />

@@ -247,15 +247,11 @@ export default function ClassFormModal({
 
   // Generate registration link preview
   const getRegistrationLink = () => {
-    if (initialData?.id) {
-      // Use slug if available, otherwise use class ID
-      if (initialData?.slug || formData?.slug) {
-        const slug = formData?.slug || initialData?.slug;
-        return `${window.location.origin}/register/${slug}`;
-      }
-      return `${window.location.origin}/checkout?classId=${initialData.id}`;
-    }
-    return null;
+    if (!initialData?.id) return null;
+    // Point at the public class overview, not straight at registration: families
+    // must be able to read the class details before creating an account.
+    const slug = formData?.slug || initialData?.slug;
+    return `${window.location.origin}/class/${slug || initialData.id}`;
   };
 
   // Generate slug from class name
@@ -1621,7 +1617,10 @@ export default function ClassFormModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { key: "show_capacity", label: "Show capacity" },
-                  { key: "show_spots_remaining", label: "Show spots remaining" },
+                  {
+                    key: "show_spots_remaining",
+                    label: "Show spots remaining",
+                  },
                   { key: "show_pricing", label: "Show pricing" },
                   { key: "show_coach", label: "Show coach" },
                   { key: "show_program_type", label: "Show program type" },
@@ -1653,14 +1652,15 @@ export default function ClassFormModal({
             {mode === "edit" && initialData?.id && (
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-text-primary font-manrope border-b border-border-light pb-2">
-                  Registration Link
+                  Class Link
                 </h3>
 
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Link className="w-5 h-5 text-green-600" />
                     <span className="font-semibold text-green-800 text-sm">
-                      Share this link for parents to register
+                      Share this link with families &mdash; they can view the
+                      class details before creating an account
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
