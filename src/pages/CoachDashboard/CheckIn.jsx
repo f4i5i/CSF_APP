@@ -13,6 +13,7 @@ import { useApi, useMutation } from "../../hooks";
 // Services
 import { classesService, checkinService } from "../../api/services";
 import { getFileUrl } from "../../api/config";
+import { isNewRegistration } from "../../utils/format";
 
 const CheckIn = () => {
   const { user } = useAuth();
@@ -142,6 +143,7 @@ const CheckIn = () => {
         grade: item.child?.grade || item.grade || "-",
         groupNumber: item.group_number ?? item.child?.group_number ?? null,
         checked: isChecked,
+        isNew: isNewRegistration(item.enrolled_at),
         wasUnchecked: !isChecked && uncheckedIds.has(enrollId),
         checkInId: item.check_in_id || item.checkin_id || null,
         img: profileImage ? getFileUrl(profileImage) : null,

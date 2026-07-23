@@ -3,21 +3,58 @@
  * Tests: formatDate, formatCurrency, formatDateTime, formatRelativeTime, formatNumber
  */
 
-import { formatDate, formatCurrency, formatDateTime, formatRelativeTime, formatNumber } from '../../../utils/format';
+import {
+  formatDate,
+  formatCurrency,
+  formatDateTime,
+  formatRelativeTime,
+  formatNumber,
+  isNewRegistration,
+} from "../../../utils/format";
 
-describe('format utilities', () => {
+describe("format utilities", () => {
+  // ==========================================
+  // isNewRegistration
+  // ==========================================
+  describe("isNewRegistration", () => {
+    const daysAgo = (n: number) =>
+      new Date(Date.now() - n * 24 * 60 * 60 * 1000);
+
+    it("flags an enrollment from today", () => {
+      expect(isNewRegistration(daysAgo(0))).toBe(true);
+    });
+
+    it("flags an enrollment 13 days old (inside the 14-day window)", () => {
+      expect(isNewRegistration(daysAgo(13))).toBe(true);
+    });
+
+    it("does not flag an enrollment 15 days old", () => {
+      expect(isNewRegistration(daysAgo(15))).toBe(false);
+    });
+
+    it("respects a custom window", () => {
+      expect(isNewRegistration(daysAgo(20), 30)).toBe(true);
+      expect(isNewRegistration(daysAgo(20), 7)).toBe(false);
+    });
+
+    it("returns false for missing or future dates", () => {
+      expect(isNewRegistration(null as unknown as string)).toBe(false);
+      expect(isNewRegistration("")).toBe(false);
+      expect(isNewRegistration(daysAgo(-5))).toBe(false);
+    });
+  });
   // ==========================================
   // formatDate
   // ==========================================
-  describe('formatDate', () => {
-    it('should format a date string to readable format', () => {
-      const result = formatDate('2024-01-15');
+  describe("formatDate", () => {
+    it("should format a date string to readable format", () => {
+      const result = formatDate("2024-01-15");
       expect(result).toMatch(/Jan/);
       expect(result).toMatch(/15/);
       expect(result).toMatch(/2024/);
     });
 
-    it('should format a Date object', () => {
+    it("should format a Date object", () => {
       const date = new Date(2024, 0, 15); // Jan 15, 2024
       const result = formatDate(date);
       expect(result).toMatch(/Jan/);
@@ -26,62 +63,73 @@ describe('format utilities', () => {
     });
 
     it('should return "-" for null', () => {
-      expect(formatDate(null)).toBe('-');
+      expect(formatDate(null)).toBe("-");
     });
 
     it('should return "-" for undefined', () => {
-      expect(formatDate(undefined)).toBe('-');
+      expect(formatDate(undefined)).toBe("-");
     });
 
     it('should return "-" for empty string', () => {
-      expect(formatDate('')).toBe('-');
+      expect(formatDate("")).toBe("-");
     });
 
-    it('should accept custom options', () => {
-      const result = formatDate('2024-01-15', { month: 'long' });
+    it("should accept custom options", () => {
+      const result = formatDate("2024-01-15", { month: "long" });
       expect(result).toMatch(/January/);
     });
 
-    it('should handle ISO datetime strings', () => {
-      const result = formatDate('2024-01-15T10:30:00Z');
+    it("should handle ISO datetime strings", () => {
+      const result = formatDate("2024-01-15T10:30:00Z");
       expect(result).toMatch(/Jan/);
       expect(result).toMatch(/2024/);
+    });
+
+    it("should not shift a date-only string across midnight in a negative-offset timezone", () => {
+      // The API sends bare YYYY-MM-DD for class start/end dates. new Date()
+      // parses those as UTC midnight, which is the previous evening in the US,
+      // so the calendar day must be preserved verbatim regardless of TZ.
+      expect(formatDate("2026-10-01")).toBe("Oct 1, 2026");
+    });
+
+    it("should preserve the day for a first-of-month date-only string", () => {
+      expect(formatDate("2024-03-01")).toBe("Mar 1, 2024");
     });
   });
 
   // ==========================================
   // formatCurrency
   // ==========================================
-  describe('formatCurrency', () => {
-    it('should format a number as USD currency', () => {
-      expect(formatCurrency(150)).toBe('$150.00');
+  describe("formatCurrency", () => {
+    it("should format a number as USD currency", () => {
+      expect(formatCurrency(150)).toBe("$150.00");
     });
 
-    it('should format zero', () => {
-      expect(formatCurrency(0)).toBe('$0.00');
+    it("should format zero", () => {
+      expect(formatCurrency(0)).toBe("$0.00");
     });
 
-    it('should format decimal amounts', () => {
-      expect(formatCurrency(99.99)).toBe('$99.99');
+    it("should format decimal amounts", () => {
+      expect(formatCurrency(99.99)).toBe("$99.99");
     });
 
-    it('should format large numbers with commas', () => {
-      expect(formatCurrency(1000)).toBe('$1,000.00');
+    it("should format large numbers with commas", () => {
+      expect(formatCurrency(1000)).toBe("$1,000.00");
     });
 
-    it('should format string amounts', () => {
-      expect(formatCurrency('150.50')).toBe('$150.50');
+    it("should format string amounts", () => {
+      expect(formatCurrency("150.50")).toBe("$150.50");
     });
 
     it('should return "-" for null', () => {
-      expect(formatCurrency(null)).toBe('-');
+      expect(formatCurrency(null)).toBe("-");
     });
 
     it('should return "-" for undefined', () => {
-      expect(formatCurrency(undefined)).toBe('-');
+      expect(formatCurrency(undefined)).toBe("-");
     });
 
-    it('should handle negative amounts', () => {
+    it("should handle negative amounts", () => {
       const result = formatCurrency(-25);
       expect(result).toMatch(/-/);
       expect(result).toMatch(/25\.00/);
@@ -91,31 +139,31 @@ describe('format utilities', () => {
   // ==========================================
   // formatDateTime
   // ==========================================
-  describe('formatDateTime', () => {
-    it('should format a datetime string', () => {
-      const result = formatDateTime('2024-01-15T10:30:00Z');
+  describe("formatDateTime", () => {
+    it("should format a datetime string", () => {
+      const result = formatDateTime("2024-01-15T10:30:00Z");
       expect(result).toMatch(/Jan/);
       expect(result).toMatch(/2024/);
     });
 
-    it('should include time in 12-hour format', () => {
-      const result = formatDateTime('2024-01-15T14:30:00');
+    it("should include time in 12-hour format", () => {
+      const result = formatDateTime("2024-01-15T14:30:00");
       expect(result).toMatch(/PM|AM/);
     });
 
     it('should return "-" for null', () => {
-      expect(formatDateTime(null)).toBe('-');
+      expect(formatDateTime(null)).toBe("-");
     });
 
     it('should return "-" for undefined', () => {
-      expect(formatDateTime(undefined)).toBe('-');
+      expect(formatDateTime(undefined)).toBe("-");
     });
 
     it('should return "-" for empty string', () => {
-      expect(formatDateTime('')).toBe('-');
+      expect(formatDateTime("")).toBe("-");
     });
 
-    it('should handle Date objects', () => {
+    it("should handle Date objects", () => {
       const date = new Date(2024, 0, 15, 14, 30);
       const result = formatDateTime(date);
       expect(result).toMatch(/Jan/);
@@ -126,43 +174,43 @@ describe('format utilities', () => {
   // ==========================================
   // formatRelativeTime
   // ==========================================
-  describe('formatRelativeTime', () => {
+  describe("formatRelativeTime", () => {
     it('should return "just now" for very recent dates', () => {
       const now = new Date();
-      expect(formatRelativeTime(now)).toBe('just now');
+      expect(formatRelativeTime(now)).toBe("just now");
     });
 
-    it('should return minutes ago', () => {
+    it("should return minutes ago", () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
-      expect(formatRelativeTime(fiveMinAgo)).toBe('5 minutes ago');
+      expect(formatRelativeTime(fiveMinAgo)).toBe("5 minutes ago");
     });
 
     it('should return "1 minute ago" (singular)', () => {
       const oneMinAgo = new Date(Date.now() - 1 * 60 * 1000);
-      expect(formatRelativeTime(oneMinAgo)).toBe('1 minute ago');
+      expect(formatRelativeTime(oneMinAgo)).toBe("1 minute ago");
     });
 
-    it('should return hours ago', () => {
+    it("should return hours ago", () => {
       const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000);
-      expect(formatRelativeTime(threeHoursAgo)).toBe('3 hours ago');
+      expect(formatRelativeTime(threeHoursAgo)).toBe("3 hours ago");
     });
 
     it('should return "1 hour ago" (singular)', () => {
       const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
-      expect(formatRelativeTime(oneHourAgo)).toBe('1 hour ago');
+      expect(formatRelativeTime(oneHourAgo)).toBe("1 hour ago");
     });
 
-    it('should return days ago', () => {
+    it("should return days ago", () => {
       const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-      expect(formatRelativeTime(twoDaysAgo)).toBe('2 days ago');
+      expect(formatRelativeTime(twoDaysAgo)).toBe("2 days ago");
     });
 
     it('should return "1 day ago" (singular)', () => {
       const oneDayAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-      expect(formatRelativeTime(oneDayAgo)).toBe('1 day ago');
+      expect(formatRelativeTime(oneDayAgo)).toBe("1 day ago");
     });
 
-    it('should fall back to formatDate for dates older than a week', () => {
+    it("should fall back to formatDate for dates older than a week", () => {
       const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
       const result = formatRelativeTime(twoWeeksAgo);
       expect(result).not.toMatch(/ago/);
@@ -170,53 +218,53 @@ describe('format utilities', () => {
     });
 
     it('should return "-" for null', () => {
-      expect(formatRelativeTime(null)).toBe('-');
+      expect(formatRelativeTime(null)).toBe("-");
     });
 
     it('should return "-" for undefined', () => {
-      expect(formatRelativeTime(undefined)).toBe('-');
+      expect(formatRelativeTime(undefined)).toBe("-");
     });
 
-    it('should handle string dates', () => {
+    it("should handle string dates", () => {
       const now = new Date().toISOString();
-      expect(formatRelativeTime(now)).toBe('just now');
+      expect(formatRelativeTime(now)).toBe("just now");
     });
   });
 
   // ==========================================
   // formatNumber
   // ==========================================
-  describe('formatNumber', () => {
-    it('should format a number with commas', () => {
-      expect(formatNumber(1000)).toBe('1,000');
+  describe("formatNumber", () => {
+    it("should format a number with commas", () => {
+      expect(formatNumber(1000)).toBe("1,000");
     });
 
-    it('should format large numbers', () => {
-      expect(formatNumber(1000000)).toBe('1,000,000');
+    it("should format large numbers", () => {
+      expect(formatNumber(1000000)).toBe("1,000,000");
     });
 
-    it('should handle small numbers without commas', () => {
-      expect(formatNumber(999)).toBe('999');
+    it("should handle small numbers without commas", () => {
+      expect(formatNumber(999)).toBe("999");
     });
 
-    it('should handle zero', () => {
-      expect(formatNumber(0)).toBe('0');
+    it("should handle zero", () => {
+      expect(formatNumber(0)).toBe("0");
     });
 
     it('should return "-" for null', () => {
-      expect(formatNumber(null)).toBe('-');
+      expect(formatNumber(null)).toBe("-");
     });
 
     it('should return "-" for undefined', () => {
-      expect(formatNumber(undefined)).toBe('-');
+      expect(formatNumber(undefined)).toBe("-");
     });
 
-    it('should handle negative numbers', () => {
+    it("should handle negative numbers", () => {
       const result = formatNumber(-1000);
       expect(result).toMatch(/-1,000/);
     });
 
-    it('should handle decimal numbers', () => {
+    it("should handle decimal numbers", () => {
       const result = formatNumber(1234.56);
       expect(result).toMatch(/1,234/);
     });

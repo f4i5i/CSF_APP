@@ -277,7 +277,7 @@ export default function DashboardCoach() {
           <div className="flex items-center gap-6 max-sm:hidden pr-4">
             {/* EVOLIA Button */}
             <a
-              href="https://app.evolia.com"
+              href="https://apps.apple.com/us/app/evolia-employee-scheduling/id1400431106"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-[#1D3557] hover:bg-[#152942] text-white px-5 py-2.5 rounded-full font-manrope font-semibold transition-colors shadow-md"
@@ -401,7 +401,7 @@ export default function DashboardCoach() {
               Check-In
             </button>
             <a
-              href="https://app.evolia.com"
+              href="https://apps.apple.com/us/app/evolia-employee-scheduling/id1400431106"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-1 items-center justify-center gap-2 bg-[#1D3557] rounded-xl shadow-md h-12 text-white text-base font-medium font-manrope hover:bg-[#152942] transition-colors"

@@ -83,6 +83,11 @@ const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
             <p className="font-semibold text-xl max-xxl:text-lg max-xl:text-base max-sm:text-base text-[#0F1D2E] font-manrope">
               {student.name}
             </p>
+            {student.isNew && (
+              <span className="shrink-0 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 font-manrope uppercase tracking-wide">
+                New
+              </span>
+            )}
             {student.groupNumber != null && (
               <span className="shrink-0 rounded-full bg-[#1D3557] px-2 py-0.5 text-xs font-semibold text-white font-manrope">
                 Group {student.groupNumber}

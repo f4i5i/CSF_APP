@@ -98,7 +98,9 @@ const Financials = () => {
   const classOptions = useMemo(() => {
     return classes.map((cls) => ({
       id: cls.id,
-      label: `${cls.school?.name || "Unknown"} • ${cls.name}`,
+      // API returns a flat `school_name`, not a nested `school` object, so the
+      // old `cls.school?.name` was always undefined -> every row read "Unknown".
+      label: cls.school_name ? `${cls.school_name} • ${cls.name}` : cls.name,
       monthly: generateMonthlyData(revenueReport),
     }));
   }, [classes, revenueReport]);

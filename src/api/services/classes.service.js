@@ -160,8 +160,13 @@ const classesService = {
    *   { items: [], total: number, skip: number, limit: number }
    */
   async getAll(filters = {}) {
+    // Browse pages render everything this returns and have no pagination UI,
+    // but the backend defaults to limit=20 (ordered by start_date), silently
+    // dropping later-starting classes. Request a full page (500 = backend cap),
+    // still overridable by an explicit caller limit.
+    const params = { limit: 500, ...filters };
     const { data } = await apiClient.get(API_ENDPOINTS.CLASSES.LIST, {
-      params: filters,
+      params,
     });
     return data;
   },

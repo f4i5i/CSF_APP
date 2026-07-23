@@ -14,6 +14,7 @@ import {
 import toast from "react-hot-toast";
 import adminService from "../../api/services/admin.service";
 import enrollmentsService from "../../api/services/enrollments.service";
+import { isNewRegistration } from "../../utils/format";
 
 const ClassRoster = () => {
   const { classId } = useParams();
@@ -302,6 +303,9 @@ const ClassRoster = () => {
                 const enrollmentId =
                   student.enrollment_id || student.enrollment?.id;
                 const groupNumber = student.group_number ?? "";
+                const isNew = isNewRegistration(
+                  student.enrolled_at || student.enrollment?.enrolled_at,
+                );
 
                 return (
                   <div
@@ -315,9 +319,16 @@ const ClassRoster = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
-                              {childName || "Unknown Student"}
-                            </h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
+                                {childName || "Unknown Student"}
+                              </h4>
+                              {isNew && (
+                                <span className="shrink-0 inline-flex items-center rounded-full bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wide">
+                                  New
+                                </span>
+                              )}
+                            </div>
                             <div className="flex flex-wrap items-center gap-3 mt-1 text-xs sm:text-sm text-text-muted font-manrope">
                               {(childAge != null || childDob) && (
                                 <span>

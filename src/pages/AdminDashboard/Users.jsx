@@ -110,6 +110,16 @@ export default function Users() {
     }
   };
 
+  const handleResendInvitation = async (userData) => {
+    try {
+      await usersService.resendInvitation(userData.id);
+      toast.success(`Invitation resent to ${userData.email}`);
+    } catch (error) {
+      console.error("Failed to resend invitation:", error);
+      toast.error(error.message || "Failed to resend invitation");
+    }
+  };
+
   const handleModalClose = () => {
     setModalOpen(false);
     setSelectedUser(null);
@@ -254,6 +264,11 @@ export default function Users() {
             label: "Edit",
             icon: Edit,
             onClick: () => handleEditUser(row),
+          });
+          actions.push({
+            label: "Resend invitation",
+            icon: Mail,
+            onClick: () => handleResendInvitation(row),
           });
         }
 

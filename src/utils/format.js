@@ -4,6 +4,30 @@
  */
 
 /**
+ * Parse an incoming date value into a Date without shifting the calendar day.
+ *
+ * The API returns date-only fields as bare "YYYY-MM-DD" strings. `new Date(str)`
+ * parses those as UTC midnight, which in any negative-offset (US) timezone lands
+ * on the previous evening — so a class starting "2026-10-01" would display as
+ * "Sep 30". For date-only strings we build the Date from local components to
+ * keep the day intact. Datetime strings (with a time/offset) are left to the
+ * native parser so their timezone semantics are preserved.
+ * @param {string|Date} date
+ * @returns {Date}
+ */
+const parseDateValue = (date) => {
+  if (date instanceof Date) return date;
+  if (typeof date === "string") {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    if (match) {
+      const [, y, m, d] = match;
+      return new Date(Number(y), Number(m) - 1, Number(d));
+    }
+  }
+  return new Date(date);
+};
+
+/**
  * Format date to readable string
  * @param {string|Date} date - Date to format
  * @param {Object} options - Intl.DateTimeFormat options
@@ -12,7 +36,7 @@
 export const formatDate = (date, options = {}) => {
   if (!date) return "-";
 
-  const dateObj = date instanceof Date ? date : new Date(date);
+  const dateObj = parseDateValue(date);
 
   const defaultOptions = {
     year: "numeric",
@@ -85,6 +109,29 @@ export const formatRelativeTime = (date) => {
   if (diffDay < 7) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
 
   return formatDate(dateObj);
+};
+
+/**
+ * Whether an enrollment/registration is recent enough to flag as "New".
+ *
+ * Used to highlight newly-registered participants on rosters. Defaults to a
+ * 14-day window. Accepts a Date, an ISO datetime, or a bare YYYY-MM-DD string
+ * (parsed via the same day-safe path as formatDate). Returns false for missing
+ * or unparseable values so a bad date never spuriously flags a student.
+ * @param {string|Date} enrolledAt - When the participant registered
+ * @param {number} [windowDays=14] - How many days the badge stays visible
+ * @returns {boolean}
+ */
+export const isNewRegistration = (enrolledAt, windowDays = 14) => {
+  if (!enrolledAt) return false;
+
+  const dateObj = parseDateValue(enrolledAt);
+  const time = dateObj.getTime();
+  if (Number.isNaN(time)) return false;
+
+  const ageMs = Date.now() - time;
+  if (ageMs < 0) return false; // future-dated: not "new", just wrong
+  return ageMs <= windowDays * 24 * 60 * 60 * 1000;
 };
 
 /**

@@ -3,8 +3,8 @@
  * Handles user profile management and admin user CRUD operations
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../../constants/api.constants';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../../constants/api.constants";
 
 const usersService = {
   /**
@@ -39,7 +39,10 @@ const usersService = {
    * @returns {Promise<Object>} Success message
    */
   async changePassword(passwordData) {
-    const { data } = await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, passwordData);
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
+      passwordData,
+    );
     return data;
   },
 
@@ -96,7 +99,10 @@ const usersService = {
    * @returns {Promise<Object>} Updated user
    */
   async updateUser(id, userData) {
-    const { data } = await apiClient.put(API_ENDPOINTS.USERS.BY_ID(id), userData);
+    const { data } = await apiClient.put(
+      API_ENDPOINTS.USERS.BY_ID(id),
+      userData,
+    );
     return data;
   },
 
@@ -107,6 +113,19 @@ const usersService = {
    */
   async delete(id) {
     const { data } = await apiClient.delete(API_ENDPOINTS.USERS.BY_ID(id));
+    return data;
+  },
+
+  /**
+   * Resend a new-user invitation (account setup) email (Admin only).
+   * Issues a fresh setup link valid for the full invitation window.
+   * @param {string} id - User ID
+   * @returns {Promise<Object>} Confirmation message
+   */
+  async resendInvitation(id) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.USERS.RESEND_INVITATION(id),
+    );
     return data;
   },
 };

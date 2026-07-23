@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Users, User, Loader2 } from "lucide-react";
 import publicService from "../api/services/public.service";
+import { isNewRegistration } from "../utils/format";
 
 const PublicRoster = () => {
   const { shareToken } = useParams();
@@ -18,7 +19,8 @@ const PublicRoster = () => {
       } catch (err) {
         console.error("Failed to fetch public roster:", err);
         setError(
-          err.response?.data?.detail || "This roster link is invalid or expired"
+          err.response?.data?.detail ||
+            "This roster link is invalid or expired",
         );
       } finally {
         setLoading(false);
@@ -131,9 +133,16 @@ const PublicRoster = () => {
                       <User className="w-5 h-5 sm:w-6 sm:h-6 text-btn-gold" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
-                        {student.child_name || "Student"}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold text-text-primary font-manrope text-sm sm:text-base truncate">
+                          {student.child_name || "Student"}
+                        </h4>
+                        {isNewRegistration(student.enrolled_at) && (
+                          <span className="shrink-0 inline-flex items-center rounded-full bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 uppercase tracking-wide">
+                            New
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap items-center gap-3 mt-1 text-xs sm:text-sm text-text-muted font-manrope">
                         {student.child_age != null && (
                           <span>Age: {student.child_age}</span>

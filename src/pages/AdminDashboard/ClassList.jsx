@@ -109,15 +109,23 @@ export default function ClassList() {
     }
   };
 
-  // Filter classes by search query
+  // Filter classes by search query, then sort alphabetically by name so the
+  // Available Classes list has a stable, predictable order (the API returns
+  // them by start_date, which reads as "random" to users browsing by name).
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return classes.filter((c) =>
-      q
-        ? c.name.toLowerCase().includes(q) ||
-          c.description?.toLowerCase().includes(q)
-        : true,
-    );
+    return classes
+      .filter((c) =>
+        q
+          ? c.name.toLowerCase().includes(q) ||
+            c.description?.toLowerCase().includes(q)
+          : true,
+      )
+      .sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "", undefined, {
+          sensitivity: "base",
+        }),
+      );
   }, [query, classes]);
 
   // Handle register button click

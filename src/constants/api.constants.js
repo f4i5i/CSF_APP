@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     LIST: "/users", // List all users (ADMIN)
     CREATE: "/users", // Create user (ADMIN)
     BY_ID: (id) => `/users/${id}`, // Get/Update/Delete user by ID (ADMIN)
+    RESEND_INVITATION: (id) => `/users/${id}/resend-invitation`, // Resend setup email (ADMIN)
   },
 
   // ===================
