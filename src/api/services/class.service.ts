@@ -139,8 +139,8 @@
 // ========================================
 // IMPORTS
 // ========================================
-import apiClient from '../client/axios-client';
-import { ENDPOINTS } from '../constants/endpoints';
+import apiClient from "../client/axios-client";
+import { ENDPOINTS } from "../constants/endpoints";
 import type {
   Class,
   ClassFilters,
@@ -150,7 +150,7 @@ import type {
   UpdateClassRequest,
   Program,
   Area,
-} from '../types/class.types';
+} from "../types/class.types";
 
 // ========================================
 // CLASS SERVICE
@@ -228,24 +228,32 @@ export const classService = {
    * });
    */
   async getAll(filters?: ClassFilters): Promise<ClassWithAvailability[]> {
-    const { data } = await apiClient.get<{ items: any[]; total: number; skip: number; limit: number }>(
-      ENDPOINTS.CLASSES.LIST,
-      { params: filters }
-    );
+    // The browse pages render everything this returns — they have no pagination
+    // UI — but the backend defaults to limit=20 and orders by start_date. Without
+    // an explicit limit, classes starting later than the 20th silently vanish
+    // from the list. Ask for a full page (500 is the backend's `le=` cap).
+    const params = { limit: 500, ...filters };
+    const { data } = await apiClient.get<{
+      items: any[];
+      total: number;
+      skip: number;
+      limit: number;
+    }>(ENDPOINTS.CLASSES.LIST, { params });
 
     // Transform API response to match expected format
-    return data.items.map(item => {
+    return data.items.map((item) => {
       // Convert weekdays array + start_time/end_time to schedule array
-      const schedule = item.weekdays?.map((day: string) => ({
-        day_of_week: day.toUpperCase(),
-        start_time: item.start_time,
-        end_time: item.end_time
-      })) || [];
+      const schedule =
+        item.weekdays?.map((day: string) => ({
+          day_of_week: day.toUpperCase(),
+          start_time: item.start_time,
+          end_time: item.end_time,
+        })) || [];
 
       return {
         ...item,
         schedule,
-        base_price: parseFloat(item.price || item.base_price || 0)
+        base_price: parseFloat(item.price || item.base_price || 0),
       };
     });
   },
@@ -337,7 +345,7 @@ export const classService = {
   async create(classData: CreateClassRequest): Promise<Class> {
     const { data } = await apiClient.post<Class>(
       ENDPOINTS.CLASSES.CREATE,
-      classData
+      classData,
     );
     return data;
   },
@@ -381,7 +389,7 @@ export const classService = {
   async update(id: string, classData: UpdateClassRequest): Promise<Class> {
     const { data } = await apiClient.put<Class>(
       ENDPOINTS.CLASSES.UPDATE(id),
-      classData
+      classData,
     );
     return data;
   },
@@ -420,7 +428,7 @@ export const classService = {
    */
   async delete(id: string): Promise<{ message: string }> {
     const { data } = await apiClient.delete<{ message: string }>(
-      ENDPOINTS.CLASSES.DELETE(id)
+      ENDPOINTS.CLASSES.DELETE(id),
     );
     return data;
   },
@@ -461,7 +469,7 @@ export const classService = {
    */
   async getCapacity(id: string): Promise<ClassCapacity> {
     const { data } = await apiClient.get<ClassCapacity>(
-      ENDPOINTS.CLASSES.CAPACITY(id)
+      ENDPOINTS.CLASSES.CAPACITY(id),
     );
     return data;
   },
