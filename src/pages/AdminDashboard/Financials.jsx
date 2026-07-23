@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import RevenueCards from "../../components/Financial/RevenueCards";
 import RevenuePrograms from "../../components/Financial/RevenuePrograms";
-import RevenueClassChart from "../../components/Financial/RevenueClassChart";
+import RevenueByClassChart from "../../components/Financial/RevenueByClassChart";
 import RevenueAverage from "../../components/Financial/RevenueAverage";
 import Header from "../../components/Header";
 import GenericButton from "../../components/GenericButton";
 import adminService from "../../api/services/admin.service";
 import programsService from "../../api/services/programs.service";
-import classesService from "../../api/services/classes.service";
 import toast from "react-hot-toast";
 
 /**
@@ -18,8 +17,7 @@ const Financials = () => {
   const [dashboardMetrics, setDashboardMetrics] = useState(null);
   const [revenueReport, setRevenueReport] = useState(null);
   const [programs, setPrograms] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [selectedClassId, setSelectedClassId] = useState(null);
+  const [revenueByClass, setRevenueByClass] = useState([]);
 
   useEffect(() => {
     fetchAllData();
@@ -47,12 +45,18 @@ const Financials = () => {
       const programsData = await programsService.getAll();
       setPrograms(programsData || []);
 
-      // Fetch classes for chart
-      const classesData = await classesService.getAll({ limit: 20 });
-      const classList = classesData.items || classesData || [];
-      setClasses(classList);
-      if (classList.length > 0) {
-        setSelectedClassId(classList[0].id);
+      // Real per-class revenue breakdown (correct names + each class's own
+      // revenue). Best-effort: if this endpoint is unavailable, the rest of the
+      // page still renders.
+      try {
+        const advanced = await adminService.getAdvancedFinance({
+          start_date: yearStart.toISOString().split("T")[0],
+          end_date: today.toISOString().split("T")[0],
+        });
+        setRevenueByClass(advanced?.revenue_by_class || []);
+      } catch (advErr) {
+        console.error("Failed to fetch per-class revenue:", advErr);
+        setRevenueByClass([]);
       }
     } catch (error) {
       console.error("Failed to fetch financial data:", error);
@@ -93,22 +97,6 @@ const Financials = () => {
       .filter((p) => p.enrollments > 0)
       .sort((a, b) => b.revenue - a.revenue);
   }, [dashboardMetrics]);
-
-  // Transform classes for chart dropdown
-  const classOptions = useMemo(() => {
-    return classes.map((cls) => ({
-      id: cls.id,
-      // API returns a flat `school_name`, not a nested `school` object, so the
-      // old `cls.school?.name` was always undefined -> every row read "Unknown".
-      label: cls.school_name ? `${cls.school_name} • ${cls.name}` : cls.name,
-      monthly: generateMonthlyData(revenueReport),
-    }));
-  }, [classes, revenueReport]);
-
-  const selectedClass = useMemo(
-    () => classOptions.find((c) => c.id === selectedClassId) || classOptions[0],
-    [selectedClassId, classOptions],
-  );
 
   // Calculate average per student by program
   const avgPerStudent = useMemo(() => {
@@ -191,31 +179,18 @@ const Financials = () => {
             <RevenuePrograms programs={programRevenues} />
           </div>
 
-          {/* Right - Class chart (span 8) */}
+          {/* Right - Revenue per class (span 8) */}
           <div className="lg:col-span-8 bg-[#FFFFFF80] rounded-2xl p-5 shadow">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <h2 className="text-lg font-semibold text-[#173151]">
                 Revenue per Class
               </h2>
-              <div className="flex items-center gap-3">
-                <select
-                  value={selectedClassId || ""}
-                  onChange={(e) => setSelectedClassId(e.target.value)}
-                  className="px-3 py-2 border rounded-lg bg-[#FFFFFF80]"
-                >
-                  {classOptions.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="text-sm text-gray-500">Monthly</div>
-              </div>
+              <div className="text-sm text-gray-500">Year to date</div>
             </div>
 
-            {selectedClass?.monthly && (
-              <RevenueClassChart monthlyData={selectedClass.monthly} />
-            )}
+            <div className="max-h-[420px] overflow-y-auto">
+              <RevenueByClassChart data={revenueByClass} />
+            </div>
           </div>
         </div>
 

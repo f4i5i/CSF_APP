@@ -45,6 +45,18 @@ const adminService = {
   },
 
   /**
+   * Get the advanced finance breakdown (revenue per class/program/area, KPIs).
+   * @param {Object} params - Optional { start_date, end_date }
+   * @returns {Promise<Object>} { revenue_by_class, revenue_by_program, ... }
+   */
+  async getAdvancedFinance(params = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.FINANCE_ADVANCED, {
+      params,
+    });
+    return data;
+  },
+
+  /**
    * Get clients list
    * @param {Object} params - Filter parameters
    * @param {number} [params.skip] - Offset for pagination
