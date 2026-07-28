@@ -119,6 +119,14 @@ const transformClassDataToBackend = (classData) => {
   const firstPaymentOption = payment_options?.find((opt) => opt.enabled);
   const price = firstPaymentOption ? parseFloat(firstPaymentOption.price) : 0;
 
+  // Installment options only work if the class flags installments_enabled —
+  // that's what checkout's PaymentMethodSelector gates on. Without this the
+  // admin's installment choice was stored but never offered to parents.
+  const installmentsEnabled =
+    payment_options?.some(
+      (opt) => opt.enabled && opt.type?.startsWith("installment_"),
+    ) ?? false;
+
   // Transform custom fees (filter out empty ones)
   const transformedCustomFees =
     custom_fees
@@ -136,6 +144,7 @@ const transformClassDataToBackend = (classData) => {
     ...scheduleData,
     class_type: mappedClassType,
     payment_options: transformedPaymentOptions,
+    installments_enabled: installmentsEnabled,
     custom_fees:
       transformedCustomFees.length > 0 ? transformedCustomFees : undefined,
     price, // Legacy field - use first enabled payment option
