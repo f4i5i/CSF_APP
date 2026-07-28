@@ -119,13 +119,12 @@ const transformClassDataToBackend = (classData) => {
   const firstPaymentOption = payment_options?.find((opt) => opt.enabled);
   const price = firstPaymentOption ? parseFloat(firstPaymentOption.price) : 0;
 
-  // Installment options only work if the class flags installments_enabled —
-  // that's what checkout's PaymentMethodSelector gates on. Without this the
-  // admin's installment choice was stored but never offered to parents.
-  const installmentsEnabled =
-    payment_options?.some(
-      (opt) => opt.enabled && opt.type?.startsWith("installment_"),
-    ) ?? false;
+  // Installments are force-disabled: the checkout installment flow is not
+  // functional end-to-end (plan selector dead-ends before an order exists,
+  // no installment plan is ever created server-side, and a stale full-amount
+  // session can charge 100% while the UI promises monthly payments). Do not
+  // derive this from installment_* options until that flow is rebuilt.
+  const installmentsEnabled = false;
 
   // Transform custom fees (filter out empty ones)
   const transformedCustomFees =
