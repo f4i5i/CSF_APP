@@ -86,6 +86,10 @@ export default function MassEmail() {
 
   // Email templates: 5 built-ins + admin-saved custom ones
   const [savedTemplates, setSavedTemplates] = useState([]);
+  // Email appearance (header label, header color, standard closing lines)
+  const [headerSubtitle, setHeaderSubtitle] = useState("Announcement");
+  const [headerAccent, setHeaderAccent] = useState("#173151");
+  const [includeClosing, setIncludeClosing] = useState(true);
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
@@ -108,12 +112,18 @@ export default function MassEmail() {
     setSubject(tpl.subject || "");
     setMessage(tpl.html || tpl.body_html || "");
     setActiveTemplateId(tpl.id);
+    setHeaderSubtitle(tpl.headerSubtitle || "Announcement");
+    setHeaderAccent(tpl.accent || "#173151");
+    setIncludeClosing(tpl.includeClosing !== undefined ? tpl.includeClosing : true);
   };
 
   const clearTemplate = () => {
     setSubject("");
     setMessage("");
     setActiveTemplateId("");
+    setHeaderSubtitle("Announcement");
+    setHeaderAccent("#173151");
+    setIncludeClosing(true);
   };
 
   const handleSaveTemplate = async () => {
@@ -450,6 +460,9 @@ export default function MassEmail() {
       const formData = new FormData();
       formData.append("recipient_type", recipientType);
       formData.append("subject", subject.trim());
+      formData.append("header_subtitle", headerSubtitle.trim() || "Announcement");
+      formData.append("header_accent", headerAccent);
+      formData.append("include_closing", includeClosing ? "true" : "false");
       formData.append("message", message);
       formData.append("include_parents", "true");
 
@@ -839,6 +852,61 @@ export default function MassEmail() {
 
             {/* Email Composer */}
             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              {/* Appearance: header label, header color, closing lines */}
+              <div className="flex flex-wrap items-end gap-3 mb-4 pb-4 border-b border-gray-100">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-text-muted font-manrope">
+                    Header label
+                  </label>
+                  <input
+                    type="text"
+                    value={headerSubtitle}
+                    onChange={(e) => setHeaderSubtitle(e.target.value)}
+                    maxLength={60}
+                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-manrope w-44 focus:outline-none focus:ring-2 focus:ring-btn-gold"
+                    placeholder="Announcement"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-text-muted font-manrope">
+                    Header color
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    {[
+                      { c: "#173151", label: "Navy" },
+                      { c: "#b8860b", label: "Gold" },
+                      { c: "#c0392b", label: "Red" },
+                      { c: "#1e7e34", label: "Green" },
+                    ].map(({ c, label }) => (
+                      <button
+                        key={c}
+                        type="button"
+                        title={label}
+                        onClick={() => setHeaderAccent(c)}
+                        className={`w-7 h-7 rounded-full border-2 ${
+                          headerAccent === c
+                            ? "border-btn-gold ring-2 ring-btn-gold/40"
+                            : "border-white shadow"
+                        }`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 text-sm font-manrope text-text-primary pb-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeClosing}
+                    onChange={(e) => setIncludeClosing(e.target.checked)}
+                    className="w-4 h-4 accent-[#173151]"
+                  />
+                  Add standard closing ("questions… best regards")
+                </label>
+                <span className="text-xs text-text-muted font-manrope pb-2">
+                  📷 Tip: the toolbar's image icon embeds photos right in the
+                  email
+                </span>
+              </div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold font-manrope text-text-primary flex items-center gap-2">
                   <Mail className="w-5 h-5 text-btn-gold" />
@@ -1082,8 +1150,7 @@ export default function MassEmail() {
                     {/* Header */}
                     <div
                       style={{
-                        background:
-                          "linear-gradient(135deg, #173151 0%, #1e3a5f 100%)",
+                        background: `linear-gradient(135deg, ${headerAccent} 0%, ${headerAccent} 100%)`,
                         color: "white",
                         padding: "30px 20px",
                         textAlign: "center",
@@ -1100,7 +1167,7 @@ export default function MassEmail() {
                           opacity: 0.9,
                         }}
                       >
-                        Announcement
+                        {headerSubtitle || "Announcement"}
                       </p>
                     </div>
 
@@ -1139,15 +1206,19 @@ export default function MassEmail() {
                         </div>
                       )}
 
-                      <p style={{ margin: "16px 0 0 0" }}>
-                        If you have any questions, please don't hesitate to
-                        contact us.
-                      </p>
-                      <p style={{ margin: "16px 0 0 0" }}>
-                        Best regards,
-                        <br />
-                        <strong>Carolina Soccer Factory Team</strong>
-                      </p>
+                      {includeClosing && (
+                        <>
+                          <p style={{ margin: "16px 0 0 0" }}>
+                            If you have any questions, please don't hesitate to
+                            contact us.
+                          </p>
+                          <p style={{ margin: "16px 0 0 0" }}>
+                            Best regards,
+                            <br />
+                            <strong>Carolina Soccer Factory Team</strong>
+                          </p>
+                        </>
+                      )}
                     </div>
 
                     {/* Footer */}

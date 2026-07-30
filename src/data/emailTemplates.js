@@ -20,6 +20,9 @@ export const BUILTIN_EMAIL_TEMPLATES = [
     id: "builtin-letter",
     name: "Classic Letter",
     description: "Content-first, personal update",
+    headerSubtitle: "Announcement",
+    accent: "#173151",
+    includeClosing: true,
     subject: "An update from Carolina Soccer Factory",
     html:
       `<h2><strong style="color:${NAVY}">A quick update from CSF</strong></h2>` +
@@ -27,12 +30,15 @@ export const BUILTIN_EMAIL_TEMPLATES = [
       `<p><em>[Write your update here — what is happening, when, and what it means for your child.]</em></p>` +
       `<p><strong style="color:${NAVY}">What you need to know:</strong></p>` +
       `<ul><li>[Key point one]</li><li>[Key point two]</li><li>[Key point three]</li></ul>` +
-      `<p>Thank you for being part of the CSF family — questions? Just reply to this email.</p>`,
+      `<p>Thank you for being part of the CSF family.</p>`,
   },
   {
     id: "builtin-poster",
     name: "Event Poster",
     description: "Big, bold, centered — like a flyer",
+    headerSubtitle: "You're Invited",
+    accent: "#b8860b",
+    includeClosing: false,
     subject: "⚽ [EVENT NAME] — Save the date!",
     html:
       `<p style="text-align:center">⚽🏆⚽</p>` +
@@ -42,6 +48,7 @@ export const BUILTIN_EMAIL_TEMPLATES = [
       `<h2 style="text-align:center"><strong style="background-color:${GOLD_BG};color:${NAVY}">&nbsp;[SATURDAY, SEPT 00]&nbsp;</strong></h2>` +
       `<h3 style="text-align:center"><strong style="color:${NAVY}">[0:00 PM – 0:00 PM]</strong></h3>` +
       `<p style="text-align:center"><strong>📍 [Venue name &amp; address]</strong></p>` +
+      `<p style="text-align:center"><em>🖼️ [Add your event photo here — click the image icon in the toolbar]</em></p>` +
       `<p style="text-align:center">──────────</p>` +
       `<p style="text-align:center">[Two lines about what's happening: games, prizes, food trucks, family fun.]</p>` +
       `<p style="text-align:center"><strong style="color:${GOLD}">FREE FOR ALL CSF FAMILIES</strong></p>` +
@@ -51,6 +58,9 @@ export const BUILTIN_EMAIL_TEMPLATES = [
     id: "builtin-social",
     name: "Social Blast",
     description: "Short, punchy, emoji-forward",
+    headerSubtitle: "News Flash",
+    accent: "#173151",
+    includeClosing: false,
     subject: "🔥 Big news from CSF!",
     html:
       `<h2 style="text-align:center"><strong style="color:${NAVY}">📣 [YOUR BIG NEWS IN ONE LINE!]</strong></h2>` +
@@ -63,6 +73,9 @@ export const BUILTIN_EMAIL_TEMPLATES = [
     id: "builtin-newsletter",
     name: "Newsletter Digest",
     description: "Sectioned monthly-style roundup",
+    headerSubtitle: "Monthly Newsletter",
+    accent: "#1e7e34",
+    includeClosing: false,
     subject: "CSF Monthly Kickaround — [Month] edition 🗞️",
     html:
       `<h2><strong style="color:${NAVY}">The CSF Kickaround</strong> <em style="color:${GOLD}">— [Month] edition</em></h2>` +
@@ -73,6 +86,7 @@ export const BUILTIN_EMAIL_TEMPLATES = [
       `<ul><li><strong>[Date]</strong> — [Event or deadline]</li><li><strong>[Date]</strong> — [Event or deadline]</li></ul>` +
       `<h3><strong style="background-color:${GOLD_BG};color:${NAVY}">&nbsp;⭐ Player spotlight&nbsp;</strong></h3>` +
       `<p>[Celebrate a player, a team, or a milestone this month.]</p>` +
+      `<p><em>🖼️ [Add a photo of the moment — click the image icon in the toolbar]</em></p>` +
       `<h3><strong style="background-color:${GOLD_BG};color:${NAVY}">&nbsp;📝 Reminders&nbsp;</strong></h3>` +
       `<ul><li>[Reminder one]</li><li>[Reminder two]</li></ul>` +
       `<p>See you on the pitch! ⚽</p>`,
@@ -81,6 +95,9 @@ export const BUILTIN_EMAIL_TEMPLATES = [
     id: "builtin-alert",
     name: "Urgent Alert",
     description: "Weather / cancellation notice",
+    headerSubtitle: "Urgent Notice",
+    accent: "#c0392b",
+    includeClosing: false,
     subject: "⚠️ Important: [Class name] — [today's date]",
     html:
       `<h2 style="text-align:center"><strong style="background-color:${RED_BG};color:${RED}">&nbsp;⚠️ IMPORTANT NOTICE ⚠️&nbsp;</strong></h2>` +
