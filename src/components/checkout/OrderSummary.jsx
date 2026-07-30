@@ -180,7 +180,15 @@ export default function OrderSummary({
                       {/* Show subscription badge if this is a subscription item */}
                       {item.is_subscription && item.billing_model === 'monthly' && (
                         <span className="text-xs text-purple-600 font-medium">
-                          ${parseFloat(item.monthly_price || item.line_total).toFixed(2)}/month × {item.num_months} months
+                          {item.first_month_amount != null &&
+                          parseFloat(item.first_month_amount) <
+                            parseFloat(item.monthly_price || 0)
+                            ? `First month (prorated): $${parseFloat(item.first_month_amount).toFixed(2)} today · then `
+                            : ''}
+                          ${parseFloat(item.monthly_price || item.line_total).toFixed(2)}/month
+                          {item.billing_start_date
+                            ? ` from ${new Date(item.billing_start_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                            : ''} × {item.num_months} months
                         </span>
                       )}
                       {item.discount_description && (
@@ -412,7 +420,9 @@ export default function OrderSummary({
                           <strong>${monthlyTotal.toFixed(2)}/month</strong> charged automatically
                         </p>
                         <p className="text-sm font-manrope text-purple-700">
-                          💳 First payment today, then monthly
+                          💳 Today you pay only the order total shown (prorated
+                          first month + fees); the monthly price starts next
+                          billing month
                         </p>
                         {formattedEndDate && (
                           <p className="text-sm font-manrope text-purple-700">
