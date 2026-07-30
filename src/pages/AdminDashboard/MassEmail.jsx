@@ -75,6 +75,7 @@ const formatFileSize = (bytes) => {
 export default function MassEmail() {
   const [recipientType, setRecipientType] = useState("all");
   const [selectedClassId, setSelectedClassId] = useState("");
+  const [classFilter, setClassFilter] = useState(""); // "", active, upcoming, completed
   const [selectedProgramId, setSelectedProgramId] = useState("");
   const [selectedAreaId, setSelectedAreaId] = useState("");
   const [subject, setSubject] = useState("");
@@ -254,6 +255,31 @@ export default function MassEmail() {
     return stripped.length > 0;
   }, [message]);
 
+  // Refetch only classes when the lifecycle filter changes (skip mount —
+  // the initial loader above already fetched the unfiltered list).
+  const classFilterMounted = useRef(false);
+  useEffect(() => {
+    if (!classFilterMounted.current) {
+      classFilterMounted.current = true;
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const m = await import("../../api/services/classes.service");
+        const res = await m.default.getAll(
+          classFilter ? { lifecycle: classFilter } : {},
+        );
+        if (!cancelled) setClasses(res?.items || res || []);
+      } catch {
+        // keep the previous list on failure
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [classFilter]);
+
   // Fetch classes, programs, areas for dropdown selection
   useEffect(() => {
     const fetchOptions = async () => {
@@ -274,6 +300,7 @@ export default function MassEmail() {
         if (classesRes.status === "fulfilled") {
           setClasses(classesRes.value?.items || classesRes.value || []);
         }
+        // eslint-disable-next-line no-empty
         if (programsRes.status === "fulfilled") {
           setPrograms(programsRes.value?.items || programsRes.value || []);
         }
@@ -504,6 +531,23 @@ export default function MassEmail() {
                   <label className="text-sm font-medium text-gray-700 font-manrope">
                     Select Class *
                   </label>
+                  <label className="text-xs text-gray-500 font-manrope block mt-1">
+                    Filter classes
+                  </label>
+                  <select
+                    value={classFilter}
+                    onChange={(e) => {
+                      setClassFilter(e.target.value);
+                      setSelectedClassId("");
+                    }}
+                    className={inputStyle}
+                    style={{ marginBottom: 8 }}
+                  >
+                    <option value="">All classes</option>
+                    <option value="active">Active (running or not ended)</option>
+                    <option value="upcoming">Upcoming (starts in future)</option>
+                    <option value="completed">Completed (ended)</option>
+                  </select>
                   <select
                     value={selectedClassId}
                     onChange={(e) => setSelectedClassId(e.target.value)}
