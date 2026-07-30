@@ -56,6 +56,7 @@ const initialFormData = {
   // Basic Info
   name: "",
   description: "",
+  features_text: "", // bullet points, one per line
   program_id: "",
   area_id: "",
   school_id: "",
@@ -245,6 +246,9 @@ export default function useClassForm(initialData = null, mode = "create") {
         // Basic text fields
         name: initialData.name || "",
         description: initialData.description || "",
+        features_text: Array.isArray(initialData.features)
+          ? initialData.features.join("\n")
+          : "",
 
         // Extract IDs from nested objects (override any raw values from backend)
         program_id: initialData.program?.id || initialData.program_id || "",
@@ -642,6 +646,12 @@ export default function useClassForm(initialData = null, mode = "create") {
         recurrence_pattern: emptyToNull(formData.recurrence_pattern),
         repeat_every_weeks: parseInt(formData.repeat_every_weeks),
         class_type: formData.class_type,
+        // Bullet points shown under the price on the class detail page
+        features: (formData.features_text || "")
+          .split("\n")
+          .map((f) => f.trim())
+          .filter(Boolean)
+          .slice(0, 12),
         // Multiple coaches support
         coach_ids: formData.coach_ids || [],
         // Custom URL slug - only include if it has a value (backend rejects empty strings due to regex pattern)

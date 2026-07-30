@@ -93,6 +93,14 @@ const StudentCard = ({ student, onOpenModal, onCheckIn, checkingIn }) => {
                 Group {student.groupNumber}
               </span>
             )}
+            {student.afterSchool && (
+              <span
+                className="shrink-0 inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700 font-manrope"
+                title={student.afterSchoolProgram || "Stays for after-school program"}
+              >
+                After School
+              </span>
+            )}
           </div>
           <p className="text-sm max-sm:text-xs max-xxl:text-xs font-manrope font-medium opacity-50 text-[#000]">
             {student.grade !== "-"

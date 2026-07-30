@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { formatDate } from "../../utils/format";
 
 export default function ClassDetailsSummary({ classData, hasCapacity }) {
   if (!classData) {
@@ -29,16 +30,8 @@ export default function ClassDetailsSummary({ classData, hasCapacity }) {
   // Format date range
   const getDateRange = () => {
     if (classData.start_date && classData.end_date) {
-      const start = new Date(classData.start_date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-      const end = new Date(classData.end_date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
+      const start = formatDate(classData.start_date);
+      const end = formatDate(classData.end_date);
       return `${start} - ${end}`;
     }
     return null;

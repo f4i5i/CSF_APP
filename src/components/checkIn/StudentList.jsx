@@ -13,14 +13,15 @@ const StudentList = ({
 }) => {
   const [page, setPage] = useState(1);
   const [sortOpen, setSortOpen] = useState(false);
-  const perPage = 5;
+  const [perPage, setPerPage] = useState(10);
+  const perPageOptions = [5, 10, 15, 30, 50];
 
   const sortOptions = ["Alphabetical", "Grade", "Age", "Check-In Status"];
 
   // Reset page when search or sort changes
   React.useEffect(() => {
     setPage(1);
-  }, [search, sort]);
+  }, [search, sort, perPage]);
 
   // SEARCH FILTER
   const filtered = students.filter((s) =>
@@ -116,9 +117,23 @@ const StudentList = ({
         )}
       </div>
 
-      {/* PAGINATION */}
+      {/* PER-PAGE SELECTOR + PAGINATION */}
+      <div className="flex justify-end items-center gap-2 mt-4">
+        <label className="text-sm text-gray-500 font-manrope">Per page:</label>
+        <select
+          value={perPage}
+          onChange={(e) => setPerPage(Number(e.target.value))}
+          className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm font-manrope"
+        >
+          {perPageOptions.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 mt-4">
+        <div className="flex justify-center items-center gap-3 mt-2">
           {/* PREV (Chevron Left) */}
           <button
             onClick={() => page > 1 && setPage(page - 1)}

@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from "react";
+import { formatDate } from "../../utils/format";
 import { Users, Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
@@ -174,11 +175,7 @@ export default function WaitlistFlow({ classData, childId, onJoinWaitlist }) {
                   Starts:
                 </span>
                 <span className="text-sm font-manrope font-semibold text-[#173151]">
-                  {new Date(classData.start_date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {formatDate(classData.start_date)}
                 </span>
               </div>
             )}

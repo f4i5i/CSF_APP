@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Users, User, Loader2 } from "lucide-react";
 import publicService from "../api/services/public.service";
-import { isNewRegistration } from "../utils/format";
+import { isNewRegistration, formatDate } from "../utils/format";
 
 const PublicRoster = () => {
   const { shareToken } = useParams();
@@ -95,8 +95,8 @@ const PublicRoster = () => {
               )}
               {rosterData.start_date && rosterData.end_date && (
                 <span>
-                  {new Date(rosterData.start_date).toLocaleDateString()} –{" "}
-                  {new Date(rosterData.end_date).toLocaleDateString()}
+                  {formatDate(rosterData.start_date)} –{" "}
+                  {formatDate(rosterData.end_date)}
                 </span>
               )}
             </div>

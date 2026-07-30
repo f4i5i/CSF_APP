@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { formatDate } from "../../utils/format";
 import React, { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import classesService from "../../api/services/classes.service";
@@ -173,16 +174,8 @@ export default function ClassList() {
       return "Dates TBD";
     }
 
-    const start = new Date(cls.start_date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const end = new Date(cls.end_date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const start = formatDate(cls.start_date);
+    const end = formatDate(cls.end_date);
 
     return `${start} - ${end}`;
   };

@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { formatDate } from "../../utils/format";
 import { CreditCard, RefreshCw, Calendar } from 'lucide-react';
 
 export default function PaymentMethodSelector({ selected, onSelect, classPrice = 0, classData }) {
@@ -35,7 +36,7 @@ export default function PaymentMethodSelector({ selected, onSelect, classPrice =
 
   const monthsRemaining = getSubscriptionMonths();
   const classEndDate = classData?.end_date
-    ? new Date(classData.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    ? formatDate(classData.end_date)
     : null;
 
   // Check if this is a subscription/membership class

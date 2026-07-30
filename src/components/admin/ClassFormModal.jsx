@@ -531,6 +531,28 @@ export default function ClassFormModal({
                     placeholder="Brief description of the class..."
                   />
                 </div>
+
+                {/* Class features (bullet points under the price) */}
+                <div className="col-span-2">
+                  <label className="block sm:text-[16px] text-[12px] font-medium font-manrope text-heading-dark mb-1">
+                    Class Features{" "}
+                    <span className="text-text-muted font-normal">
+                      (one per line, shown under the price)
+                    </span>
+                  </label>
+                  <textarea
+                    value={formData.features_text || ""}
+                    onChange={(e) => updateField("features_text", e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border font-manrope rounded-[12px] focus:outline-none focus:ring-2 focus:ring-btn-gold border-border-light"
+                    style={{ boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)" }}
+                    placeholder={"Small group training\nAll equipment provided\nEnd-of-season medal"}
+                  />
+                  <p className="text-xs text-text-muted font-manrope mt-1">
+                    Leave empty to show the defaults (session count + certified
+                    coaching staff).
+                  </p>
+                </div>
               </div>
 
               {/* Registration Period Section */}

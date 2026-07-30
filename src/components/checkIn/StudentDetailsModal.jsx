@@ -10,7 +10,8 @@ export default function StudentDetailsModal({ student, onClose }) {
   const parentEmail = student?.parent?.email || student?.child?.parent_email || 'Not provided';
   const allergies = student?.medical_info?.allergies || student?.child?.allergies || 'None';
   const conditions = student?.medical_info?.conditions || student?.child?.medical_conditions || 'None';
-  const afterSchool = student?.child?.after_school ? 'Yes' : 'No';
+  const afterSchool =
+    (student?.child?.after_school ?? student?.afterSchool) ? "Yes" : "No";
   const notes = student?.notes || student?.child?.notes || 'No additional notes';
 
   return (

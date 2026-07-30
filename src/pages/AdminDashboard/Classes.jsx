@@ -33,7 +33,7 @@ import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import ClassFormModal from "../../components/admin/ClassFormModal";
 import classesService from "../../api/services/classes.service";
-import { getClassStatusBadge } from "../../utils/format";
+import { getClassStatusBadge, formatDate } from "../../utils/format";
 import programsService from "../../api/services/programs.service";
 import areasService from "../../api/services/areas.service";
 import adminService from "../../api/services/admin.service";
@@ -531,11 +531,11 @@ export default function Classes() {
         <div className="text-xs font-manrope text-text-muted whitespace-nowrap">
           <p>
             {row.start_date
-              ? new Date(row.start_date).toLocaleDateString()
+              ? formatDate(row.start_date)
               : "N/A"}
           </p>
           <p>
-            {row.end_date ? new Date(row.end_date).toLocaleDateString() : "N/A"}
+            {row.end_date ? formatDate(row.end_date) : "N/A"}
           </p>
         </div>
       ),
@@ -1328,11 +1328,11 @@ export default function Classes() {
                       </div>
                       <p className="text-sm text-text-primary font-manrope">
                         {cls.start_date
-                          ? new Date(cls.start_date).toLocaleDateString()
+                          ? formatDate(cls.start_date)
                           : "N/A"}{" "}
                         —{" "}
                         {cls.end_date
-                          ? new Date(cls.end_date).toLocaleDateString()
+                          ? formatDate(cls.end_date)
                           : "N/A"}
                       </p>
                     </div>

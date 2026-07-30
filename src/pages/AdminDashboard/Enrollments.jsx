@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
+import { formatDate } from "../../utils/format";
 import {
   Plus,
   Edit,
@@ -682,11 +683,11 @@ export default function Enrollments() {
                           </div>
                           <p className="text-sm text-text-primary font-manrope">
                             {cls?.start_date
-                              ? new Date(cls.start_date).toLocaleDateString()
+                              ? formatDate(cls.start_date)
                               : "N/A"}{" "}
                             —{" "}
                             {cls?.end_date
-                              ? new Date(cls.end_date).toLocaleDateString()
+                              ? formatDate(cls.end_date)
                               : "N/A"}
                           </p>
                         </div>

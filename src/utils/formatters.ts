@@ -65,7 +65,12 @@ export const buildScheduleFromClass = (cls: {
 export const formatDateRange = (startDate?: string, endDate?: string) => {
   if (!startDate || !endDate) return "Dates TBA";
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    // Date-only strings must be parsed as LOCAL dates — new Date("YYYY-MM-DD")
+    // is UTC midnight, which renders as the previous day in US timezones.
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+    const date = m
+      ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+      : new Date(dateStr);
     const month = date.toLocaleDateString("en-US", { month: "short" });
     const day = date.getDate();
     return `${month} ${day}`;

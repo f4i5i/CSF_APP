@@ -32,6 +32,7 @@
 
 // React core and hooks
 import React, { useState, useEffect } from "react";
+import { formatDate } from "../../utils/format";
 
 // Routing
 import {
@@ -248,16 +249,8 @@ export default function ClassDetail() {
       return "Dates TBD";
     }
 
-    const start = new Date(cls.start_date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const end = new Date(cls.end_date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const start = formatDate(cls.start_date);
+    const end = formatDate(cls.end_date);
 
     return `${start} - ${end}`;
   };
@@ -568,19 +561,25 @@ export default function ClassDetail() {
 
                     {/* Pricing features list */}
                     <ul className="mt-6 space-y-4 font-manrope text-sm text-text-muted">
-                      <li className="font-manrope flex items-center gap-2">
-                        <img src="/images/price_info.png" alt="" />
-                        <span>
-                          {Array.isArray(classData.class_dates) &&
-                          classData.class_dates.length > 0
-                            ? `${classData.class_dates.length} sessions`
-                            : `${calculateTrainingWeeks(classData)} weeks of training`}
-                        </span>
-                      </li>
-                      <li className="font-manrope flex items-center gap-2">
-                        <img src="/images/price_info.png" alt="" />
-                        <span>Certified coaching staff</span>
-                      </li>
+                      {(Array.isArray(classData.features) &&
+                      classData.features.filter((f) => f && f.trim()).length > 0
+                        ? classData.features.filter((f) => f && f.trim())
+                        : [
+                            Array.isArray(classData.class_dates) &&
+                            classData.class_dates.length > 0
+                              ? `${classData.class_dates.length} sessions`
+                              : `${calculateTrainingWeeks(classData)} weeks of training`,
+                            "Certified coaching staff",
+                          ]
+                      ).map((feature, idx) => (
+                        <li
+                          key={idx}
+                          className="font-manrope flex items-center gap-2"
+                        >
+                          <img src="/images/price_info.png" alt="" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
                     </ul>
 
                     {/* Capacity display removed per requirements */}

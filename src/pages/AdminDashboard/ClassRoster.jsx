@@ -14,7 +14,7 @@ import {
 import toast from "react-hot-toast";
 import adminService from "../../api/services/admin.service";
 import enrollmentsService from "../../api/services/enrollments.service";
-import { isNewRegistration } from "../../utils/format";
+import { isNewRegistration, formatDate } from "../../utils/format";
 
 const ClassRoster = () => {
   const { classId } = useParams();
@@ -176,8 +176,8 @@ const ClassRoster = () => {
               )}
               {rosterData.start_date && rosterData.end_date && (
                 <span>
-                  {new Date(rosterData.start_date).toLocaleDateString()} -{" "}
-                  {new Date(rosterData.end_date).toLocaleDateString()}
+                  {formatDate(rosterData.start_date)} -{" "}
+                  {formatDate(rosterData.end_date)}
                 </span>
               )}
             </div>

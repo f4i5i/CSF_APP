@@ -157,6 +157,8 @@ const CheckIn = () => {
           item.child?.medical_info,
         hasMedicalAlert: item.has_medical_alert || false,
         hasNoMedicalConditions: item.has_no_medical_conditions || false,
+        afterSchool: item.after_school || item.child?.after_school_attendance || false,
+        afterSchoolProgram: item.after_school_program || null,
         notes: item.notes,
       };
     });
