@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Eye,
   X,
+  FileText,
   Paperclip,
   Image,
   Trash2,
@@ -24,6 +25,8 @@ import Header from "../../components/Header";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import { useLocation } from "react-router-dom";
 import adminService from "../../api/services/admin.service";
+import emailTemplatesService from "../../api/services/emailTemplates.service";
+import { BUILTIN_EMAIL_TEMPLATES } from "../../data/emailTemplates";
 import toast from "react-hot-toast";
 
 const RECIPIENT_TYPES = [
@@ -80,6 +83,77 @@ export default function MassEmail() {
   // Preselected single recipient (arriving from Users/Clients email click)
   const [customRecipient, setCustomRecipient] = useState(null);
   const location = useLocation();
+
+  // Email templates: 5 built-ins + admin-saved custom ones
+  const [savedTemplates, setSavedTemplates] = useState([]);
+  const [activeTemplateId, setActiveTemplateId] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    emailTemplatesService
+      .list()
+      .then((items) => {
+        if (!cancelled) setSavedTemplates(items || []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const applyTemplate = (tpl) => {
+    setSubject(tpl.subject || "");
+    setMessage(tpl.html || tpl.body_html || "");
+    setActiveTemplateId(tpl.id);
+  };
+
+  const clearTemplate = () => {
+    setSubject("");
+    setMessage("");
+    setActiveTemplateId("");
+  };
+
+  const handleSaveTemplate = async () => {
+    if (!templateName.trim()) {
+      toast.error("Give the template a name");
+      return;
+    }
+    if (!subject.trim() || !hasMessageContent) {
+      toast.error("Write a subject and message first");
+      return;
+    }
+    setSavingTemplate(true);
+    try {
+      const created = await emailTemplatesService.create({
+        name: templateName.trim(),
+        subject: subject.trim(),
+        body_html: message,
+      });
+      setSavedTemplates((prev) => [created, ...prev]);
+      setActiveTemplateId(created.id);
+      setTemplateName("");
+      setShowSaveTemplate(false);
+      toast.success("Template saved");
+    } catch (e) {
+      toast.error("Failed to save template");
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
+  const handleDeleteTemplate = async (id) => {
+    try {
+      await emailTemplatesService.remove(id);
+      setSavedTemplates((prev) => prev.filter((t) => t.id !== id));
+      if (activeTemplateId === id) setActiveTemplateId("");
+      toast.success("Template deleted");
+    } catch (e) {
+      toast.error("Failed to delete template");
+    }
+  };
 
   useEffect(() => {
     const r = location.state?.recipient;
@@ -664,6 +738,103 @@ export default function MassEmail() {
                   </select>
                 </div>
               )}
+            </div>
+
+            {/* Email Templates */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-base font-semibold font-manrope text-text-primary flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-btn-gold" />
+                  Email Templates
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowSaveTemplate((v) => !v)}
+                  className="text-sm font-semibold text-[#173151] bg-gray-100 hover:bg-gray-200 rounded-lg px-3 py-1.5 font-manrope"
+                >
+                  {showSaveTemplate ? "Cancel" : "Save current as template"}
+                </button>
+              </div>
+              <p className="text-xs text-text-muted font-manrope mb-3">
+                Start from a ready-made template or one you saved — then edit
+                freely below. Templates fill in the subject and message.
+              </p>
+
+              {showSaveTemplate && (
+                <div className="flex items-center gap-2 mb-3">
+                  <input
+                    type="text"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="Template name (e.g. Rainout notice)"
+                    maxLength={120}
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-manrope focus:outline-none focus:ring-2 focus:ring-btn-gold"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveTemplate}
+                    disabled={savingTemplate}
+                    className="px-4 py-2 bg-[#173151] text-white rounded-lg text-sm font-semibold font-manrope disabled:opacity-50"
+                  >
+                    {savingTemplate ? "Saving…" : "Save"}
+                  </button>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={clearTemplate}
+                  className={`px-3 py-2 rounded-lg border text-left font-manrope text-sm transition-colors ${
+                    activeTemplateId === ""
+                      ? "border-[#173151] bg-[#173151]/5"
+                      : "border-gray-200 hover:border-[#173151]"
+                  }`}
+                >
+                  <span className="font-semibold block">Blank</span>
+                  <span className="text-xs text-text-muted">Start from scratch</span>
+                </button>
+                {BUILTIN_EMAIL_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => applyTemplate(tpl)}
+                    className={`px-3 py-2 rounded-lg border text-left font-manrope text-sm transition-colors ${
+                      activeTemplateId === tpl.id
+                        ? "border-[#173151] bg-[#173151]/5"
+                        : "border-gray-200 hover:border-[#173151]"
+                    }`}
+                  >
+                    <span className="font-semibold block">{tpl.name}</span>
+                    <span className="text-xs text-text-muted">{tpl.description}</span>
+                  </button>
+                ))}
+                {savedTemplates.map((tpl) => (
+                  <div
+                    key={tpl.id}
+                    className={`relative pr-8 px-3 py-2 rounded-lg border text-left font-manrope text-sm transition-colors cursor-pointer ${
+                      activeTemplateId === tpl.id
+                        ? "border-[#173151] bg-[#173151]/5"
+                        : "border-gray-200 hover:border-[#173151]"
+                    }`}
+                    onClick={() => applyTemplate(tpl)}
+                  >
+                    <span className="font-semibold block">{tpl.name}</span>
+                    <span className="text-xs text-text-muted">My template</span>
+                    <button
+                      type="button"
+                      title="Delete template"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTemplate(tpl.id);
+                      }}
+                      className="absolute right-1.5 top-1.5 p-0.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Email Composer */}
