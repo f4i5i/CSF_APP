@@ -22,6 +22,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Header from "../../components/Header";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
+import { useLocation } from "react-router-dom";
 import adminService from "../../api/services/admin.service";
 import toast from "react-hot-toast";
 
@@ -76,6 +77,17 @@ export default function MassEmail() {
   const [recipientType, setRecipientType] = useState("all");
   const [selectedClassId, setSelectedClassId] = useState("");
   const [classFilter, setClassFilter] = useState(""); // "", active, upcoming, completed
+  // Preselected single recipient (arriving from Users/Clients email click)
+  const [customRecipient, setCustomRecipient] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const r = location.state?.recipient;
+    if (r?.id && r?.email) {
+      setCustomRecipient(r);
+      setRecipientType("custom");
+    }
+  }, [location.state]);
   const [selectedProgramId, setSelectedProgramId] = useState("");
   const [selectedAreaId, setSelectedAreaId] = useState("");
   const [subject, setSubject] = useState("");
@@ -333,6 +345,10 @@ export default function MassEmail() {
       toast.error("Please select a program");
       return false;
     }
+    if (recipientType === "custom" && !customRecipient?.id) {
+      toast.error("No recipient selected");
+      return;
+    }
     if (recipientType === "area" && !selectedAreaId) {
       toast.error("Please select an area");
       return false;
@@ -368,6 +384,8 @@ export default function MassEmail() {
       if (recipientType === "program")
         formData.append("program_id", selectedProgramId);
       if (recipientType === "area") formData.append("area_id", selectedAreaId);
+      if (recipientType === "custom" && customRecipient)
+        formData.append("recipient_ids", JSON.stringify([customRecipient.id]));
 
       for (const att of attachments) {
         formData.append("attachments", att.file);
@@ -421,6 +439,10 @@ export default function MassEmail() {
         const area = areas.find((a) => a.id === selectedAreaId);
         return area ? `parents in "${area.name}"` : "selected area parents";
       }
+      case "custom":
+        return customRecipient
+          ? `${customRecipient.name || customRecipient.email} (${customRecipient.email})`
+          : "selected recipient";
       default:
         return "selected recipients";
     }
@@ -526,6 +548,28 @@ export default function MassEmail() {
               </div>
 
               {/* Dynamic dropdown based on recipient type */}
+              {recipientType === "custom" && customRecipient && (
+                <div className="mt-4 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+                  <div className="text-sm font-manrope">
+                    Sending to:{" "}
+                    <span className="font-semibold">
+                      {customRecipient.name || customRecipient.email}
+                    </span>{" "}
+                    <span className="text-gray-500">({customRecipient.email})</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-sm text-red-600 hover:underline"
+                    onClick={() => {
+                      setCustomRecipient(null);
+                      setRecipientType("all");
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
               {recipientType === "class" && (
                 <div>
                   <label className="text-sm font-medium text-gray-700 font-manrope">

@@ -517,7 +517,25 @@ export default function Clients() {
             </p>
             <div className="flex items-center gap-1 text-xs text-text-muted">
               <Mail className="w-3 h-3" />
-              <span>{row.email}</span>
+              <button
+                type="button"
+                title="Compose email to this user"
+                className="hover:underline hover:text-btn-secondary text-left"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/admin/mass-email", {
+                    state: {
+                      recipient: {
+                        id: row.id,
+                        email: row.email,
+                        name: `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+                      },
+                    },
+                  });
+                }}
+              >
+                {row.email}
+              </button>
             </div>
           </div>
         </div>

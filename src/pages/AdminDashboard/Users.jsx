@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Edit, Trash2, Mail, Phone, Shield } from "lucide-react";
 import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
@@ -29,6 +30,7 @@ const ROLE_COLORS = {
 };
 
 export default function Users() {
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const isOwner = currentUser?.role === "owner";
 
@@ -157,7 +159,25 @@ export default function Users() {
             </p>
             <div className="flex items-center gap-1 text-xs text-text-muted">
               <Mail className="w-3 h-3" />
-              <span>{row.email}</span>
+              <button
+                type="button"
+                title="Compose email to this user"
+                className="hover:underline hover:text-btn-secondary text-left"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/admin/mass-email", {
+                    state: {
+                      recipient: {
+                        id: row.id,
+                        email: row.email,
+                        name: `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+                      },
+                    },
+                  });
+                }}
+              >
+                {row.email}
+              </button>
             </div>
           </div>
         </div>
