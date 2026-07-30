@@ -49,8 +49,8 @@ const PaymentCancel = () => {
         {/* Help Text */}
         <p className="text-xs text-gray-500 mt-6 font-manrope">
           Need help? Contact us at{' '}
-          <a href="mailto:support@csf.com" className="text-btn-secondary hover:underline">
-            support@csf.com
+          <a href="mailto:info@carolinasoccerfactory.com" className="text-btn-secondary hover:underline">
+            info@carolinasoccerfactory.com
           </a>
         </p>
       </div>

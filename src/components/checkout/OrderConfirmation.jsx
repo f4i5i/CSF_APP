@@ -253,10 +253,10 @@ export default function OrderConfirmation({
         <p className="text-sm font-manrope text-blue-800 text-center">
           Questions? Contact us at{" "}
           <a
-            href="mailto:support@example.com"
+            href="mailto:info@carolinasoccerfactory.com"
             className="font-semibold underline"
           >
-            support@example.com
+            info@carolinasoccerfactory.com
           </a>{" "}
           or call{" "}
           <a href="tel:+1234567890" className="font-semibold underline">

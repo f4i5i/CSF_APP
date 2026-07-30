@@ -587,10 +587,10 @@ export default function CheckOut() {
                 <p className="text-xs font-manrope text-blue-700 mt-1">
                   Contact us at{" "}
                   <a
-                    href="mailto:support@csfacademy.com"
+                    href="mailto:info@carolinasoccerfactory.com"
                     className="underline font-semibold"
                   >
-                    support@csfacademy.com
+                    info@carolinasoccerfactory.com
                   </a>
                 </p>
               </div>
