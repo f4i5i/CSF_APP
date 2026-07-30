@@ -575,23 +575,30 @@ export default function MassEmail() {
                   <label className="text-sm font-medium text-gray-700 font-manrope">
                     Select Class *
                   </label>
-                  <label className="text-xs text-gray-500 font-manrope block mt-1">
-                    Filter classes
-                  </label>
-                  <select
-                    value={classFilter}
-                    onChange={(e) => {
-                      setClassFilter(e.target.value);
-                      setSelectedClassId("");
-                    }}
-                    className={inputStyle}
-                    style={{ marginBottom: 8 }}
-                  >
-                    <option value="">All classes</option>
-                    <option value="active">Active (running or not ended)</option>
-                    <option value="upcoming">Upcoming (starts in future)</option>
-                    <option value="completed">Completed (ended)</option>
-                  </select>
+                  <div className="flex flex-wrap items-center gap-2 mt-2 mb-2">
+                    {[
+                      { value: "", label: "All" },
+                      { value: "active", label: "Active" },
+                      { value: "upcoming", label: "Upcoming" },
+                      { value: "completed", label: "Completed" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          setClassFilter(opt.value);
+                          setSelectedClassId("");
+                        }}
+                        className={`px-4 py-1.5 rounded-full text-sm font-manrope font-medium border transition-colors ${
+                          classFilter === opt.value
+                            ? "bg-[#173151] text-white border-[#173151]"
+                            : "bg-white text-gray-600 border-gray-300 hover:border-[#173151]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                   <select
                     value={selectedClassId}
                     onChange={(e) => setSelectedClassId(e.target.value)}
