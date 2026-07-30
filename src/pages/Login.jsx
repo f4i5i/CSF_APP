@@ -153,7 +153,11 @@ export default function Login() {
         {/* LOGIN CARD (animated stage: entrance / shake / exit) */}
         <AuthStage shake={shake} leaving={leaving}>
         <div className="bg-white/[.92] backdrop-blur-md border border-white/90 shadow-[0_24px_64px_-24px_rgba(23,49,81,.28)] rounded-2xl max-sm:pb-8 p-4 sm:p-6 md:p-10">
-          <div className="csf-logo flex justify-center items-center mb-0 sm:mb-4">
+          {/* no csf-logo animation here: the logo PNG relies on
+              mix-blend-exclusion against the card, and an animated wrapper
+              creates a stacking context that isolates the blend (logo turns
+              invisible). It enters with the card's rise instead. */}
+          <div className="flex justify-center items-center mb-0 sm:mb-4">
             <LogoLogin />
           </div>
           <h2 className="csf-rise csf-d1 text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">

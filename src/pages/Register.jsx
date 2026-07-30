@@ -215,7 +215,9 @@ export default function Register() {
         {/* REGISTER CARD (animated stage: entrance / shake / exit) */}
         <AuthStage shake={shake} leaving={leaving} className="w-full max-w-3xl">
         <div className="bg-white/[.92] backdrop-blur-md border border-white/90 shadow-[0_24px_64px_-24px_rgba(23,49,81,.28)] rounded-[20px] px-6 sm:px-8 md:px-12 py-6 sm:py-8 md:py-10 w-full space-y-2">
-          <div className="csf-logo flex justify-center items-center -mb-1">
+          {/* no csf-logo animation: see Login.jsx — blend-mode logo must not
+              sit inside an animated (stacking-context) wrapper */}
+          <div className="flex justify-center items-center -mb-1">
             <LogoLogin />
           </div>
           <h2 className="csf-rise csf-d1 text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
