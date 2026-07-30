@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import LogoLogin from "../components/LogoLogin";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
+import AuthStage from "../components/auth/AuthStage";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -11,6 +12,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  // animation-only state: shake on failed login, slide-out on success
+  const [shake, setShake] = useState(0);
+  const [leaving, setLeaving] = useState(false);
   const { user, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -105,6 +109,9 @@ export default function Login() {
 
     try {
       const user = await login(email, password);
+      // brief slide-out before navigating (animation only)
+      setLeaving(true);
+      await new Promise((r) => setTimeout(r, 380));
       // Check if user must change password on first login
       if (user?.must_change_password) {
         navigate("/force-password-change", { replace: true });
@@ -114,6 +121,8 @@ export default function Login() {
     } catch (error) {
       // Error toast is already shown by auth context
       console.error("Login error:", error);
+      setShake(Date.now());
+      setTimeout(() => setShake(0), 340);
     } finally {
       setLoading(false);
     }
@@ -140,16 +149,14 @@ export default function Login() {
 
   return (
     <div className=" w-full flex flex-col justify-center items-center overflow-y-auto  px-3 sm:px-6">
-      {/* Dotted Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
-
       <div className="relative justify-center items-center w-full max-w-md sm:max-w-lg px-2 sm:px-4 my-auto">
-        {/* LOGIN CARD */}
-        <div className="bg-white shadow-2xl rounded-2xl max-sm:pb-8 p-4 sm:p-6 md:p-10">
-          <div className="flex justify-center items-center mb-0 sm:mb-4">
+        {/* LOGIN CARD (animated stage: entrance / shake / exit) */}
+        <AuthStage shake={shake} leaving={leaving}>
+        <div className="bg-white/[.92] backdrop-blur-md border border-white/90 shadow-[0_24px_64px_-24px_rgba(23,49,81,.28)] rounded-2xl max-sm:pb-8 p-4 sm:p-6 md:p-10">
+          <div className="csf-logo flex justify-center items-center mb-0 sm:mb-4">
             <LogoLogin />
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
+          <h2 className="csf-rise csf-d1 text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
             Welcome Back
           </h2>
           <p className="text-center font-manrope font-normal text-xs sm:text-sm md:text-base text-[#666D80] mt-1 mb-3 sm:mb-4 md:mb-6">
@@ -157,7 +164,7 @@ export default function Login() {
           </p>
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-3 max-sm:mt-8 sm:mb-4">
+            <div className="csf-rise csf-d2 mb-3 max-sm:mt-8 sm:mb-4">
               <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Email Address <span className="text-red-500">*</span>
               </label>
@@ -172,7 +179,7 @@ export default function Login() {
               />
             </div>
 
-            <div className="mb-3 sm:mb-4">
+            <div className="csf-rise csf-d3 mb-3 sm:mb-4">
               <label className="block text-xs font-manrope sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Password <span className="text-red-500">*</span>
               </label>
@@ -207,7 +214,7 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex w-full max-w-[436px] items-start justify-between gap-4 text-xs sm:text-sm font-manrope mb-3 sm:mb-4">
+            <div className="csf-rise csf-d4 flex w-full max-w-[436px] items-start justify-between gap-4 text-xs sm:text-sm font-manrope mb-3 sm:mb-4">
               <label className="flex items-center gap-2 text-[#0D0D12]">
                 <input
                   type="checkbox"
@@ -227,13 +234,26 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-primary font-['inter'] py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="csf-rise csf-d5 csf-shimmer csf-press relative overflow-hidden w-full bg-primary font-['inter'] py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? "Logging in..." : "Login"}
+              <span
+                className="transition-opacity duration-200"
+                style={{ opacity: loading ? 0 : 1 }}
+              >
+                Login
+              </span>
+              <span
+                aria-hidden="true"
+                className={
+                  "absolute left-1/2 top-1/2 -ml-2.5 -mt-2.5 h-5 w-5 rounded-full border-[2.5px] border-[#173151]/25 border-t-[#173151] transition-opacity duration-200 " +
+                  (loading ? "csf-spin" : "")
+                }
+                style={{ opacity: loading ? 1 : 0 }}
+              />
             </button>
 
-            <div className="mt-4 sm:mt-6 flex flex-col items-center">
+            <div className="csf-rise csf-d6 mt-4 sm:mt-6 flex flex-col items-center">
               <div className="w-full">
                 <GoogleSignInButton
                   onSuccess={handleGoogleSuccess}
@@ -253,7 +273,7 @@ export default function Login() {
        </button> */}
           </form>
 
-          <p className="text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal  text-[#666d80] mt-3 sm:mt-4 md:mt-6">
+          <p className="csf-rise csf-d7 text-center font-['inter'] text-xs sm:text-sm md:text-base font-normal  text-[#666d80] mt-3 sm:mt-4 md:mt-6">
             Don't have an account?
             <Link
               to="/register"
@@ -264,6 +284,7 @@ export default function Login() {
             </Link>
           </p>
         </div>
+        </AuthStage>
       </div>
     </div>
   );

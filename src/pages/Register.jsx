@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import LogoLogin from "../components/LogoLogin";
+import AuthStage from "../components/auth/AuthStage";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -22,6 +23,9 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  // animation-only state: shake on invalid submit, slide-out on success
+  const [shake, setShake] = useState(0);
+  const [leaving, setLeaving] = useState(false);
   const { user, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -181,6 +185,8 @@ export default function Register() {
 
     if (!validateForm()) {
       toast.error("Please fix the errors in the form");
+      setShake(Date.now());
+      setTimeout(() => setShake(0), 340);
       return;
     }
 
@@ -189,10 +195,15 @@ export default function Register() {
     try {
       const user = await register(formData);
       toast.success("Account created successfully!");
+      // brief slide-out before navigating (animation only)
+      setLeaving(true);
+      await new Promise((r) => setTimeout(r, 380));
       redirectForRole(user);
     } catch (error) {
       // Error already handled by auth context (toast shown)
       console.error("Registration error:", error);
+      setShake(Date.now());
+      setTimeout(() => setShake(0), 340);
     } finally {
       setLoading(false);
     }
@@ -200,23 +211,21 @@ export default function Register() {
 
   return (
     <div className=" w-full flex flex-col justify-start items-center overflow-y-auto  px-3 sm:px-6 py-8 sm:py-12">
-      {/* Dotted Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(#a1acc7_1px,transparent_1px)] [background-size:18px_18px] opacity-70"></div>
-
       <div className="relative flex justify-center  items-center w-full px-2 sm:px-4 md:px-6 my-auto py-8 sm:py-12">
-        {/* REGISTER CARD */}
-        <div className="bg-white shadow-2xl rounded-[20px] px-6 sm:px-8 md:px-12 py-6 sm:py-8 md:py-10 w-full max-w-3xl space-y-2">
-          <div className="flex justify-center items-center -mb-1">
+        {/* REGISTER CARD (animated stage: entrance / shake / exit) */}
+        <AuthStage shake={shake} leaving={leaving} className="w-full max-w-3xl">
+        <div className="bg-white/[.92] backdrop-blur-md border border-white/90 shadow-[0_24px_64px_-24px_rgba(23,49,81,.28)] rounded-[20px] px-6 sm:px-8 md:px-12 py-6 sm:py-8 md:py-10 w-full space-y-2">
+          <div className="csf-logo flex justify-center items-center -mb-1">
             <LogoLogin />
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
+          <h2 className="csf-rise csf-d1 text-lg sm:text-xl md:text-2xl font-manrope text-center font-semibold text-[#173151]">
             Create Account
           </h2>
           <p className="text-center font-manrope font-normal text-xs sm:text-sm md:text-base text-[#666D80] mt-1 mb-3 sm:mb-4 md:mb-6">
             Create your account to get started.
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+          <form onSubmit={handleSubmit} className="csf-rise csf-d2 flex flex-col gap-8">
             <div className="grid gap-4 md:grid-cols-2">
               {/* First Name */}
               <div>
@@ -425,20 +434,34 @@ export default function Register() {
 
             <button
               type="submit"
-              className="w-full bg-primary font-['inter'] py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="csf-shimmer csf-press relative overflow-hidden w-full bg-primary font-['inter'] py-2 sm:py-2.5 text-sm sm:text-base rounded-lg font-semibold bg-[#F3BC48] disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? "Creating account..." : "Register"}
+              <span
+                className="transition-opacity duration-200"
+                style={{ opacity: loading ? 0 : 1 }}
+              >
+                Register
+              </span>
+              <span
+                aria-hidden="true"
+                className={
+                  "absolute left-1/2 top-1/2 -ml-2.5 -mt-2.5 h-5 w-5 rounded-full border-[2.5px] border-[#173151]/25 border-t-[#173151] transition-opacity duration-200 " +
+                  (loading ? "csf-spin" : "")
+                }
+                style={{ opacity: loading ? 1 : 0 }}
+              />
             </button>
           </form>
 
-          <p className="text-center text-sm sm:text-base text-gray-600 mt-4 sm:mt-6">
+          <p className="csf-rise csf-d3 text-center text-sm sm:text-base text-gray-600 mt-4 sm:mt-6">
             Already have an account?{" "}
             <Link to="/login" className="text-primary font-medium">
               Login
             </Link>
           </p>
         </div>
+        </AuthStage>
       </div>
     </div>
   );

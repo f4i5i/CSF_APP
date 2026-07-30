@@ -1,13 +1,16 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Footer from "@/components/Footer";
+import { AuthAmbient } from "@/components/auth/AuthStage";
+import "../styles/auth-animations.css";
 export default function AuthLayout() {
   return (
-     <div className="min-h-screen w-full flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#f3f6fb] via-[#dee5f2] to-[#c7d3e7] opacity-80">
- 
-  
+     <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#f4f6fa] via-[#e7ebf4] to-[#dfe4ef]">
+      {/* Ambient animation layer: parallax dotted grid + drifting blobs */}
+      <AuthAmbient />
+
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex justify-center items-center px-4 overflow-hidden">
+      <div className="relative flex-1 flex justify-center items-center px-4 overflow-hidden">
         <Outlet />
       </div>
 

@@ -1,0 +1,128 @@
+/* ============================================================
+   Carolina Soccer Factory — auth animation layer
+   Imported once in src/pages/Authlayout.jsx.
+   Every block below is independently removable — see the
+   "TURN OFF" note on each section.
+   Only transform / opacity / box-shadow / color are animated.
+   ============================================================ */
+
+/* ---------- 1. ENTRANCE ----------------------------------- */
+/* TURN OFF: remove the .csf-rise / .csf-logo classes in JSX   */
+@keyframes csf-rise {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes csf-logo {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+.csf-rise { animation: csf-rise .62s cubic-bezier(.22,.7,.24,1) both; }
+.csf-logo { animation: csf-logo .5s cubic-bezier(.22,.7,.24,1) both; }
+/* stagger: 60–80ms apart */
+.csf-d1 { animation-delay: .06s; }
+.csf-d2 { animation-delay: .14s; }
+.csf-d3 { animation-delay: .22s; }
+.csf-d4 { animation-delay: .30s; }
+.csf-d5 { animation-delay: .38s; }
+.csf-d6 { animation-delay: .46s; }
+.csf-d7 { animation-delay: .54s; }
+.csf-d8 { animation-delay: .60s; }
+.csf-d9 { animation-delay: .66s; }
+
+/* ---------- 2. AMBIENT BACKGROUND ------------------------- */
+/* TURN OFF: delete <AuthAmbient /> from Authlayout.jsx        */
+@keyframes csf-blob-a {
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  50%     { transform: translate3d(4%,-6%,0) scale(1.08); }
+}
+@keyframes csf-blob-b {
+  0%,100% { transform: translate3d(0,0,0) scale(1.05); }
+  50%     { transform: translate3d(-5%,4%,0) scale(.95); }
+}
+@keyframes csf-blob-c {
+  0%,100% { transform: translate3d(0,0,0); }
+  50%     { transform: translate3d(3%,5%,0); }
+}
+.csf-blob-a { animation: csf-blob-a 26s ease-in-out infinite; will-change: transform; }
+.csf-blob-b { animation: csf-blob-b 30s ease-in-out infinite; will-change: transform; }
+.csf-blob-c { animation: csf-blob-c 22s ease-in-out infinite; will-change: transform; }
+/* the dotted grid, lifted into its own parallax layer */
+.csf-grid {
+  background-image: radial-gradient(rgba(23,49,81,.20) 1px, transparent 1px);
+  background-size: 22px 22px;
+  transition: transform .6s cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+}
+/* mobile: ambient reduced (blobs stay, motion stops) */
+@media (max-width: 767px) {
+  .csf-blob-a, .csf-blob-b, .csf-blob-c { animation: none; opacity: .5; }
+}
+
+/* ---------- 3. SOCCER MOTIF (rolling ball) ---------------- */
+/* TURN OFF: delete <RollingBall /> in AuthStage.jsx           */
+@keyframes csf-roll {
+  0%   { transform: translate3d(-40px,0,0) rotate(0deg); }
+  100% { transform: translate3d(var(--csf-roll-x, 478px),0,0) rotate(900deg); }
+}
+.csf-ball { animation: csf-roll 24s linear infinite; will-change: transform; }
+
+/* ---------- 4. MICRO-INTERACTIONS ------------------------ */
+/* TURN OFF: drop .csf-shimmer / .csf-press from the CTA      */
+@keyframes csf-shimmer {
+  from { transform: translate3d(-120%,0,0); }
+  to   { transform: translate3d(220%,0,0); }
+}
+.csf-shimmer::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 45%;
+  background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
+  transform: translate3d(-120%,0,0); pointer-events: none;
+}
+.csf-shimmer:hover:not(:disabled)::after { animation: csf-shimmer 1.1s cubic-bezier(.3,0,.4,1); }
+.csf-press { transition: transform .12s ease, background-color .2s ease, box-shadow .2s ease; }
+.csf-press:active:not(:disabled) { transform: scale(.985); }
+/* input focus glow + label lift, scoped so existing inputs need no class */
+.csf-scope input[type="text"],
+.csf-scope input[type="email"],
+.csf-scope input[type="password"],
+.csf-scope input[type="tel"] {
+  transition: box-shadow .22s ease, border-color .22s ease;
+}
+.csf-scope input[type="text"]:focus,
+.csf-scope input[type="email"]:focus,
+.csf-scope input[type="password"]:focus,
+.csf-scope input[type="tel"]:focus {
+  outline: none; border-color: #173151;
+  box-shadow: 0 0 0 4px rgba(23,49,81,.12);
+}
+.csf-scope label { transition: color .2s ease, transform .2s ease; transform-origin: left bottom; }
+.csf-scope div:focus-within > label { color: #173151; transform: translate3d(0,-2px,0); }
+/* eye cross-fade */
+.csf-eye { transition: opacity .22s ease, transform .22s ease; }
+
+/* ---------- 5. STATE ANIMATIONS -------------------------- */
+/* TURN OFF: stop toggling .csf-shake / data-leaving in pages */
+@keyframes csf-shake {
+  0%,100% { transform: translate3d(0,0,0); }
+  15% { transform: translate3d(-8px,0,0); }
+  30% { transform: translate3d(7px,0,0); }
+  45% { transform: translate3d(-5px,0,0); }
+  60% { transform: translate3d(4px,0,0); }
+  80% { transform: translate3d(-2px,0,0); }
+}
+.csf-shake { animation: csf-shake .3s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes csf-spin { to { transform: rotate(360deg); } }
+.csf-spin { animation: csf-spin .8s linear infinite; }
+/* success exit */
+.csf-exit { transition: transform .55s cubic-bezier(.4,0,.2,1), opacity .45s ease; }
+.csf-exit[data-leaving="true"] { transform: translate3d(0,-28px,0) scale(.985); opacity: 0; }
+
+/* ---------- REDUCED MOTION ------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .csf-rise, .csf-logo, .csf-ball, .csf-blob-a, .csf-blob-b, .csf-blob-c,
+  .csf-shake, .csf-spin, .csf-shimmer:hover::after { animation: none !important; }
+  .csf-rise, .csf-logo { opacity: 1 !important; transform: none !important; }
+  .csf-exit, .csf-grid, .csf-press, .csf-eye,
+  .csf-scope label,
+  .csf-scope input[type="text"], .csf-scope input[type="email"],
+  .csf-scope input[type="password"], .csf-scope input[type="tel"] { transition: none !important; }
+}
