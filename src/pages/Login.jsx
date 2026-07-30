@@ -148,7 +148,7 @@ export default function Login() {
   };
 
   return (
-    <div className=" w-full flex flex-col justify-center items-center overflow-y-auto  px-3 sm:px-6">
+    <div className="m-auto w-full flex flex-col items-center px-3 sm:px-6 py-8">
       <div className="relative justify-center items-center w-full max-w-md sm:max-w-lg px-2 sm:px-4 my-auto">
         {/* LOGIN CARD (animated stage: entrance / shake / exit) */}
         <AuthStage shake={shake} leaving={leaving}>

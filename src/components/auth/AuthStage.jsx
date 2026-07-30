@@ -29,7 +29,7 @@ export function AuthAmbient() {
     <>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-[10%] opacity-[.55] blur-[80px]"
+        className="pointer-events-none absolute -inset-[10%] opacity-[.35] blur-[80px]"
       >
         <div
           className="csf-blob-a absolute left-[6%] top-[8%] h-[38vw] w-[38vw]"

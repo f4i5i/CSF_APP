@@ -9,8 +9,11 @@ export default function AuthLayout() {
       {/* Ambient animation layer: parallax dotted grid + drifting blobs */}
       <AuthAmbient />
 
-      {/* MAIN CONTENT */}
-      <div className="relative flex-1 flex justify-center items-center px-4 overflow-hidden">
+      {/* MAIN CONTENT — scroll container; children use m-auto so a tall
+          card scrolls naturally from the top instead of being clipped by
+          justify-center (the old pattern cut off the card top on short
+          screens with no way to scroll up). */}
+      <div className="relative flex-1 flex overflow-y-auto px-4">
         <Outlet />
       </div>
 

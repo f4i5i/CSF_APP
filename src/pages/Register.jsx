@@ -210,7 +210,7 @@ export default function Register() {
   }
 
   return (
-    <div className=" w-full flex flex-col justify-start items-center overflow-y-auto  px-3 sm:px-6 py-8 sm:py-12">
+    <div className="m-auto w-full flex flex-col items-center px-3 sm:px-6 py-8 sm:py-10">
       <div className="relative flex justify-center  items-center w-full px-2 sm:px-4 md:px-6 my-auto py-8 sm:py-12">
         {/* REGISTER CARD (animated stage: entrance / shake / exit) */}
         <AuthStage shake={shake} leaving={leaving} className="w-full max-w-3xl">
