@@ -82,6 +82,140 @@ export default function Enrollments() {
     action: null,
   });
 
+  // Invoices per enrollment, loaded lazily when a row is expanded:
+  // { [enrollmentId]: { loading, error, items } }
+  const [invoicesByEnrollment, setInvoicesByEnrollment] = useState({});
+
+  const loadEnrollmentInvoices = async (row) => {
+    if (invoicesByEnrollment[row.id]?.items) return; // already loaded
+    setInvoicesByEnrollment((prev) => ({
+      ...prev,
+      [row.id]: { loading: true, error: null, items: null },
+    }));
+    try {
+      const data = await enrollmentsService.getInvoices(row.id);
+      setInvoicesByEnrollment((prev) => ({
+        ...prev,
+        [row.id]: { loading: false, error: null, items: data.items || [] },
+      }));
+    } catch (error) {
+      console.error("Failed to fetch enrollment invoices:", error);
+      setInvoicesByEnrollment((prev) => ({
+        ...prev,
+        [row.id]: {
+          loading: false,
+          error: "Failed to load invoices",
+          items: null,
+        },
+      }));
+    }
+  };
+
+  const INVOICE_STATUS_COLORS = {
+    paid: "bg-green-100 text-green-800",
+    sent: "bg-yellow-100 text-yellow-800",
+    draft: "bg-gray-100 text-gray-700",
+    overdue: "bg-red-100 text-red-800",
+    cancelled: "bg-gray-100 text-gray-500",
+  };
+
+  const renderEnrollmentInvoices = (row) => {
+    const state = invoicesByEnrollment[row.id];
+    if (!state || state.loading) {
+      return (
+        <p className="text-sm text-text-muted font-manrope py-2">
+          Loading invoices…
+        </p>
+      );
+    }
+    if (state.error) {
+      return (
+        <p className="text-sm text-red-600 font-manrope py-2">{state.error}</p>
+      );
+    }
+    if (!state.items?.length) {
+      return (
+        <p className="text-sm text-text-muted font-manrope py-2">
+          No invoices for this enrollment yet.
+        </p>
+      );
+    }
+    return (
+      <div className="overflow-x-auto">
+        <p className="text-xs font-bold uppercase tracking-wide text-text-muted font-manrope mb-2">
+          Invoices ({state.items.length})
+        </p>
+        <table className="w-full text-sm font-manrope">
+          <thead>
+            <tr className="text-left text-xs text-text-muted border-b border-border-light">
+              <th className="py-2 pr-4">Invoice #</th>
+              <th className="py-2 pr-4">Date</th>
+              <th className="py-2 pr-4">Description</th>
+              <th className="py-2 pr-4">Period</th>
+              <th className="py-2 pr-4 text-right">Total</th>
+              <th className="py-2 pr-4 text-right">Paid</th>
+              <th className="py-2 pr-4">Status</th>
+              <th className="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.items.map((inv) => {
+              const status = (inv.status || "").toLowerCase();
+              return (
+                <tr key={inv.id} className="border-b border-border-light/60">
+                  <td className="py-2 pr-4 whitespace-nowrap">
+                    {inv.invoice_number}
+                  </td>
+                  <td className="py-2 pr-4 whitespace-nowrap">
+                    {formatDate(inv.invoice_date)}
+                  </td>
+                  <td className="py-2 pr-4 max-w-[280px] truncate">
+                    {inv.description || "—"}
+                  </td>
+                  <td className="py-2 pr-4 whitespace-nowrap">
+                    {inv.billing_period_start
+                      ? `${formatDate(inv.billing_period_start)} – ${formatDate(
+                          inv.billing_period_end,
+                        )}`
+                      : "—"}
+                  </td>
+                  <td className="py-2 pr-4 text-right whitespace-nowrap">
+                    ${Number(inv.total).toFixed(2)}
+                  </td>
+                  <td className="py-2 pr-4 text-right whitespace-nowrap">
+                    ${Number(inv.amount_paid).toFixed(2)}
+                  </td>
+                  <td className="py-2 pr-4">
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        INVOICE_STATUS_COLORS[status] ||
+                        "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {inv.status}
+                    </span>
+                  </td>
+                  <td className="py-2 whitespace-nowrap">
+                    {inv.pdf_url && (
+                      <a
+                        href={inv.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#173151] underline text-xs font-semibold hover:text-[#F3BC48]"
+                      >
+                        PDF
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   useEffect(() => {
     fetchClasses();
   }, []);
@@ -523,6 +657,9 @@ export default function Enrollments() {
             currentPage={currentPage}
             totalItems={totalItems}
             onPageChange={setCurrentPage}
+            expandable={true}
+            onExpand={loadEnrollmentInvoices}
+            renderExpanded={renderEnrollmentInvoices}
           />
         </div>
       </div>
@@ -685,10 +822,7 @@ export default function Enrollments() {
                             {cls?.start_date
                               ? formatDate(cls.start_date)
                               : "N/A"}{" "}
-                            —{" "}
-                            {cls?.end_date
-                              ? formatDate(cls.end_date)
-                              : "N/A"}
+                            — {cls?.end_date ? formatDate(cls.end_date) : "N/A"}
                           </p>
                         </div>
 

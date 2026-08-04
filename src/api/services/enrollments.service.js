@@ -223,6 +223,17 @@ const enrollmentsService = {
   },
 
   /**
+   * List all invoices tied to one enrollment (admin only): original checkout,
+   * backfilled months, and subscription renewals.
+   * @param {string} id - Enrollment ID
+   * @returns {Promise<Object>} { items: [...], total }
+   */
+  async getInvoices(id) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ENROLLMENTS.INVOICES(id));
+    return data;
+  },
+
+  /**
    * Join the waitlist for a full class.
    * Regular waitlist gives a 12-hour claim window when a spot opens; priority
    * waitlist auto-charges the saved card on file (requires payment_method_id).
