@@ -57,6 +57,17 @@ const adminService = {
   },
 
   /**
+   * Filterable payment-based finance analytics (totals, timeseries, breakdowns).
+   * @param {Object} params - { start_date, end_date, class_id, program_id, payment_type }
+   */
+  async getFinanceAnalytics(params = {}) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.FINANCE_ANALYTICS, {
+      params,
+    });
+    return data;
+  },
+
+  /**
    * Get clients list
    * @param {Object} params - Filter parameters
    * @param {number} [params.skip] - Offset for pagination
