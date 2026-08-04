@@ -542,10 +542,10 @@ export default function App() {
             <Route path="/clients" element={<Clients />} />
 
             {/* Financial Reports - Revenue reports by class, program, date range */}
-            <Route path="/financials" element={<Financials />} />
+            <Route path="/financials" element={<ProtectedRoute requiredRole="owner"><Financials /></ProtectedRoute>} />
 
             {/* Installment Management - View and manage payment plans */}
-            <Route path="/admin/installments" element={<Installments />} />
+            <Route path="/admin/installments" element={<ProtectedRoute requiredRole="owner"><Installments /></ProtectedRoute>} />
 
             {/* Enrollment Management - View, transfer, cancel enrollments */}
             <Route path="/admin/enrollments" element={<Enrollments />} />
@@ -554,10 +554,10 @@ export default function App() {
             <Route path="/admin/waitlist" element={<Waitlist />} />
 
             {/* Invoice Management - View and manage invoices */}
-            <Route path="/admin/invoices" element={<Invoices />} />
+            <Route path="/admin/invoices" element={<ProtectedRoute requiredRole="owner"><Invoices /></ProtectedRoute>} />
 
             {/* Refunds Management - Review and process refund requests */}
-            <Route path="/admin/refunds" element={<RefundsManagement />} />
+            <Route path="/admin/refunds" element={<ProtectedRoute requiredRole="owner"><RefundsManagement /></ProtectedRoute>} />
 
             {/* Cancellation Requests - Review enrollment cancellation requests */}
             <Route

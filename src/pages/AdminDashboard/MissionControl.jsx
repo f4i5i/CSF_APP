@@ -404,7 +404,7 @@ const MissionControl = () => {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           <SectionCard
             title="Action inbox"
-            className="xl:col-span-7"
+            className={data?.finance ? "xl:col-span-7" : "xl:col-span-12"}
             right={
               <span className="text-xs text-gray-500 font-manrope">
                 Generated live from system state
@@ -443,6 +443,7 @@ const MissionControl = () => {
             )}
           </SectionCard>
 
+          {data?.finance && (
           <SectionCard
             title="Financial snapshot"
             className="xl:col-span-5"
@@ -494,6 +495,7 @@ const MissionControl = () => {
               </div>
             )}
           </SectionCard>
+          )}
         </div>
       </div>
     </div>

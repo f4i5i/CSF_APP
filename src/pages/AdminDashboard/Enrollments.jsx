@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { formatDate } from "../../utils/format";
+import { usePermissions } from "../../hooks/usePermissions";
 import {
   Plus,
   Edit,
@@ -50,6 +51,8 @@ const STATUS_COLORS = {
 };
 
 export default function Enrollments() {
+  const { can } = usePermissions();
+  const canSeeInvoices = can("canViewFinancials");
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -657,7 +660,7 @@ export default function Enrollments() {
             currentPage={currentPage}
             totalItems={totalItems}
             onPageChange={setCurrentPage}
-            expandable={true}
+            expandable={canSeeInvoices}
             onExpand={loadEnrollmentInvoices}
             renderExpanded={renderEnrollmentInvoices}
           />
