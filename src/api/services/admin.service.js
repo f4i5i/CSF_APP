@@ -68,6 +68,15 @@ const adminService = {
   },
 
   /**
+   * Mission Control home data: today's glance, schedule, coach status,
+   * momentum, derived action inbox, finance snapshot.
+   */
+  async getMissionControl() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.MISSION_CONTROL);
+    return data;
+  },
+
+  /**
    * Get clients list
    * @param {Object} params - Filter parameters
    * @param {number} [params.skip] - Offset for pagination

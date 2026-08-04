@@ -355,6 +355,7 @@ export const API_ENDPOINTS = {
     REVENUE: "/admin/finance/revenue", // Revenue report
     FINANCE_ADVANCED: "/admin/finance/advanced", // Per-class/program/area revenue breakdown
     FINANCE_ANALYTICS: "/admin/finance/analytics", // Filterable payment-based finance analytics
+    MISSION_CONTROL: "/admin/mission-control", // Owner home: glance, schedule, action inbox
     CLIENTS: "/admin/clients", // List clients with filters
     CLIENT_BY_ID: (id) => `/admin/clients/${id}`, // Client details
     COACHES: "/admin/coaches", // List coaches for class assignment
