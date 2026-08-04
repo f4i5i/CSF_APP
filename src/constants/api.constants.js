@@ -126,6 +126,7 @@ export const API_ENDPOINTS = {
     ACTIVATE: (id) => `/enrollments/${id}/activate`, // Activate pending (ADMIN)
     SEND_PAYMENT_LINK: (id) => `/enrollments/${id}/send-payment-link`, // Email hosted Stripe payment link (ADMIN)
     INVOICES: (id) => `/enrollments/${id}/invoices`, // List invoices for an enrollment (ADMIN)
+    STATS: "/enrollments/stats/summary", // Status counts for header cards (ADMIN)
     GROUP: (id) => `/enrollments/${id}/group`, // Set roster group number (coach/admin)
     WAITLIST_JOIN: "/enrollments/waitlist/join", // Join waitlist for a full class
     WAITLIST_CLAIM: (id) => `/enrollments/${id}/waitlist/claim`, // Claim a regular waitlist spot

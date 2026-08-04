@@ -30,6 +30,8 @@ import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import EnrollmentFormModal from "../../components/admin/EnrollmentFormModal";
 import enrollmentsService from "../../api/services/enrollments.service";
 import classesService from "../../api/services/classes.service";
+import programsService from "../../api/services/programs.service";
+import schoolsService from "../../api/services/schools.service";
 import toast from "react-hot-toast";
 import Header from "../../components/Header";
 
@@ -50,6 +52,14 @@ const STATUS_COLORS = {
   waitlisted: "bg-purple-100 text-purple-800",
 };
 
+const PAYMENT_COLORS = {
+  paid: "bg-green-100 text-green-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  unpaid: "bg-red-100 text-red-800",
+  refunded: "bg-gray-200 text-gray-700",
+  past_due: "bg-red-100 text-red-800",
+};
+
 export default function Enrollments() {
   const { can } = usePermissions();
   const canSeeInvoices = can("canViewFinancials");
@@ -62,6 +72,11 @@ export default function Enrollments() {
   const [dateTo, setDateTo] = useState("");
 
   const [classes, setClasses] = useState([]);
+  const [programFilter, setProgramFilter] = useState("");
+  const [schoolFilter, setSchoolFilter] = useState("");
+  const [programsList, setProgramsList] = useState([]);
+  const [schoolsList, setSchoolsList] = useState([]);
+  const [stats, setStats] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -225,8 +240,16 @@ export default function Enrollments() {
 
   const fetchClasses = async () => {
     try {
-      const response = await classesService.getAll({ limit: 100 });
+      const [response, progs, schools, statsData] = await Promise.all([
+        classesService.getAll({ limit: 500 }),
+        programsService.getAll().catch(() => []),
+        schoolsService.getAll().catch(() => []),
+        enrollmentsService.getStats().catch(() => null),
+      ]);
       setClasses(response.items || []);
+      setProgramsList(Array.isArray(progs) ? progs : progs?.items || []);
+      setSchoolsList(Array.isArray(schools) ? schools : schools?.items || []);
+      setStats(statsData);
     } catch (error) {
       console.error("Failed to fetch classes:", error);
     }
@@ -243,6 +266,8 @@ export default function Enrollments() {
 
       if (statusFilter) params.status = statusFilter;
       if (classFilter) params.class_id = classFilter;
+      if (programFilter) params.program_id = programFilter;
+      if (schoolFilter) params.school_id = schoolFilter;
 
       const response = await enrollmentsService.getAll(params);
       setEnrollments(response.items || []);
@@ -255,7 +280,7 @@ export default function Enrollments() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, classFilter]);
+  }, [currentPage, statusFilter, classFilter, programFilter, schoolFilter]);
 
   useEffect(() => {
     fetchEnrollments();
@@ -399,7 +424,8 @@ export default function Enrollments() {
             {value || "Unknown"}
           </p>
           <p className="text-xs text-gray-500 font-manrope">
-            ID: {row.child_id?.slice(0, 8)}...
+            {row.child_age != null ? `Age ${row.child_age}` : ""}
+            {row.child_age != null ? " · " : ""}ID: {row.child_id?.slice(0, 8)}
           </p>
         </div>
       ),
@@ -414,10 +440,44 @@ export default function Enrollments() {
             {value || "Unknown"}
           </p>
           <p className="text-xs text-gray-500 font-manrope">
-            ID: {row.class_id?.slice(0, 8)}...
+            {row.program_name || row.school_name || ""}
           </p>
         </div>
       ),
+    },
+    {
+      key: "parent_name",
+      label: "Parent / Guardian",
+      sortable: true,
+      hideOnMobile: true,
+      render: (value, row) => (
+        <div className="text-sm font-manrope">
+          <p className="font-semibold text-[#173151]">{value || "—"}</p>
+          {row.parent_email && (
+            <p className="text-xs text-gray-500">{row.parent_email}</p>
+          )}
+          {row.parent_phone && (
+            <p className="text-xs text-gray-500">{row.parent_phone}</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "payment_status",
+      label: "Payment",
+      sortable: true,
+      render: (value) =>
+        value ? (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${
+              PAYMENT_COLORS[value] || "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {value.replace("_", " ")}
+          </span>
+        ) : (
+          <span className="text-xs text-gray-400 font-manrope">—</span>
+        ),
     },
     {
       key: "status",
@@ -570,12 +630,34 @@ export default function Enrollments() {
     },
     {
       type: "select",
+      placeholder: "All Programs",
+      value: programFilter,
+      onChange: setProgramFilter,
+      options: [
+        { value: "", label: "All Programs" },
+        ...programsList.map((prg) => ({ value: prg.id, label: prg.name })),
+      ],
+    },
+    {
+      type: "select",
       placeholder: "All Classes",
       value: classFilter,
       onChange: setClassFilter,
       options: [
         { value: "", label: "All Classes" },
-        ...classes.map((c) => ({ value: c.id, label: c.name })),
+        ...classes
+          .filter((c) => !programFilter || c.program_id === programFilter)
+          .map((c) => ({ value: c.id, label: c.name })),
+      ],
+    },
+    {
+      type: "select",
+      placeholder: "All Locations",
+      value: schoolFilter,
+      onChange: setSchoolFilter,
+      options: [
+        { value: "", label: "All Locations" },
+        ...schoolsList.map((sc) => ({ value: sc.id, label: sc.name })),
       ],
     },
     {
@@ -588,11 +670,19 @@ export default function Enrollments() {
   ];
 
   const hasActiveFilters =
-    statusFilter || classFilter || searchQuery || dateFrom || dateTo;
+    statusFilter ||
+    classFilter ||
+    programFilter ||
+    schoolFilter ||
+    searchQuery ||
+    dateFrom ||
+    dateTo;
   const clearFilters = () => {
     setSearchQuery("");
     setStatusFilter("");
     setClassFilter("");
+    setProgramFilter("");
+    setSchoolFilter("");
     setDateFrom("");
     setDateTo("");
     setCurrentPage(1);
@@ -637,6 +727,51 @@ export default function Enrollments() {
             <span className="hidden xs:inline">Create </span>Enrollment
           </button>
         </div>
+
+        {stats?.counts && (
+          <div className="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+            {[
+              { key: "active", label: "Active", style: "text-green-600 bg-green-50" },
+              { key: "pending", label: "Pending Review", style: "text-yellow-600 bg-yellow-50" },
+              { key: "waitlisted", label: "Waitlist", style: "text-purple-600 bg-purple-50" },
+              { key: "cancelled", label: "Cancellations", style: "text-red-600 bg-red-50" },
+            ].map((card) => {
+              const count = stats.counts[card.key] || 0;
+              const pct = stats.total
+                ? Math.round((count / stats.total) * 100)
+                : 0;
+              return (
+                <button
+                  key={card.key}
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter(
+                      statusFilter === card.key ? "" : card.key,
+                    );
+                    setCurrentPage(1);
+                  }}
+                  className={`text-left bg-white/60 rounded-2xl p-4 shadow-sm border transition-colors ${
+                    statusFilter === card.key
+                      ? "border-[#F3BC48]"
+                      : "border-white/40 hover:border-[#F3BC48]/50"
+                  }`}
+                >
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold font-manrope ${card.style}`}
+                  >
+                    {card.label}
+                  </span>
+                  <p className="text-2xl font-semibold text-[#173151] font-kollektif mt-1">
+                    {count}
+                  </p>
+                  <p className="text-xs text-gray-500 font-manrope">
+                    {pct}% of total
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="shrink-0">
           <FilterBar

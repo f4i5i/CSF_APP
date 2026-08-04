@@ -234,6 +234,15 @@ const enrollmentsService = {
   },
 
   /**
+   * Enrollment counts by status for the admin page header cards.
+   * @returns {Promise<Object>} { counts: {active, pending, ...}, total }
+   */
+  async getStats() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ENROLLMENTS.STATS);
+    return data;
+  },
+
+  /**
    * Join the waitlist for a full class.
    * Regular waitlist gives a 12-hour claim window when a spot opens; priority
    * waitlist auto-charges the saved card on file (requires payment_method_id).
