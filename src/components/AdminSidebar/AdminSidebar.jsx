@@ -288,12 +288,10 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
               navigate("/admin");
             }}
           >
-            {/* Logo Outline (turns black using blend mode) */}
             <img
               src="/assets/brand/csf-logo.png"
-              alt="Outline"
-              className="w-[95px] h-[90px] md:block hidden object-contain
-          mix-blend-exclusion"
+              alt="Carolina Soccer Factory"
+              className="w-[95px] h-[90px] md:block hidden object-contain"
             />
           </div>
         </div>

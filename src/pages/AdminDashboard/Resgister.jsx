@@ -56,8 +56,7 @@ export default function Resgister() {
           <img
             src="/assets/brand/csf-logo.png"
             alt="location"
-            className="size-[140px]  object-contain 
-          mix-blend-exclusion"
+            className="size-[140px]  object-contain "
             style={{
               filter: 'brightness(0.2) contrast(1.5)',
               mixBlendMode: 'normal'
