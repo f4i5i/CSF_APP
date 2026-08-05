@@ -41,7 +41,6 @@ import { usePermissions } from "../../hooks/usePermissions";
 // Categorized navigation structure with permissions
 const categorizedRoutes = [
   { name: "Mission Control", to: "/admin", icon: Home, end: true },
-  { name: "Overview", to: "/admin/overview", icon: History, end: true },
   {
     category: "Setup",
     icon: Settings,

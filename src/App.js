@@ -83,7 +83,6 @@ import CoachGallery from "./pages/CoachDashboard/CoachGallery";
 // ========================================
 // IMPORTS - Admin Pages
 // ========================================
-import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import MissionControl from "./pages/AdminDashboard/MissionControl";
 import Financials from "./pages/AdminDashboard/Financials";
 import Clients from "./pages/AdminDashboard/Clients";
@@ -515,7 +514,6 @@ export default function App() {
           >
             {/* Admin Dashboard - Overview of metrics, revenue, enrollments */}
             <Route path="/admin" element={<MissionControl />} />
-            <Route path="/admin/overview" element={<AdminDashboard />} />
 
             {/* Class Management - Create, edit, delete classes and programs */}
             <Route path="/admin/classes" element={<AdminClasses />} />

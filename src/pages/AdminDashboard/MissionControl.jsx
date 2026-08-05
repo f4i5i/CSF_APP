@@ -21,6 +21,11 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Header from "../../components/Header";
+import StatsCards from "../../components/AdminDashboard/StatsCard";
+import MiddleSummary from "../../components/AdminDashboard/MiddleSummary";
+import MembersBarChart from "../../components/AdminDashboard/MembersBarChart";
+import SharedCalendar from "../../components/calendar/SharedCalendar";
+import { useAuth } from "../../context/auth";
 import adminService from "../../api/services/admin.service";
 import toast from "react-hot-toast";
 
@@ -90,15 +95,21 @@ const SEVERITY_STYLES = {
  * live system state; the Action Inbox is derived, never manually curated.
  */
 const MissionControl = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [metrics, setMetrics] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const mc = await adminService.getMissionControl();
+        const [mc, dm] = await Promise.all([
+          adminService.getMissionControl(),
+          adminService.getDashboardMetrics().catch(() => null),
+        ]);
         setData(mc);
+        setMetrics(dm);
       } catch (error) {
         console.error("Failed to load mission control:", error);
         toast.error("Failed to load Mission Control");
@@ -173,7 +184,12 @@ const MissionControl = () => {
                 Mission Control
               </h1>
               <p className="text-black font-manrope font-medium text-base">
-                Welcome back! Here's what's happening today.
+                Welcome back{user?.first_name ? `, ${user.first_name}` : ""}!
+                {metrics
+                  ? ` Managing ${metrics.total_schools || 0} locations · ${
+                      metrics.active_enrollments || 0
+                    } active students.`
+                  : " Here's what's happening today."}
               </p>
             </div>
           </div>
@@ -496,6 +512,68 @@ const MissionControl = () => {
             )}
           </SectionCard>
           )}
+        </div>
+
+        {/* ===== Trends & totals (merged from the old Overview page) ===== */}
+        {metrics && (
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <div className="xl:col-span-5">
+              <StatsCards
+                registrations={{
+                  "24h": metrics.registrations_24h || 0,
+                  "7d": metrics.registrations_7d || 0,
+                  "30d": metrics.registrations_30d || 0,
+                }}
+                cancellations={{
+                  "24h": metrics.cancellations_24h || 0,
+                  "7d": metrics.cancellations_7d || 0,
+                  "30d": metrics.cancellations_30d || 0,
+                }}
+              />
+            </div>
+            <div className="xl:col-span-3 flex flex-col gap-4">
+              <MiddleSummary
+                totalClasses={metrics.total_classes || 0}
+                totalPrograms={metrics.total_programs || 0}
+              />
+              <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow flex-1">
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-500 font-manrope mb-2">
+                  Programs
+                </p>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {(metrics.programs_with_counts || [])
+                    .filter((p) => p.count > 0)
+                    .map((p) => (
+                      <div
+                        key={p.id || p.name}
+                        className="flex justify-between text-sm font-manrope"
+                      >
+                        <span className="text-[#173151] truncate">{p.name}</span>
+                        <span className="font-semibold text-[#173151] shrink-0">
+                          {p.count}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+            <div className="xl:col-span-4 bg-[#FFFFFF80] rounded-2xl p-4 shadow flex flex-col">
+              <h3 className="text-lg font-manrope font-semibold mb-2 text-[#173151]">
+                Enrollments (monthly)
+              </h3>
+              <div className="flex-1">
+                <MembersBarChart data={metrics.monthly_enrollments || []} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===== Unified calendar ===== */}
+        <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow">
+          <h3 className="text-lg font-manrope font-semibold mb-4 text-[#173151]">
+            Calendar
+          </h3>
+          <SharedCalendar />
         </div>
       </div>
     </div>
