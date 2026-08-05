@@ -27,7 +27,9 @@ import Header from "../../components/Header";
 import adminService from "../../api/services/admin.service";
 import childrenService from "../../api/services/children.service";
 import programsService from "../../api/services/programs.service";
-import { formatGrade, formatJerseySize } from "../../utils/format";
+import { formatDate, formatGrade, formatJerseySize } from "../../utils/format";
+import { usePermissions } from "../../hooks/usePermissions";
+import ClientDetailsPanel from "../../components/admin/ClientDetailsPanel";
 import toast from "react-hot-toast";
 
 export default function Clients() {
@@ -64,6 +66,36 @@ export default function Clients() {
     parentName: null,
   });
 
+  const { can } = usePermissions();
+  const canSeeFinancials = can("canViewFinancials");
+  const [stats, setStats] = useState(null);
+  const [chip, setChip] = useState("all"); // all | active | attention
+  const [detailsPanel, setDetailsPanel] = useState({
+    open: false,
+    loading: false,
+    client: null,
+    details: null,
+  });
+
+  useEffect(() => {
+    adminService
+      .getClientStats()
+      .then(setStats)
+      .catch(() => setStats(null));
+  }, []);
+
+  const openDetailsPanel = async (client) => {
+    setDetailsPanel({ open: true, loading: true, client, details: null });
+    try {
+      const details = await adminService.getClientById(client.id);
+      setDetailsPanel({ open: true, loading: false, client, details });
+    } catch (error) {
+      console.error("Failed to fetch client details:", error);
+      toast.error("Failed to load client details");
+      setDetailsPanel({ open: false, loading: false, client: null, details: null });
+    }
+  };
+
   const fetchClients = useCallback(async () => {
     setLoading(true);
     try {
@@ -78,6 +110,8 @@ export default function Clients() {
       if (programFilter) params.program_id = programFilter;
       if (statusFilter !== "")
         params.has_active_enrollment = statusFilter === "true";
+      if (chip === "active") params.has_active_enrollment = true;
+      if (chip === "attention") params.needs_attention = true;
 
       const response = await adminService.getClients(params);
 
@@ -96,6 +130,10 @@ export default function Clients() {
           active_enrollments: client.active_enrollments || 0,
           children_count: client.children_count || 0,
           created_at: client.created_at,
+          balance: client.balance,
+          last_activity: client.last_activity,
+          status: client.status || "inactive",
+          needs_attention: client.needs_attention,
         };
       });
 
@@ -109,7 +147,7 @@ export default function Clients() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, searchQuery, programFilter]);
+  }, [currentPage, statusFilter, searchQuery, programFilter, chip]);
 
   useEffect(() => {
     fetchClients();
@@ -599,6 +637,60 @@ export default function Clients() {
         </span>
       ),
     },
+    ...(canSeeFinancials
+      ? [
+          {
+            key: "balance",
+            label: "Balance",
+            sortable: true,
+            render: (value) =>
+              value > 0 ? (
+                <span className="font-semibold text-red-600 font-manrope">
+                  ${Number(value).toFixed(2)}
+                </span>
+              ) : (
+                <span className="text-gray-500 font-manrope">$0.00</span>
+              ),
+          },
+        ]
+      : []),
+    {
+      key: "last_activity",
+      label: "Last Activity",
+      sortable: true,
+      hideOnMobile: true,
+      render: (value) => (
+        <span className="text-sm text-gray-600 font-manrope">
+          {value ? formatDate(value) : "—"}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      sortable: true,
+      render: (value) => {
+        const styles = {
+          active: "bg-green-100 text-green-800",
+          payment_due: "bg-red-100 text-red-700",
+          inactive: "bg-gray-100 text-gray-600",
+        };
+        const labels = {
+          active: "Active",
+          payment_due: "Payment due",
+          inactive: "Inactive",
+        };
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              styles[value] || styles.inactive
+            }`}
+          >
+            {labels[value] || value}
+          </span>
+        );
+      },
+    },
     {
       key: "created_at",
       label: "Joined",
@@ -618,7 +710,7 @@ export default function Clients() {
         {
           label: "View",
           icon: Eye,
-          onClick: () => handleViewClient(toggleExpand),
+          onClick: () => openDetailsPanel(row),
         },
         {
           label: "Delete",
@@ -719,6 +811,49 @@ export default function Clients() {
           </button>
         </div>
 
+        {stats && (
+          <div className="shrink-0 flex flex-wrap gap-2 mb-3">
+            {[
+              { key: "all", label: "All Clients", count: stats.total },
+              { key: "active", label: "Active", count: stats.active, dot: "bg-green-500" },
+              ...(stats.needs_attention != null
+                ? [
+                    {
+                      key: "attention",
+                      label: "Needs Attention",
+                      count: stats.needs_attention,
+                      dot: "bg-red-500",
+                    },
+                  ]
+                : []),
+            ].map((c) => (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => {
+                  setChip(c.key);
+                  setCurrentPage(1);
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold font-manrope border transition-colors ${
+                  chip === c.key
+                    ? "bg-[#173151] text-white border-[#173151]"
+                    : "bg-white/60 text-[#173151] border-white/40 hover:border-[#F3BC48]"
+                }`}
+              >
+                {c.dot && <span className={`w-2 h-2 rounded-full ${c.dot}`} />}
+                {c.label}
+                <span
+                  className={`px-1.5 py-0.5 rounded-md text-xs ${
+                    chip === c.key ? "bg-white/20" : "bg-[#173151]/10"
+                  }`}
+                >
+                  {c.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="shrink-0">
           <FilterBar
             searchValue={searchQuery}
@@ -747,6 +882,30 @@ export default function Clients() {
           />
         </div>
       </div>
+
+      <ClientDetailsPanel
+        open={detailsPanel.open}
+        loading={detailsPanel.loading}
+        client={detailsPanel.client}
+        details={detailsPanel.details}
+        canSeeFinancials={canSeeFinancials}
+        onClose={() =>
+          setDetailsPanel({ open: false, loading: false, client: null, details: null })
+        }
+        onSendMessage={() => {
+          const c = detailsPanel.client;
+          navigate("/admin/mass-email", {
+            state: {
+              recipient: {
+                id: c.id,
+                email: c.email,
+                name: `${c.first_name} ${c.last_name}`.trim(),
+              },
+            },
+          });
+        }}
+        onViewInvoices={() => navigate("/admin/invoices")}
+      />
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}

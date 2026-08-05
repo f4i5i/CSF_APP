@@ -77,6 +77,14 @@ const adminService = {
   },
 
   /**
+   * Clients page chip counts: total / active / needs_attention (owner only).
+   */
+  async getClientStats() {
+    const { data } = await apiClient.get(API_ENDPOINTS.ADMIN.CLIENT_STATS);
+    return data;
+  },
+
+  /**
    * Get clients list
    * @param {Object} params - Filter parameters
    * @param {number} [params.skip] - Offset for pagination

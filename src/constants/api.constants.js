@@ -361,6 +361,7 @@ export const API_ENDPOINTS = {
     MISSION_CONTROL: "/admin/mission-control", // Owner home: glance, schedule, action inbox
     CLIENTS: "/admin/clients", // List clients with filters
     CLIENT_BY_ID: (id) => `/admin/clients/${id}`, // Client details
+    CLIENT_STATS: "/admin/clients/stats/summary", // Chip counts for Clients page
     COACHES: "/admin/coaches", // List coaches for class assignment
     ROSTER: (classId) => `/admin/classes/${classId}/roster`, // Class roster
     EXPORT_STUDENTS: "/admin/export/students", // Full parent + child CSV export
