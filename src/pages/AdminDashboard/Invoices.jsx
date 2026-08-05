@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FileText, Download, Eye, RefreshCw, X } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import FilterBar from '../../components/admin/FilterBar';
@@ -17,7 +18,11 @@ export default function Invoices() {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchParams] = useSearchParams();
+  // Deep links (e.g. Mission Control's "open invoices" action) preset the filter
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get('status') || '',
+  );
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
@@ -220,6 +225,7 @@ export default function Invoices() {
       value: statusFilter,
       onChange: setStatusFilter,
       options: [
+        { value: 'open', label: 'Open (unpaid)' },
         { value: 'paid', label: 'Paid' },
         { value: 'sent', label: 'Sent' },
         { value: 'draft', label: 'Draft' },

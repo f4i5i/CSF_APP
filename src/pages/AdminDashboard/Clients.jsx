@@ -904,7 +904,7 @@ export default function Clients() {
             },
           });
         }}
-        onViewInvoices={() => navigate("/admin/invoices")}
+        onViewInvoices={() => navigate("/admin/invoices?status=open")}
       />
 
       <ConfirmDialog
