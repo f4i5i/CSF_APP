@@ -191,7 +191,7 @@ export default function ClassList() {
             </button>
             <div>
               <img
-                src="/images/logo.png"
+                src="/assets/brand/csf-logo.png"
                 alt="logo"
                 className="size-[90px] object-contain "
                 style={{

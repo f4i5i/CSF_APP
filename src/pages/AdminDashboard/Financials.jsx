@@ -641,7 +641,7 @@ const Financials = () => {
                   analytics.outstanding.total,
                 )}`}
               >
-                <div className="max-h-[320px] overflow-y-auto">
+                <div className="max-h-[320px] overflow-y-auto overflow-x-auto">
                   <table className="w-full text-sm font-manrope">
                     <thead>
                       <tr className="text-left text-xs text-gray-500 border-b border-border-light sticky top-0 bg-white/90">
@@ -692,7 +692,7 @@ const Financials = () => {
                   analytics.failed.total,
                 )}`}
               >
-                <div className="max-h-[320px] overflow-y-auto">
+                <div className="max-h-[320px] overflow-y-auto overflow-x-auto">
                   <table className="w-full text-sm font-manrope">
                     <thead>
                       <tr className="text-left text-xs text-gray-500 border-b border-border-light sticky top-0 bg-white/90">
@@ -850,53 +850,56 @@ const Financials = () => {
               No class revenue in this period.
             </div>
           ) : (
-            <div
-              style={{
-                width: "100%",
-                height: Math.max(240, topClasses.length * 36),
-              }}
-            >
-              <ResponsiveContainer>
-                <BarChart
-                  layout="vertical"
-                  data={topClasses.map((c) => ({
-                    name: c.class_name,
-                    revenue: c.revenue,
-                    payments: c.payments,
-                  }))}
-                  margin={{ left: 12, right: 24, top: 8, bottom: 8 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="4 8"
-                    stroke="#eef2f6"
-                    horizontal={false}
-                  />
-                  <XAxis
-                    type="number"
-                    tick={{ fill: "#6b7280", fontSize: 12 }}
-                    tickFormatter={fmtMoney}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={220}
-                    tick={{ fill: "#374151", fontSize: 12 }}
-                  />
-                  <Tooltip
-                    formatter={(v, name) =>
-                      name === "revenue"
-                        ? [fmtMoneyFull(v), "Revenue"]
-                        : [v, name]
-                    }
-                  />
-                  <Bar
-                    dataKey="revenue"
-                    fill={NAVY}
-                    radius={[0, 6, 6, 0]}
-                    barSize={20}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="overflow-x-auto">
+              <div
+                className="min-w-[520px]"
+                style={{
+                  width: "100%",
+                  height: Math.max(240, topClasses.length * 36),
+                }}
+              >
+                <ResponsiveContainer>
+                  <BarChart
+                    layout="vertical"
+                    data={topClasses.map((c) => ({
+                      name: c.class_name,
+                      revenue: c.revenue,
+                      payments: c.payments,
+                    }))}
+                    margin={{ left: 12, right: 24, top: 8, bottom: 8 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="4 8"
+                      stroke="#eef2f6"
+                      horizontal={false}
+                    />
+                    <XAxis
+                      type="number"
+                      tick={{ fill: "#6b7280", fontSize: 12 }}
+                      tickFormatter={fmtMoney}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      width={220}
+                      tick={{ fill: "#374151", fontSize: 12 }}
+                    />
+                    <Tooltip
+                      formatter={(v, name) =>
+                        name === "revenue"
+                          ? [fmtMoneyFull(v), "Revenue"]
+                          : [v, name]
+                      }
+                    />
+                    <Bar
+                      dataKey="revenue"
+                      fill={NAVY}
+                      radius={[0, 6, 6, 0]}
+                      barSize={20}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           )}
         </div>
@@ -1005,57 +1008,62 @@ const Financials = () => {
                 No active classes.
               </div>
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: Math.max(240, capacityData.length * 44),
-                }}
-              >
-                <ResponsiveContainer>
-                  <BarChart
-                    layout="vertical"
-                    data={capacityData.map((c) => ({
-                      name: `${c.class_name} (${c.enrolled}/${c.capacity})`,
-                      actual: c.actual,
-                      untapped: Math.max(0, c.gap),
-                    }))}
-                    margin={{ left: 12, right: 24, top: 8, bottom: 8 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="4 8"
-                      stroke="#eef2f6"
-                      horizontal={false}
-                    />
-                    <XAxis
-                      type="number"
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
-                      tickFormatter={fmtMoney}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={230}
-                      tick={{ fill: "#374151", fontSize: 11 }}
-                    />
-                    <Tooltip formatter={(v, name) => [fmtMoneyFull(v), name]} />
-                    <Legend />
-                    <Bar
-                      dataKey="actual"
-                      name="Current revenue"
-                      stackId="cap"
-                      fill={NAVY}
-                      barSize={18}
-                    />
-                    <Bar
-                      dataKey="untapped"
-                      name="Untapped (empty seats)"
-                      stackId="cap"
-                      fill="#cbd5e1"
-                      radius={[0, 6, 6, 0]}
-                      barSize={18}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="overflow-x-auto">
+                <div
+                  className="min-w-[520px]"
+                  style={{
+                    width: "100%",
+                    height: Math.max(240, capacityData.length * 44),
+                  }}
+                >
+                  <ResponsiveContainer>
+                    <BarChart
+                      layout="vertical"
+                      data={capacityData.map((c) => ({
+                        name: `${c.class_name} (${c.enrolled}/${c.capacity})`,
+                        actual: c.actual,
+                        untapped: Math.max(0, c.gap),
+                      }))}
+                      margin={{ left: 12, right: 24, top: 8, bottom: 8 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="4 8"
+                        stroke="#eef2f6"
+                        horizontal={false}
+                      />
+                      <XAxis
+                        type="number"
+                        tick={{ fill: "#6b7280", fontSize: 12 }}
+                        tickFormatter={fmtMoney}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={230}
+                        tick={{ fill: "#374151", fontSize: 11 }}
+                      />
+                      <Tooltip
+                        formatter={(v, name) => [fmtMoneyFull(v), name]}
+                      />
+                      <Legend />
+                      <Bar
+                        dataKey="actual"
+                        name="Current revenue"
+                        stackId="cap"
+                        fill={NAVY}
+                        barSize={18}
+                      />
+                      <Bar
+                        dataKey="untapped"
+                        name="Untapped (empty seats)"
+                        stackId="cap"
+                        fill="#cbd5e1"
+                        radius={[0, 6, 6, 0]}
+                        barSize={18}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             )}
           </SectionCard>
@@ -1070,7 +1078,7 @@ const Financials = () => {
                 No active subscriptions.
               </div>
             ) : (
-              <div className="max-h-[420px] overflow-y-auto">
+              <div className="max-h-[420px] overflow-y-auto overflow-x-auto">
                 <table className="w-full text-sm font-manrope">
                   <thead>
                     <tr className="text-left text-xs text-gray-500 border-b border-border-light sticky top-0 bg-white/90">

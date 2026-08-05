@@ -290,7 +290,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, onNavigate }) {
           >
             {/* Logo Outline (turns black using blend mode) */}
             <img
-              src="/images/logo.png"
+              src="/assets/brand/csf-logo.png"
               alt="Outline"
               className="w-[95px] h-[90px] md:block hidden object-contain
           mix-blend-exclusion"

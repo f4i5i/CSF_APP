@@ -217,9 +217,9 @@ const Header = () => {
           </button>
 
           <img
-            src="/images/logo3.png"
-            alt="Outline"
-            className="size-[80px] object-contain mix-blend-exclusion mx-2"
+            src="/assets/brand/csf-logo.png"
+            alt="Carolina Soccer Factory"
+            className="size-[80px] object-contain mx-2"
           />
           <div className="md:hidden flex items-center gap-2 cursor-pointer max-sm:justify-end max-sm:items-end ">
             <img

@@ -629,7 +629,7 @@ export default function MyChildren() {
               </div>
 
               {/* DOB, Grade, Jersey */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 font-manrope mb-1">
                     Date of Birth <span className="text-red-500">*</span>
@@ -760,7 +760,7 @@ export default function MyChildren() {
                 <p className="text-xs font-semibold text-[#173151] font-manrope mb-2 uppercase tracking-wide">
                   Emergency Contact
                 </p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 font-manrope mb-1">
                       Name

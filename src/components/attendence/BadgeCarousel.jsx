@@ -92,7 +92,8 @@ export default function BadgeCarousel({ badges }) {
             gap-4 max-sm:gap-3
             overflow-x-auto no-scrollbar scroll-smooth
             py-2
-            w-[1280px]       
+            w-full
+            max-w-[1280px]
             xl:w-[1280px]
             lg:w-[848px]      
             md:w-[848px]

@@ -54,7 +54,7 @@ export default function Resgister() {
           {/* <Logo /> */}
           <div className="isolation-auto" >
           <img
-            src="/images/logo.png"
+            src="/assets/brand/csf-logo.png"
             alt="location"
             className="size-[140px]  object-contain 
           mix-blend-exclusion"

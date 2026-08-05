@@ -39,7 +39,8 @@ const RevenueByClassChart = ({ data = [] }) => {
   const height = Math.max(300, rows.length * 38);
 
   return (
-    <div style={{ width: "100%", height }}>
+    <div className="overflow-x-auto">
+    <div className="min-w-[480px]" style={{ width: "100%", height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           layout="vertical"
@@ -74,6 +75,7 @@ const RevenueByClassChart = ({ data = [] }) => {
           />
         </BarChart>
       </ResponsiveContainer>
+    </div>
     </div>
   );
 };

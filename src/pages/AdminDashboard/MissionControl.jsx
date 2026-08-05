@@ -164,7 +164,7 @@ const MissionControl = () => {
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img
-              src="/images/logo.png"
+              src="/assets/brand/csf-logo.png"
               alt="Carolina Soccer Factory"
               className="w-14 h-14 object-contain max-sm:hidden"
             />

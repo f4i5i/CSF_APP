@@ -367,7 +367,7 @@ export default function ClassDetail() {
               {/* Right side: Logo with custom styling */}
               <div className="isolation-auto">
                 <img
-                  src="/images/logo.png"
+                  src="/assets/brand/csf-logo.png"
                   alt="logo"
                   className="size-[80px] object-contain"
                   style={{

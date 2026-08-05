@@ -907,7 +907,7 @@ export default function EventsManagement() {
 
             {/* Summary Stats */}
             {rsvpData && !rsvpLoading && (
-              <div className="grid grid-cols-4 gap-3 mb-4 flex-shrink-0">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 flex-shrink-0">
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold text-text-primary font-manrope">
                     {rsvpData.total_rsvps || 0}

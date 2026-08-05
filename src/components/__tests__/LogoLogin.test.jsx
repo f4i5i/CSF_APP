@@ -10,6 +10,6 @@ describe('LogoLogin', () => {
     render(<LogoLogin />);
     const img = screen.getByRole('img');
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute('src', 'logo_login.png');
+    expect(img).toHaveAttribute('src', '/assets/brand/csf-logo.png');
   });
 });
