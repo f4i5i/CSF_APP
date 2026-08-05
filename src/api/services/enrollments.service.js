@@ -243,6 +243,27 @@ const enrollmentsService = {
   },
 
   /**
+   * Enrollment Review panel aggregate: child, placement, documents checklist,
+   * and (owner only) payment timeline.
+   * @param {string} id - Enrollment ID
+   */
+  async getReview(id) {
+    const { data } = await apiClient.get(API_ENDPOINTS.ENROLLMENTS.REVIEW(id));
+    return data;
+  },
+
+  /**
+   * Re-email the parent their open hosted-invoice link (owner only).
+   * @param {string} id - Enrollment ID
+   */
+  async sendPaymentReminder(id) {
+    const { data } = await apiClient.post(
+      API_ENDPOINTS.ENROLLMENTS.PAYMENT_REMINDER(id),
+    );
+    return data;
+  },
+
+  /**
    * Join the waitlist for a full class.
    * Regular waitlist gives a 12-hour claim window when a spot opens; priority
    * waitlist auto-charges the saved card on file (requires payment_method_id).

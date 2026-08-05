@@ -28,6 +28,7 @@ import DataTable from "../../components/admin/DataTable";
 import FilterBar from "../../components/admin/FilterBar";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import EnrollmentFormModal from "../../components/admin/EnrollmentFormModal";
+import EnrollmentReviewPanel from "../../components/admin/EnrollmentReviewPanel";
 import enrollmentsService from "../../api/services/enrollments.service";
 import classesService from "../../api/services/classes.service";
 import programsService from "../../api/services/programs.service";
@@ -99,6 +100,29 @@ export default function Enrollments() {
     message: "",
     action: null,
   });
+
+  // Enrollment Review right drawer
+  const [reviewPanel, setReviewPanel] = useState({
+    open: false,
+    loading: false,
+    enrollment: null,
+    data: null,
+  });
+
+  const openReviewPanel = async (enrollment) => {
+    setReviewPanel({ open: true, loading: true, enrollment, data: null });
+    try {
+      const data = await enrollmentsService.getReview(enrollment.id);
+      setReviewPanel({ open: true, loading: false, enrollment, data });
+    } catch (error) {
+      console.error("Failed to load enrollment review:", error);
+      toast.error("Failed to load enrollment review");
+      setReviewPanel({ open: false, loading: false, enrollment: null, data: null });
+    }
+  };
+
+  const closeReviewPanel = () =>
+    setReviewPanel({ open: false, loading: false, enrollment: null, data: null });
 
   // Invoices per enrollment, loaded lazily when a row is expanded:
   // { [enrollmentId]: { loading, error, items } }
@@ -560,7 +584,7 @@ export default function Enrollments() {
           {
             label: "View",
             icon: Eye,
-            onClick: () => handleViewEnrollment(row),
+            onClick: () => openReviewPanel(row),
           },
           {
             label: "Edit",
@@ -817,6 +841,50 @@ export default function Enrollments() {
         title={confirmDialog.title}
         message={confirmDialog.message}
         variant="danger"
+      />
+
+      <EnrollmentReviewPanel
+        open={reviewPanel.open}
+        loading={reviewPanel.loading}
+        data={reviewPanel.data}
+        onClose={closeReviewPanel}
+        onApprove={async () => {
+          await handleActivateEnrollment(reviewPanel.enrollment.id);
+          closeReviewPanel();
+        }}
+        onReassign={() => {
+          const enr = reviewPanel.enrollment;
+          closeReviewPanel();
+          handleEditEnrollment(enr);
+        }}
+        onCancel={() => {
+          const enr = reviewPanel.enrollment;
+          closeReviewPanel();
+          setConfirmDialog({
+            isOpen: true,
+            title: "Cancel Enrollment",
+            message: `Cancel ${enr?.child_name || "this child"}'s enrollment? Membership billing (if any) will be stopped.`,
+            action: () => handleCancelEnrollment(enr.id),
+          });
+        }}
+        onSendPaymentLink={() => handleSendPaymentLink(reviewPanel.enrollment.id)}
+        onSendReminder={async () => {
+          const loadingToast = toast.loading("Sending payment reminder...");
+          try {
+            const res = await enrollmentsService.sendPaymentReminder(
+              reviewPanel.enrollment.id,
+            );
+            toast.success(
+              `Reminder sent to ${res?.parent_email || "the parent"}`,
+              { id: loadingToast },
+            );
+          } catch (error) {
+            console.error("Failed to send reminder:", error);
+            toast.error(error.message || "Failed to send reminder", {
+              id: loadingToast,
+            });
+          }
+        }}
       />
 
       {/* View Enrollment Modal */}
