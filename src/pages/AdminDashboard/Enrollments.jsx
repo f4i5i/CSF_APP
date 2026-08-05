@@ -292,6 +292,7 @@ export default function Enrollments() {
       if (classFilter) params.class_id = classFilter;
       if (programFilter) params.program_id = programFilter;
       if (schoolFilter) params.school_id = schoolFilter;
+      if (searchQuery.trim()) params.search = searchQuery.trim();
 
       const response = await enrollmentsService.getAll(params);
       setEnrollments(response.items || []);
@@ -304,11 +305,17 @@ export default function Enrollments() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter, classFilter, programFilter, schoolFilter]);
+  }, [currentPage, statusFilter, classFilter, programFilter, schoolFilter, searchQuery]);
 
   useEffect(() => {
-    fetchEnrollments();
+    // Debounce so each keystroke doesn't fire a request
+    const t = setTimeout(fetchEnrollments, 300);
+    return () => clearTimeout(t);
   }, [fetchEnrollments]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, classFilter, programFilter, schoolFilter]);
 
   const handleCreateEnrollment = () => {
     setModalMode("create");

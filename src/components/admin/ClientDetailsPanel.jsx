@@ -39,7 +39,7 @@ export default function ClientDetailsPanel({
   const activity = details?.recent_activity || [];
   const enrollmentsByChild = {};
   (details?.active_enrollments || []).forEach((e) => {
-    (enrollmentsByChild[e.child_name] ||= []).push(e);
+    (enrollmentsByChild[e.child_id || e.child_name] ||= []).push(e);
   });
 
   return (
@@ -127,7 +127,10 @@ export default function ClientDetailsPanel({
                   ) : (
                     details.children.map((ch) => {
                       const name = `${ch.first_name} ${ch.last_name}`;
-                      const enrs = enrollmentsByChild[name] || [];
+                      const enrs =
+                        enrollmentsByChild[ch.id] ||
+                        enrollmentsByChild[name] ||
+                        [];
                       return (
                         <div key={ch.id} className="flex items-start gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#F3BC48]/20 flex items-center justify-center shrink-0 text-xs font-bold text-[#173151]">
