@@ -4,6 +4,8 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  BarChart,
+  Bar,
   PieChart,
   Pie,
   Cell,
@@ -21,9 +23,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Header from "../../components/Header";
-import StatsCards from "../../components/AdminDashboard/StatsCard";
-import MiddleSummary from "../../components/AdminDashboard/MiddleSummary";
-import MembersBarChart from "../../components/AdminDashboard/MembersBarChart";
 import SharedCalendar from "../../components/calendar/SharedCalendar";
 import { useAuth } from "../../context/auth";
 import adminService from "../../api/services/admin.service";
@@ -140,6 +139,35 @@ const MissionControl = () => {
       { name: "Installment", value: t.installment || 0, color: TEAL },
     ].filter((s) => s.value > 0);
   }, [data]);
+
+  const trendsData = useMemo(() => {
+    if (!metrics) return [];
+    return [
+      {
+        label: "Last 24h",
+        Registrations: metrics.registrations_24h || 0,
+        Cancellations: metrics.cancellations_24h || 0,
+      },
+      {
+        label: "7 days",
+        Registrations: metrics.registrations_7d || 0,
+        Cancellations: metrics.cancellations_7d || 0,
+      },
+      {
+        label: "30 days",
+        Registrations: metrics.registrations_30d || 0,
+        Cancellations: metrics.cancellations_30d || 0,
+      },
+    ];
+  }, [metrics]);
+
+  const programBars = useMemo(() => {
+    const progs = (metrics?.programs_with_counts || []).filter((p) => p.count > 0);
+    const max = Math.max(1, ...progs.map((p) => p.count));
+    return progs
+      .sort((a, b) => b.count - a.count)
+      .map((p) => ({ ...p, pct: Math.round((p.count / max) * 100) }));
+  }, [metrics]);
 
   const todayLabel = useMemo(
     () =>
@@ -514,57 +542,131 @@ const MissionControl = () => {
           )}
         </div>
 
-        {/* ===== Trends & totals (merged from the old Overview page) ===== */}
+        {/* ===== Growth & network (restyled from the old Overview) ===== */}
         {metrics && (
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div className="xl:col-span-5">
-              <StatsCards
-                registrations={{
-                  "24h": metrics.registrations_24h || 0,
-                  "7d": metrics.registrations_7d || 0,
-                  "30d": metrics.registrations_30d || 0,
-                }}
-                cancellations={{
-                  "24h": metrics.cancellations_24h || 0,
-                  "7d": metrics.cancellations_7d || 0,
-                  "30d": metrics.cancellations_30d || 0,
-                }}
-              />
-            </div>
-            <div className="xl:col-span-3 flex flex-col gap-4">
-              <MiddleSummary
-                totalClasses={metrics.total_classes || 0}
-                totalPrograms={metrics.total_programs || 0}
-              />
-              <div className="bg-[#FFFFFF80] rounded-2xl p-4 shadow flex-1">
-                <p className="text-xs font-bold uppercase tracking-wide text-gray-500 font-manrope mb-2">
-                  Programs
-                </p>
-                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                  {(metrics.programs_with_counts || [])
-                    .filter((p) => p.count > 0)
-                    .map((p) => (
+            <SectionCard
+              title="Enrollment trends"
+              right={
+                <span className="text-xs text-gray-500 font-manrope">
+                  Registrations vs cancellations
+                </span>
+              }
+              className="xl:col-span-5"
+            >
+              <div style={{ width: "100%", height: 240 }}>
+                <ResponsiveContainer>
+                  <BarChart
+                    data={trendsData}
+                    margin={{ left: 0, right: 12, top: 8, bottom: 0 }}
+                    barGap={6}
+                  >
+                    <CartesianGrid strokeDasharray="4 8" stroke="#eef2f6" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fill: "#6b7280", fontSize: 12 }}
+                    />
+                    <YAxis
+                      tick={{ fill: "#6b7280", fontSize: 12 }}
+                      allowDecimals={false}
+                      width={30}
+                    />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="Registrations"
+                      fill={TEAL}
+                      radius={[6, 6, 0, 0]}
+                      barSize={26}
+                    />
+                    <Bar
+                      dataKey="Cancellations"
+                      fill={RED}
+                      radius={[6, 6, 0, 0]}
+                      barSize={26}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Programs" className="xl:col-span-3">
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {[
+                  { label: "Locations", value: metrics.total_schools || 0 },
+                  { label: "Programs", value: metrics.total_programs || 0 },
+                  { label: "Classes", value: metrics.total_classes || 0 },
+                  { label: "Students", value: metrics.active_enrollments || 0 },
+                ].map((t) => (
+                  <div
+                    key={t.label}
+                    className="rounded-xl bg-white/70 border border-white/40 p-3 text-center"
+                  >
+                    <p className="text-xl font-semibold text-[#173151] font-kollektif">
+                      {t.value}
+                    </p>
+                    <p className="text-xs text-gray-500 font-manrope">
+                      {t.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2.5 max-h-44 overflow-y-auto pr-1">
+                {programBars.map((p) => (
+                  <div key={p.id || p.name}>
+                    <div className="flex justify-between text-xs font-manrope mb-1">
+                      <span className="text-[#173151] font-semibold truncate">
+                        {p.name}
+                      </span>
+                      <span className="text-gray-500 shrink-0">{p.count}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-[#173151]/10">
                       <div
-                        key={p.id || p.name}
-                        className="flex justify-between text-sm font-manrope"
-                      >
-                        <span className="text-[#173151] truncate">{p.name}</span>
-                        <span className="font-semibold text-[#173151] shrink-0">
-                          {p.count}
-                        </span>
-                      </div>
-                    ))}
-                </div>
+                        className="h-1.5 rounded-full"
+                        style={{ width: `${p.pct}%`, backgroundColor: GOLD }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <div className="xl:col-span-4 bg-[#FFFFFF80] rounded-2xl p-4 shadow flex flex-col">
-              <h3 className="text-lg font-manrope font-semibold mb-2 text-[#173151]">
-                Enrollments (monthly)
-              </h3>
-              <div className="flex-1">
-                <MembersBarChart data={metrics.monthly_enrollments || []} />
+            </SectionCard>
+
+            <SectionCard
+              title="Enrollments by month"
+              right={
+                <span className="text-xs text-gray-500 font-manrope">
+                  Last 12 months
+                </span>
+              }
+              className="xl:col-span-4"
+            >
+              <div style={{ width: "100%", height: 240 }}>
+                <ResponsiveContainer>
+                  <BarChart
+                    data={metrics.monthly_enrollments || []}
+                    margin={{ left: 0, right: 12, top: 8, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="4 8" stroke="#eef2f6" />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: "#6b7280", fontSize: 11 }}
+                    />
+                    <YAxis
+                      tick={{ fill: "#6b7280", fontSize: 11 }}
+                      allowDecimals={false}
+                      width={30}
+                    />
+                    <Tooltip />
+                    <Bar
+                      dataKey="value"
+                      name="Enrollments"
+                      fill={NAVY}
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            </div>
+            </SectionCard>
           </div>
         )}
 

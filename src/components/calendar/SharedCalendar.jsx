@@ -64,6 +64,20 @@ export default function SharedCalendar({ className = "", height = 600 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
+  // Day dialog: all of one day's items (opened by clicking a day cell,
+  // its date number, or the "+N more" link)
+  const [dayDetails, setDayDetails] = useState(null); // {date, items}
+
+  const openDay = useCallback(
+    (date) => {
+      const key = moment(date).format("YYYY-MM-DD");
+      const dayItems = items
+        .filter((i) => i.date === key)
+        .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
+      setDayDetails({ date: key, items: dayItems });
+    },
+    [items],
+  );
 
   const fetchRange = useCallback(async () => {
     const { start, end } = rangeForView(currentDate, view);
@@ -142,10 +156,85 @@ export default function SharedCalendar({ className = "", height = 600 }) {
           onNavigate={(next) => setCurrentDate(next)}
           onSelectEvent={(event) => setSelected(event.resource)}
           eventPropGetter={eventPropGetter}
-          popup
+          selectable
+          onSelectSlot={(slot) => view === "month" && openDay(slot.start)}
+          onShowMore={(evts, date) => openDay(date)}
+          onDrillDown={(date) => openDay(date)}
           style={{ height, minHeight: 400 }}
         />
       </div>
+
+      {/* Day dialog: everything happening on the clicked day */}
+      {dayDetails && !selected && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setDayDetails(null)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 font-manrope max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[#173963]">
+                {moment(dayDetails.date).format("dddd, MMM D, YYYY")}
+              </h3>
+              <button
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                onClick={() => setDayDetails(null)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            {dayDetails.items.length === 0 ? (
+              <p className="text-sm text-gray-500">Nothing scheduled this day.</p>
+            ) : (
+              <div className="space-y-2 overflow-y-auto pr-1">
+                {dayDetails.items.map((item) => {
+                  const style = TYPE_STYLES[item.type] || TYPE_STYLES.session;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSelected(item)}
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-[#F3BC48] text-left transition-colors"
+                    >
+                      <span
+                        className="inline-block w-3 h-3 rounded-sm shrink-0"
+                        style={{
+                          backgroundColor: style.bg,
+                          border: `1px solid ${style.border}`,
+                        }}
+                      />
+                      <span className="flex-1 min-w-0">
+                        <span
+                          className={`block text-sm font-semibold text-[#173963] truncate ${
+                            item.type === "cancellation" ? "line-through" : ""
+                          }`}
+                        >
+                          {item.title}
+                        </span>
+                        <span className="block text-xs text-gray-500 truncate">
+                          {style.label}
+                          {item.extra?.location ? ` · ${item.extra.location}` : ""}
+                        </span>
+                      </span>
+                      <span className="text-xs text-gray-500 shrink-0">
+                        {item.start_time
+                          ? `${item.start_time}${item.end_time ? ` – ${item.end_time}` : ""}`
+                          : "All day"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-3">
+              Tap an item for full details.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Details modal */}
       {selected && (
