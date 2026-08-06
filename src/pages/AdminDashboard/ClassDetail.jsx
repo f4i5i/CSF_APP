@@ -336,7 +336,7 @@ export default function ClassDetail() {
   // --------------------------------------------------------------------------
 
   return (
-    <div className="h-full flex flex-col w-full items-center justify-center md:px-6 md:p-0 p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
+    <div className="min-h-screen flex flex-col w-full items-center justify-center md:px-6 md:p-0 p-6 bg-gradient-to-br from-[#e3e5e6] via-[#b7c3d1] to-[#a4b4c8]">
       {/* Outer container for vertical centering */}
       <div className="flex flex-1 items-center justify-center sm:pt-6 p-0">
         {/* Background dotted overlay pattern */}
