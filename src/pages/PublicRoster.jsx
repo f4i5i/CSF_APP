@@ -126,7 +126,7 @@ const PublicRoster = () => {
               {students.map((student, idx) => (
                 <div
                   key={idx}
-                  className="bg-white border border-gray-200 rounded-lg p-4"
+                  className="bg-white border border-gray-200 rounded-lg p-4 min-w-0"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-btn-gold/20 flex items-center justify-center shrink-0">

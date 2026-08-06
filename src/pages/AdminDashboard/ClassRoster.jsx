@@ -310,7 +310,7 @@ const ClassRoster = () => {
                 return (
                   <div
                     key={studentId}
-                    className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors min-w-0"
                   >
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-btn-gold/20 flex items-center justify-center shrink-0">
