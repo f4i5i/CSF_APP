@@ -359,7 +359,7 @@ export default function ClassDetail() {
                 >
                   <ArrowLeft className="text-[#00000099]" />
                 </Link>
-                <h1 className="text-xl font-semibold font-manrope text-text-primary">
+                <h1 className="text-sm sm:text-xl font-semibold font-manrope text-text-primary">
                   Back to Available Classes
                 </h1>
               </div>
@@ -368,12 +368,8 @@ export default function ClassDetail() {
               <div className="isolation-auto">
                 <img
                   src="/assets/brand/csf-logo.png"
-                  alt="logo"
-                  className="size-[80px] object-contain"
-                  style={{
-                    filter: "brightness(0.2) contrast(1.5)",
-                    mixBlendMode: "normal",
-                  }}
+                  alt="Carolina Soccer Factory"
+                  className="size-14 sm:size-[80px] object-contain"
                 />
               </div>
             </div>
@@ -414,19 +410,19 @@ export default function ClassDetail() {
                   -------------------------------------------------------- */}
               <div className="flex flex-col md:flex-row items-start gap-6 mt-6 w-full">
                 {/* LEFT COLUMN - Class details (65% width) */}
-                <div className="flex flex-1 flex-col items-start gap-2 sm:gap-4 w-full sm:max-w-[65%]">
+                <div className="flex flex-1 flex-col items-start gap-2 sm:gap-4 w-full md:max-w-[65%]">
                   {/* ============================================
                       LOCATION CARD - Map and address
                       ============================================ */}
                   <div className="w-full flex flex-col gap-4">
                     {classData.school && (
-                      <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px]">
-                        <div className="flex items-center gap-4">
+                      <div className="bg-[#FFFFFF80] rounded-[20px] w-full sm:min-h-[140px] p-3 sm:p-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                           {/* Embedded Google Map
                               Note: iframe is 140% height to crop bottom controls
                               Container has overflow-hidden to hide the excess
                           */}
-                          <div className="sm:w-[190px] w-[130px] sm:h-[140px] h-[100px] rounded-lg overflow-hidden flex-shrink-0 relative">
+                          <div className="w-full h-40 sm:w-[190px] sm:h-[140px] rounded-lg overflow-hidden flex-shrink-0 relative">
                             <iframe
                               title="location-map"
                               src={`https://www.google.com/maps?q=${encodeURIComponent(classData.school.address || "")}&output=embed`}
@@ -438,7 +434,7 @@ export default function ClassDetail() {
                           {/* Location information */}
                           <div className="flex-1 p-2 ">
                             {/* Location icon and label */}
-                            <div className="flex items-center gap-2 mt-4 sm:mt-0 ">
+                            <div className="flex items-center gap-2">
                               <div className="p-1 rounded-full bg-[#fff6e0] flex items-center justify-center">
                                 <svg
                                   width="16"
@@ -460,7 +456,7 @@ export default function ClassDetail() {
                             </div>
 
                             {/* School name and address */}
-                            <p className="sm:text-sm text-xs leading-[30px] max-w-60 font-manrope text-text-muted mt-2">
+                            <p className="sm:text-sm text-xs leading-6 sm:leading-[30px] sm:max-w-60 font-manrope text-text-muted mt-2">
                               {classData.school.name}
                               {classData.school.address && (
                                 <>
@@ -540,7 +536,7 @@ export default function ClassDetail() {
                 {/* ============================================
                     RIGHT COLUMN - Pricing and registration (35% width)
                     ============================================ */}
-                <aside className="bg-[#FFFFFF80] flex-1 rounded-[20px] p-6 flex flex-col w-full sm:max-w-[35%]">
+                <aside className="bg-[#FFFFFF80] flex-1 rounded-[20px] p-6 flex flex-col w-full md:max-w-[35%]">
                   <div>
                     {/* Price display */}
                     <div className="flex justify-between items-center w-full">
